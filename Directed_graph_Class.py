@@ -1,0 +1,695 @@
+import numpy as np
+import scipy.sparse
+from numba import jit
+import time
+
+@jit(nopython=True)
+def loglikelihood_dcm_noloop(x, args):
+    """loglikelihood function for dcm
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    n_out = len(k_out)
+    n_in = len(k_in)
+    f = 0
+    for i in range(n_out):
+        f += k_out[i]*np.log(x[i])
+        for j in range(n_in):
+            if i!= j:
+                f -= np.log(1 + x[i]*x[n_out+j])
+
+    for j in range(n_in):
+        f += k_in[j]*np.log(x[j+n_out])
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_dcm(x, args):
+    """loglikelihood function for dcm
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    n_out = len(k_out)
+    n_in = len(k_in)
+    f = 0
+    for i in range(n_out):
+        f += k_out[i]*np.log(x[i])
+        for j in range(n_in):
+            f -= np.log(1 + x[i]*x[n_out+j])
+
+    for j in range(n_in):
+        f += k_in[j]*np.log(x[j+n_out])
+
+    return f
+
+
+
+@jit(nopython=True)
+def loglikelihood_prime_dcm_noloop(x, args):
+    """iterative function for loglikelihood gradient dcm
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    n_out = len(k_out)
+    n_in = len(k_in)
+
+    f = np.zeros(n_out+n_in)
+
+    for i in range(n_out):
+        fx = 0
+        for j in range(n_in):
+            if i!= j:
+                fx += x[j+n_out]/(1 + x[i]*x[j+n_out])
+        # original prime
+        f[i] = -fx + k_out[i]/x[i]
+
+    for j in range(n_in):
+        fy = 0
+        for i in range(n_out):
+            if i!= j:
+                fy += x[i]/(1 + x[j+n_out]*x[i])
+        # original prime
+        f[j+n_out] = -fy + k_in[j]/x[j+n_out]
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_dcm(x, args):
+    """iterative function for loglikelihood gradient dcm
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    n_out = len(k_out)
+    n_in = len(k_in)
+
+    f = np.zeros(n_out+n_in)
+
+    for i in range(n_out):
+        fx = 0
+        for j in range(n_in):
+            fx += x[j+n_out]/(1 + x[i]*x[j+n_out])
+        # original prime
+        f[i] = -fx + k_out[i]/x[i]
+
+    for j in range(n_in):
+        fy = 0
+        for i in range(n_out):
+            fy += x[i]/(1 + x[j+n_out]*x[i])
+        # original prime
+        f[j+n_out] = -fy + k_in[j]/x[j+n_out]
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_dcm_noloop(x, args):
+    """hessian diagonal of dcm loglikelihood
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    n_out = len(k_out)
+    n_in = len(k_in)
+
+    f = np.zeros(n_out + n_in)
+
+    for i in range(n_out):
+        fx = 0
+        for j in range(n_in):
+            if i!= j:
+                fx += x[j+n_out]*x[j+n_out]/((1 + x[i]*x[j+n_out])*(1 + x[i]*x[j+n_out]))
+        # original prime
+        f[i] = fx - k_out[i]/(x[i]*x[i])
+
+    for j in range(n_in):
+        fy = 0
+        for i in range(n_out):
+            if i!= j:
+                fy += x[i]*x[i]/((1 + x[j+n_out]*x[i])*(1 + x[j+n_out]*x[i]))
+        # original prime
+        f[j+n_out] = fy - k_in[j]/(x[j+n_out]*x[j+n_out])
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_dcm(x, args):
+    """hessian diagonal of dcm loglikelihood
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    n_out = len(k_out)
+    n_in = len(k_in)
+
+    f = np.zeros(n_out + n_in)
+
+    for i in range(n_out):
+        fx = 0
+        for j in range(n_in):
+            fx += x[j+n_out]*x[j+n_out]/((1 + x[i]*x[j+n_out])*(1 + x[i]*x[j+n_out]))
+        # original prime
+        f[i] = fx - k_out[i]/(x[i]*x[i])
+
+    for j in range(n_in):
+        fy = 0
+        for i in range(n_out):
+            fy += x[i]*x[i]/((1 + x[j+n_out]*x[i])*(1 + x[j+n_out]*x[i]))
+        # original prime
+        f[j+n_out] = fy - k_in[j]/(x[j+n_out]*x[j+n_out])
+
+    return f
+
+
+@jit(nopython=True)
+def expected_out_degree_dcm(sol):
+    n = int(len(sol)/ 2)
+    a_out = sol[:n]
+    a_in = sol[n:]
+
+    k = np.zeros(n)  # allocate k
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                k[i] += a_in[j]*a_out[i] / (1 + a_in[j]*a_out[i])
+
+    return k
+
+
+@jit(nopython=True)
+def expected_in_degree_dcm(sol):
+    n = int(len(sol)/2)
+    a_out = sol[:n]
+    a_in = sol[n:]
+    k = np.zeros(n)  # allocate k
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                k[i] += a_in[i]*a_out[j]/(1 + a_in[i]*a_out[j])
+
+    return k
+
+
+def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=False, full_return = False):
+    """Find roots of eq. f = 0, using newton, quasinewton or dianati.
+    """
+
+    tic_all = time.time()
+    toc_init = 0
+    tic = time.time()
+
+    # stopping conditions evaluation function
+    if g == None:
+        stop_fun = fun
+    else:
+        stop_fun = g
+
+    # algorithm
+    beta = .5  # to compute alpha
+    n_steps = 0
+    x = x0  # initial point
+
+    if method == 'dianati':
+        norm = np.linalg.norm(fun(x))
+    else:
+        norm = np.linalg.norm(stop_fun(x))
+        if fun_jac == None:
+            raise ValueError('{} method requires a Jacobian function in input'.format(method))
+
+    if full_return:
+        norm_seq = [norm]
+
+    if verbose:
+        print('\nx0 = {}'.format(x))
+        print('|f(x0)| = {}'.format(norm))
+
+    toc_init = time.time() - tic
+
+    toc_alfa = 0
+    toc_update = 0
+    toc_dx = 0
+    toc_jacfun = 0
+
+    tic_loop = time.time()
+
+    while norm > tol and n_steps < max_steps:  # stopping condition
+        x_old = x  # save previous iteration
+
+        # f jacobian
+        tic = time.time()
+        if method == 'newton':
+            H = fun_jac(x)  # original jacobian
+            # check the hessian is positive definite
+            # l, e = np.linalg.eigh(H)
+            l, e = np.linalg.eig(H)
+            ml = np.min(l)
+            # if it's not positive definite -> regularise
+            if ml < eps:
+                regularise = True
+            # regularisation
+            if regularise == True:
+                B = hessian_regulariser_function(H, eps)
+                l, e = np.linalg.eigh(B)
+                new_ml = np.min(l)
+            else:
+                B = H.__array__()
+        elif method == 'quasinewton':
+            # quasinewton hessian approximation
+            B = fun_jac(x)  # Jacobian diagonal
+            if regularise == True:
+                B = np.maximum(B, B*0 + 1e-8)
+        toc_jacfun += time.time() - tic
+
+        # discending direction computation
+        tic = time.time()
+        if method == 'newton':
+            dx = np.linalg.solve(B, - fun(x))
+        elif method == 'quasinewton':
+            dx = - fun(x)/B
+        elif method == 'dianati':
+            dx = - fun(x)
+        toc_dx += time.time() - tic
+        # dampening factor computation:
+        # backtraking line search
+        tic = time.time()
+        if method in ['newton', 'quasinewton']:
+            alfa = 1
+            i = 0
+            if g == None:
+                while np.linalg.norm(stop_fun(x + alfa*dx)) >= \
+                    np.linalg.norm(stop_fun(x)) and i<70:
+                    # print(np.linalg.norm(fun(x + alfa*dx)))
+                    alfa *= beta
+                    # print(np.linalg.norm(fun(x + alfa*dx)))
+                    i +=1
+            else:
+                while sufficient_decrease_condition(stop_fun(x), \
+                    stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
+                    alfa *= beta
+                    i +=1
+
+        elif method == 'dianati':
+            alfa = 0.1
+            eps2=1e-2
+            alfa0 = (eps2-1)*x/dx
+            for a in alfa0:
+                if a>=0:
+                    alfa = min(alfa, a)
+        toc_alfa += time.time() - tic
+
+        tic = time.time()
+        # solution update
+        # direction= dx@fun(x).T
+        x = x + alfa*dx
+        toc_update += time.time() - tic
+
+        # stopping condition computation
+        # TODO: try and except con fun(x)
+        # norm = np.linalg.norm(fun(x))
+        norm = np.linalg.norm(stop_fun(x))
+
+        if full_return:
+            norm_seq.append(norm)
+
+        # step update
+        n_steps += 1
+
+        if verbose == True:
+            print('step {}'.format(n_steps))
+            print('alpha = {}'.format(alfa))
+            # print('B = {}'.format(B))
+            # print('fun = {}'.format(fun(x)))
+            print('dx = {}'.format(dx))
+            print('x = {}'.format(x))
+            print('|f(x)| = {}'.format(norm))
+            print('B = {}'.format(B))
+
+    toc_loop = time.time() - tic_loop
+    toc_all = time.time() - tic_all
+
+    if verbose == True:
+        print('Number of steps for convergence = {}'.format(n_steps))
+        print('toc_init = {}'.format(toc_init))
+        print('toc_jacfun = {}'.format(toc_jacfun))
+        print('toc_alfa = {}'.format(toc_alfa))
+        print('toc_dx = {}'.format(toc_dx))
+        print('toc_update = {}'.format(toc_update))
+        print('toc_loop = {}'.format(toc_loop))
+        print('toc_all = {}'.format(toc_all))
+
+    if full_return:
+        return (x, toc_all, n_steps, np.array(norm_seq))
+    else:
+        return x
+
+
+def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=.9):
+    """return boolean indicator if upper wolfe condition are respected.
+    """
+    # print(f_old, f_new, alpha, grad_f, p)
+
+    sup = f_old + c1 *alpha*grad_f@p.T
+    return bool(f_new < sup)
+
+
+def edgelist_from_edgelist(edgelist):
+    """
+        Creates a new edgelist with the indexes of the nodes instead of the names.
+        Returns also two dictionaries that keep track of the nodes.
+        """
+    if len(edgelist[0]) == 2:
+        nodetype = type(edgelist[0][0])
+        edgelist = np.array(edgelist, dtype=np.dtype(
+            [('source', nodetype), ('target', nodetype)]))
+    else:
+        nodetype = type(edgelist[0][0])
+        weigthtype = type(edgelist[0][2])
+        # Vorrei mettere una condizione sul weighttype che deve essere numerico
+        edgelist = np.array(edgelist, dtype=np.dtype(
+            [('source', nodetype), ('target', nodetype), ('weigth', weigthtype)]))
+    # If there is a loop we count it twice in the degree of the node.
+    unique_nodes = np.unique(np.concatenate(
+        (edgelist['source'], edgelist['target'])), return_counts=False)
+    out_degree = np.zeros_like(unique_nodes)
+    in_degree = np.zeros_like(unique_nodes)
+    nodes_dict = dict(enumerate(unique_nodes))
+    inv_nodes_dict = {v: k for k, v in nodes_dict.items()}
+    if len(edgelist[0]) == 2:
+        edgelist_new = [(inv_nodes_dict[edge[0]], inv_nodes_dict[edge[1]])
+                         for edge in edgelist]
+        edgelist_new = np.array(edgelist_new, dtype=np.dtype(
+            [('source', int), ('target', int)]))
+    else:
+        edgelist_new = [(inv_nodes_dict[edge[0]],
+                         inv_nodes_dict[edge[1]], edge[2]) for edge in edgelist]
+        edgelist_new = np.array(edgelist_new, dtype=np.dtype(
+            [('source', int), ('target', int), ('weigth', weigthtype)]))
+    out_indices, out_counts = np.unique(
+        edgelist_new['source'], return_counts=True)
+    in_indices, in_counts = np.unique(
+        edgelist_new['target'], return_counts=True)
+    out_degree[out_indices] = out_counts
+    in_degree[in_indices] = in_counts
+    if len(edgelist[0]) == 3:
+        out_strength = np.zeros_like(unique_nodes,dtype=weigthtype)
+        in_strength = np.zeros_like(unique_nodes,dtype=weigthtype)
+        out_counts_strength = np.array(
+            [edgelist_new[edgelist_new['source'] == i]['weigth'].sum() for i in out_indices])
+        in_counts_strength = np.array(
+            [edgelist_new[edgelist_new['target'] == i]['weigth'].sum() for i in in_indices])
+        out_strength[out_indices] = out_counts_strength
+        in_strength[in_indices] = in_counts_strength
+        return edgelist_new, out_degree, in_degree, out_strength, in_strength, nodes_dict
+    return edgelist_new, out_degree, in_degree, nodes_dict
+
+
+class DirectedGraph:
+    def __init__(self, adjacency=None, edgelist=None, degree_sequence=None, strength_sequence=None):
+        self.n_nodes = None
+        self.n_edges = None
+        self.adjacency = None
+        self.sparse_adjacency = None
+        self.edgelist = None
+        self.dseq = None
+        self.dseq_out = None
+        self.dseq_in = None
+        self.out_strength = None
+        self.in_strength = None
+        self.nodes_dict = None
+        self.is_initialized = False
+        self.is_randomized = False
+        self._initialize_graph(adjacency=adjacency, edgelist=edgelist,
+                               degree_sequence=degree_sequence, strength_sequence=strength_sequence)
+        self.avg_mat = None
+        self.x = None
+        self.y = None
+        self.xy = None
+        self.b_out = None
+        self.b_in = None
+
+        self.initial_guess = None
+        # Reduced problem parameters
+        self.is_reduced = False
+        self.r_dseq = None
+        self.r_dseq_out = None
+        self.r_dseq_in = None
+        self.r_n_out = None
+        self.r_n_in = None
+        self.r_invert_dseq = None
+        self.r_invert_dseq_out = None
+        self.r_invert_dseq_in = None
+        self.r_dim = None
+        self.r_multiplicity = None
+
+        # Problem solutions
+        self.r_x = None
+        self.r_y = None
+        self.r_xy = None
+        # Problem (reduced) residuals
+        self.residuals = None
+        self.final_result = None
+
+        self.nz_index_out = None
+        self.rnz_dseq_out = None
+        self.nz_index_in = None
+        self.rnz_dseq_in = None
+
+        # model
+        self.error = None
+        self.full_return = False
+
+
+    def degree_reduction(self):
+        self.dseq = np.array(list(zip(self.dseq_out, self.dseq_in)))
+        self.r_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(self.dseq, return_index=False, return_inverse=True, return_counts=True, axis=0)
+
+        self.r_dseq_out = self.r_dseq[:,0]
+        self.r_dseq_in = self.r_dseq[:,1]
+
+        self.nz_index_out = np.nonzero(self.r_dseq_out)
+        self.rnz_dseq_out = self.r_dseq_out[self.nz_index_out]
+        self.nz_index_in = np.nonzero(self.r_dseq_in)
+        self.rnz_dseq_in = self.r_dseq_in[self.nz_index_in]
+
+        self.r_n_out = self.r_dseq_out.size
+        self.r_n_in = self.r_dseq_in.size
+        self.r_dim = self.r_n_out + self.r_n_in
+
+        self.rnz_n_out = self.rnz_dseq_out.size
+        self.rnz_n_in = self.rnz_dseq_in.size
+        self.rnz_dim = self.rnz_n_out + self.rnz_n_in
+
+        self.is_reduced = True
+
+
+    def _initialize_graph(self, adjacency=None, edgelist=None, degree_sequence=None, strength_sequence=None):
+        # Here we can put controls over the type of input. For instance, if the graph is directed,
+        # i.e. adjacency matrix is asymmetric, the class to use must be the DiGraph,
+        # or if the graph is weighted (edgelist contains triplets or matrix is not binary) or bipartite
+
+
+        if adjacency is not None:
+            if not isinstance(adjacency, (list, np.ndarray)) and not scipy.sparse.isspmatrix(adjacency):
+                raise TypeError('The adjacency matrix must be passed as a list or numpy array or scipy sparse matrix.')
+            elif adjacency.size > 0:
+                if (adjacency<0).any():
+                    raise TypeError('The adjacency matrix entries must be positive.')
+                if isinstance(adjacency, list): # Cast it to a numpy array: if it is given as a list it should not be too large
+                    self.adjacency = np.array(adjacency)
+                elif isinstance(adjacency, np.ndarray):
+                    self.adjacency = adjacency
+                else:
+                    self.sparse_adjacency = adjacency
+                if np.sum(adjacency)==np.sum(adjacency>0):
+                    self.dseq_in = np.sum(adjacency, axis=0)
+                    self.dseq_out = np.sum(adjacency, axis=1)
+                else:
+                    self.dseq_in = np.sum(adjacency>0, axis=0)
+                    self.dseq_out = np.sum(adjacency>0, axis=1)
+                    self.in_strength = np.sum(adjacency, axis=0)
+                    self.out_strength = np.sum(adjacency, axis=1)
+                # self.edgelist, self.deg_seq = edgelist_from_adjacency(adjacency)
+                self.n_nodes = len(self.dseq_out)
+                self.n_edges = np.sum(self.dseq_out)
+                self.is_initialized = True
+
+        elif edgelist is not None:
+            if not isinstance(edgelist, (list, np.ndarray)):
+                raise TypeError('The edgelist must be passed as a list or numpy array.')
+            elif len(edgelist) > 0:
+                if len(edgelist[0]) > 3:
+                    raise ValueError(
+                        'This is not an edgelist. An edgelist must be a list or array of couples of nodes with optional weights. Is this an adjacency matrix?')
+                elif len(edgelist[0])==2:
+                    self.edgelist, self.dseq_out, self.dseq_in, self.nodes_dict = edgelist_from_edgelist(edgelist)
+                else:
+                    self.edgelist, self.dseq_out, self.dseq_in, self.out_strength, self.in_strength, self.nodes_dict = edgelist_from_edgelist(edgelist)
+                self.n_nodes = len(self.dseq_out)
+                self.n_edges = np.sum(self.dseq_out)
+                self.is_initialized = True
+
+        elif degree_sequence is not None:
+            if not isinstance(degree_sequence, (list, np.ndarray)):
+                raise TypeError('The degree sequence must be passed as a list or numpy array.')
+            elif len(degree_sequence) > 0:
+                try:
+                    int(degree_sequence[0])
+                except:
+                    raise TypeError('The degree sequence must contain numeric values.')
+                if (np.array(degree_sequence) < 0).sum() > 0:
+                        raise ValueError('A degree cannot be negative.')
+                else:
+                    if len(degree_sequence)%2 !=0:
+                        raise ValueError('Strength-in/out arrays must have same length.')
+                    self.n_nodes = int(len(degree_sequence)/2)
+                    self.dseq_out = degree_sequence[:self.n_nodes]
+                    self.dseq_in = degree_sequence[self.n_nodes:]
+                    self.n_edges = np.sum(self.dseq_out)
+                    self.is_initialized = True
+                if strength_sequence is not None:
+                    if not isinstance(strength_sequence, (list, np.ndarray)):
+                        raise TypeError('The strength sequence must be passed as a list or numpy array.')
+                    elif len(strength_sequence):
+                        try:
+                            int(strength_sequence[0])
+                        except:
+                            raise TypeError('The strength sequence must contain numeric values.')
+                        if (np.array(strength_sequence)<0).sum() >0:
+                            raise ValueError('A strength cannot be negative.')
+                        else:
+                            if len(strength_sequence)%2 !=0:
+                                raise ValueError('Strength-in/out arrays must have same length.')
+                            self.n_nodes = int(len(strength_sequence)/2)
+                            self.out_strength = strength_sequence[:self.n_nodes]
+                            self.in_strength = strength_sequence[self.n_nodes:]
+                            self.is_initialized = True
+
+        elif strength_sequence is not None:
+            if not isinstance(strength_sequence, (list, np.ndarray)):
+                raise TypeError('The strength sequence must be passed as a list or numpy array.')
+            elif len(strength_sequence):
+                try:
+                    int(strength_sequence[0])
+                except:
+                    raise TypeError('The strength sequence must contain numeric values.')
+                if (np.array(strength_sequence)<0).sum() >0:
+                    raise ValueError('A strength cannot be negative.')
+                else:
+                    if len(strength_sequence)%2 !=0:
+                        raise ValueError('Strength-in/out arrays must have same length.')
+                    self.n_nodes = int(len(strength_sequence)/2)
+                    self.out_strength = strength_sequence[:self.n_nodes]
+                    self.in_strength = strength_sequence[self.n_nodes:]
+                    self.is_initialized = True
+
+
+    def set_adjacency_matrix(self, adjacency):
+        if self.is_initialized:
+            print('Graph already contains edges or has a degree sequence. Use clean_edges() first.')
+        else:
+            self._initialize_graph(adjacency=adjacency)
+
+
+    def set_edgelist(self, edgelist):
+        if self.is_initialized:
+            print('Graph already contains edges or has a degree sequence. Use clean_edges() first.')
+        else:
+            self._initialize_graph(edgelist=edgelist)
+
+
+    def set_degree_sequences(self, degree_sequence):
+        if self.is_initialized:
+            print('Graph already contains edges or has a degree sequence. Use clean_edges() first.')
+        else:
+            self._initialize_graph(degree_sequence=degree_sequence)
+
+
+    def clean_edges(self):
+        self.adjacency = None
+        self.edgelist = None
+        self.deg_seq = None
+        self.is_initialized = False
+
+
+    def solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
+        self._initial_guess = initial_guess
+        self._initialize_problem(model, method)
+        x0 = np.concatenate((self.r_x, self.r_y))
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=False, full_return = full_return)
+
+        self._set_solved_problem(sol)
+
+
+    def _set_solved_problem(self, solution):
+        if ~self.full_return:
+            self.r_xy = solution 
+            
+            self.r_x = self.r_xy[:self.rnz_n_out]
+            self.r_y = self.r_xy[self.rnz_n_out:]
+
+            rx = np.zeros(self.r_n_out)
+            ry = np.zeros(self.r_n_in)
+
+            rx[self.nz_index_out] = self.r_x
+            ry[self.nz_index_in] = self.r_y
+            rxy = np.concatenate((rx, ry))
+
+            self.x = rx[self.r_invert_dseq]
+            self.y = ry[self.r_invert_dseq]
+
+
+    def _initialize_problem(self, model, method):
+        if ~self.is_reduced:
+            self.degree_reduction()
+
+        self._set_initial_guess(model, method)
+
+        if method in ['newton', 'quasinewton']:
+            d_fun = {
+                    'dcm': loglikelihood_prime_dcm,
+                    }
+
+            d_fun_jac = {
+                    'dcm': loglikelihood_hessian_diag_dcm,
+                    }
+
+            d_fun_stop = {
+                    'dcm': loglikelihood_dcm,
+                    }
+
+            args = (self.rnz_dseq_out, self.rnz_dseq_in)
+            self.fun = lambda x: -d_fun[model](x, args)
+            self.fun_jac = lambda x: -d_fun_jac[model](x, args)
+            self.stop_fun = lambda x: -d_fun_stop[model](x, args)
+
+
+    def _set_initial_guess(self, model, method):
+        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        if self.initial_guess is None:
+            self.r_x = self.rnz_dseq_out / (np.sqrt(self.n_edges) + 1)  # This +1 increases the stability of the solutions.
+            self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
+        elif self.initial_guess == 'random':
+            self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
+            self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
+        elif self.initial_guess == 'uniform':
+            self.r_x = 0.9*np.ones(self.rnz_n_out, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.r_y = 0.9*np.ones(self.rnz_n_in, dtype=np.float64)
+        elif self.initial_guess == 'degrees':
+            self.r_x = self.rnz_dseq_out.astype(np.float64)
+            self.r_y = self.rnz_dseq_in.astype(np.float64)
+
+
+    def _solution_error(self):
+        sol = np.concatenate((self.x, self.y))
+        ex_k_out = expected_out_degree_dcm(sol)
+        ex_k_in = expected_in_degree_dcm(sol)
+        ex_k = np.concatenate((ex_k_out, ex_k_in))
+        k = np.concatenate((self.dseq_out, self.dseq_in))
+        self.error = np.linalg.norm(ex_k - k)
