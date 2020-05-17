@@ -3,30 +3,79 @@ import scipy.sparse
 from numba import jit
 import time
 
+
+def random_binary_matrix_generator_nozeros(n, sym=False, seed=None):
+        if sym == False:
+                np.random.seed(seed = seed)
+                A = np.random.randint(0, 2, size=(n, n))
+                # zeros on the diagonal
+                for i in range(n):
+                    A[i, i] = 0
+                k_in = np.sum(A, axis=0)
+                for ind, k in enumerate(k_in):
+                        if k==0:
+                                A[0, ind] = 1
+                k_out = np.sum(A, axis=1)
+                for ind, k in enumerate(k_out):
+                        if k==0:
+                                A[ind, 0] = 1
+        return A
+
+
 @jit(nopython=True)
-def loglikelihood_dcm_noloop(x, args):
+def loglikelihood_dcm(x, args):
     """loglikelihood function for dcm
+    reduced, not-zero indexes
     """
     # problem fixed parameters
     k_out = args[0]
     k_in = args[1]
-    n_out = len(k_out)
-    n_in = len(k_in)
-    f = 0
-    for i in range(n_out):
-        f += k_out[i]*np.log(x[i])
-        for j in range(n_in):
-            if i!= j:
-                f -= np.log(1 + x[i]*x[n_out+j])
+    nz_index_out = args[2]
+    nz_index_in = args[3]
+    c = args[4]
+    n = len(k_out)
 
-    for j in range(n_in):
-        f += k_in[j]*np.log(x[j+n_out])
+    f = 0
+    for i in nz_index_out:
+        f += c[i]*k_out[i]*np.log(x[i])
+        for j in nz_index_in:
+            if i != j:
+                f -= c[i]*c[j]*np.log(1 + x[i]*x[n+j])
+            else:
+                f -= c[i]*(c[i] - 1)*np.log(1 + x[i]*x[n+j])
+
+    for j in nz_index_in:
+            f += c[j]*k_in[j]*np.log(x[j+n])
 
     return f
 
 
 @jit(nopython=True)
-def loglikelihood_dcm(x, args):
+def loglikelihood_dcm_notrd(x, args):
+    """loglikelihood function for dcm
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    nz_index_out = args[2]
+    nz_index_in = args[3]
+    n = len(k_in)
+
+    f = 0
+    for i in nz_index_out:
+        f += k_out[i]*np.log(x[i])
+        for j in nz_index_in:
+            if i != j:
+                f -= np.log(1 + x[i]*x[n+j])
+
+    for j in nz_index_in:
+            f += k_in[j]*np.log(x[j+n])
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_dcm_loop(x, args):
     """loglikelihood function for dcm
     """
     # problem fixed parameters
@@ -46,40 +95,85 @@ def loglikelihood_dcm(x, args):
     return f
 
 
-
 @jit(nopython=True)
-def loglikelihood_prime_dcm_noloop(x, args):
+def loglikelihood_prime_dcm(x, args):
     """iterative function for loglikelihood gradient dcm
     """
     # problem fixed parameters
     k_out = args[0]
     k_in = args[1]
-    n_out = len(k_out)
-    n_in = len(k_in)
+    nz_index_out = args[2]
+    nz_index_in = args[3]
+    c = args[4]
+    n = len(k_in)
 
-    f = np.zeros(n_out+n_in)
+    f = np.zeros(2*n)
 
-    for i in range(n_out):
+    for i in nz_index_out:
         fx = 0
-        for j in range(n_in):
+        for j in nz_index_in:
             if i!= j:
-                fx += x[j+n_out]/(1 + x[i]*x[j+n_out])
+                # const = c[i]*c[j]
+                const = c[j]
+            else:
+                # const = c[i]*(c[j] - 1)
+                const = (c[j] - 1)
+                
+            fx += const*x[j+n]/(1 + x[i]*x[j+n])
         # original prime
         f[i] = -fx + k_out[i]/x[i]
 
-    for j in range(n_in):
+    for j in nz_index_in:
         fy = 0
-        for i in range(n_out):
+        for i in nz_index_out:
             if i!= j:
-                fy += x[i]/(1 + x[j+n_out]*x[i])
+                # const = c[i]*c[j]
+                const = c[i]
+            else:
+                # const = c[i]*(c[j] - 1)
+                const = (c[j] - 1)
+
+            fy += const*x[i]/(1 + x[j+n]*x[i])
         # original prime
-        f[j+n_out] = -fy + k_in[j]/x[j+n_out]
+        f[j+n] = -fy + k_in[j]/x[j+n]
 
     return f
 
 
 @jit(nopython=True)
-def loglikelihood_prime_dcm(x, args):
+def loglikelihood_prime_dcm_notrd(x, args):
+    """iterative function for loglikelihood gradient dcm
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    nz_index_out = args[2]
+    nz_index_in = args[3]
+    n = len(k_in)
+
+    f = np.zeros(2*n)
+
+    for i in nz_index_out:
+        fx = 0
+        for j in nz_index_in:
+            if i!= j:
+                fx += x[j+n]/(1 + x[i]*x[j+n])
+        # original prime
+        f[i] = -fx + k_out[i]/x[i]
+
+    for j in nz_index_in:
+        fy = 0
+        for i in nz_index_out:
+            if i!= j:
+                fy += x[i]/(1 + x[j+n]*x[i])
+        # original prime
+        f[j+n] = -fy + k_in[j]/x[j+n]
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_dcm_loop(x, args):
     """iterative function for loglikelihood gradient dcm
     """
     # problem fixed parameters
@@ -108,38 +202,88 @@ def loglikelihood_prime_dcm(x, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_dcm_noloop(x, args):
+def loglikelihood_hessian_diag_dcm(x, args):
     """hessian diagonal of dcm loglikelihood
     """
-    # problem fixed parameters
+    # problem fixed paprameters
     k_out = args[0]
     k_in = args[1]
-    n_out = len(k_out)
-    n_in = len(k_in)
+    nz_index_out = args[2]
+    nz_index_in = args[3]
+    c = args[4]
+    n = len(k_in)
 
-    f = np.zeros(n_out + n_in)
+    f = np.zeros(2*n)
 
-    for i in range(n_out):
+    for i in nz_index_out:
         fx = 0
-        for j in range(n_in):
+        for j in nz_index_in:
             if i!= j:
-                fx += x[j+n_out]*x[j+n_out]/((1 + x[i]*x[j+n_out])*(1 + x[i]*x[j+n_out]))
+                # const = c[i]*c[j]
+                const = c[j]
+            else:
+                # const = c[i]*(c[j] - 1)
+                const = (c[j] - 1)
+            
+            fx += const*x[j+n]*x[j+n]/((1 + x[i]*x[j+n])*(1 + x[i]*x[j+n]))
         # original prime
         f[i] = fx - k_out[i]/(x[i]*x[i])
 
-    for j in range(n_in):
+    for j in nz_index_in:
         fy = 0
-        for i in range(n_out):
+        for i in nz_index_out:
             if i!= j:
-                fy += x[i]*x[i]/((1 + x[j+n_out]*x[i])*(1 + x[j+n_out]*x[i]))
+                # const = c[i]*c[j]
+                const = c[i]
+            else:
+                # const = c[i]*(c[j] - 1)
+                const = (c[j] - 1)
+            
+            fy += const*x[i]*x[i]/((1 + x[j+n]*x[i])*(1 + x[j+n]*x[i]))
         # original prime
-        f[j+n_out] = fy - k_in[j]/(x[j+n_out]*x[j+n_out])
+        f[j+n] = fy - k_in[j]/(x[j+n]*x[j+n])
+
+    # f[f == 0] = 1
 
     return f
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_dcm(x, args):
+def loglikelihood_hessian_diag_dcm_notrd(x, args):
+    """hessian diagonal of dcm loglikelihood
+    """
+    # problem fixed paprameters
+    k_out = args[0]
+    k_in = args[1]
+    nz_index_out = args[2]
+    nz_index_in = args[3]
+    n = len(k_in)
+
+    f = np.zeros(2*n)
+
+    for i in nz_index_out:
+        fx = 0
+        for j in nz_index_in:
+            if i!= j:
+                fx += x[j+n]*x[j+n]/((1 + x[i]*x[j+n])*(1 + x[i]*x[j+n]))
+        # original prime
+        f[i] = fx - k_out[i]/(x[i]*x[i])
+
+    for j in nz_index_in:
+        fy = 0
+        for i in nz_index_out:
+            if i!= j:
+                fy += x[i]*x[i]/((1 + x[j+n]*x[i])*(1 + x[j+n]*x[i]))
+        # original prime
+        f[j+n] = fy - k_in[j]/(x[j+n]*x[j+n])
+
+    # f[f == 0] = 1
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_dcm_loop(x, args):
     """hessian diagonal of dcm loglikelihood
     """
     # problem fixed parameters
@@ -465,29 +609,6 @@ class DirectedGraph:
         self.full_return = False
 
 
-    def degree_reduction(self):
-        self.dseq = np.array(list(zip(self.dseq_out, self.dseq_in)))
-        self.r_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(self.dseq, return_index=False, return_inverse=True, return_counts=True, axis=0)
-
-        self.r_dseq_out = self.r_dseq[:,0]
-        self.r_dseq_in = self.r_dseq[:,1]
-
-        self.nz_index_out = np.nonzero(self.r_dseq_out)
-        self.rnz_dseq_out = self.r_dseq_out[self.nz_index_out]
-        self.nz_index_in = np.nonzero(self.r_dseq_in)
-        self.rnz_dseq_in = self.r_dseq_in[self.nz_index_in]
-
-        self.r_n_out = self.r_dseq_out.size
-        self.r_n_in = self.r_dseq_in.size
-        self.r_dim = self.r_n_out + self.r_n_in
-
-        self.rnz_n_out = self.rnz_dseq_out.size
-        self.rnz_n_in = self.rnz_dseq_in.size
-        self.rnz_dim = self.rnz_n_out + self.rnz_n_in
-
-        self.is_reduced = True
-
-
     def _initialize_graph(self, adjacency=None, edgelist=None, degree_sequence=None, strength_sequence=None):
         # Here we can put controls over the type of input. For instance, if the graph is directed,
         # i.e. adjacency matrix is asymmetric, the class to use must be the DiGraph,
@@ -618,10 +739,14 @@ class DirectedGraph:
 
 
     def solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
-        self._initial_guess = initial_guess
+
+        self.initial_guess = initial_guess
         self._initialize_problem(model, method)
         x0 = np.concatenate((self.r_x, self.r_y))
-        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=False, full_return = full_return)
+        # print('x0', x0)
+        # print('index',self.nz_index_out, self.nz_index_in)
+
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
 
         self._set_solved_problem(sol)
 
@@ -633,15 +758,25 @@ class DirectedGraph:
             self.r_x = self.r_xy[:self.rnz_n_out]
             self.r_y = self.r_xy[self.rnz_n_out:]
 
-            rx = np.zeros(self.r_n_out)
-            ry = np.zeros(self.r_n_in)
+            self.x = self.r_x[self.r_invert_dseq]
+            self.y = self.r_y[self.r_invert_dseq]
 
-            rx[self.nz_index_out] = self.r_x
-            ry[self.nz_index_in] = self.r_y
-            rxy = np.concatenate((rx, ry))
 
-            self.x = rx[self.r_invert_dseq]
-            self.y = ry[self.r_invert_dseq]
+    def degree_reduction(self):
+        self.dseq = np.array(list(zip(self.dseq_out, self.dseq_in)))
+        self.r_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(self.dseq, return_index=False, return_inverse=True, return_counts=True, axis=0)
+
+        self.rnz_dseq_out = self.r_dseq[:,0]
+        self.rnz_dseq_in = self.r_dseq[:,1]
+
+        self.nz_index_out = np.nonzero(self.rnz_dseq_out)[0]
+        self.nz_index_in = np.nonzero(self.rnz_dseq_in)[0]
+
+        self.rnz_n_out = self.rnz_dseq_out.size
+        self.rnz_n_in = self.rnz_dseq_in.size
+        self.rnz_dim = self.rnz_n_out + self.rnz_n_in
+
+        self.is_reduced = True
 
 
     def _initialize_problem(self, model, method):
@@ -663,10 +798,10 @@ class DirectedGraph:
                     'dcm': loglikelihood_dcm,
                     }
 
-            args = (self.rnz_dseq_out, self.rnz_dseq_in)
-            self.fun = lambda x: -d_fun[model](x, args)
-            self.fun_jac = lambda x: -d_fun_jac[model](x, args)
-            self.stop_fun = lambda x: -d_fun_stop[model](x, args)
+            self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
+            self.fun = lambda x: -d_fun[model](x, self.args)
+            self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
+            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
 
 
     def _set_initial_guess(self, model, method):
@@ -679,11 +814,14 @@ class DirectedGraph:
             self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
             self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
         elif self.initial_guess == 'uniform':
-            self.r_x = 0.9*np.ones(self.rnz_n_out, dtype=np.float64)  # All probabilities will be 1/2 initially
-            self.r_y = 0.9*np.ones(self.rnz_n_in, dtype=np.float64)
+            self.r_x = 0.5*np.ones(self.rnz_n_out, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.r_y = 0.5*np.ones(self.rnz_n_in, dtype=np.float64)
         elif self.initial_guess == 'degrees':
             self.r_x = self.rnz_dseq_out.astype(np.float64)
             self.r_y = self.rnz_dseq_in.astype(np.float64)
+
+        self.r_x[self.rnz_dseq_out == 0] = 0
+        self.r_y[self.rnz_dseq_in == 0] = 0
 
 
     def _solution_error(self):
@@ -692,4 +830,5 @@ class DirectedGraph:
         ex_k_in = expected_in_degree_dcm(sol)
         ex_k = np.concatenate((ex_k_out, ex_k_in))
         k = np.concatenate((self.dseq_out, self.dseq_in))
+        # print(k, ex_k)
         self.error = np.linalg.norm(ex_k - k)
