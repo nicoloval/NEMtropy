@@ -153,9 +153,9 @@ class MyTest(unittest.TestCase):
         f_notrd = sample.loglikelihood_hessian_diag_dcm_notrd(x, args_notrd)
  
         # debug
-        print(a)
-        print(x0, x)
-        print('f_sample, f_correct', f_full, f_notrd)
+        # print(a)
+        # print(x0, x)
+        # print('f_sample, f_correct', f_full, f_notrd)
 
         # test result
         self.assertTrue(np.allclose(f_full, f_notrd))

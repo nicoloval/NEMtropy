@@ -138,7 +138,7 @@ class MyTest(unittest.TestCase):
         # print(g.r_dseq_in)
         # print(g.rnz_dseq_out)
         # print(g.rnz_dseq_in)
-        print('\ntest 3: error = {}'.format(g.error))
+        #  print('\ntest 3: error = {}'.format(g.error))
 
         # test result
         # self.assertTrue(g.error < 1e-2)
