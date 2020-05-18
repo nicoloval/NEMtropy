@@ -824,7 +824,7 @@ class DirectedGraph:
         self.r_y[self.rnz_dseq_in == 0] = 0
 
 
-    def _solution_error(self):
+    def solution_error(self):
         sol = np.concatenate((self.x, self.y))
         ex_k_out = expected_out_degree_dcm(sol)
         ex_k_in = expected_in_degree_dcm(sol)

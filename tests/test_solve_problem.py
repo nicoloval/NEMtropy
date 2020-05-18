@@ -26,7 +26,7 @@ class MyTest(unittest.TestCase):
 
         g.solve_problem(model='dcm', method='quasinewton', max_steps=200, verbose=False, initial_guess='uniform')
 
-        g._solution_error()
+        g.solution_error()
         # debug
         """
         print('test 1:')
@@ -59,7 +59,7 @@ class MyTest(unittest.TestCase):
 
         g.solve_problem(model='dcm', method='quasinewton', max_steps=100, verbose=False, initial_guess='uniform')
 
-        g._solution_error()
+        g.solution_error()
         # debug
         """
         print('test 1:')
@@ -92,7 +92,7 @@ class MyTest(unittest.TestCase):
 
         g.solve_problem(model='dcm', method='quasinewton', max_steps=100, verbose=False, initial_guess='uniform')
 
-        g._solution_error()
+        g.solution_error()
         # debug
         """
         print('test 1:')
@@ -124,24 +124,16 @@ class MyTest(unittest.TestCase):
 
         g.solve_problem(model='dcm', method='quasinewton', max_steps=100, verbose=False, initial_guess='uniform')
 
-        g._solution_error()
+        g.solution_error()
         # debug
-        """
-        print('test 1:')
-        print(A)
-        print(g.dseq)
-        print(g.r_dseq)
-        print(g.r_x, g.r_y)
-        print(g.x, g.y)
-        """
         # print(g.r_dseq_out)
         # print(g.r_dseq_in)
         # print(g.rnz_dseq_out)
         # print(g.rnz_dseq_in)
-        #  print('\ntest 3: error = {}'.format(g.error))
+        # print('\ntest 3: error = {}'.format(g.error))
 
         # test result
-        # self.assertTrue(g.error < 1e-2)
+        self.assertTrue(g.error < 1e-2)
 
 
 
