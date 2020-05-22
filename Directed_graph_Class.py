@@ -383,7 +383,7 @@ def expected_in_degree_dcm(sol):
     return k
 
 
-def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=False, full_return = False):
+def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=False, full_return = False):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
 
@@ -391,23 +391,14 @@ def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, me
     toc_init = 0
     tic = time.time()
 
-    # stopping conditions evaluation function
-    if g == None:
-        stop_fun = fun
-    else:
-        stop_fun = g
+    stop_fun = g  # TODO: change g to stop_fun in the header and all functions below
 
     # algorithm
     beta = .5  # to compute alpha
     n_steps = 0
     x = x0  # initial point
 
-    if method == 'fixed-point':
-        norm = np.linalg.norm(fun(x), ord=np.inf)
-    else:
-        norm = np.linalg.norm(stop_fun(x))
-        if fun_jac == None:
-            raise ValueError('{} method requires a Jacobian function in input'.format(method))
+    norm = np.linalg.norm(fun(x), ord=np.inf)
 
     if full_return:
         norm_seq = [norm]
@@ -462,32 +453,24 @@ def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, me
         elif method == 'fixed-point':
             dx = - fun(x)
         toc_dx += time.time() - tic
-        # dampening factor computation:
+
         # backtraking line search
         tic = time.time()
-        if method in ['newton', 'quasinewton']:
-            alfa = 1
-            i = 0
-            if g == None:
-                while stop_fun(x + alfa*dx) >= \
-                    stop_fun(x) and i<70:
-                    # print(np.linalg.norm(fun(x + alfa*dx)))
-                    alfa *= beta
-                    # print(np.linalg.norm(fun(x + alfa*dx)))
-                    i +=1
-            else:
-                while sufficient_decrease_condition(stop_fun(x), \
-                    stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
-                    alfa *= beta
-                    i +=1
+        """
+        alfa = 0.1
+        eps2=1e-2
+        alfa0 = (eps2-1)*x/dx
+        for a in alfa0:
+            if a>=0:
+                alfa = min(alfa, a)
+        """
+        alfa = 1 
+        i = 0
+        while sufficient_decrease_condition(stop_fun(x), \
+            stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
+            alfa *= beta
+            i +=1
 
-        elif method == 'fixed-point':
-            alfa = 0.1
-            eps2=1e-2
-            alfa0 = (eps2-1)*x/dx
-            for a in alfa0:
-                if a>=0:
-                    alfa = min(alfa, a)
         toc_alfa += time.time() - tic
 
         tic = time.time()
@@ -856,11 +839,15 @@ class DirectedGraph:
                     'dcm': iterative_dcm,
                     }
 
+            d_fun_stop = {
+                    'dcm': loglikelihood_dcm,
+                    }
+
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
 
             self.fun = lambda x: -d_fun[model](x, self.args)
             self.fun_jac = None 
-            self.stop_fun = None 
+            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
 
 
     def _set_initial_guess(self, model, method):
