@@ -209,178 +209,58 @@ class MyTest(unittest.TestCase):
         self.assertTrue(np.allclose(f_sample, f_correct))
 
 
-    """
-    def test_loglikelihood_dcm_rd(self):
-        n, seed = (3, 42)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
-
-        # rd pars
-        d = sample.scalability_classes(A, 'dcm_rd')
-        x0, args_rd = sample.solver_setting(A, 'dcm_rd')
-        x_rd = np.random.random(len(args_rd[0])) 
-
-        # standard pars
-        k_out = sample.out_degree(A)
-        k_in = sample.in_degree(A)
-        par = (k_out, k_in)
-        args = (par, )
-        x = sample.rd2full(x_rd, d, 'dcm_rd')
-
-	# call loglikelihood function 
-        f_rd = sample.loglikelihood_dcm_rd(x_rd, args_rd)
-        f = sample.loglikelihood_dcm(x, args)
-
-        # debug
-        print(A)
-        print(args_rd[0], args[0])
-        print(x_rd, x)
-        print(f_rd, f)
-
-        # test result
-        self.assertTrue(round(f_rd, 3) == round(f, 3))
-
-
-    def test_loglikelihood_prime_dcm(self):
-        A = np.array([[0, 0, 1],
+    def test_iterative_dcm(self):
+        """
+        a = np.array([[0, 1, 1],
                       [1, 0, 1],
                       [0, 1, 0]])
-        k_out = sample.out_degree(A)
-        k_in = sample.in_degree(A)
-        par = (k_out, k_in)
-        args = (par, )
-        x = 0.5*np.ones(2*len(k_out)) 
-	# call loglikelihood function 
-        f_correct = np.array([-4/5+2,4-4/5, 2-4/5, -4/5+2, -4/5+2, -4/5+4])  
-        f_sample = sample.loglikelihood_prime_dcm(x, args)
-
-        # debug
-        # print(f_sample, f_correct)
-
-        # test result
-        self.assertTrue(np.allclose(f_sample, f_correct))
-
-
-    def test_loglikelihood_prime_dcm_rd(self):
+        """
         n, seed = (3, 42)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        a = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
 
-        # rd pars
-        d = sample.scalability_classes(A, 'dcm_rd')
-        x0, args_rd = sample.solver_setting(A, 'dcm_rd')
-        x_rd = np.random.random(2*len(args_rd[0][0])) 
+        # rd
+        g = sample.DirectedGraph(a)
+        g.degree_reduction()
+        g.initial_guess='uniform'
+        g._initialize_problem('dcm', 'fixed-point')
+        x0 = 0.5*np.ones(4) 
 
-        # standard pars
-        k_out = sample.out_degree(A)
-        k_in = sample.in_degree(A)
-        par = (k_out, k_in)
-        args = (par, )
-        x = sample.rd2full(x_rd, d, 'dcm_rd')
-
-	# call loglikelihood function 
-        f_rd = sample.loglikelihood_prime_dcm_rd(x_rd, args_rd)
-        f_rd2full = sample.rd2full(f_rd, d, 'dcm_rd')
-        f = sample.loglikelihood_prime_dcm(x, args)
+        f_sample = -g.fun(x0)
+        g._set_solved_problem(f_sample)
+        f_full = np.concatenate((g.x, g.y))
+        f_correct = np.array([2.5, 1.25, 1.25, 2.5, 1.25, 1.25])
 
         # debug
-        # print(A)
-        # print(args_rd)
-        # print(args)
-        # print(x_rd, x)
-        # print(f_rd2full, f)
+        # print(a)
+        # print(x0, x)
 
         # test result
-        self.assertTrue(np.allclose(f_rd2full, f))
+        self.assertTrue(np.allclose(f_full, f_correct))
 
 
-    def test_loglikelihood_hessian_diag_dcm(self):
-        A = np.array([[0, 0, 1],
-                      [1, 0, 1],
-                      [0, 1, 0]])
-        k_out = sample.out_degree(A)
-        k_in = sample.in_degree(A)
-        par = (k_out, k_in)
-        args = (par, )
-        x = 0.5*np.ones(2+len(k_out))
-	# call loglikelihood function 
-        f_correct = np.array([8/25-4, 8/25-8, 8/25-4, 8/25-4, 8/25-4, 8/25-8])  
-        f_sample = sample.loglikelihood_hessian_diag_dcm(x, args)
+    def test_iterative_dcm_1(self):
+        degseq = np.array([0, 1, 2, 1, 2, 2, 2, 0, 2, 0])
+
+        # rd
+        g = sample.DirectedGraph(degree_sequence = degseq)
+        g.degree_reduction()
+        g.initial_guess='uniform'
+        g._initialize_problem('dcm', 'fixed-point')
+        x0 = np.ones(6) 
+        # x0[x0 == 0] = 0
+
+        f_sample = -g.fun(x0)
+        # g._set_solved_problem(f_sample)
+        # f_full = np.concatenate((g.x, g.y))
+        f_correct = np.array([0, 0.5, 1, 1, 1, 0])
 
         # debug
-        # print(f_sample, f_correct)
+        # print(g.args)
+        # print(f_sample)
+        # print(f_correct)
 
         # test result
         self.assertTrue(np.allclose(f_sample, f_correct))
-
-
-    def test_loglikelihood_hessian_diag_dcm_rd(self):
-        n, seed = (3, 42)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
-
-        # rd pars
-        d = sample.scalability_classes(A, 'dcm_rd')
-        x0, args_rd = sample.solver_setting(A, 'dcm_rd')
-        x_rd = np.random.random(2*len(args_rd[0][0])) 
-
-        # standard pars
-        k_out = sample.out_degree(A)
-        k_in = sample.in_degree(A)
-        par = (k_out, k_in)
-        args = (par, )
-        x = sample.rd2full(x_rd, d, 'dcm_rd')
-
-	# call loglikelihood function 
-        f_rd = sample.loglikelihood_hessian_diag_dcm_rd(x_rd, args_rd)
-        f_rd2full = sample.rd2full(f_rd, d, 'dcm_rd')
-        f = sample.loglikelihood_hessian_diag_dcm(x, args)
-
-        # debug
-        # print(A)
-        # print(args_rd)
-        # print(args)
-        # print(x_rd, x)
-        # print(f_rd2full, f)
-
-        # test result
-        self.assertTrue(np.allclose(f_rd2full, f))
-
-
-    def test_loglikelihood_decm(self):
-        A = np.array([[0, 2, 2],
-                      [2, 0, 2],
-                      [0, 2, 0]])
-	# call loglikelihood function 
-        # problem fixed parameters
-        k_out = sample.out_degree(A)
-        k_in = sample.in_degree(A)
-        s_out = sample.out_strength(A)
-        s_in = sample.in_strength(A)
-        par = np.concatenate((k_out, k_in, s_out, s_in))
-        x = 0.5*np.ones(len(par))
-
-        f_sample = sample.loglikelihood_decm(x, par)
-        f_correct = 30*np.log(0.5) + 6*np.log(1 - 0.5*0.5) - 6*np.log(1 - 0.5*0.5 + 0.5*0.5*0.5*0.5)  
-        # test result
-        self.assertTrue(round(f_sample, 3) == round(f_correct, 3))
-
-
-    def test_loglikelihood_prime_decm(self):
-        A = np.array([[0, 2, 2],
-                      [2, 0, 2],
-                      [0, 2, 0]])
-	# call loglikelihood function 
-        # problem fixed parameters
-        k_out = sample.out_degree(A)
-        k_in = sample.in_degree(A)
-        s_out = sample.out_strength(A)
-        s_in = sample.in_strength(A)
-        par = np.concatenate((k_out, k_in, s_out, s_in))
-        x = 0.5*np.ones(len(par))
-
-        f_sample = sample.loglikelihood_prime_decm(x, par)
-        f_correct = np.concatenate((k_out, k_in, s_out, s_in))/x - 2*np.array([2/13, 2/13, 2/13, 2/13, 2/13, 2/13, 8/39, 8/39, 8/39, 8/39, 8/39, 8/39]) 
-        # test result
-        self.assertTrue(np.allclose(f_sample, f_correct))
-"""
 
 
 if __name__ == '__main__':

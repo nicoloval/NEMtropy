@@ -141,6 +141,49 @@ def loglikelihood_prime_dcm(x, args):
 
 
 @jit(nopython=True)
+def iterative_dcm(x, args):
+    """Return the next iterative step for the Directed Configuration Model Reduced version.
+
+    :param numpy.ndarray v: old iteration step 
+    :param numpy.ndarray par: constant parameters of the cm function
+    :return: next iteration step 
+    :rtype: numpy.ndarray
+    """
+
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    n = len(k_out)
+    # nz_index_out = args[2]
+    # nz_index_in = args[3]
+    nz_index_out = range(n)
+    nz_index_in = range(n) 
+    c = args[4]
+
+    f = np.zeros(2*n)
+
+    for i in nz_index_out:
+        for j in nz_index_in:
+            if j != i:
+                f[i] += c[j]*x[j+n]/(1 + x[i]*x[j+n])
+            else:
+                f[i] += (c[j] - 1)*x[j+n]/(1 + x[i]*x[j+n])
+
+    for j in nz_index_in:
+        for i in nz_index_out:
+            if j != i:
+                f[j+n] += c[i]*x[i]/(1 + x[i]*x[j+n])
+            else:
+                f[j+n] += (c[i] - 1)*x[i]/(1 + x[i]*x[j+n])
+
+    tmp = np.concatenate((k_out, k_in))
+    # ff = np.array([tmp[i]/f[i] if tmp[i] != 0 else 0 for i in range(2*n)])
+    ff = np.array([tmp[i]/f[i] for i in range(2*n)])
+
+    return ff 
+
+
+@jit(nopython=True)
 def loglikelihood_prime_dcm_notrd(x, args):
     """iterative function for loglikelihood gradient dcm
     """
@@ -359,8 +402,8 @@ def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, me
     n_steps = 0
     x = x0  # initial point
 
-    if method == 'dianati':
-        norm = np.linalg.norm(fun(x))
+    if method == 'fixed-point':
+        norm = np.linalg.norm(fun(x), ord=np.inf)
     else:
         norm = np.linalg.norm(stop_fun(x))
         if fun_jac == None:
@@ -416,7 +459,7 @@ def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, me
             dx = np.linalg.solve(B, - fun(x))
         elif method == 'quasinewton':
             dx = - fun(x)/B
-        elif method == 'dianati':
+        elif method == 'fixed-point':
             dx = - fun(x)
         toc_dx += time.time() - tic
         # dampening factor computation:
@@ -426,8 +469,8 @@ def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, me
             alfa = 1
             i = 0
             if g == None:
-                while np.linalg.norm(stop_fun(x + alfa*dx)) >= \
-                    np.linalg.norm(stop_fun(x)) and i<70:
+                while stop_fun(x + alfa*dx) >= \
+                    stop_fun(x) and i<70:
                     # print(np.linalg.norm(fun(x + alfa*dx)))
                     alfa *= beta
                     # print(np.linalg.norm(fun(x + alfa*dx)))
@@ -438,7 +481,7 @@ def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, me
                     alfa *= beta
                     i +=1
 
-        elif method == 'dianati':
+        elif method == 'fixed-point':
             alfa = 0.1
             eps2=1e-2
             alfa0 = (eps2-1)*x/dx
@@ -455,8 +498,8 @@ def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, me
 
         # stopping condition computation
         # TODO: try and except con fun(x)
-        # norm = np.linalg.norm(fun(x))
-        norm = np.linalg.norm(stop_fun(x))
+        norm = np.linalg.norm(fun(x), ord=np.inf)
+        # norm = np.linalg.norm(stop_fun(x), ord='inf')
 
         if full_return:
             norm_seq.append(norm)
@@ -472,7 +515,8 @@ def solver(x0, fun, fun_jac=None, g=None, tol=1e-6, eps=1e-10, max_steps=100, me
             print('dx = {}'.format(dx))
             print('x = {}'.format(x))
             print('|f(x)| = {}'.format(norm))
-            print('B = {}'.format(B))
+            if method in ['newton', 'quasinewton']:
+                print('B = {}'.format(B))
 
     toc_loop = time.time() - tic_loop
     toc_all = time.time() - tic_all
@@ -607,6 +651,9 @@ class DirectedGraph:
         # model
         self.error = None
         self.full_return = False
+
+        # function
+        self.args = None
 
 
     def _initialize_graph(self, adjacency=None, edgelist=None, degree_sequence=None, strength_sequence=None):
@@ -781,7 +828,7 @@ class DirectedGraph:
 
     def _initialize_problem(self, model, method):
         if ~self.is_reduced:
-            self.degree_reduction()
+           self.degree_reduction()
 
         self._set_initial_guess(model, method)
 
@@ -799,9 +846,21 @@ class DirectedGraph:
                     }
 
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
+
             self.fun = lambda x: -d_fun[model](x, self.args)
             self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
             self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
+
+        elif method in ['fixed-point']:
+            d_fun = {
+                    'dcm': iterative_dcm,
+                    }
+
+            self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
+
+            self.fun = lambda x: -d_fun[model](x, self.args)
+            self.fun_jac = None 
+            self.stop_fun = None 
 
 
     def _set_initial_guess(self, model, method):
@@ -831,4 +890,5 @@ class DirectedGraph:
         ex_k = np.concatenate((ex_k_out, ex_k_in))
         k = np.concatenate((self.dseq_out, self.dseq_in))
         # print(k, ex_k)
+        self.expected_dseq = ex_k
         self.error = np.linalg.norm(ex_k - k)
