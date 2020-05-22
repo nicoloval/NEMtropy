@@ -178,6 +178,47 @@ def iterative_dcm(x, args):
 
     tmp = np.concatenate((k_out, k_in))
     # ff = np.array([tmp[i]/f[i] if tmp[i] != 0 else 0 for i in range(2*n)])
+    ff = tmp/f 
+
+    return ff 
+
+
+@jit(nopython=True)
+def iterative_dcm_old(x, args):
+    """Return the next iterative step for the Directed Configuration Model Reduced version.
+
+    :param numpy.ndarray v: old iteration step 
+    :param numpy.ndarray par: constant parameters of the cm function
+    :return: next iteration step 
+    :rtype: numpy.ndarray
+    """
+
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    n = len(k_out)
+    nz_index_out = args[2]
+    nz_index_in = args[3]
+    c = args[4]
+
+    f = np.zeros(2*n)
+
+    for i in nz_index_out:
+        for j in nz_index_in:
+            if j != i:
+                f[i] += c[j]*x[j+n]/(1 + x[i]*x[j+n])
+            else:
+                f[i] += (c[j] - 1)*x[j+n]/(1 + x[i]*x[j+n])
+
+    for j in nz_index_in:
+        for i in nz_index_out:
+            if j != i:
+                f[j+n] += c[i]*x[i]/(1 + x[i]*x[j+n])
+            else:
+                f[j+n] += (c[i] - 1)*x[i]/(1 + x[i]*x[j+n])
+
+    tmp = np.concatenate((k_out, k_in))
+    # ff = np.array([tmp[i]/f[i] if tmp[i] != 0 else 0 for i in range(2*n)])
     ff = np.array([tmp[i]/f[i] for i in range(2*n)])
 
     return ff 
@@ -399,6 +440,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
     x = x0  # initial point
 
     norm = np.linalg.norm(fun(x), ord=np.inf)
+    diff = 1
 
     if full_return:
         norm_seq = [norm]
@@ -416,7 +458,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
 
     tic_loop = time.time()
 
-    while norm > tol and n_steps < max_steps:  # stopping condition
+    while norm > tol and diff > tol and n_steps < max_steps:  # stopping condition
         x_old = x  # save previous iteration
 
         # f jacobian
@@ -451,7 +493,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
         elif method == 'quasinewton':
             dx = - fun(x)/B
         elif method == 'fixed-point':
-            dx = - fun(x)
+            dx = fun(x) - x
         toc_dx += time.time() - tic
 
         # backtraking line search
@@ -471,18 +513,34 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
             alfa *= beta
             i +=1
 
+        #TODO: instafix, to check
+        if method == 'fixed-point':
+            alfa = 1
+        """
+        if method == 'fixed-point':
+            alfa = 0.1
+            eps2 = 1e-2
+            alfa0 = (eps2-1)*x/dx
+            for a in alfa0:
+                if a >= 0:
+                    alfa = min(alfa, a)
+        """
+       
+
         toc_alfa += time.time() - tic
 
         tic = time.time()
         # solution update
         # direction= dx@fun(x).T
-        x = x + alfa*dx
+        if method in ['newton', 'quasinewton']:
+            x = x + alfa*dx
+        if method in ['fixed-point']:
+            x = alfa*(x + dx)
         toc_update += time.time() - tic
 
         # stopping condition computation
-        # TODO: try and except con fun(x)
         norm = np.linalg.norm(fun(x), ord=np.inf)
-        # norm = np.linalg.norm(stop_fun(x), ord='inf')
+        diff = np.linalg.norm(x - x_old)
 
         if full_return:
             norm_seq.append(norm)

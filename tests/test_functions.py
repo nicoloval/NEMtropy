@@ -256,8 +256,8 @@ class MyTest(unittest.TestCase):
 
         # debug
         # print(g.args)
-        # print(f_sample)
-        # print(f_correct)
+        print(f_sample)
+        print(f_correct)
 
         # test result
         self.assertTrue(np.allclose(f_sample, f_correct))
