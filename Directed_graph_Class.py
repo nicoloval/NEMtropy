@@ -3,38 +3,19 @@ import scipy.sparse
 from numba import jit
 import time
 
-
-def random_binary_matrix_generator_nozeros(n, sym=False, seed=None):
-        if sym == False:
-                np.random.seed(seed = seed)
-                A = np.random.randint(0, 2, size=(n, n))
-                # zeros on the diagonal
-                for i in range(n):
-                    A[i, i] = 0
-                k_in = np.sum(A, axis=0)
-                for ind, k in enumerate(k_in):
-                        if k==0:
-                                A[0, ind] = 1
-                k_out = np.sum(A, axis=1)
-                for ind, k in enumerate(k_out):
-                        if k==0:
-                                A[ind, 0] = 1
-        return A
-
 @jit(nopython=True)
 def pmatrix_dcm(x,args):
     """
     Function evaluating the P-matrix of DCM given the solution of the underlying model
     """
-    # Può essere riscritta meglio (e.g. saltare gli zeri)
     n = args[0]
     index_out = args[1]
     index_in = args[2]
     P = np.zeros((n,n),dtype=np.int64)
     xout = x[:n]
     yin = x[n:]
-    for ii in np.arange(n):
-        for jj in np.arange(n):
+    for ii in index_out:
+        for jj in index_in:
             aux = xout[ii]*yin[jj]
             P[ii,jj] = aux/(1+aux)
     return P
@@ -50,8 +31,8 @@ def loglikelihood_CReAMa(beta,args):
     
     aux_n = len(s_out)
 
-    beta_out = beta[0:aux_n]
-    beta_in = beta[aux_n:2*aux_n]
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
     
     f=0
     
@@ -72,7 +53,7 @@ def loglikelihood_prime_CReAMa(beta, args):
     nz_index_out = args[3]
     nz_index_in = args[4]
     
-    aux_n = len(sout)
+    aux_n = len(s_out)
 
     beta_out = beta[0:aux_n]
     beta_in = beta[aux_n:2*aux_n]
@@ -82,13 +63,13 @@ def loglikelihood_prime_CReAMa(beta, args):
     for ii in nz_index_out:
 
         aux_F[ii] = s_out[ii]
-        aux_F[ii+aux_n] = s_in[ii]
+        aux_F[ii+aux_n] -= s_in[ii]
         for jj in nz_index_in:
             if ii != jj:
                 if adj[ii, jj] > 0:
-                    aux_F[ii] -= adj[ii, jj]/(beta_out[ii]+beta_in[jj])
+                    aux_F[ii] += adj[ii, jj]/(beta_out[ii]+beta_in[jj])
                 if adj[jj, ii] > 0:
-                    aux_F[ii+aux_n] -= adj[jj, ii]/(beta_in[ii]+beta_out[jj])
+                    aux_F[ii+aux_n] += adj[jj, ii]/(beta_in[ii]+beta_out[jj])
 
     return (aux_F)
 
@@ -115,26 +96,26 @@ def loglikelihood_hessian_CReAMa(beta, args):
             if (ii == jj) & (ii < aux_n) & (jj < aux_n):
                 for kk in np.arange(aux_n):
                     if adj[ii, kk] > 0:
-                        f[ii, jj] += adj[ii, kk] / \
+                        f[ii, jj] -= adj[ii, kk] / \
                             ((beta_out[ii]+beta_in[kk])**2)
 
             # diagonal second n elements
             elif (ii == jj) & (ii >= aux_n) & (jj >= aux_n):
                 for kk in np.arange(aux_n):
                     if adj[kk, ii-aux_n] > 0:
-                        f[ii, jj] += adj[kk, ii-aux_n] / \
+                        f[ii, jj] -= adj[kk, ii-aux_n] / \
                             ((beta_out[kk]+beta_in[ii-aux_n])**2)
 
             # off-diagonal top right elements
             elif (ii != jj) & (ii < aux_n) & (jj >= aux_n):
                 if adj[ii, jj-aux_n] > 0:
-                    f[ii, jj] = adj[ii, jj-aux_n] / \
+                    f[ii, jj] = -adj[ii, jj-aux_n] / \
                         ((beta_out[ii]+beta_in[jj-aux_n])**2)
 
             # off-diagonal bottom left elements
             elif (ii != jj) & (ii >= aux_n) & (jj < aux_n):
                 if adj[jj, ii-aux_n] > 0:
-                    f[ii, jj] = adj[jj, ii-aux_n] / \
+                    f[ii, jj] = -adj[jj, ii-aux_n] / \
                         (beta_out[jj] + beta_in[ii-aux_n])
 
     return f
@@ -158,17 +139,36 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
     for ii in nz_index_out:
         for jj in nz_index_in:
             if adj[ii,jj]>0:
-                f[ii] += adj[ii, jj] / \
+                f[ii] -= adj[ii, jj] / \
                          ((beta_out[ii]+beta_in[jj])**2)
 
     for ii in nz_index_in:
         for jj in nz_index_out:
             if adj[ii,jj]>0:
-                f[ii+aux_n] += adj[ii, jj] / \
+                f[ii+aux_n] -= adj[ii, jj] / \
                                ((beta_out[jj] + beta_in[ii])**2)
 
     return f
 
+
+
+
+def random_binary_matrix_generator_nozeros(n, sym=False, seed=None):
+        if sym == False:
+                np.random.seed(seed = seed)
+                A = np.random.randint(0, 2, size=(n, n))
+                # zeros on the diagonal
+                for i in range(n):
+                    A[i, i] = 0
+                k_in = np.sum(A, axis=0)
+                for ind, k in enumerate(k_in):
+                        if k==0:
+                                A[0, ind] = 1
+                k_out = np.sum(A, axis=1)
+                for ind, k in enumerate(k_out):
+                        if k==0:
+                                A[ind, 0] = 1
+        return A
 
 
 @jit(nopython=True)
@@ -646,6 +646,12 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
     """return boolean indicator if upper wolfe condition are respected.
     """
     # print(f_old, f_new, alpha, grad_f, p)
+    
+    #print ('f_old',f_old)
+    #print ('c1',c1)
+    #print('alpha',alpha)
+    #print ('grad_f',grad_f)
+    #print('p.T',p.T)
 
     sup = f_old + c1 *alpha*grad_f@p.T
     return bool(f_new < sup)
@@ -714,9 +720,12 @@ class DirectedGraph:
         self.dseq_in = None
         self.out_strength = None
         self.in_strength = None
+        self.nz_index_sout = None
+        self.nz_index_sin = None
         self.nodes_dict = None
         self.is_initialized = False
         self.is_randomized = False
+        self.is_weighted = False
         self._initialize_graph(adjacency=adjacency, edgelist=edgelist,
                                degree_sequence=degree_sequence, strength_sequence=strength_sequence)
         self.avg_mat = None
@@ -725,6 +734,7 @@ class DirectedGraph:
         self.xy = None
         self.b_out = None
         self.b_in = None
+        
 
         self.initial_guess = None
         # Reduced problem parameters
@@ -747,14 +757,13 @@ class DirectedGraph:
         # Problem (reduced) residuals
         self.residuals = None
         self.final_result = None
+        self.r_beta = None
 
         self.nz_index_out = None
         self.rnz_dseq_out = None
         self.nz_index_in = None
         self.rnz_dseq_in = None
-        self.nz_index_sout = None
-        self.nz_index_sin = None
-
+        
         # model
         self.error = None
         self.full_return = False
@@ -788,6 +797,8 @@ class DirectedGraph:
                     self.out_strength = np.sum(adjacency, axis=1)
                     self.nz_index_sout = np.nonzero(self.out_strength)[0]
                     self.nz_index_sin = np.nonzero(self.in_strength)[0]
+                    self.is_weighted = True
+                    
                 # self.edgelist, self.deg_seq = edgelist_from_adjacency(adjacency)
                 self.n_nodes = len(self.dseq_out)
                 self.n_edges = np.sum(self.dseq_out)
@@ -844,6 +855,7 @@ class DirectedGraph:
                             self.in_strength = strength_sequence[self.n_nodes:]
                             self.nz_index_sout = np.nonzero(self.out_strength)[0]
                             self.nz_index_sin = np.nonzero(self.in_strength)[0]
+                            self.is_weighted = True
                             self.is_initialized = True
 
         elif strength_sequence is not None:
@@ -864,6 +876,7 @@ class DirectedGraph:
                     self.in_strength = strength_sequence[self.n_nodes:]
                     self.nz_index_sout = np.nonzero(self.out_strength)[0]
                     self.nz_index_sin = np.nonzero(self.in_strength)[0]
+                    self.is_weighted = True
                     self.is_initialized = True
 
 
@@ -908,42 +921,6 @@ class DirectedGraph:
         self._set_solved_problem(sol)
 
 
-    def solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
-        if model == 'CReAMa':
-            if not isinstance(adjacency,(list,np.ndarray,str)):
-                raise ValueError('adjacency must be a matrix or a method')
-            elif isinstance(adjacency,str):
-                self.initial_guess = initial_guess
-                self._initialize_problem_CReAMa(adjacency, method)
-                x0 = np.concatenate((self.r_x, self.r_y))
-                sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
-                self._set_solved_problem(sol)
-                adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
-            elif isinstance(adjacency,list):
-                adjacency = np.array(adjacency)
-
-            if adjacency.shape[0] != adjacency.shape[1]:
-                raise ValueError(r'adjacency matrix must be $n \times n$')
-
-            ###### Mettere la parte dove risolviamo il CReAM
-
-            self.initial_guess = 'strenght'
-            self._initialize_problem_CReAMa(model,method)
-            sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
-
-            self.beta_out = sol[:self.n_nodes]
-            self.beta_in = sol[self.n_nodes:]
-        else:
-            self.initial_guess = initial_guess
-            self._initialize_problem(model, method)
-            x0 = np.concatenate((self.r_x, self.r_y))
-            # print('x0', x0)
-            # print('index',self.nz_index_out, self.nz_index_in)
-
-            sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
-
-            self._set_solved_problem(sol)
-
     def _set_solved_problem(self, solution):
         if ~self.full_return:
             self.r_xy = solution 
@@ -953,8 +930,8 @@ class DirectedGraph:
 
             self.x = self.r_x[self.r_invert_dseq]
             self.y = self.r_y[self.r_invert_dseq]
-
-
+        
+        
     def degree_reduction(self):
         self.dseq = np.array(list(zip(self.dseq_out, self.dseq_in)))
         self.r_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(self.dseq, return_index=False, return_inverse=True, return_counts=True, axis=0)
@@ -970,12 +947,11 @@ class DirectedGraph:
         self.rnz_dim = self.rnz_n_out + self.rnz_n_in
 
         self.is_reduced = True
-
-
+        
     def _initialize_problem(self, model, method):
         if ~self.is_reduced:
             self.degree_reduction()
-
+        
         self._set_initial_guess(model, method)
 
         if method in ['newton', 'quasinewton']:
@@ -996,19 +972,61 @@ class DirectedGraph:
             self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
             self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
 
+    
+    def _set_initial_guess(self, model, method):
+        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        if self.initial_guess is None:
+            self.r_x = self.rnz_dseq_out / (np.sqrt(self.n_edges) + 1)  # This +1 increases the stability of the solutions.
+            self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
+        elif self.initial_guess == 'random':
+            self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
+            self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
+        elif self.initial_guess == 'uniform':
+            self.r_x = 0.5*np.ones(self.rnz_n_out, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.r_y = 0.5*np.ones(self.rnz_n_in, dtype=np.float64)
+        elif self.initial_guess == 'degrees':
+            self.r_x = self.rnz_dseq_out.astype(np.float64)
+            self.r_y = self.rnz_dseq_in.astype(np.float64)
+
+        self.r_x[self.rnz_dseq_out == 0] = 0
+        self.r_y[self.rnz_dseq_in == 0] = 0
+
+
+    def solution_error(self):
+        sol = np.concatenate((self.x, self.y))
+        ex_k_out = expected_out_degree_dcm(sol)
+        ex_k_in = expected_in_degree_dcm(sol)
+        ex_k = np.concatenate((ex_k_out, ex_k_in))
+        k = np.concatenate((self.dseq_out, self.dseq_in))
+        # print(k, ex_k)
+        self.error = np.linalg.norm(ex_k - k)
+
+
+    def _set_initial_guess_CReAMa(self, model, method):
+        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        if self.initial_guess is None:
+            self.b_out = (self.out_strength>0).astype(int) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
+            self.b_in = (self.r_in_strength>0).astype(int) / self.r_in_strength.sum()
+        elif self.initial_guess == 'strengths':
+            self.b_out = (self.out_strength>0).astype(int) / (self.out_strength + 1)
+            self.b_in = (self.in_strength>0).astype(int) / (self.in_strength + 1)
+
+
+
     def _initialize_problem_CReAMa(self, model, method):
         if ~self.is_reduced:
             self.degree_reduction()
-
+        
         if model=='CReAMa':
             self._set_initial_guess_CReAMa(model, method)
         else:
             self._set_initial_guess(model,method)
-
         if method in ['newton', 'quasinewton']:
             d_fun = {
                     'dcm': loglikelihood_prime_dcm,
-                    'CReAMa': loglikelihood_CReAMa,
+                    'CReAMa': loglikelihood_prime_CReAMa,
                     }
 
             d_fun_jac = {
@@ -1035,46 +1053,42 @@ class DirectedGraph:
             self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
 
 
-    def _set_initial_guess(self, model, method):
-        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
-        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
-        if self.initial_guess is None:
-            self.r_x = self.rnz_dseq_out / (np.sqrt(self.n_edges) + 1)  # This +1 increases the stability of the solutions.
-            self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
-        elif self.initial_guess == 'random':
-            self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
-            self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
-        elif self.initial_guess == 'uniform':
-            self.r_x = 0.5*np.ones(self.rnz_n_out, dtype=np.float64)  # All probabilities will be 1/2 initially
-            self.r_y = 0.5*np.ones(self.rnz_n_in, dtype=np.float64)
-        elif self.initial_guess == 'degrees':
-            self.r_x = self.rnz_dseq_out.astype(np.float64)
-            self.r_y = self.rnz_dseq_in.astype(np.float64)
+    def solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
+        if model == 'CReAMa':
+            if not isinstance(adjacency,(list,np.ndarray,str)):
+                raise ValueError('adjacency must be a matrix or a method')
+            elif isinstance(adjacency,str):
+                self.initial_guess = initial_guess
+                self._initialize_problem_CReAMa(adjacency, method)
+                x0 = np.concatenate((self.r_x, self.r_y))
+                sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
+                self._set_solved_problem(sol)
+                adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
+            elif isinstance(adjacency,list):
+                adjacency = np.array(adjacency)
 
-        self.r_x[self.rnz_dseq_out == 0] = 0
-        self.r_y[self.rnz_dseq_in == 0] = 0
+            if adjacency.shape[0] != adjacency.shape[1]:
+                raise ValueError(r'adjacency matrix must be $n \times n$')
+            
+            self.initial_guess = 'strengths'
+            self._initialize_problem_CReAMa(model,method)
+            x0 = np.concatenate((self.b_out, self.b_in))
+            
+            sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
+
+            self.beta_out = sol[:self.n_nodes]
+            self.beta_in = sol[self.n_nodes:]
+            
+        else:
+            
+            self.initial_guess = initial_guess
+            self._initialize_problem(model, method)
+            x0 = np.concatenate((self.r_x, self.r_y))
+            # print('x0', x0)
+            # print('index',self.nz_index_out, self.nz_index_in)
+
+            sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
+
+            self._set_solved_problem(sol)
 
 
-    def _set_initial_guess_CReAMa(self, model, method):
-        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
-        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
-        if self.initial_guess is None:
-            self.b_out = (self.dseq_out>0).astype(int) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
-            self.b_in = (self.dseq_in>0).astype(int) / self.in_strength.sum()
-        elif self.initial_guess == 'strengths':
-            self.b_out = (self.dseq_out>0).astype(int) / (self.out_strength + 1)
-            self.b_in = (self.dseq_in>0).astype(int) / (self.in_strength + 1)
-
-
-
-
-
-
-    def solution_error(self):
-        sol = np.concatenate((self.x, self.y))
-        ex_k_out = expected_out_degree_dcm(sol)
-        ex_k_in = expected_in_degree_dcm(sol)
-        ex_k = np.concatenate((ex_k_out, ex_k_in))
-        k = np.concatenate((self.dseq_out, self.dseq_in))
-        # print(k, ex_k)
-        self.error = np.linalg.norm(ex_k - k)
