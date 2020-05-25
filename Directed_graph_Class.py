@@ -996,7 +996,7 @@ class DirectedGraph:
         self.is_initialized = False
 
 
-    def solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
+    def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
 
         self.initial_guess = initial_guess
         self._initialize_problem(model, method)
@@ -1157,7 +1157,7 @@ class DirectedGraph:
             self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
 
 
-    def solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
+    def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
         if model == 'CReAMa':
             if not isinstance(adjacency,(list,np.ndarray,str)):
                 raise ValueError('adjacency must be a matrix or a method')
@@ -1194,5 +1194,14 @@ class DirectedGraph:
             sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
 
             self._set_solved_problem(sol)
+
+
+    def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False):
+        """ function to switch around the various problems
+        """
+        if model in ['dcm']:
+            self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
+        elif model in ['CReAMa']:
+            self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
 
 
