@@ -22,6 +22,13 @@ def pmatrix_dcm(x,args):
 
 @jit(nopython=True)
 def iterative_CReAMa(beta,args):
+    """Return the next iterative step for the CReAMa Model.
+
+    :param numpy.ndarray v: old iteration step 
+    :param numpy.ndarray par: constant parameters of the cm function
+    :return: next iteration step 
+    :rtype: numpy.ndarray
+    """
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
