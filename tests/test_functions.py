@@ -256,11 +256,35 @@ class MyTest(unittest.TestCase):
 
         # debug
         # print(g.args)
-        print(f_sample)
-        print(f_correct)
+        # print(f_sample)
+        # print(f_correct)
 
         # test result
         self.assertTrue(np.allclose(f_sample, f_correct))
+
+
+    def test_loglikelihood_hessian_dcm_vs_diag(self):
+        a = np.array([[0, 1, 1],
+                      [1, 0, 1],
+                      [0, 1, 0]])
+        k_out = np.sum(a > 0, 1) 
+        k_in = np.sum(a > 0, 0)
+        nz_ind_out = np.nonzero(k_out)[0]
+        nz_ind_in = np.nonzero(k_in)[0]
+        c = np.array([1,1,1])
+        args = (k_out, k_in, nz_ind_out, nz_ind_in, c)
+        x = 0.5*np.ones(len(k_out)+len(k_in))
+	# call loglikelihood function 
+        f_diag = sample.loglikelihood_hessian_diag_dcm(x, args)
+        f_full = sample.loglikelihood_hessian_dcm(x, args)
+        f_df = np.diag(f_full)
+        # debug
+        # print(f_diag, f_full, f_df)
+        
+
+        # test result
+        self.assertTrue(np.allclose(f_diag, f_df))
+
 
 
 if __name__ == '__main__':

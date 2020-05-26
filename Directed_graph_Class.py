@@ -290,6 +290,59 @@ def loglikelihood_prime_dcm(x, args):
 
 
 @jit(nopython=True)
+def loglikelihood_hessian_dcm(x, args):
+    """
+    :param x: np.array
+    :param args: list
+    :return: np.array
+
+    x = [a_in, a_out] where a^{in}_i = e^{-\theta^{in}_i} for rd class i
+    par = [k_in, k_out, c]
+        c is the cardinality of each class
+
+    log-likelihood hessian: Directed Configuration Model reduced.
+
+    """
+    k_out = args[0]
+    k_in = args[1]
+    nz_out_index = args[2]
+    nz_in_index = args[3]
+    c = args[4]
+    n = len(k_out)
+
+    out = np.zeros((2*n, 2*n))  # hessian matrix
+
+    for h in nz_out_index:
+        out[h, h] = -c[h]*k_out[h]/(x[h])**2
+        # out[h+n, h+n] = -c[h]*k_in[h]/(x[h+n])**2
+        for i in nz_in_index:
+            if i == h:
+                # const = c[h]*(c[h] - 1)
+                const = (c[h] - 1)
+            else:
+                # const = c[h]*c[i]
+                const = c[i]
+
+            out[h, h] += const*(x[i+n]**2)/(1 + x[h]*x[i+n])**2
+            out[h, i+n] = -const/(1 + x[i+n]*x[h])**2
+
+    for i in nz_in_index:
+        out[i+n, i+n] = -c[i]*k_in[i]/(x[i+n])**2
+        for h in nz_out_index:
+            if i == h:
+                # const = c[h]*(c[h] - 1)
+                const = (c[h] - 1)
+            else:
+                # const = c[h]*c[i]
+                const = c[i]
+
+            out[i+n, i+n] += const*(x[h]**2)/(1 + x[i+n]*x[h])**2
+            out[i+n, h] = -const/(1 + x[i+n]*x[h])**2
+
+    return out
+
+
+@jit(nopython=True)
 def iterative_dcm(x, args):
     """Return the next iterative step for the Directed Configuration Model Reduced version.
 
@@ -571,6 +624,20 @@ def expected_in_degree_dcm(sol):
                 k[i] += a_in[i]*a_out[j]/(1 + a_in[i]*a_out[j])
 
     return k
+
+def hessian_regulariser_function(B, eps):
+    """Trasform input matrix in a positive defined matrix
+    input matrix should be numpy.array
+    """
+
+    B = (B + B.transpose())*0.5  # symmetrization
+    l, e = np.linalg.eigh(B)
+    ll = np.array([0 if li>eps else eps-li for li in l])
+    Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    # lll, eee = np.linalg.eigh(Bf)
+    # debug check
+    # print('B regularised eigenvalues =\n {}'.format(lll))
+    return Bf
 
 
 def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=False, full_return = False):
@@ -1042,13 +1109,32 @@ class DirectedGraph:
 
         self._set_initial_guess(model, method)
 
-        if method in ['newton', 'quasinewton']:
+        if method in ['quasinewton']:
             d_fun = {
                     'dcm': loglikelihood_prime_dcm,
                     }
 
             d_fun_jac = {
                     'dcm': loglikelihood_hessian_diag_dcm,
+                    }
+
+            d_fun_stop = {
+                    'dcm': loglikelihood_dcm,
+                    }
+
+            self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
+
+            self.fun = lambda x: -d_fun[model](x, self.args)
+            self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
+            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
+
+        elif method in ['newton']:
+            d_fun = {
+                    'dcm': loglikelihood_prime_dcm,
+                    }
+
+            d_fun_jac = {
+                    'dcm': loglikelihood_hessian_dcm,
                     }
 
             d_fun_stop = {
