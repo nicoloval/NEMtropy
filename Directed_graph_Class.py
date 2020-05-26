@@ -11,15 +11,46 @@ def pmatrix_dcm(x,args):
     n = args[0]
     index_out = args[1]
     index_in = args[2]
-    P = np.zeros((n,n),dtype=np.int64)
+    P = np.zeros((n,n),dtype=np.float64)
     xout = x[:n]
     yin = x[n:]
-    for ii in index_out:
-        for jj in index_in:
-            aux = xout[ii]*yin[jj]
-            P[ii,jj] = aux/(1+aux)
+    for i in index_out:
+        for j in index_in:
+            aux = xout[i]*yin[j]
+            P[i,j] = aux/(1+aux)
     return P
 
+@jit(nopython=True)
+def iterative_CReAMa(beta,args):
+    """Return the next iterative step for the CReAMa Model.
+
+    :param numpy.ndarray v: old iteration step 
+    :param numpy.ndarray par: constant parameters of the cm function
+    :return: next iteration step 
+    :rtype: numpy.ndarray
+    """
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    
+    aux_n = len(s_out)
+    
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+    
+    xd = np.zeros(aux_n)
+    yd = np.zeros(aux_n)
+    
+    for i in np.arange(aux_n):
+        for j in np.arange(aux_n):
+            if adj[i,j]>0:
+                aux = adj[i,j]/(1+beta_in[j]/beta_out[i])
+                xd[i] -= aux/s_out[i]
+            if adj[j,i]>0:
+                aux = adj[j,i]/(1+beta_out[j]/beta_in[i])
+                yd[i] -= aux/s_in[i]
+    
+    return(np.concatenate((xd,yd)))
 
 @jit(nopython=True)
 def loglikelihood_CReAMa(beta,args):
@@ -36,11 +67,11 @@ def loglikelihood_CReAMa(beta,args):
     
     f=0
     
-    for ii in nz_index_out:
-        f -= s_out[ii] * beta_out[ii] + s_in[ii] * beta_in[ii]
-        for jj in nz_index_in:
-            if (ii!=jj) and (adj[ii,jj]!=0):
-                f += adj[ii,jj] * np.log(beta_out[ii] + beta_in[jj])
+    for i in nz_index_out:
+        f -= s_out[i] * beta_out[i] + s_in[i] * beta_in[i]
+        for j in nz_index_in:
+            if (i!=j) and (adj[i,j]!=0):
+                f += adj[i,j] * np.log(beta_out[i] + beta_in[j])
     
     return f
 
@@ -58,20 +89,19 @@ def loglikelihood_prime_CReAMa(beta, args):
     beta_out = beta[0:aux_n]
     beta_in = beta[aux_n:2*aux_n]
 
-    aux_F = np.zeros_like(beta)
+    aux_F_out = np.zeros_like(beta_out)
+    aux_F_in = np.zeros_like(beta_in)
 
-    for ii in nz_index_out:
+    for i in nz_index_out:
+        aux_F_out[i] -= s_out[i]
+        aux_F_in[i] -= s_in[i]
+        for j in nz_index_in:
+            if adj[i, j] > 0:
+                aux_F_out[i] += adj[i, j]/(beta_out[i]+beta_in[j])
+            if adj[j, i] > 0:
+                    aux_F_in[i] += adj[j, i]/(beta_out[j]+beta_in[i])
 
-        aux_F[ii] = s_out[ii]
-        aux_F[ii+aux_n] -= s_in[ii]
-        for jj in nz_index_in:
-            if ii != jj:
-                if adj[ii, jj] > 0:
-                    aux_F[ii] += adj[ii, jj]/(beta_out[ii]+beta_in[jj])
-                if adj[jj, ii] > 0:
-                    aux_F[ii+aux_n] += adj[jj, ii]/(beta_in[ii]+beta_out[jj])
-
-    return (aux_F)
+    return (np.concatenate((aux_F_out,aux_F_in)))
 
 
 @jit(nopython=True)
@@ -89,34 +119,34 @@ def loglikelihood_hessian_CReAMa(beta, args):
 
     f = np.zeros(shape=(2*aux_n, 2*aux_n))
 
-    for ii in np.arange(f.shape[0]):
-        for jj in np.arange(f.shape[0]):
+    for i in np.arange(f.shape[0]):
+        for j in np.arange(f.shape[0]):
 
             # diagonal first n elements
-            if (ii == jj) & (ii < aux_n) & (jj < aux_n):
+            if (i == j) & (i < aux_n) & (j < aux_n):
                 for kk in np.arange(aux_n):
-                    if adj[ii, kk] > 0:
-                        f[ii, jj] -= adj[ii, kk] / \
-                            ((beta_out[ii]+beta_in[kk])**2)
+                    if adj[i, kk] > 0:
+                        f[i, j] -= adj[i, kk] / \
+                            ((beta_out[i]+beta_in[kk])**2)
 
             # diagonal second n elements
-            elif (ii == jj) & (ii >= aux_n) & (jj >= aux_n):
+            elif (i == j) & (i >= aux_n) & (j >= aux_n):
                 for kk in np.arange(aux_n):
-                    if adj[kk, ii-aux_n] > 0:
-                        f[ii, jj] -= adj[kk, ii-aux_n] / \
-                            ((beta_out[kk]+beta_in[ii-aux_n])**2)
+                    if adj[kk, i-aux_n] > 0:
+                        f[i, j] -= adj[kk, i-aux_n] / \
+                            ((beta_out[kk]+beta_in[i-aux_n])**2)
 
             # off-diagonal top right elements
-            elif (ii != jj) & (ii < aux_n) & (jj >= aux_n):
-                if adj[ii, jj-aux_n] > 0:
-                    f[ii, jj] = -adj[ii, jj-aux_n] / \
-                        ((beta_out[ii]+beta_in[jj-aux_n])**2)
+            elif (i != j) & (i < aux_n) & (j >= aux_n):
+                if adj[i, j-aux_n] > 0:
+                    f[i, j] = -adj[i, j-aux_n] / \
+                        ((beta_out[i]+beta_in[j-aux_n])**2)
 
             # off-diagonal bottom left elements
-            elif (ii != jj) & (ii >= aux_n) & (jj < aux_n):
-                if adj[jj, ii-aux_n] > 0:
-                    f[ii, jj] = -adj[jj, ii-aux_n] / \
-                        (beta_out[jj] + beta_in[ii-aux_n])
+            elif (i != j) & (i >= aux_n) & (j < aux_n):
+                if adj[j, i-aux_n] > 0:
+                    f[i, j] = -adj[j, i-aux_n] / \
+                        (beta_out[j] + beta_in[i-aux_n])
 
     return f
 
@@ -136,17 +166,14 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
     f = np.zeros(2*aux_n)
 
-    for ii in nz_index_out:
-        for jj in nz_index_in:
-            if adj[ii,jj]>0:
-                f[ii] -= adj[ii, jj] / \
-                         ((beta_out[ii]+beta_in[jj])**2)
-
-    for ii in nz_index_in:
-        for jj in nz_index_out:
-            if adj[ii,jj]>0:
-                f[ii+aux_n] -= adj[ii, jj] / \
-                               ((beta_out[jj] + beta_in[ii])**2)
+    for i in nz_index_out:
+        for j in nz_index_in:
+            if adj[i,j]>0:
+                f[i] -= adj[i, j] / \
+                         ((beta_out[i]+beta_in[j])**2)
+            if adj[j,i]>0:
+                f[i+aux_n] -= adj[j,i] / \
+                               ((beta_out[j]+beta_in[i])**2)
 
     return f
 
@@ -640,6 +667,37 @@ def hessian_regulariser_function(B, eps):
     return Bf
 
 
+@jit(nopython=True)
+def expected_out_strength_CReAMa(sol,adj):
+    n = adj.shape[0]
+    b_out = sol[:n]
+    b_in = sol[n:]
+    s = np.zeros(n)
+    for i in range(n):
+        for j in range(n):
+            if adj[i,j]!=0:
+                s[i] += adj[i,j]/(b_out[i]+b_in[j])
+
+    return s
+
+
+@jit(nopython=True)
+def expected_in_stregth_CReAMa(sol,adj):  
+    n = adj.shape[0]
+    b_out = sol[:n]
+    b_in = sol[n:]
+    s = np.zeros(n)
+    for i in range(n):
+        for j in range(n):
+            if adj[j,i]!=0:
+                s[i] += adj[j,i]/(b_out[j]+b_in[i])
+
+    return s
+
+
+
+
+
 def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=False, full_return = False):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
@@ -918,6 +976,7 @@ class DirectedGraph:
         
         # model
         self.error = None
+        self.error_strength = None
         self.full_return = False
 
         # function
@@ -1193,13 +1252,21 @@ class DirectedGraph:
         self.expected_dseq = ex_k
         self.error = np.linalg.norm(ex_k - k)
 
+    def solution_error_CReAMa(self):
+        sol = np.concatenate([self.b_out,self.b_in])
+        ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency)
+        ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency)
+        ex_s = np.concatenate([ex_s_out,ex_s_in])
+        s = np.concatenate([self.out_strength,self.in_strength])
+        self.expected_stregth_seq = ex_s
+        self.error_strength = np.linalg.norm(ex_s - s)
 
     def _set_initial_guess_CReAMa(self, model, method):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         if self.initial_guess is None:
             self.b_out = (self.out_strength>0).astype(int) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
-            self.b_in = (self.r_in_strength>0).astype(int) / self.r_in_strength.sum()
+            self.b_in = (self.in_strength>0).astype(int) / self.in_strength.sum()
         elif self.initial_guess == 'strengths':
             self.b_out = (self.out_strength>0).astype(int) / (self.out_strength + 1)
             self.b_in = (self.in_strength>0).astype(int) / (self.in_strength + 1)
@@ -1213,7 +1280,7 @@ class DirectedGraph:
             self._set_initial_guess_CReAMa(model, method)
         else:
             self._set_initial_guess(model,method)
-        if method in ['newton', 'quasinewton']:
+        if method in ['quasinewton']:
             d_fun = {
                     'dcm': loglikelihood_prime_dcm,
                     'CReAMa': loglikelihood_prime_CReAMa,
@@ -1235,6 +1302,50 @@ class DirectedGraph:
             self.fun = lambda x: -d_fun[model](x, self.args)
             self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
             self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
+            
+        elif method in ['newton']:
+            d_fun = {
+                    'dcm': loglikelihood_prime_dcm,
+                    'CReAMa': loglikelihood_prime_CReAMa,
+                    }
+
+            d_fun_jac = {
+                    'dcm': loglikelihood_hessian_diag_dcm,
+                    'CReAMa': loglikelihood_hessian_CReAMa,
+                    }
+
+            d_fun_stop = {
+                    'dcm': loglikelihood_dcm,
+                    'CReAMa': loglikelihood_CReAMa,
+                    }
+            if model=='CReAMa':
+                self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
+            else:
+                self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
+            self.fun = lambda x: -d_fun[model](x, self.args)
+            self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
+            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
+        
+        elif method in ['fixed-point']:
+            d_fun = {
+                    'dcm': iterative_dcm,
+                    'CReAMa': iterative_CReAMa,
+                    }
+
+            d_fun_stop = {
+                    'dcm': loglikelihood_dcm,
+                    'CReAMa': loglikelihood_CReAMa,
+                    }
+            if model=='CReAMa':
+                self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
+            else:
+                self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
+
+            self.fun = lambda x: -d_fun[model](x, self.args)
+            self.fun_jac = None 
+            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
+        else:
+            raise ValueError('Method must be "newton","quasi-newton", or "fixed-point".')
         d_pmatrix = {
                     'dcm': pmatrix_dcm
                     }
@@ -1253,21 +1364,23 @@ class DirectedGraph:
                 x0 = np.concatenate((self.r_x, self.r_y))
                 sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
                 self._set_solved_problem(sol)
-                adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
+                self.adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
             elif isinstance(adjacency,list):
-                adjacency = np.array(adjacency)
+                self.adjacency = np.array(adjacency)
+            elif isinstance(adjacency,np.ndarray):
+                self.adjacency = adjacency
 
-            if adjacency.shape[0] != adjacency.shape[1]:
+            if self.adjacency.shape[0] != self.adjacency.shape[1]:
                 raise ValueError(r'adjacency matrix must be $n \times n$')
-            
-            self.initial_guess = 'strengths'
+
+            self.initial_guess = None
             self._initialize_problem_CReAMa(model,method)
             x0 = np.concatenate((self.b_out, self.b_in))
             
             sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
 
-            self.beta_out = sol[:self.n_nodes]
-            self.beta_in = sol[self.n_nodes:]
+            self.b_out = sol[:self.n_nodes]
+            self.b_in = sol[self.n_nodes:]
             
         else:
             
