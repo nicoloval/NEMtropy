@@ -624,6 +624,186 @@ def loglikelihood_hessian_diag_dcm_loop(x, args):
     return f
 
 
+
+@jit(nopython=True)
+def loglikelihood_decm(x, args):
+    """not reduced
+    """
+    # problem fixed parameters
+    k_out = args[0] 
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+    n = len(k_out) 
+
+    f = 0
+    for i in range(n):
+        f += k_out[i]*np.log(x[i]) \
+            + k_in[i]*np.log(x[i+n]) \
+            + s_out[i]*np.log(x[i+2*n]) \
+            + s_in[i]*np.log(x[i+3*n])
+        for j in range(n):
+            if i != j:
+                f += np.log(1 - x[i+2*n]*x[j+3*n])
+                f -= np.log(1 - x[i+2*n]*x[j+3*n] \
+                     + x[i+2*n]*x[j+3*n]*x[i]*x[j+n])
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_decm(x, args):
+    """not reduced
+    """
+    # problem fixed parameters
+    k_out = args[0] 
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+    n = len(k_out) 
+
+    f = np.zeros(4*n) 
+    for i in range(n):
+        fa_out = 0
+        fa_in = 0
+        fb_out = 0
+        fb_in = 0
+        for j in range(n):
+            if i != j:
+                fa_out += x[j+n]*x[i+2*n]*x[j+3*n]\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fa_in += x[j]*x[j+2*n]*x[i+3*n]\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+                fb_out += x[j +3*n]/(1 - x[j+3*n]*x[i+2*n])\
+                          + (x[j+n]*x[i] - 1)*x[j+3*n]\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fb_in += x[j +2*n]/(1 - x[i+3*n]*x[j+2*n])\
+                         + (x[i+n]*x[j] - 1)*x[j+2*n]\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+
+        f[i] = k_out[i]/x[i] - fa_out
+        f[i+n] = k_in[i]/x[i+n] - fa_in
+        f[i+2*n] = s_out[i]/x[i+2*n] - fb_out
+        f[i+3*n] = s_in[i]/x[i+3*n] - fb_in
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_decm(x, args):
+    """not reduced
+    """
+    # problem fixed parameters
+    k_out = args[0] 
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+    n = len(k_out) 
+
+    f = np.zeros(4*n) 
+    for i in range(n):
+        fa_out = 0
+        fa_in = 0
+        fb_out = 0
+        fb_in = 0
+        for j in range(n):
+            if i != j:
+                fa_out += (x[j+n]*x[i+2*n]*x[j+3*n])**2\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])**2
+                fa_in += (x[j]*x[j+2*n]*x[i+3*n])**2\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])**2
+                fb_out += x[j +3*n]**2/(1 - x[j+3*n]*x[i+2*n])**2\
+                          - ((x[j+n]*x[i] - 1)*x[j+3*n])**2\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])**2
+                fb_in += x[j +2*n]**2/(1 - x[i+3*n]*x[j+2*n])**2\
+                         - ((x[i+n]*x[j] - 1)*x[j+2*n])**2\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])**2
+
+        f[i] = -k_out[i]/x[i]**2 + fa_out
+        f[i+n] = -k_in[i]/x[i+n]**2 + fa_in
+        f[i+2*n] = -s_out[i]/x[i+2*n]**2 - fb_out
+        f[i+3*n] = -s_in[i]/x[i+3*n]**2 - fb_in
+
+    return f
+
+
+@jit(nopython=True)
+def iterative_decm(x, par):
+    """iterative function for decm
+    """
+    # problem fixed parameters
+    k_out = args[0] 
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+    n = len(k_out) 
+
+    """
+    xs = SX.sym('xs', 4)
+    xs23 = xs[2]*xs[3]
+    xs123 = xs[1]*xs23
+    f_aj = Function('f_aj',[xs],[ xs123/(1- xs23 + xs[0]*xs123) ])
+    xs013 = (xs[0]*xs[1] - 1)*xs[3]
+    f_bj = Function('f_bj',[xs],[ xs[3]/(1 - xs23) + xs013/(1- xs23 + xs[0]*xs123) ])
+    """
+    f = np.zeros(4*n) 
+
+    for i in range(n):
+        fa_out = 0
+        fa_in = 0
+        fb_out = 0
+        fb_in = 0
+        b = 0
+        for j in range(n):
+            if i != j:
+                """
+                fa_out += f_aj(veccat(x[i], x[j+n], x[i+2*n], x[j+3*n]))
+                fa_in += f_aj(veccat(x[j], x[i+n], x[j+2*n], x[i+3*n]))
+                fb_out += f_bj(veccat(x[i], x[j+n], x[i+2*n], x[j+3*n]))
+                fb_in += f_bj(veccat(x[j], x[i+n], x[j+2*n], x[i+3*n]))
+                """
+                fa_out += x[j+n]*x[i+2*n]*x[j+3*n]\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fa_in += x[j]*x[j+2*n]*x[i+3*n]\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+                fb_out += x[j+3*n]/(1 - x[j+3*n]*x[i+2*n])\
+                          + (x[j+n]*x[i] - 1)*x[j+3*n]\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fb_in += x[j+2*n]/(1 - x[i+3*n]*x[j+2*n])\
+                         + (x[i+n]*x[j] - 1)*x[j+2*n]\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+            
+        if k_out[i] != 0:
+            f[i] = x[i] - k_out[i]/fa_out
+        else:
+            f[i] = x[i] 
+        if k_in[i] != 0:
+            f[i+n] = x[i+n] - k_in[i]/fa_in
+        else:
+            f[i+n] = x[i+n]
+        if s_out[i] != 0:
+            f[i+2*n] = x[i+2*n] - s_out[i]/fb_out
+        else:
+            f[i+2*n] = 0
+        if s_in[i] != 0:
+            f[i+3*n] = x[i+3*n] - s_in[i]/fb_in
+        else:
+            f[i+3*n] = x[i+3*n]
+
+    return f
+
+
 @jit(nopython=True)
 def expected_out_degree_dcm(sol):
     n = int(len(sol)/ 2)
@@ -651,6 +831,34 @@ def expected_in_degree_dcm(sol):
                 k[i] += a_in[i]*a_out[j]/(1 + a_in[i]*a_out[j])
 
     return k
+
+
+@jit(nopython=True)
+def expected_decm(x):
+    """
+    """
+    # casadi MX function calculation
+    n = int(len(x)/4)
+    f = np.zeros(len(x))
+
+    for i in range(n):
+        fa_out = 0
+        fa_in = 0
+        fb_out = 0
+        fb_in = 0
+        for j in range(n):
+            if i != j:
+                fa_out += x[j+n]*x[i+2*n]*x[j+3*n]/(1 - x[i+2*n]*x[j+3*n] + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fa_in += x[j]*x[j+2*n]*x[i+3*n]/(1 - x[j+2*n]*x[i+3*n] + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+                fb_out += x[j +3*n]/(1 - x[j+3*n]*x[i+2*n]) + (x[j+n]*x[i] - 1)*x[j+3*n]/(1 - x[i+2*n]*x[j+3*n] + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fb_in += x[j +2*n]/(1 - x[i+3*n]*x[j+2*n]) + (x[i+n]*x[j] - 1)*x[j+2*n]/(1 - x[j+2*n]*x[i+3*n] + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+        f[i] = x[i]*fa_out
+        f[i+n] = x[i+n]*fa_in
+        f[i+2*n] = x[i+2*n]*fb_out
+        f[i+3*n] = x[i+3*n]*fb_in
+
+    return f
+
 
 def hessian_regulariser_function(B, eps):
     """Trasform input matrix in a positive defined matrix
@@ -698,7 +906,7 @@ def expected_in_stregth_CReAMa(sol,adj):
 
 
 
-def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=False, full_return = False):
+def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
 
@@ -713,7 +921,8 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
     n_steps = 0
     x = x0  # initial point
 
-    norm = np.linalg.norm(fun(x), ord=np.inf)
+    # norm = np.linalg.norm(fun(x), ord=np.inf)
+    norm = np.linalg.norm(fun(x))
     diff = 1
 
     if full_return:
@@ -733,6 +942,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
     tic_loop = time.time()
 
     while norm > tol and diff > tol and n_steps < max_steps:  # stopping condition
+
         x_old = x  # save previous iteration
 
         # f jacobian
@@ -758,6 +968,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
             B = fun_jac(x)  # Jacobian diagonal
             if regularise == True:
                 B = np.maximum(B, B*0 + 1e-8)
+
         toc_jacfun += time.time() - tic
 
         # discending direction computation
@@ -784,6 +995,10 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
         i = 0
         while sufficient_decrease_condition(stop_fun(x), \
             stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
+            print(fun(x))
+            print(dx)
+            print(dx.T)
+            print(fun(x)@dx.T)
             alfa *= beta
             i +=1
 
@@ -813,7 +1028,8 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
         toc_update += time.time() - tic
 
         # stopping condition computation
-        norm = np.linalg.norm(fun(x), ord=np.inf)
+        # norm = np.linalg.norm(fun(x), ord=np.inf)
+        norm = np.linalg.norm(fun(x))
         diff = np.linalg.norm(x - x_old)
 
         if full_return:
@@ -826,10 +1042,14 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
             print('step {}'.format(n_steps))
             print('alpha = {}'.format(alfa))
             # print('B = {}'.format(B))
-            # print('fun = {}'.format(fun(x)))
+            print('fun = {}'.format(fun(x)))
             print('dx = {}'.format(dx))
             print('x = {}'.format(x))
             print('|f(x)| = {}'.format(norm))
+
+            print('x_old = {}'.format(x_old))
+            print('fun_old = {}'.format(fun(x_old)))
+
             if method in ['newton', 'quasinewton']:
                 print('B = {}'.format(B))
 
@@ -864,6 +1084,7 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
     #print('p.T',p.T)
 
     sup = f_old + c1 *alpha*grad_f@p.T
+    print(alpha, sup)
     return bool(f_new < sup)
 
 

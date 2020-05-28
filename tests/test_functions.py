@@ -286,6 +286,124 @@ class MyTest(unittest.TestCase):
         self.assertTrue(np.allclose(f_diag, f_df))
 
 
+    def test_loglikelihood__decm(self):
+        A = np.array([[0, 2, 2],
+                      [2, 0, 2],
+                      [0, 2, 0]])
+
+        bA = np.array([ [1 if aa != 0 else 0 for aa in a] for a in A])
+
+        k_out = np.sum(bA, axis = 1)
+        k_in = np.sum(bA, axis = 0)
+        s_out = np.sum(A, axis = 1)
+        s_in = np.sum(A, axis = 0)
+
+        x0 = 0.5*np.ones(12)
+        args = (k_out, k_in, s_out, s_in)
+
+	# call loglikelihood function 
+        f_sample = sample.loglikelihood_decm(x0, args)
+        f_correct = 30*np.log(0.5) + 6*np.log(1 - 0.5*0.5) - 6*np.log(1 - 0.5*0.5 + 0.5*0.5*0.5*0.5)
+ 
+        # debug
+        # print(par)
+        # print(f_sample)
+        # print(f_correct)
+
+        # test result
+        self.assertTrue(np.allclose(f_sample, f_correct))
+
+
+    def test_loglikelihood_prime_decm(self):
+        A = np.array([[0, 2, 2],
+                      [2, 0, 2],
+                      [0, 2, 0]])
+
+        bA = np.array([ [1 if aa != 0 else 0 for aa in a] for a in A])
+
+        k_out = np.sum(bA, axis = 1)
+        k_in = np.sum(bA, axis = 0)
+        s_out = np.sum(A, axis = 1)
+        s_in = np.sum(A, axis = 0)
+
+        x0 = 0.5*np.ones(12)
+        args = (k_out, k_in, s_out, s_in)
+
+	# call loglikelihood function 
+        f_sample = sample.loglikelihood_prime_decm(x0, args)
+        f_correct = np.array([3.69231, 3.69231, 1.69231, 1.69231, 3.69231, 3.69231, 7.58974, 7.58974, 3.58974, 3.58974, 7.58974, 7.58974])
+ 
+        # debug
+        # print(par)
+        # print(f_sample)
+        # print(f_correct)
+
+        # test result
+        self.assertTrue(np.allclose(f_sample, f_correct))
+
+
+    def test_loglikelihood_hessian_diag_decm(self):
+        A = np.array([[0, 2, 2],
+                      [2, 0, 2],
+                      [0, 2, 0]])
+
+        bA = np.array([ [1 if aa != 0 else 0 for aa in a] for a in A])
+
+        k_out = np.sum(bA, axis = 1)
+        k_in = np.sum(bA, axis = 0)
+        s_out = np.sum(A, axis = 1)
+        s_in = np.sum(A, axis = 0)
+
+        x0 = 0.5*np.ones(12)
+        args = (k_out, k_in, s_out, s_in)
+
+	# call loglikelihood function 
+        f_sample = sample.loglikelihood_hessian_diag_decm(x0, args)
+        f_correct = np.array([ -7.95266272,  -7.95266272,  -3.95266272,  -3.95266272,  -7.95266272, -7.95266272, -16.46285339, -16.46285339,  -8.46285339,  -8.46285339, -16.46285339, -16.46285339])
+ 
+        # debug
+        # print(par)
+        # print(f_sample)
+        # print(f_correct)
+
+        # test result
+        self.assertTrue(np.allclose(f_sample, f_correct))
+
+
+    def test_loglikelihood_decm_all(self):
+        A = np.array([[0, 1, 3],
+                      [2, 0, 6],
+                      [0, 1, 0]])
+
+        bA = np.array([ [1 if aa != 0 else 0 for aa in a] for a in A])
+
+        k_out = np.sum(bA, axis = 1)
+        k_in = np.sum(bA, axis = 0)
+        s_out = np.sum(A, axis = 1)
+        s_in = np.sum(A, axis = 0)
+
+        np.random.seed(seed=30)
+        x0 = np.random.rand(12)
+        args = (k_out, k_in, s_out, s_in)
+
+	# call loglikelihood function 
+
+        f = sample.loglikelihood_decm(x0, args)
+        f_p = sample.loglikelihood_prime_decm(x0, args)
+        f_h = sample.loglikelihood_hessian_diag_decm(x0, args)
+ 
+        # print(f)
+        # print(f_p)
+        # print(f_h)
+        # debug
+        # print(par)
+        # print(f_sample)
+        # print(f_correct)
+
+        # test result
+        # self.assertTrue(np.allclose(f_sample, f_correct))
+
+
 
 if __name__ == '__main__':
     unittest.main()
