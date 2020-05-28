@@ -21,6 +21,19 @@ def pmatrix_dcm(x,args):
     return P
 
 @jit(nopython=True)
+def weighted_adjacency(x,adj):
+    n = adj.shape[0]
+    beta_out = x[:n]
+    beta_in = x[n:]
+    
+    weighted_adj = np.zeros_like(adj)
+    for i in np.arange(n):
+        for j in np.arange(n):
+            if adj[i,j]>0:
+                weighted_adj[i,j] = adj[i,j]/(beta_out[i]+beta_in[j])
+    return weighted_adj
+
+@jit(nopython=True)
 def iterative_CReAMa(beta,args):
     """Return the next iterative step for the CReAMa Model.
 
@@ -68,10 +81,13 @@ def loglikelihood_CReAMa(beta,args):
     f=0
     
     for i in nz_index_out:
-        f -= s_out[i] * beta_out[i] + s_in[i] * beta_in[i]
+        f -= s_out[i] * beta_out[i] 
         for j in nz_index_in:
             if (i!=j) and (adj[i,j]!=0):
                 f += adj[i,j] * np.log(beta_out[i] + beta_in[j])
+    
+    for i in nz_index_in:
+        f -=  s_in[i] * beta_in[i]
     
     return f
 
@@ -92,10 +108,10 @@ def loglikelihood_prime_CReAMa(beta, args):
     aux_F_out = np.zeros_like(beta_out)
     aux_F_in = np.zeros_like(beta_in)
 
-    for i in nz_index_out:
+    for i in np.arange(aux_n):
         aux_F_out[i] -= s_out[i]
         aux_F_in[i] -= s_in[i]
-        for j in nz_index_in:
+        for j in np.arange(aux_n):
             if adj[i, j] > 0:
                 aux_F_out[i] += adj[i, j]/(beta_out[i]+beta_in[j])
             if adj[j, i] > 0:
@@ -118,37 +134,22 @@ def loglikelihood_hessian_CReAMa(beta, args):
     beta_in = beta[aux_n:]
 
     f = np.zeros(shape=(2*aux_n, 2*aux_n))
-
-    for i in np.arange(f.shape[0]):
-        for j in np.arange(f.shape[0]):
-
-            # diagonal first n elements
-            if (i == j) & (i < aux_n) & (j < aux_n):
-                for kk in np.arange(aux_n):
-                    if adj[i, kk] > 0:
-                        f[i, j] -= adj[i, kk] / \
-                            ((beta_out[i]+beta_in[kk])**2)
-
-            # diagonal second n elements
-            elif (i == j) & (i >= aux_n) & (j >= aux_n):
-                for kk in np.arange(aux_n):
-                    if adj[kk, i-aux_n] > 0:
-                        f[i, j] -= adj[kk, i-aux_n] / \
-                            ((beta_out[kk]+beta_in[i-aux_n])**2)
-
-            # off-diagonal top right elements
-            elif (i != j) & (i < aux_n) & (j >= aux_n):
-                if adj[i, j-aux_n] > 0:
-                    f[i, j] = -adj[i, j-aux_n] / \
-                        ((beta_out[i]+beta_in[j-aux_n])**2)
-
-            # off-diagonal bottom left elements
-            elif (i != j) & (i >= aux_n) & (j < aux_n):
-                if adj[j, i-aux_n] > 0:
-                    f[i, j] = -adj[j, i-aux_n] / \
-                        (beta_out[j] + beta_in[i-aux_n])
-
+    
+    for i in np.arange(aux_n):
+        for j in np.arange(aux_n):
+            if adj[i,j]>0:
+                aux = adj[i,j]/((beta_out[i]+beta_in[j])**2)
+                f[i,i] += -aux
+                f[i,j+aux_n] = - aux
+                f[j+aux_n,i] = -aux
+            if adj[j,i]>0:
+                aux = adj[j,i]/((beta_out[j]+beta_in[i])**2)
+                f[i+aux_n,i+aux_n] += -aux
+                
+    
     return f
+
+
 
 
 @jit(nopython=True)
@@ -166,8 +167,8 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
     f = np.zeros(2*aux_n)
 
-    for i in nz_index_out:
-        for j in nz_index_in:
+    for i in np.arange(aux_n):
+        for j in  np.arange(aux_n):
             if adj[i,j]>0:
                 f[i] -= adj[i, j] / \
                          ((beta_out[i]+beta_in[j])**2)
@@ -195,8 +196,76 @@ def random_binary_matrix_generator_nozeros(n, sym=False, seed=None):
                 for ind, k in enumerate(k_out):
                         if k==0:
                                 A[ind, 0] = 1
+            
         return A
 
+@jit
+def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None):
+    if seed==None:
+        seed = 0
+    if sym==False:
+        np.random.seed(seed = seed)
+        A = np.random.random(size=(n, n)) * sup_ext
+        np.fill_diagonal(A,0)
+        
+        k_in = np.sum(A, axis=0)
+        for ind, k in enumerate(k_in):
+            if k==0:
+                A[0, ind] = np.random.random() * sup_ext
+        k_out = np.sum(A, axis=1)
+        for ind, k in enumerate(k_out):
+            if k==0:
+                A[ind, 0] = np.random.random() * sup_ext
+        return A
+    else:
+        np.random.seed(seed = seed)
+        b = np.random.random(size=(n, n)) * sup_ext
+        A = (b + b.T)/2
+        np.fill_diagonal(A,0)
+        
+        degree = np.sum(A, axis=0)
+        for ind, k in enumerate(degree):
+            if k==0:
+                A[0, ind] = np.random.random() * sup_ext
+                A[ind, 0] = A[0, ind]
+        return A
+
+                                           
+@jit
+def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=False, seed=None):
+    if seed==None:
+        seed = 0
+    if sym==False:
+        np.random.seed(seed = seed)
+        A = np.zeros(shape=(n, n))
+        for i in range(n):
+            for j in range(n):
+                if np.random.random()<=p:
+                    A[i,j] = np.random.random()*sup_ext
+        np.fill_diagonal(A,0)
+        k_in = np.sum(A, axis=0)
+        for ind, k in enumerate(k_in):
+            if k==0:
+                A[0, ind] = np.random.random() * sup_ext
+        k_out = np.sum(A, axis=1)
+        for ind, k in enumerate(k_out):
+            if k==0:
+                A[ind, 0] = np.random.random() * sup_ext
+        return A
+    else:
+        np.random.seed(seed = seed)
+        A = np.zeros(shape=(n, n))
+        for i in range(n):
+            for j in range(i+1,n):
+                if np.random.random()<=p:
+                    A[i,j] = np.random.random()*sup_ext
+                    A[j,i] = A[i,j]
+        degree = np.sum(A, axis=0)
+        for ind, k in enumerate(degree):
+            if k==0:
+                A[0, ind] = np.random.random() * sup_ext
+                A[ind, 0] = A[0, ind]
+        return A
 
 @jit(nopython=True)
 def loglikelihood_dcm(x, args):
@@ -365,7 +434,7 @@ def loglikelihood_hessian_dcm(x, args):
 
             out[i+n, i+n] += const*(x[h]**2)/(1 + x[i+n]*x[h])**2
             out[i+n, h] = -const/(1 + x[i+n]*x[h])**2
-
+    
     return out
 
 
@@ -757,7 +826,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
             # quasinewton hessian approximation
             B = fun_jac(x)  # Jacobian diagonal
             if regularise == True:
-                B = np.maximum(B, B*0 + 1e-8)
+                B = np.maximum(B, B*0 + 1e-10)
         toc_jacfun += time.time() - tic
 
         # discending direction computation
@@ -1260,16 +1329,17 @@ class DirectedGraph:
         s = np.concatenate([self.out_strength,self.in_strength])
         self.expected_stregth_seq = ex_s
         self.error_strength = np.linalg.norm(ex_s - s)
+        self.relative_error_strength = self.error_strength/self.out_strength.sum()
 
     def _set_initial_guess_CReAMa(self, model, method):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         if self.initial_guess is None:
-            self.b_out = (self.out_strength>0).astype(int) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
-            self.b_in = (self.in_strength>0).astype(int) / self.in_strength.sum()
+            self.b_out = (self.out_strength>0).astype(float) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
+            self.b_in = (self.in_strength>0).astype(float) / self.in_strength.sum()
         elif self.initial_guess == 'strengths':
-            self.b_out = (self.out_strength>0).astype(int) / (self.out_strength + 1)
-            self.b_in = (self.in_strength>0).astype(int) / (self.in_strength + 1)
+            self.b_out = (self.out_strength>0).astype(float) / (self.out_strength + 1)
+            self.b_in = (self.in_strength>0).astype(float) / (self.in_strength + 1)
 
 
     def _initialize_problem_CReAMa(self, model, method):
@@ -1310,7 +1380,7 @@ class DirectedGraph:
                     }
 
             d_fun_jac = {
-                    'dcm': loglikelihood_hessian_diag_dcm,
+                    'dcm': loglikelihood_hessian_dcm,
                     'CReAMa': loglikelihood_hessian_CReAMa,
                     }
 
@@ -1373,7 +1443,7 @@ class DirectedGraph:
             if self.adjacency.shape[0] != self.adjacency.shape[1]:
                 raise ValueError(r'adjacency matrix must be $n \times n$')
 
-            self.initial_guess = None
+            self.initial_guess = 'strengths'
             self._initialize_problem_CReAMa(model,method)
             x0 = np.concatenate((self.b_out, self.b_in))
             
@@ -1404,3 +1474,7 @@ class DirectedGraph:
             self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
 
 
+    def weighted_realisation(self):
+        weighted_realisation = weighted_adjacency(np.concatenate((self.b_out,self.b_in)),self.adjacency)
+        
+        return(weighted_realisation)
