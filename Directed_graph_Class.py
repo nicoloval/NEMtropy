@@ -735,7 +735,7 @@ def loglikelihood_hessian_diag_decm(x, args):
 
 
 @jit(nopython=True)
-def iterative_decm(x, par):
+def iterative_decm(x, args):
     """iterative function for decm
     """
     # problem fixed parameters
@@ -745,14 +745,6 @@ def iterative_decm(x, par):
     s_in = args[3] 
     n = len(k_out) 
 
-    """
-    xs = SX.sym('xs', 4)
-    xs23 = xs[2]*xs[3]
-    xs123 = xs[1]*xs23
-    f_aj = Function('f_aj',[xs],[ xs123/(1- xs23 + xs[0]*xs123) ])
-    xs013 = (xs[0]*xs[1] - 1)*xs[3]
-    f_bj = Function('f_bj',[xs],[ xs[3]/(1 - xs23) + xs013/(1- xs23 + xs[0]*xs123) ])
-    """
     f = np.zeros(4*n) 
 
     for i in range(n):
@@ -763,12 +755,6 @@ def iterative_decm(x, par):
         b = 0
         for j in range(n):
             if i != j:
-                """
-                fa_out += f_aj(veccat(x[i], x[j+n], x[i+2*n], x[j+3*n]))
-                fa_in += f_aj(veccat(x[j], x[i+n], x[j+2*n], x[i+3*n]))
-                fb_out += f_bj(veccat(x[i], x[j+n], x[i+2*n], x[j+3*n]))
-                fb_in += f_bj(veccat(x[j], x[i+n], x[j+2*n], x[i+3*n]))
-                """
                 fa_out += x[j+n]*x[i+2*n]*x[j+3*n]\
                           /(1 - x[i+2*n]*x[j+3*n]\
                           + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
@@ -784,6 +770,7 @@ def iterative_decm(x, par):
                          /(1 - x[j+2*n]*x[i+3*n]\
                          + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
             
+        """
         if k_out[i] != 0:
             f[i] = x[i] - k_out[i]/fa_out
         else:
@@ -800,7 +787,25 @@ def iterative_decm(x, par):
             f[i+3*n] = x[i+3*n] - s_in[i]/fb_in
         else:
             f[i+3*n] = x[i+3*n]
-
+        """
+        if k_out[i] != 0:
+            f[i] = k_out[i]/fa_out
+        else:
+            f[i] = 0 
+        if k_in[i] != 0:
+            f[i+n] = k_in[i]/fa_in
+        else:
+            f[i+n] = 0 
+        if s_out[i] != 0:
+            f[i+2*n] = s_out[i]/fb_out
+        else:
+            f[i+2*n] = 0
+        if s_in[i] != 0:
+            f[i+3*n] = s_in[i]/fb_in
+        else:
+            f[i+3*n] = 0 
+ 
+ 
     return f
 
 
@@ -906,7 +911,7 @@ def expected_in_stregth_CReAMa(sol,adj):
 
 
 
-def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False):
+def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
 
@@ -983,38 +988,25 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
 
         # backtraking line search
         tic = time.time()
-        """
-        alfa = 0.1
-        eps2=1e-2
-        alfa0 = (eps2-1)*x/dx
-        for a in alfa0:
-            if a>=0:
-                alfa = min(alfa, a)
-        """
-        alfa = 1 
-        i = 0
-        while sufficient_decrease_condition(stop_fun(x), \
-            stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
-            print(fun(x))
-            print(dx)
-            print(dx.T)
-            print(fun(x)@dx.T)
-            alfa *= beta
-            i +=1
-
-        #TODO: instafix, to check
-        if method == 'fixed-point':
+        if linsearch == True:
+            alfa = 1 
+            i = 0
+            while sufficient_decrease_condition(stop_fun(x), \
+                stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
+                alfa *= beta
+                i +=1
+        else:
+            """
+            if True:
+                alfa = 0.1
+                eps2=1e-2
+                alfa0 = (eps2-1)*x/dx
+                for a in alfa0:
+                    if a>=0:
+                        alfa = min(alfa, a)
+            """
             alfa = 1
-        """
-        if method == 'fixed-point':
-            alfa = 0.1
-            eps2 = 1e-2
-            alfa0 = (eps2-1)*x/dx
-            for a in alfa0:
-                if a >= 0:
-                    alfa = min(alfa, a)
-        """
-       
+
 
         toc_alfa += time.time() - tic
 
@@ -1024,7 +1016,8 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
         if method in ['newton', 'quasinewton']:
             x = x + alfa*dx
         if method in ['fixed-point']:
-            x = alfa*(x + dx)
+            # x = alfa*(x + dx)
+            x = x + alfa*dx
         toc_update += time.time() - tic
 
         # stopping condition computation
@@ -1041,7 +1034,6 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
         if verbose == True:
             print('step {}'.format(n_steps))
             print('alpha = {}'.format(alfa))
-            # print('B = {}'.format(B))
             print('fun = {}'.format(fun(x)))
             print('dx = {}'.format(dx))
             print('x = {}'.format(x))
@@ -1084,7 +1076,6 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
     #print('p.T',p.T)
 
     sup = f_old + c1 *alpha*grad_f@p.T
-    print(alpha, sup)
     return bool(f_new < sup)
 
 
@@ -1343,7 +1334,7 @@ class DirectedGraph:
         self.is_initialized = False
 
 
-    def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
+    def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
 
         self.initial_guess = initial_guess
         self._initialize_problem(model, method)
@@ -1351,7 +1342,7 @@ class DirectedGraph:
         # print('x0', x0)
         # print('index',self.nz_index_out, self.nz_index_in)
 
-        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
 
         self._set_solved_problem(sol)
 

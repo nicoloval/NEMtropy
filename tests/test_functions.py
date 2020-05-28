@@ -404,6 +404,38 @@ class MyTest(unittest.TestCase):
         # self.assertTrue(np.allclose(f_sample, f_correct))
 
 
+    def test_iterative_decm(self):
+        A = np.array([[0, 1, 3],
+                      [2, 0, 6],
+                      [0, 1, 0]])
+
+        bA = np.array([ [1 if aa != 0 else 0 for aa in a] for a in A])
+
+        k_out = np.sum(bA, axis = 1)
+        k_in = np.sum(bA, axis = 0)
+        s_out = np.sum(A, axis = 1)
+        s_in = np.sum(A, axis = 0)
+
+        np.random.seed(seed=30)
+        x0 = np.random.rand(12)
+        args = (k_out, k_in, s_out, s_in)
+
+	# call loglikelihood function 
+
+        f = x0 - sample.iterative_decm(x0, args)
+        f_correct = np.array([ -3.7115928, -29.44267416, -7.11414071, -3.99441366, -12.71558613, -2.71506243, -6.1850179, -64.58546601, -5.26756932, -15.76092613, -1.57639912,  -9.82196987])
+
+        # print(f_p)
+        # print(f_h)
+        # debug
+        # print(par)
+        # print(f_sample)
+        # print(f_correct)
+
+        # test result
+        self.assertTrue(np.allclose(f, f_correct))
+
+
 
 if __name__ == '__main__':
     unittest.main()
