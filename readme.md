@@ -1,5 +1,4 @@
 TODO
 ----
 
-* unpack `tests/test_functions.py` by model and change names
-    (like loglikelihood instead of functions)
+* remove `tests/test_functions.py` (content is now in `test_loglikelihood_ dcm and decm`)
