@@ -735,6 +735,320 @@ def loglikelihood_hessian_diag_decm(x, args):
 
 
 @jit(nopython=True)
+def loglikelihood_hessian_decm(x, args):
+    # MINUS log-likelihood function Hessian : DECM case
+    # x : where the function is computed : np.array
+    # par : real data constant parameters : np.array
+    # rem: size(x)=size(par)
+
+    # REMARK:
+    # the ll fun is to max but the algorithm minimize,
+    # so the fun return -H
+
+    k_out = args[0]
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+
+    n = len(k_out)
+    f = np.zeros((n * 4, n * 4))
+
+    a_out = x[:n]
+    a_in = x[n:2*n]
+    b_out = x[2*n:3*n]
+    b_in = x[3*n:]
+
+    for h in range(n):
+        for l in range(n):
+            if h == l:
+                # dll / da^in da^in
+                f[h+n, l+n] = -k_in[h] / a_in[h] ** 2
+                # dll / da^out da^out
+                f[h, l] = -k_out[h] / a_out[h] ** 2
+                # dll / db^in db^in
+                f[h+3*n, l+3*n] = -s_in[h] / b_in[h] ** 2
+                # dll / db^out db^out
+                f[h+2*n, l+2*n] = -s_out[h] / b_out[h] ** 2
+
+                for j in range(n):
+                    if j != h:
+                        # dll / da^in da^in
+                        f[h+n, l+n] = (f[h+n, l+n]
+                                   + (a_out[j] * b_in[h] * b_out[j]
+                                      / (1 - b_in[h] * b_out[j]
+                                         + a_in[h] * a_out[j]
+                                         * b_in[h] * b_out[j])) ** 2)
+                        # dll / da^in db^in
+                        f[h+n, l+3*n] = (f[h+n, l+3*n]
+                                       - a_out[j]*b_out[j]
+                                       / (1-b_in[h]*b_out[j]
+                                          + a_in[h]*a_out[j]*b_in[h]*b_out[j])**2)
+                        # dll / da^out da^out
+                        f[h, l] = (f[h, l]
+                                           + (a_in[j] * b_in[j] * b_out[h]) ** 2
+                                           / (1 - b_in[j] * b_out[h] +
+                                              a_in[j] * a_out[h] *
+                                              b_in[j] * b_out[h]) ** 2)
+                        # dll / da^out db^out
+                        f[h, l+2*n] = (f[h, l+2*n]
+                                               - a_in[j] * b_in[j]
+                                               / (1 - b_in[j] * b_out[h]
+                                                  + a_in[j] * a_out[h]
+                                                  * b_in[j] * b_out[h])**2)
+                        # dll / db^in da^in
+                        f[h+3*n,l+n] = (f[h+3*n, l+n] - a_out[j] * b_out[j]
+                                           / (1 - b_in[h] * b_out[j] + a_in[h]
+                                           * a_out[j] * b_in[h] * b_out[j]) ** 2)
+                        # dll / db_in db_in
+                        f[h+3*n, l+3*n] = (f[h+3*n, l+3*n]
+                                           - (b_out[j]/(1-b_in[h]*b_out[j]))**2
+                                           + (b_out[j]*(a_in[h]*a_out[j]-1)
+                                              / (1-b_in[h]*b_out[j]
+                                                 + a_in[h]*a_out[j]
+                                                 * b_in[h]*b_out[j]))**2)
+                        # dll / db_out da_out
+                        f[h+2*n, l] = (f[h+2*n, l]
+                                               - a_in[j] * b_in[j]
+                                               / (1 - b_in[j] * b_out[h]
+                                                  + a_in[j] * a_out[h]
+                                                  * b_in[j] * b_out[h]) ** 2)
+                        # dll / db^out db^out
+                        f[h+2*n, l+2*n] = (f[h+2*n, l+2*n]
+                                           - (b_in[j]/(1-b_in[j]*b_out[h]))**2
+                                           + ((a_in[j]*a_out[h]-1)*b_in[j]
+                                              / (1-b_in[j]*b_out[h]
+                                                 + a_in[j]*a_out[h]
+                                                 * b_in[j]*b_out[h]))**2)
+
+            else:
+                # dll / da_in da_out
+                f[h+n, l] = (- b_in[h] * b_out[l] * (1 - b_in[h] * b_out[l])
+                               / (1 - b_in[h] * b_out[l]
+                                  + a_in[h] * a_out[l]
+                                  * b_in[h] * b_out[l]) ** 2)
+                # dll / da_in db_out
+                f[h+n, l+2*n] = (- a_out[l] * b_in[h]
+                                   / (1 - b_in[h] * b_out[l]
+                                      + a_in[h] * a_out[l]
+                                      * b_in[h] * b_out[l]) ** 2)
+                # dll / da_out da_in
+                f[h, l+n] = (- b_in[l] * b_out[h]*(1 - b_in[l] * b_out[h])
+                               / (1 - b_in[l] * b_out[h]
+                                  + a_in[l] * a_out[h]
+                                  * b_in[l] * b_out[h]) ** 2)
+                # dll / da_out db_in
+                f[h, l+3*n] = (-a_in[l] * b_out[h]
+                                       / (1 - b_in[l] * b_out[h]
+                                       + a_in[l] * a_out[h]
+                                       * b_in[l] * b_out[h]) ** 2)
+                # dll / db_in da_out
+                f[h+3*n, l] = (- a_in[h] * b_out[l]
+                                       / (1 - b_in[h] * b_out[l]
+                                          + a_in[h] * a_out[l]
+                                          * b_in[h] * b_out[l]) ** 2)
+                # dll / db_in db_out
+                f[h+3*n, l+2*n] = (-1 / (1 - b_in[h] * b_out[l])**2
+                                           - (a_out[l] * a_in[h] - 1)
+                                           / (1 - b_in[h] * b_out[l]
+                                              + a_in[h] * a_out[l]
+                                              * b_in[h] * b_out[l]) ** 2)
+                # dll / db_out da_in
+                f[h+2*n, l+n] = (- a_out[h] * b_in[l]
+                                   / (1 - b_in[l] * b_out[h]
+                                      + a_in[l] * a_out[h]
+                                      * b_in[l] * b_out[h]) ** 2)
+                # dll / db_out db_in
+                f[h+2*n, l+3*n] = (-1 / (1 - b_in[l] * b_out[h]) ** 2
+                                           - (a_in[l] * a_out[h] - 1)
+                                           / (1 - b_in[l] * b_out[h]
+                                              + a_in[l] * a_out[h]
+                                              * b_in[l] * b_out[h]) ** 2)
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_decm_old(x, args):
+    # MINUS log-likelihood function Hessian : DECM case
+    # x : where the function is computed : np.array
+    # par : real data constant parameters : np.array
+    # rem: size(x)=size(par)
+
+    # REMARK:
+    # the ll fun is to max but the algorithm minimize,
+    # so the fun return -H
+
+    k_out = args[0]
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+
+    n = len(k_out)
+    f = np.zeros((n * 4, n * 4))
+
+    a_out = x[:n]
+    a_in = x[n:2*n]
+    b_out = x[2*n:3*n]
+    b_in = x[3*n:]
+
+    for h in range(n):
+        for l in range(n):
+            if h == l:
+                # dll / da^in da^in
+                f[h+n, l+n] = -k_in[h] / a_in[h] ** 2
+                # dll / da^out da^out
+                f[h, l] = -k_out[h] / a_out[h] ** 2
+                # dll / db^in db^in
+                f[h+3*n, l+3*n] = -s_in[h] / b_in[h] ** 2
+                # dll / db^out db^out
+                f[h+2*n, l+2*n] = -s_out[h] / b_out[h] ** 2
+
+                for j in range(h):
+                    # dll / da^in da^in
+                    f[h+n, l+n] = (f[h+n, l+n]
+                               + (a_out[j] * b_in[h] * b_out[j]
+                                  / (1 - b_in[h] * b_out[j]
+                                     + a_in[h] * a_out[j]
+                                     * b_in[h] * b_out[j])) ** 2)
+                    # dll / da^in db^in
+                    f[h+n, l+3*n] = (f[h+n, l+3*n]
+                                   - a_out[j]*b_out[j]
+                                   / (1-b_in[h]*b_out[j]
+                                      + a_in[h]*a_out[j]*b_in[h]*b_out[j])**2)
+                    # dll / da^out da^out
+                    f[h, l] = (f[h, l]
+                                       + (a_in[j] * b_in[j] * b_out[h]) ** 2
+                                       / (1 - b_in[j] * b_out[h] +
+                                          a_in[j] * a_out[h] *
+                                          b_in[j] * b_out[h]) ** 2)
+                    # dll / da^out db^out
+                    f[h, l+2*n] = (f[h, l+2*n]
+                                           - a_in[j] * b_in[j]
+                                           / (1 - b_in[j] * b_out[h]
+                                              + a_in[j] * a_out[h]
+                                              * b_in[j] * b_out[h])**2)
+                    # dll / db^in da^in
+                    f[h+3*n,l+n] = (f[h+3*n, l+n] - a_out[j] * b_out[j]
+                                       / (1 - b_in[h] * b_out[j] + a_in[h]
+                                       * a_out[j] * b_in[h] * b_out[j]) ** 2)
+                    # dll / db_in db_in
+                    f[h+3*n, l+3*n] = (f[h+3*n, l+3*n]
+                                       - (b_out[j]/(1-b_in[h]*b_out[j]))**2
+                                       + (b_out[j]*(a_in[h]*a_out[j]-1)
+                                          / (1-b_in[h]*b_out[j]
+                                             + a_in[h]*a_out[j]
+                                             * b_in[h]*b_out[j]))**2)
+                    # dll / db_out da_out
+                    f[h+2*n, l] = (f[h+2*n, l]
+                                           - a_in[j] * b_in[j]
+                                           / (1 - b_in[j] * b_out[h]
+                                              + a_in[l] * a_out[h]
+                                              * b_in[l] * b_out[h]) ** 2)
+                    # dll / db^out db^out
+                    f[h+2*n, l+2*n] = (f[h+2*n, l+2*n]
+                                       - (b_in[j]/(1-b_in[j]*b_out[h]))**2
+                                       + ((a_in[j]*a_out[h]-1)*b_in[j]
+                                          / (1-b_in[j]*b_out[h]
+                                             + a_in[j]*a_out[h]
+                                             * b_in[j]*b_out[h]))**2)
+
+                for j in range(h + 1, n):
+                    # dll / da^in da^in
+                    f[h+n, l+n] = (f[h+n, l+n]
+                               + (a_out[j] * b_in[h] * b_out[j]
+                                  / (1 - b_in[h] * b_out[j]
+                                     + a_in[h] * a_out[j]
+                                     * b_in[h] * b_out[j])) ** 2)
+                    # dll / da^in db^in
+                    f[h+n, l+3*n] = (f[h+n, l+3*n]
+                                   - a_out[j]*b_out[j]
+                                   / (1-b_in[h]*b_out[j]
+                                      + a_in[h]*a_out[j]*b_in[h]*b_out[j])**2)
+                    # dll / da^out da^out
+                    f[h, l] = (f[h, l]
+                                       + (a_in[j] * b_in[j] * b_out[h]) ** 2
+                                       / (1 - b_in[j] * b_out[h] +
+                                          a_in[j] * a_out[h] *
+                                          b_in[j] * b_out[h]) ** 2)
+                    # dll / da^out db^out
+                    f[h, l+2*n] = (f[h, l+2*n]
+                                           - a_in[j] * b_in[j]
+                                           / (1 - b_in[j] * b_out[h]
+                                              + a_in[j] * a_out[h]
+                                              * b_in[j] * b_out[h])**2)
+                    # dll / db^in da^in
+                    f[h+3*n, l+n] = (f[h+3*n, l+n] - a_out[j] * b_out[j]
+                                       / (1 - b_in[h] * b_out[j]
+                                          + a_in[h] * a_out[j]
+                                          * b_in[h] * b_out[j]) ** 2)
+                    # dll / db_in db_in
+                    f[h+3*n, l+3*n] = (f[h+3*n, l+3*n]
+                                       - (b_out[j]/(1-b_in[h]*b_out[j]))**2
+                                       + (b_out[j]*(a_in[h]*a_out[j]-1)
+                                          / (1-b_in[h]*b_out[j]
+                                             + a_in[h]*a_out[j]
+                                             * b_in[h]*b_out[j]))**2)
+                    # dll / db_out da_out
+                    f[h+2*n, l] = (f[h+2*n, l]
+                                           - a_in[j] * b_in[j]
+                                           / (1 - b_in[j]*b_out[h]
+                                              + a_in[l] * a_out[h]
+                                              * b_in[l] * b_out[h]) ** 2)
+                    # dll / db^out db^out
+                    f[h+2*n, l+2*n] = (f[h+2*n, l+2*n]
+                                       - (b_in[j]/(1-b_in[j]*b_out[h]))**2
+                                       + ((a_in[j]*a_out[h]-1)*b_in[j]
+                                          / (1-b_in[j]*b_out[h]
+                                             + a_in[j]*a_out[h]
+                                             * b_in[j]*b_out[h]))**2)
+            else:
+                # dll / da_in da_out
+                f[h+n, l] = (- b_in[h] * b_out[l] * (1 - b_in[h] * b_out[l])
+                               / (1 - b_in[h] * b_out[l]
+                                  + a_in[h] * a_out[l]
+                                  * b_in[h] * b_out[l]) ** 2)
+                # dll / da_in db_out
+                f[h+n, l+2*n] = (- a_out[l] * b_in[h]
+                                   / (1 - b_in[h] * b_out[l]
+                                      + a_in[h] * a_out[l]
+                                      * b_in[h] * b_out[l]) ** 2)
+                # dll / da_out da_in
+                f[h, l+n] = (- b_in[l] * b_out[h]*(1 - b_in[l] * b_out[h])
+                               / (1 - b_in[l] * b_out[h]
+                                  + a_in[l] * a_out[h]
+                                  * b_in[l] * b_out[h]) ** 2)
+                # dll / da_out db_in
+                f[h, l+3*n] = (-a_in[l] * b_out[h]
+                                       / (1 - b_in[l] * b_out[h]
+                                       + a_in[l] * a_out[h]
+                                       * b_in[l] * b_out[h]) ** 2)
+                # dll / db_in da_out
+                f[h+3*n, l] = (- a_in[h] * b_out[l]
+                                       / (1 - b_in[h] * b_out[l]
+                                          + a_in[h] * a_out[l]
+                                          * b_in[h] * b_out[l]) ** 2)
+                # dll / db_in db_out
+                f[h+3*n, l+2*n] = (-1 / (1 - b_in[h] * b_out[l])**2
+                                           - (a_out[l] * a_in[h] - 1)
+                                           / (1 - b_in[h] * b_out[l]
+                                              + a_in[h] * a_out[l]
+                                              * b_in[h] * b_out[l]) ** 2)
+                # dll / db_out da_in
+                f[h+2*n, l+n] = (- a_out[h] * b_in[l]
+                                   / (1 - b_in[l] * b_out[h]
+                                      + a_in[l] * a_out[h]
+                                      * b_in[l] * b_out[h]) ** 2)
+                # dll / db_out db_in
+                f[h+2*n, l+3*n] = (-1 / (1 - b_in[l] * b_out[h]) ** 2
+                                           - (a_in[l] * a_out[h] - 1)
+                                           / (1 - b_in[l] * b_out[h]
+                                              + a_in[l] * a_out[h]
+                                              * b_in[l] * b_out[h]) ** 2)
+
+    return f
+
+
+@jit(nopython=True)
 def iterative_decm(x, args):
     """iterative function for decm
     """
@@ -911,7 +1225,7 @@ def expected_in_stregth_CReAMa(sol,adj):
 
 
 
-def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
+def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
 
@@ -979,6 +1293,11 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
         # discending direction computation
         tic = time.time()
         if method == 'newton':
+            # print(l)
+            # print('here', B, fun(x))
+            # print('max', np.amax(B))
+            # print('min', np.amin(B))
+            # print('sum', np.sum(B))
             dx = np.linalg.solve(B, - fun(x))
         elif method == 'quasinewton':
             dx = - fun(x)/B
@@ -1039,11 +1358,12 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
             print('x = {}'.format(x))
             print('|f(x)| = {}'.format(norm))
 
-            print('x_old = {}'.format(x_old))
-            print('fun_old = {}'.format(fun(x_old)))
+            # print('x_old = {}'.format(x_old))
+            # print('fun_old = {}'.format(fun(x_old)))
+            # print('H_old = {}'.format(fun_jac(x_old)))
 
-            if method in ['newton', 'quasinewton']:
-                print('B = {}'.format(B))
+            # if method in ['newton', 'quasinewton']:
+                # print('B = {}'.format(B))
 
     toc_loop = time.time() - tic_loop
     toc_all = time.time() - tic_all
@@ -1076,6 +1396,7 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
     #print('p.T',p.T)
 
     sup = f_old + c1 *alpha*grad_f@p.T
+    # print(alpha, f_new, sup)
     return bool(f_new < sup)
 
 
