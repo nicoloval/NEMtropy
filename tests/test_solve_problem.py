@@ -158,7 +158,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-2)
 
 
-    def test_fp_dcm_5(self):
+    def test_fixedpoint_dcm_5(self):
         """test with 3 classes of cardinality 1
         and no zero degrees
         """
@@ -169,7 +169,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = 'False')
 
         g.solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
@@ -185,7 +185,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-1)
 
 
-    def test_fp_dcm_6(self):
+    def test_fixedpoint_dcm_6(self):
         """classes with cardinality > 1, no zero degree
         """
         n, seed = (4, 22)
@@ -193,7 +193,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = 'False')
 
         g.solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
@@ -209,7 +209,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-1)
 
 
-    def test_fp_dcm_7(self):
+    def test_fixedpoint_dcm_7(self):
         """classes with cardinality 1 and zero degrees
         """
         # test Matrix 1
@@ -219,7 +219,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = 'False')
 
         g.solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
@@ -235,7 +235,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-1)
 
 
-    def test_qn_dcm_8(self):
+    def test_fixedpoint_dcm_8(self):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
@@ -245,7 +245,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = 'False')
 
         g.solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
@@ -261,7 +261,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-1)
 
 
-    def test_qn_dcm_9(self):
+    def test_fixedpoint_dcm_9(self):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
@@ -270,7 +270,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = 'False')
 
         g.solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
@@ -286,7 +286,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-1)
 
 
-    def test_n_dcm_10(self):
+    def test_newton_dcm_10(self):
         """test with 3 classes of cardinality 1
         and no zero degrees
         """
@@ -312,7 +312,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-1)
 
 
-    def test_n_dcm_11(self):
+    def test_newton_dcm_11(self):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1

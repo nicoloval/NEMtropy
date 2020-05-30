@@ -624,6 +624,505 @@ def loglikelihood_hessian_diag_dcm_loop(x, args):
     return f
 
 
+
+@jit(nopython=True)
+def loglikelihood_decm(x, args):
+    """not reduced
+    """
+    # problem fixed parameters
+    k_out = args[0] 
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+    n = len(k_out) 
+
+    f = 0
+    for i in range(n):
+        f += k_out[i]*np.log(x[i]) \
+            + k_in[i]*np.log(x[i+n]) \
+            + s_out[i]*np.log(x[i+2*n]) \
+            + s_in[i]*np.log(x[i+3*n])
+        for j in range(n):
+            if i != j:
+                f += np.log(1 - x[i+2*n]*x[j+3*n])
+                f -= np.log(1 - x[i+2*n]*x[j+3*n] \
+                     + x[i+2*n]*x[j+3*n]*x[i]*x[j+n])
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_decm(x, args):
+    """not reduced
+    """
+    # problem fixed parameters
+    k_out = args[0] 
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+    n = len(k_out) 
+
+    f = np.zeros(4*n) 
+    for i in range(n):
+        fa_out = 0
+        fa_in = 0
+        fb_out = 0
+        fb_in = 0
+        for j in range(n):
+            if i != j:
+                fa_out += x[j+n]*x[i+2*n]*x[j+3*n]\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fa_in += x[j]*x[j+2*n]*x[i+3*n]\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+                fb_out += x[j +3*n]/(1 - x[j+3*n]*x[i+2*n])\
+                          + (x[j+n]*x[i] - 1)*x[j+3*n]\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fb_in += x[j +2*n]/(1 - x[i+3*n]*x[j+2*n])\
+                         + (x[i+n]*x[j] - 1)*x[j+2*n]\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+
+        f[i] = k_out[i]/x[i] - fa_out
+        f[i+n] = k_in[i]/x[i+n] - fa_in
+        f[i+2*n] = s_out[i]/x[i+2*n] - fb_out
+        f[i+3*n] = s_in[i]/x[i+3*n] - fb_in
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_decm(x, args):
+    """not reduced
+    """
+    # problem fixed parameters
+    k_out = args[0] 
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+    n = len(k_out) 
+
+    f = np.zeros(4*n) 
+    for i in range(n):
+        fa_out = 0
+        fa_in = 0
+        fb_out = 0
+        fb_in = 0
+        for j in range(n):
+            if i != j:
+                fa_out += (x[j+n]*x[i+2*n]*x[j+3*n])**2\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])**2
+                fa_in += (x[j]*x[j+2*n]*x[i+3*n])**2\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])**2
+                fb_out += x[j +3*n]**2/(1 - x[j+3*n]*x[i+2*n])**2\
+                          - ((x[j+n]*x[i] - 1)*x[j+3*n])**2\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])**2
+                fb_in += x[j +2*n]**2/(1 - x[i+3*n]*x[j+2*n])**2\
+                         - ((x[i+n]*x[j] - 1)*x[j+2*n])**2\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])**2
+
+        f[i] = -k_out[i]/x[i]**2 + fa_out
+        f[i+n] = -k_in[i]/x[i+n]**2 + fa_in
+        f[i+2*n] = -s_out[i]/x[i+2*n]**2 - fb_out
+        f[i+3*n] = -s_in[i]/x[i+3*n]**2 - fb_in
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_decm(x, args):
+    # MINUS log-likelihood function Hessian : DECM case
+    # x : where the function is computed : np.array
+    # par : real data constant parameters : np.array
+    # rem: size(x)=size(par)
+
+    # REMARK:
+    # the ll fun is to max but the algorithm minimize,
+    # so the fun return -H
+
+    k_out = args[0]
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+
+    n = len(k_out)
+    f = np.zeros((n * 4, n * 4))
+
+    a_out = x[:n]
+    a_in = x[n:2*n]
+    b_out = x[2*n:3*n]
+    b_in = x[3*n:]
+
+    for h in range(n):
+        for l in range(n):
+            if h == l:
+                # dll / da^in da^in
+                f[h+n, l+n] = -k_in[h] / a_in[h] ** 2
+                # dll / da^out da^out
+                f[h, l] = -k_out[h] / a_out[h] ** 2
+                # dll / db^in db^in
+                f[h+3*n, l+3*n] = -s_in[h] / b_in[h] ** 2
+                # dll / db^out db^out
+                f[h+2*n, l+2*n] = -s_out[h] / b_out[h] ** 2
+
+                for j in range(n):
+                    if j != h:
+                        # dll / da^in da^in
+                        f[h+n, l+n] = (f[h+n, l+n]
+                                   + (a_out[j] * b_in[h] * b_out[j]
+                                      / (1 - b_in[h] * b_out[j]
+                                         + a_in[h] * a_out[j]
+                                         * b_in[h] * b_out[j])) ** 2)
+                        # dll / da^in db^in
+                        f[h+n, l+3*n] = (f[h+n, l+3*n]
+                                       - a_out[j]*b_out[j]
+                                       / (1-b_in[h]*b_out[j]
+                                          + a_in[h]*a_out[j]*b_in[h]*b_out[j])**2)
+                        # dll / da^out da^out
+                        f[h, l] = (f[h, l]
+                                           + (a_in[j] * b_in[j] * b_out[h]) ** 2
+                                           / (1 - b_in[j] * b_out[h] +
+                                              a_in[j] * a_out[h] *
+                                              b_in[j] * b_out[h]) ** 2)
+                        # dll / da^out db^out
+                        f[h, l+2*n] = (f[h, l+2*n]
+                                               - a_in[j] * b_in[j]
+                                               / (1 - b_in[j] * b_out[h]
+                                                  + a_in[j] * a_out[h]
+                                                  * b_in[j] * b_out[h])**2)
+                        # dll / db^in da^in
+                        f[h+3*n,l+n] = (f[h+3*n, l+n] - a_out[j] * b_out[j]
+                                           / (1 - b_in[h] * b_out[j] + a_in[h]
+                                           * a_out[j] * b_in[h] * b_out[j]) ** 2)
+                        # dll / db_in db_in
+                        f[h+3*n, l+3*n] = (f[h+3*n, l+3*n]
+                                           - (b_out[j]/(1-b_in[h]*b_out[j]))**2
+                                           + (b_out[j]*(a_in[h]*a_out[j]-1)
+                                              / (1-b_in[h]*b_out[j]
+                                                 + a_in[h]*a_out[j]
+                                                 * b_in[h]*b_out[j]))**2)
+                        # dll / db_out da_out
+                        f[h+2*n, l] = (f[h+2*n, l]
+                                               - a_in[j] * b_in[j]
+                                               / (1 - b_in[j] * b_out[h]
+                                                  + a_in[j] * a_out[h]
+                                                  * b_in[j] * b_out[h]) ** 2)
+                        # dll / db^out db^out
+                        f[h+2*n, l+2*n] = (f[h+2*n, l+2*n]
+                                           - (b_in[j]/(1-b_in[j]*b_out[h]))**2
+                                           + ((a_in[j]*a_out[h]-1)*b_in[j]
+                                              / (1-b_in[j]*b_out[h]
+                                                 + a_in[j]*a_out[h]
+                                                 * b_in[j]*b_out[h]))**2)
+
+            else:
+                # dll / da_in da_out
+                f[h+n, l] = (- b_in[h] * b_out[l] * (1 - b_in[h] * b_out[l])
+                               / (1 - b_in[h] * b_out[l]
+                                  + a_in[h] * a_out[l]
+                                  * b_in[h] * b_out[l]) ** 2)
+                # dll / da_in db_out
+                f[h+n, l+2*n] = (- a_out[l] * b_in[h]
+                                   / (1 - b_in[h] * b_out[l]
+                                      + a_in[h] * a_out[l]
+                                      * b_in[h] * b_out[l]) ** 2)
+                # dll / da_out da_in
+                f[h, l+n] = (- b_in[l] * b_out[h]*(1 - b_in[l] * b_out[h])
+                               / (1 - b_in[l] * b_out[h]
+                                  + a_in[l] * a_out[h]
+                                  * b_in[l] * b_out[h]) ** 2)
+                # dll / da_out db_in
+                f[h, l+3*n] = (-a_in[l] * b_out[h]
+                                       / (1 - b_in[l] * b_out[h]
+                                       + a_in[l] * a_out[h]
+                                       * b_in[l] * b_out[h]) ** 2)
+                # dll / db_in da_out
+                f[h+3*n, l] = (- a_in[h] * b_out[l]
+                                       / (1 - b_in[h] * b_out[l]
+                                          + a_in[h] * a_out[l]
+                                          * b_in[h] * b_out[l]) ** 2)
+                # dll / db_in db_out
+                f[h+3*n, l+2*n] = (-1 / (1 - b_in[h] * b_out[l])**2
+                                           - (a_out[l] * a_in[h] - 1)
+                                           / (1 - b_in[h] * b_out[l]
+                                              + a_in[h] * a_out[l]
+                                              * b_in[h] * b_out[l]) ** 2)
+                # dll / db_out da_in
+                f[h+2*n, l+n] = (- a_out[h] * b_in[l]
+                                   / (1 - b_in[l] * b_out[h]
+                                      + a_in[l] * a_out[h]
+                                      * b_in[l] * b_out[h]) ** 2)
+                # dll / db_out db_in
+                f[h+2*n, l+3*n] = (-1 / (1 - b_in[l] * b_out[h]) ** 2
+                                           - (a_in[l] * a_out[h] - 1)
+                                           / (1 - b_in[l] * b_out[h]
+                                              + a_in[l] * a_out[h]
+                                              * b_in[l] * b_out[h]) ** 2)
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_decm_old(x, args):
+    # MINUS log-likelihood function Hessian : DECM case
+    # x : where the function is computed : np.array
+    # par : real data constant parameters : np.array
+    # rem: size(x)=size(par)
+
+    # REMARK:
+    # the ll fun is to max but the algorithm minimize,
+    # so the fun return -H
+
+    k_out = args[0]
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+
+    n = len(k_out)
+    f = np.zeros((n * 4, n * 4))
+
+    a_out = x[:n]
+    a_in = x[n:2*n]
+    b_out = x[2*n:3*n]
+    b_in = x[3*n:]
+
+    for h in range(n):
+        for l in range(n):
+            if h == l:
+                # dll / da^in da^in
+                f[h+n, l+n] = -k_in[h] / a_in[h] ** 2
+                # dll / da^out da^out
+                f[h, l] = -k_out[h] / a_out[h] ** 2
+                # dll / db^in db^in
+                f[h+3*n, l+3*n] = -s_in[h] / b_in[h] ** 2
+                # dll / db^out db^out
+                f[h+2*n, l+2*n] = -s_out[h] / b_out[h] ** 2
+
+                for j in range(h):
+                    # dll / da^in da^in
+                    f[h+n, l+n] = (f[h+n, l+n]
+                               + (a_out[j] * b_in[h] * b_out[j]
+                                  / (1 - b_in[h] * b_out[j]
+                                     + a_in[h] * a_out[j]
+                                     * b_in[h] * b_out[j])) ** 2)
+                    # dll / da^in db^in
+                    f[h+n, l+3*n] = (f[h+n, l+3*n]
+                                   - a_out[j]*b_out[j]
+                                   / (1-b_in[h]*b_out[j]
+                                      + a_in[h]*a_out[j]*b_in[h]*b_out[j])**2)
+                    # dll / da^out da^out
+                    f[h, l] = (f[h, l]
+                                       + (a_in[j] * b_in[j] * b_out[h]) ** 2
+                                       / (1 - b_in[j] * b_out[h] +
+                                          a_in[j] * a_out[h] *
+                                          b_in[j] * b_out[h]) ** 2)
+                    # dll / da^out db^out
+                    f[h, l+2*n] = (f[h, l+2*n]
+                                           - a_in[j] * b_in[j]
+                                           / (1 - b_in[j] * b_out[h]
+                                              + a_in[j] * a_out[h]
+                                              * b_in[j] * b_out[h])**2)
+                    # dll / db^in da^in
+                    f[h+3*n,l+n] = (f[h+3*n, l+n] - a_out[j] * b_out[j]
+                                       / (1 - b_in[h] * b_out[j] + a_in[h]
+                                       * a_out[j] * b_in[h] * b_out[j]) ** 2)
+                    # dll / db_in db_in
+                    f[h+3*n, l+3*n] = (f[h+3*n, l+3*n]
+                                       - (b_out[j]/(1-b_in[h]*b_out[j]))**2
+                                       + (b_out[j]*(a_in[h]*a_out[j]-1)
+                                          / (1-b_in[h]*b_out[j]
+                                             + a_in[h]*a_out[j]
+                                             * b_in[h]*b_out[j]))**2)
+                    # dll / db_out da_out
+                    f[h+2*n, l] = (f[h+2*n, l]
+                                           - a_in[j] * b_in[j]
+                                           / (1 - b_in[j] * b_out[h]
+                                              + a_in[l] * a_out[h]
+                                              * b_in[l] * b_out[h]) ** 2)
+                    # dll / db^out db^out
+                    f[h+2*n, l+2*n] = (f[h+2*n, l+2*n]
+                                       - (b_in[j]/(1-b_in[j]*b_out[h]))**2
+                                       + ((a_in[j]*a_out[h]-1)*b_in[j]
+                                          / (1-b_in[j]*b_out[h]
+                                             + a_in[j]*a_out[h]
+                                             * b_in[j]*b_out[h]))**2)
+
+                for j in range(h + 1, n):
+                    # dll / da^in da^in
+                    f[h+n, l+n] = (f[h+n, l+n]
+                               + (a_out[j] * b_in[h] * b_out[j]
+                                  / (1 - b_in[h] * b_out[j]
+                                     + a_in[h] * a_out[j]
+                                     * b_in[h] * b_out[j])) ** 2)
+                    # dll / da^in db^in
+                    f[h+n, l+3*n] = (f[h+n, l+3*n]
+                                   - a_out[j]*b_out[j]
+                                   / (1-b_in[h]*b_out[j]
+                                      + a_in[h]*a_out[j]*b_in[h]*b_out[j])**2)
+                    # dll / da^out da^out
+                    f[h, l] = (f[h, l]
+                                       + (a_in[j] * b_in[j] * b_out[h]) ** 2
+                                       / (1 - b_in[j] * b_out[h] +
+                                          a_in[j] * a_out[h] *
+                                          b_in[j] * b_out[h]) ** 2)
+                    # dll / da^out db^out
+                    f[h, l+2*n] = (f[h, l+2*n]
+                                           - a_in[j] * b_in[j]
+                                           / (1 - b_in[j] * b_out[h]
+                                              + a_in[j] * a_out[h]
+                                              * b_in[j] * b_out[h])**2)
+                    # dll / db^in da^in
+                    f[h+3*n, l+n] = (f[h+3*n, l+n] - a_out[j] * b_out[j]
+                                       / (1 - b_in[h] * b_out[j]
+                                          + a_in[h] * a_out[j]
+                                          * b_in[h] * b_out[j]) ** 2)
+                    # dll / db_in db_in
+                    f[h+3*n, l+3*n] = (f[h+3*n, l+3*n]
+                                       - (b_out[j]/(1-b_in[h]*b_out[j]))**2
+                                       + (b_out[j]*(a_in[h]*a_out[j]-1)
+                                          / (1-b_in[h]*b_out[j]
+                                             + a_in[h]*a_out[j]
+                                             * b_in[h]*b_out[j]))**2)
+                    # dll / db_out da_out
+                    f[h+2*n, l] = (f[h+2*n, l]
+                                           - a_in[j] * b_in[j]
+                                           / (1 - b_in[j]*b_out[h]
+                                              + a_in[l] * a_out[h]
+                                              * b_in[l] * b_out[h]) ** 2)
+                    # dll / db^out db^out
+                    f[h+2*n, l+2*n] = (f[h+2*n, l+2*n]
+                                       - (b_in[j]/(1-b_in[j]*b_out[h]))**2
+                                       + ((a_in[j]*a_out[h]-1)*b_in[j]
+                                          / (1-b_in[j]*b_out[h]
+                                             + a_in[j]*a_out[h]
+                                             * b_in[j]*b_out[h]))**2)
+            else:
+                # dll / da_in da_out
+                f[h+n, l] = (- b_in[h] * b_out[l] * (1 - b_in[h] * b_out[l])
+                               / (1 - b_in[h] * b_out[l]
+                                  + a_in[h] * a_out[l]
+                                  * b_in[h] * b_out[l]) ** 2)
+                # dll / da_in db_out
+                f[h+n, l+2*n] = (- a_out[l] * b_in[h]
+                                   / (1 - b_in[h] * b_out[l]
+                                      + a_in[h] * a_out[l]
+                                      * b_in[h] * b_out[l]) ** 2)
+                # dll / da_out da_in
+                f[h, l+n] = (- b_in[l] * b_out[h]*(1 - b_in[l] * b_out[h])
+                               / (1 - b_in[l] * b_out[h]
+                                  + a_in[l] * a_out[h]
+                                  * b_in[l] * b_out[h]) ** 2)
+                # dll / da_out db_in
+                f[h, l+3*n] = (-a_in[l] * b_out[h]
+                                       / (1 - b_in[l] * b_out[h]
+                                       + a_in[l] * a_out[h]
+                                       * b_in[l] * b_out[h]) ** 2)
+                # dll / db_in da_out
+                f[h+3*n, l] = (- a_in[h] * b_out[l]
+                                       / (1 - b_in[h] * b_out[l]
+                                          + a_in[h] * a_out[l]
+                                          * b_in[h] * b_out[l]) ** 2)
+                # dll / db_in db_out
+                f[h+3*n, l+2*n] = (-1 / (1 - b_in[h] * b_out[l])**2
+                                           - (a_out[l] * a_in[h] - 1)
+                                           / (1 - b_in[h] * b_out[l]
+                                              + a_in[h] * a_out[l]
+                                              * b_in[h] * b_out[l]) ** 2)
+                # dll / db_out da_in
+                f[h+2*n, l+n] = (- a_out[h] * b_in[l]
+                                   / (1 - b_in[l] * b_out[h]
+                                      + a_in[l] * a_out[h]
+                                      * b_in[l] * b_out[h]) ** 2)
+                # dll / db_out db_in
+                f[h+2*n, l+3*n] = (-1 / (1 - b_in[l] * b_out[h]) ** 2
+                                           - (a_in[l] * a_out[h] - 1)
+                                           / (1 - b_in[l] * b_out[h]
+                                              + a_in[l] * a_out[h]
+                                              * b_in[l] * b_out[h]) ** 2)
+
+    return f
+
+
+@jit(nopython=True)
+def iterative_decm(x, args):
+    """iterative function for decm
+    """
+    # problem fixed parameters
+    k_out = args[0] 
+    k_in = args[1] 
+    s_out = args[2] 
+    s_in = args[3] 
+    n = len(k_out) 
+
+    f = np.zeros(4*n) 
+
+    for i in range(n):
+        fa_out = 0
+        fa_in = 0
+        fb_out = 0
+        fb_in = 0
+        b = 0
+        for j in range(n):
+            if i != j:
+                fa_out += x[j+n]*x[i+2*n]*x[j+3*n]\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fa_in += x[j]*x[j+2*n]*x[i+3*n]\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+                fb_out += x[j+3*n]/(1 - x[j+3*n]*x[i+2*n])\
+                          + (x[j+n]*x[i] - 1)*x[j+3*n]\
+                          /(1 - x[i+2*n]*x[j+3*n]\
+                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fb_in += x[j+2*n]/(1 - x[i+3*n]*x[j+2*n])\
+                         + (x[i+n]*x[j] - 1)*x[j+2*n]\
+                         /(1 - x[j+2*n]*x[i+3*n]\
+                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+            
+        """
+        if k_out[i] != 0:
+            f[i] = x[i] - k_out[i]/fa_out
+        else:
+            f[i] = x[i] 
+        if k_in[i] != 0:
+            f[i+n] = x[i+n] - k_in[i]/fa_in
+        else:
+            f[i+n] = x[i+n]
+        if s_out[i] != 0:
+            f[i+2*n] = x[i+2*n] - s_out[i]/fb_out
+        else:
+            f[i+2*n] = 0
+        if s_in[i] != 0:
+            f[i+3*n] = x[i+3*n] - s_in[i]/fb_in
+        else:
+            f[i+3*n] = x[i+3*n]
+        """
+        if k_out[i] != 0:
+            f[i] = k_out[i]/fa_out
+        else:
+            f[i] = 0 
+        if k_in[i] != 0:
+            f[i+n] = k_in[i]/fa_in
+        else:
+            f[i+n] = 0 
+        if s_out[i] != 0:
+            f[i+2*n] = s_out[i]/fb_out
+        else:
+            f[i+2*n] = 0
+        if s_in[i] != 0:
+            f[i+3*n] = s_in[i]/fb_in
+        else:
+            f[i+3*n] = 0 
+ 
+ 
+    return f
+
+
 @jit(nopython=True)
 def expected_out_degree_dcm(sol):
     n = int(len(sol)/ 2)
@@ -651,6 +1150,34 @@ def expected_in_degree_dcm(sol):
                 k[i] += a_in[i]*a_out[j]/(1 + a_in[i]*a_out[j])
 
     return k
+
+
+@jit(nopython=True)
+def expected_decm(x):
+    """
+    """
+    # casadi MX function calculation
+    n = int(len(x)/4)
+    f = np.zeros(len(x))
+
+    for i in range(n):
+        fa_out = 0
+        fa_in = 0
+        fb_out = 0
+        fb_in = 0
+        for j in range(n):
+            if i != j:
+                fa_out += x[j+n]*x[i+2*n]*x[j+3*n]/(1 - x[i+2*n]*x[j+3*n] + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fa_in += x[j]*x[j+2*n]*x[i+3*n]/(1 - x[j+2*n]*x[i+3*n] + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+                fb_out += x[j +3*n]/(1 - x[j+3*n]*x[i+2*n]) + (x[j+n]*x[i] - 1)*x[j+3*n]/(1 - x[i+2*n]*x[j+3*n] + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fb_in += x[j +2*n]/(1 - x[i+3*n]*x[j+2*n]) + (x[i+n]*x[j] - 1)*x[j+2*n]/(1 - x[j+2*n]*x[i+3*n] + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+        f[i] = x[i]*fa_out
+        f[i+n] = x[i+n]*fa_in
+        f[i+2*n] = x[i+2*n]*fb_out
+        f[i+3*n] = x[i+3*n]*fb_in
+
+    return f
+
 
 def hessian_regulariser_function(B, eps):
     """Trasform input matrix in a positive defined matrix
@@ -698,7 +1225,7 @@ def expected_in_stregth_CReAMa(sol,adj):
 
 
 
-def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=False, full_return = False):
+def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
 
@@ -713,7 +1240,8 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
     n_steps = 0
     x = x0  # initial point
 
-    norm = np.linalg.norm(fun(x), ord=np.inf)
+    # norm = np.linalg.norm(fun(x), ord=np.inf)
+    norm = np.linalg.norm(fun(x))
     diff = 1
 
     if full_return:
@@ -733,6 +1261,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
     tic_loop = time.time()
 
     while norm > tol and diff > tol and n_steps < max_steps:  # stopping condition
+
         x_old = x  # save previous iteration
 
         # f jacobian
@@ -758,11 +1287,17 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
             B = fun_jac(x)  # Jacobian diagonal
             if regularise == True:
                 B = np.maximum(B, B*0 + 1e-8)
+
         toc_jacfun += time.time() - tic
 
         # discending direction computation
         tic = time.time()
         if method == 'newton':
+            # print(l)
+            # print('here', B, fun(x))
+            # print('max', np.amax(B))
+            # print('min', np.amin(B))
+            # print('sum', np.sum(B))
             dx = np.linalg.solve(B, - fun(x))
         elif method == 'quasinewton':
             dx = - fun(x)/B
@@ -772,34 +1307,25 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
 
         # backtraking line search
         tic = time.time()
-        """
-        alfa = 0.1
-        eps2=1e-2
-        alfa0 = (eps2-1)*x/dx
-        for a in alfa0:
-            if a>=0:
-                alfa = min(alfa, a)
-        """
-        alfa = 1 
-        i = 0
-        while sufficient_decrease_condition(stop_fun(x), \
-            stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
-            alfa *= beta
-            i +=1
-
-        #TODO: instafix, to check
-        if method == 'fixed-point':
+        if linsearch == True:
+            alfa = 1 
+            i = 0
+            while sufficient_decrease_condition(stop_fun(x), \
+                stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
+                alfa *= beta
+                i +=1
+        else:
+            """
+            if True:
+                alfa = 0.1
+                eps2=1e-2
+                alfa0 = (eps2-1)*x/dx
+                for a in alfa0:
+                    if a>=0:
+                        alfa = min(alfa, a)
+            """
             alfa = 1
-        """
-        if method == 'fixed-point':
-            alfa = 0.1
-            eps2 = 1e-2
-            alfa0 = (eps2-1)*x/dx
-            for a in alfa0:
-                if a >= 0:
-                    alfa = min(alfa, a)
-        """
-       
+
 
         toc_alfa += time.time() - tic
 
@@ -809,11 +1335,13 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
         if method in ['newton', 'quasinewton']:
             x = x + alfa*dx
         if method in ['fixed-point']:
-            x = alfa*(x + dx)
+            # x = alfa*(x + dx)
+            x = x + alfa*dx
         toc_update += time.time() - tic
 
         # stopping condition computation
-        norm = np.linalg.norm(fun(x), ord=np.inf)
+        # norm = np.linalg.norm(fun(x), ord=np.inf)
+        norm = np.linalg.norm(fun(x))
         diff = np.linalg.norm(x - x_old)
 
         if full_return:
@@ -825,13 +1353,17 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-10, max_steps=100, method=
         if verbose == True:
             print('step {}'.format(n_steps))
             print('alpha = {}'.format(alfa))
-            # print('B = {}'.format(B))
-            # print('fun = {}'.format(fun(x)))
+            print('fun = {}'.format(fun(x)))
             print('dx = {}'.format(dx))
             print('x = {}'.format(x))
             print('|f(x)| = {}'.format(norm))
-            if method in ['newton', 'quasinewton']:
-                print('B = {}'.format(B))
+
+            # print('x_old = {}'.format(x_old))
+            # print('fun_old = {}'.format(fun(x_old)))
+            # print('H_old = {}'.format(fun_jac(x_old)))
+
+            # if method in ['newton', 'quasinewton']:
+                # print('B = {}'.format(B))
 
     toc_loop = time.time() - tic_loop
     toc_all = time.time() - tic_all
@@ -864,6 +1396,7 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
     #print('p.T',p.T)
 
     sup = f_old + c1 *alpha*grad_f@p.T
+    # print(alpha, f_new, sup)
     return bool(f_new < sup)
 
 
@@ -1122,7 +1655,7 @@ class DirectedGraph:
         self.is_initialized = False
 
 
-    def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
+    def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
 
         self.initial_guess = initial_guess
         self._initialize_problem(model, method)
@@ -1130,7 +1663,7 @@ class DirectedGraph:
         # print('x0', x0)
         # print('index',self.nz_index_out, self.nz_index_in)
 
-        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
 
         self._set_solved_problem(sol)
 
