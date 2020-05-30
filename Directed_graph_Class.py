@@ -199,10 +199,8 @@ def random_binary_matrix_generator_nozeros(n, sym=False, seed=None):
             
         return A
 
-@jit
+@jit(forceobj=True)
 def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None):
-    if seed==None:
-        seed = 0
     if sym==False:
         np.random.seed(seed = seed)
         A = np.random.random(size=(n, n)) * sup_ext
@@ -231,10 +229,8 @@ def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None
         return A
 
                                            
-@jit
+@jit(forceobj=True)
 def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=False, seed=None):
-    if seed==None:
-        seed = 0
     if sym==False:
         np.random.seed(seed = seed)
         A = np.zeros(shape=(n, n))
@@ -725,7 +721,7 @@ def hessian_regulariser_function(B, eps):
     """Trasform input matrix in a positive defined matrix
     input matrix should be numpy.array
     """
-
+    eps = 1e-3
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = np.linalg.eigh(B)
     ll = np.array([0 if li>eps else eps-li for li in l])
