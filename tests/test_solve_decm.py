@@ -103,15 +103,15 @@ class MyTest(unittest.TestCase):
         fun_jac = lambda x: -sample.loglikelihood_hessian_decm(x, args)
         stop_fun = lambda x: -sample.loglikelihood_decm(x, args)
 
-        sol = sample.solver(x0, fun=fun, g=stop_fun, fun_jac=fun_jac, tol=1e-6, eps=1e-3, max_steps=300, method='newton', verbose=True, regularise=True, full_return = False)
+        sol = sample.solver(x0, fun=fun, g=stop_fun, fun_jac=fun_jac, tol=1e-6, eps=1e-3, max_steps=300, method='newton', verbose=False, regularise=True, full_return = False)
 
         ek = sample.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.linalg.norm(ek - k)
         # debug
-        print(ek)
-        print(k)
-        print('\ntest 0: error = {}'.format(err))
+        # print(ek)
+        # print(k)
+        # print('\ntest 0: error = {}'.format(err))
 
         # test result
         self.assertTrue(err< 1e-1)
