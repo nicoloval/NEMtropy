@@ -1760,6 +1760,7 @@ class DirectedGraph:
         self.is_reduced = True
         
     def _initialize_problem(self, model, method):
+        #TODO: aggiungere decm
         if ~self.is_reduced:
            self.degree_reduction()
 
@@ -1862,6 +1863,8 @@ class DirectedGraph:
     def _set_initial_guess_CReAMa(self, model, method):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        #TODO: unificare con initial_guess
+        #TODO: mettere un self.is_weighted bool 
         if self.initial_guess is None:
             self.b_out = (self.out_strength>0).astype(float) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
             self.b_in = (self.in_strength>0).astype(float) / self.in_strength.sum()
@@ -1871,6 +1874,7 @@ class DirectedGraph:
 
 
     def _initialize_problem_CReAMa(self, model, method):
+        #TODO: merge con _initialize_problem classico
         if ~self.is_reduced:
             self.degree_reduction()
         
@@ -1957,6 +1961,7 @@ class DirectedGraph:
             if not isinstance(adjacency,(list,np.ndarray,str)):
                 raise ValueError('adjacency must be a matrix or a method')
             elif isinstance(adjacency,str):
+                #TODO: sostituire questa parte nell'elif con una call a _solve problem
                 self.initial_guess = initial_guess
                 self._initialize_problem_CReAMa(adjacency, method)
                 x0 = np.concatenate((self.r_x, self.r_y))
@@ -1982,6 +1987,7 @@ class DirectedGraph:
             
         else:
             
+            #TODO: eliminare questa parte dopo l'else
             self.initial_guess = initial_guess
             self._initialize_problem(model, method)
             x0 = np.concatenate((self.r_x, self.r_y))
@@ -1996,6 +2002,7 @@ class DirectedGraph:
     def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False):
         """ function to switch around the various problems
         """
+        #TODO: aggiungere tutti i metodi
         if model in ['dcm']:
             self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
         elif model in ['CReAMa']:
