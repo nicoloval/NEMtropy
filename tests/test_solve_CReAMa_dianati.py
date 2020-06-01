@@ -12,11 +12,9 @@ class MyTest(unittest.TestCase):
     def setUp(self):
         pass
 
-
-    def test_CReAMa_dcm_Newton_Emid(self):
-        """test with 3 classes of cardinality 1
-        and no zero degrees
-        """
+    """
+    def test_CReAMa_dcm_Dianati_Emid(self):
+        
         __file__ = "network.txt"
         __location__ = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -37,10 +35,8 @@ class MyTest(unittest.TestCase):
         self.assertTrue((g.weighted_realisation()>=0).all())
 
 
-    def test_CReAMa_Orignial_Newton_Emid(self):
-        """test with 3 classes of cardinality 1
-        and no zero degrees
-        """
+    def test_CReAMa_Orignial_Dianati_Emid(self):
+        
         __file__ = "network.txt"
         __location__ = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -59,8 +55,8 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.relative_error_strength < 1e-2)
         self.assertTrue((g.weighted_realisation()>=0).all())
 
-
-    def test_CReAMa_dcm_Newton_random_dense_20(self):
+    """
+    def test_CReAMa_dcm_Dianati_random_dense_20(self):
         """test with 3 classes of cardinality 1
         and no zero degrees
         """
@@ -81,11 +77,8 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.relative_error_strength < 1e-2)
         self.assertTrue((g.weighted_realisation()>=0).all())
 
-
-    def test_CReAMa_dcm_Newton_random_dense_100(self):
-        """test with 3 classes of cardinality 1
-        and no zero degrees
-        """
+    """
+    def test_CReAMa_dcm_Dianati_random_dense_100(self):
 
         network = sample.random_weighted_matrix_generator_dense(n=100, sup_ext = 10, sym=False, seed=None)
         network_bin = (network>0).astype(int)
@@ -104,10 +97,8 @@ class MyTest(unittest.TestCase):
         self.assertTrue((g.weighted_realisation()>=0).all())
 
 
-    def test_CReAMa_dcm_Newton_random_dense_1000(self):
-        """test with 3 classes of cardinality 1
-        and no zero degrees
-        """
+    def test_CReAMa_dcm_Dianati_random_dense_1000(self):
+        
 
         network = sample.random_weighted_matrix_generator_dense(n=1000, sup_ext = 100, sym=False, seed=None)
         network_bin = (network>0).astype(int)
@@ -126,10 +117,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue((g.weighted_realisation()>=0).all())
 
 
-    def test_CReAMa_dcm_Newton_random_20(self):
-        """test with 3 classes of cardinality 1
-        and no zero degrees
-        """
+    def test_CReAMa_dcm_Dianati_random_20(self):
 
         network = sample.random_weighted_matrix_generator_dense(n=20, sup_ext = 100, sym=False, seed=None)
         network_bin = (network>0).astype(int)
@@ -148,10 +136,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue((g.weighted_realisation()>=0).all())
 
 
-    def test_CReAMa_dcm_Newton_random_100(self):
-        """test with 3 classes of cardinality 1
-        and no zero degrees
-        """
+    def test_CReAMa_dcm_Dianati_random_100(self):
 
         network = sample.random_weighted_matrix_generator_dense(n=100, sup_ext = 100, sym=False, seed=None)
         network_bin = (network>0).astype(int)
@@ -171,10 +156,7 @@ class MyTest(unittest.TestCase):
 
 
 
-    def test_CReAMa_dcm_Newton_random_1000(self):
-        """test with 3 classes of cardinality 1
-        and no zero degrees
-        """
+    def test_CReAMa_dcm_Dianati_random_1000(self):
 
         network = sample.random_weighted_matrix_generator_dense(n=1000, sup_ext = 100, sym=False, seed=None)
         network_bin = (network>0).astype(int)
@@ -191,7 +173,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.relative_error_strength < 1e-1)
         self.assertTrue(g.relative_error_strength < 1e-2)
         self.assertTrue((g.weighted_realisation()>=0).all())
-
+    """
 
 
 
