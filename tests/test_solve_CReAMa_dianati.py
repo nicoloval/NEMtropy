@@ -74,7 +74,7 @@ class MyTest(unittest.TestCase):
         
         self.assertTrue(g.relative_error_strength < 1e-1)
         self.assertTrue(g.relative_error_strength < 1e-2)
-        self.assertTrue((g.weighted_realisation()>=0).all())
+        self.assertTrue((g._weighted_realisation()>=0).all())
 
     def test_CReAMa_original_Dianati_random_dense_20(self):
         """test with 3 classes of cardinality 1
@@ -94,7 +94,7 @@ class MyTest(unittest.TestCase):
         
         self.assertTrue(g.relative_error_strength < 1e-1)
         self.assertTrue(g.relative_error_strength < 1e-2)
-        self.assertTrue((g.weighted_realisation()>=0).all())
+        self.assertTrue((g._weighted_realisation()>=0).all())
 
     """
     def test_CReAMa_dcm_Dianati_random_dense_100(self):

@@ -1574,7 +1574,9 @@ class DirectedGraph:
         # model
         self.error = None
         self.error_strength = None
+        self.relative_error_strength = None
         self.full_return = False
+        self.last_model = None
 
         # function
         self.args = None
@@ -1721,6 +1723,7 @@ class DirectedGraph:
 
     def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
         
+        self.last_model = model
         self.full_return = full_return
         self.initial_guess = initial_guess
         self._initialize_problem(model, method)
@@ -1787,25 +1790,28 @@ class DirectedGraph:
 
 
     def solution_error(self):
-        if (self.x is not None) and (self.y is not None):
-            sol = np.concatenate((self.x, self.y))
-            ex_k_out = expected_out_degree_dcm(sol)
-            ex_k_in = expected_in_degree_dcm(sol)
-            ex_k = np.concatenate((ex_k_out, ex_k_in))
-            k = np.concatenate((self.dseq_out, self.dseq_in))
-            # print(k, ex_k)
-            self.expected_dseq = ex_k
-            self.error = np.linalg.norm(ex_k - k)
-        if (self.b_out is not None) and (self.b_in is not None):
-            sol = np.concatenate([self.b_out,self.b_in])
-            ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency)
-            ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency)
-            ex_s = np.concatenate([ex_s_out,ex_s_in])
-            s = np.concatenate([self.out_strength,self.in_strength])
-            self.expected_stregth_seq = ex_s
-            self.error_strength = np.linalg.norm(ex_s - s)
-            self.relative_error_strength = self.error_strength/self.out_strength.sum()
-            # Puoi aggiungere direttamete qua il solution error per il DECM
+        if self.last_model in ['dcm','CReAMa']:
+            if (self.x is not None) and (self.y is not None):
+                sol = np.concatenate((self.x, self.y))
+                ex_k_out = expected_out_degree_dcm(sol)
+                ex_k_in = expected_in_degree_dcm(sol)
+                ex_k = np.concatenate((ex_k_out, ex_k_in))
+                k = np.concatenate((self.dseq_out, self.dseq_in))
+                # print(k, ex_k)
+                self.expected_dseq = ex_k
+                self.error = np.linalg.norm(ex_k - k)
+            if (self.b_out is not None) and (self.b_in is not None):
+                sol = np.concatenate([self.b_out,self.b_in])
+                ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency)
+                ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency)
+                ex_s = np.concatenate([ex_s_out,ex_s_in])
+                s = np.concatenate([self.out_strength,self.in_strength])
+                self.expected_stregth_seq = ex_s
+                self.error_strength = np.linalg.norm(ex_s - s)
+                self.relative_error_strength = self.error_strength/self.out_strength.sum()
+        # potremmo strutturarlo così per evitare ridondanze
+        #elif self.last_model in ['decm']:
+
 
     
     def _set_initial_guess_CReAMa(self, model, method):
@@ -1880,29 +1886,28 @@ class DirectedGraph:
     
     
     def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
-        if model == 'CReAMa':
-            if not isinstance(adjacency,(list,np.ndarray,str)):
-                raise ValueError('adjacency must be a matrix or a method')
-            elif isinstance(adjacency,str):
-                #TODO: sostituire questa parte nell'elif con una call a _solve problem
-                self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
-                self.adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
-            elif isinstance(adjacency,list):
-                self.adjacency = np.array(adjacency)
-            elif isinstance(adjacency,np.ndarray):
-                self.adjacency = adjacency
+        self.last_model = model
+        if not isinstance(adjacency,(list,np.ndarray,str)):
+            raise ValueError('adjacency must be a matrix or a method')
+        elif isinstance(adjacency,str):
+            self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
+            self.adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
+        elif isinstance(adjacency,list):
+            self.adjacency = np.array(adjacency)
+        elif isinstance(adjacency,np.ndarray):
+            self.adjacency = adjacency
 
-            if self.adjacency.shape[0] != self.adjacency.shape[1]:
-                raise ValueError(r'adjacency matrix must be $n \times n$')
+        if self.adjacency.shape[0] != self.adjacency.shape[1]:
+            raise ValueError(r'adjacency matrix must be $n \times n$')
+
+        self.full_return = full_return
+        self.initial_guess = 'strengths'
+        self._initialize_problem(model,method)
+        x0 = np.concatenate((self.b_out, self.b_in))
             
-            self.full_return = full_return
-            self.initial_guess = 'strengths'
-            self._initialize_problem(model,method)
-            x0 = np.concatenate((self.b_out, self.b_in))
+        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
             
-            sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
-            
-            self._set_solved_problem_CReAMa(sol)
+        self._set_solved_problem_CReAMa(sol)
     
     def _set_solved_problem_CReAMa(self, solution):
         if self.full_return:
@@ -1923,10 +1928,11 @@ class DirectedGraph:
         if model in ['dcm']:
             self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
         elif model in ['CReAMa']:
+            self.last_model =
             self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
 
 
-    def weighted_realisation(self):
+    def _weighted_realisation(self):
         weighted_realisation = weighted_adjacency(np.concatenate((self.b_out,self.b_in)),self.adjacency)
         
         return(weighted_realisation)

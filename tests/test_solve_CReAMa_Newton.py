@@ -74,7 +74,7 @@ class MyTest(unittest.TestCase):
         
         self.assertTrue(g.relative_error_strength < 1e-1)
         self.assertTrue(g.relative_error_strength < 1e-2)
-        self.assertTrue((g.weighted_realisation()>=0).all())
+        self.assertTrue((g._weighted_realisation()>=0).all())
 
 
     def test_CReAMa_original_Newton_random_dense_20(self):
@@ -95,7 +95,7 @@ class MyTest(unittest.TestCase):
         
         self.assertTrue(g.relative_error_strength < 1e-1)
         self.assertTrue(g.relative_error_strength < 1e-2)
-        self.assertTrue((g.weighted_realisation()>=0).all())
+        self.assertTrue((g._weighted_realisation()>=0).all())
 
     """
     def test_CReAMa_dcm_Newton_random_dense_100(self):
