@@ -1805,6 +1805,7 @@ class DirectedGraph:
             self.expected_stregth_seq = ex_s
             self.error_strength = np.linalg.norm(ex_s - s)
             self.relative_error_strength = self.error_strength/self.out_strength.sum()
+            # Puoi aggiungere direttamete qua il solution error per il DECM
 
     
     def _set_initial_guess_CReAMa(self, model, method):
@@ -1907,9 +1908,9 @@ class DirectedGraph:
         if self.full_return:
             self.b_out = solution[0][:self.n_nodes]
             self.b_in = solution[0][self.n_nodes:]
-            self.comput_time_crema = solution[1]
-            self.n_steps_crema = solution[2]
-            self.norm_seq_crema = solution[3]
+            self.comput_time_creama = solution[1]
+            self.n_steps_creama = solution[2]
+            self.norm_seq_creama = solution[3]
         
         else:
             self.b_out = solution[:self.n_nodes]
