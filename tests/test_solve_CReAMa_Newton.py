@@ -69,7 +69,6 @@ class MyTest(unittest.TestCase):
         g.solve_tool(model='CReAMa', method='newton', adjacency='dcm',  max_steps=200, verbose=False)
 
         g.solution_error()
-        g.solution_error_CReAMa()
 
         # test result
         
@@ -90,7 +89,7 @@ class MyTest(unittest.TestCase):
 
         g.solve_tool(model='CReAMa', method='newton', adjacency=network_bin,  max_steps=200, verbose=False)
 
-        g.solution_error_CReAMa()
+        g.solution_error()
 
         # test result
         

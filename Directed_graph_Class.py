@@ -1787,25 +1787,26 @@ class DirectedGraph:
 
 
     def solution_error(self):
-        sol = np.concatenate((self.x, self.y))
-        ex_k_out = expected_out_degree_dcm(sol)
-        ex_k_in = expected_in_degree_dcm(sol)
-        ex_k = np.concatenate((ex_k_out, ex_k_in))
-        k = np.concatenate((self.dseq_out, self.dseq_in))
-        # print(k, ex_k)
-        self.expected_dseq = ex_k
-        self.error = np.linalg.norm(ex_k - k)
+        if (self.x is not None) and (self.y is not None):
+            sol = np.concatenate((self.x, self.y))
+            ex_k_out = expected_out_degree_dcm(sol)
+            ex_k_in = expected_in_degree_dcm(sol)
+            ex_k = np.concatenate((ex_k_out, ex_k_in))
+            k = np.concatenate((self.dseq_out, self.dseq_in))
+            # print(k, ex_k)
+            self.expected_dseq = ex_k
+            self.error = np.linalg.norm(ex_k - k)
+        if (self.b_out is not None) and (self.b_in is not None):
+            sol = np.concatenate([self.b_out,self.b_in])
+            ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency)
+            ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency)
+            ex_s = np.concatenate([ex_s_out,ex_s_in])
+            s = np.concatenate([self.out_strength,self.in_strength])
+            self.expected_stregth_seq = ex_s
+            self.error_strength = np.linalg.norm(ex_s - s)
+            self.relative_error_strength = self.error_strength/self.out_strength.sum()
 
-    def solution_error_CReAMa(self):
-        sol = np.concatenate([self.b_out,self.b_in])
-        ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency)
-        ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency)
-        ex_s = np.concatenate([ex_s_out,ex_s_in])
-        s = np.concatenate([self.out_strength,self.in_strength])
-        self.expected_stregth_seq = ex_s
-        self.error_strength = np.linalg.norm(ex_s - s)
-        self.relative_error_strength = self.error_strength/self.out_strength.sum()
-
+    
     def _set_initial_guess_CReAMa(self, model, method):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
@@ -1871,8 +1872,10 @@ class DirectedGraph:
                     'dcm': pmatrix_dcm
                     }
         
-        self.args_p = (self.n_nodes, np.nonzero(self.dseq_out)[0], np.nonzero(self.dseq_in)[0])
-        self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
+        # Così basta aggiungere il decm e funziona tutto
+        if model in ['dcm']:
+            self.args_p = (self.n_nodes, np.nonzero(self.dseq_out)[0], np.nonzero(self.dseq_in)[0])
+            self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
     
     
     def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
