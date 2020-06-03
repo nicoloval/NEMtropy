@@ -1248,7 +1248,6 @@ def hessian_regulariser_function(B, eps):
     """Trasform input matrix in a positive defined matrix
     input matrix should be numpy.array
     """
-    eps = 1e-3
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = np.linalg.eigh(B)
     ll = np.array([0 if li>eps else eps-li for li in l])
@@ -1351,7 +1350,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='
             # quasinewton hessian approximation
             B = fun_jac(x)  # Jacobian diagonal
             if regularise == True:
-                B = np.maximum(B, B*0 + 1e-10)
+                B = np.maximum(B, B*0 + 1e-8)
         toc_jacfun += time.time() - tic
 
         # discending direction computation
@@ -1758,66 +1757,6 @@ class DirectedGraph:
         self.rnz_dim = self.rnz_n_out + self.rnz_n_in
 
         self.is_reduced = True
-        
-    def _initialize_problem(self, model, method):
-        #TODO: aggiungere decm
-        if ~self.is_reduced:
-           self.degree_reduction()
-
-        self._set_initial_guess(model, method)
-
-        if method in ['quasinewton']:
-            d_fun = {
-                    'dcm': loglikelihood_prime_dcm,
-                    }
-
-            d_fun_jac = {
-                    'dcm': loglikelihood_hessian_diag_dcm,
-                    }
-
-            d_fun_stop = {
-                    'dcm': loglikelihood_dcm,
-                    }
-
-            self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
-
-            self.fun = lambda x: -d_fun[model](x, self.args)
-            self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
-            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
-
-        elif method in ['newton']:
-            d_fun = {
-                    'dcm': loglikelihood_prime_dcm,
-                    }
-
-            d_fun_jac = {
-                    'dcm': loglikelihood_hessian_dcm,
-                    }
-
-            d_fun_stop = {
-                    'dcm': loglikelihood_dcm,
-                    }
-
-            self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
-
-            self.fun = lambda x: -d_fun[model](x, self.args)
-            self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
-            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
-
-        elif method in ['fixed-point']:
-            d_fun = {
-                    'dcm': iterative_dcm,
-                    }
-
-            d_fun_stop = {
-                    'dcm': loglikelihood_dcm,
-                    }
-
-            self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
-
-            self.fun = lambda x: -d_fun[model](x, self.args)
-            self.fun_jac = None 
-            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
 
 
     def _set_initial_guess(self, model, method):
@@ -1873,100 +1812,69 @@ class DirectedGraph:
             self.b_in = (self.in_strength>0).astype(float) / (self.in_strength + 1)
 
 
-    def _initialize_problem_CReAMa(self, model, method):
-        #TODO: merge con _initialize_problem classico
-        if ~self.is_reduced:
-            self.degree_reduction()
+    def _initialize_problem(self, model, method):
         
         if model=='CReAMa':
             self._set_initial_guess_CReAMa(model, method)
+            self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
         else:
+            if ~self.is_reduced:
+                self.degree_reduction()
             self._set_initial_guess(model,method)
-        if method in ['quasinewton']:
-            d_fun = {
-                    'dcm': loglikelihood_prime_dcm,
-                    'CReAMa': loglikelihood_prime_CReAMa,
-                    }
+            self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
+        mod_met = '-'
+        mod_met = mod_met.join([model,method])
 
-            d_fun_jac = {
-                    'dcm': loglikelihood_hessian_diag_dcm,
-                    'CReAMa': loglikelihood_hessian_diag_CReAMa,
-                    }
+        d_fun = {
+                'dcm-newton': lambda x: -loglikelihood_prime_dcm(x,self.args),
+                'dcm-quasinewton': lambda x: -loglikelihood_prime_dcm(x,self.args),
+                'dcm-fixed-point': lambda x: -iterative_dcm(x,self.args),
 
-            d_fun_stop = {
-                    'dcm': loglikelihood_dcm,
-                    'CReAMa': loglikelihood_CReAMa,
-                    }
-            if model=='CReAMa':
-                self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
-            else:
-                self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
-            self.fun = lambda x: -d_fun[model](x, self.args)
-            self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
-            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
-            
-        elif method in ['newton']:
-            d_fun = {
-                    'dcm': loglikelihood_prime_dcm,
-                    'CReAMa': loglikelihood_prime_CReAMa,
-                    }
+                'CReAMa-newton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
+                'CReAMa-quasinewton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
+                'CReAMa-fixed-point': lambda x: -iterative_CReAMa(x,self.args),
+                }
 
-            d_fun_jac = {
-                    'dcm': loglikelihood_hessian_dcm,
-                    'CReAMa': loglikelihood_hessian_CReAMa,
-                    }
+        d_fun_jac = {
+                    'dcm-newton': lambda x: -loglikelihood_hessian_dcm(x,self.args),
+                    'dcm-quasinewton': lambda x: -loglikelihood_hessian_diag_dcm(x,self.args),
+                    'dcm-fixed-point': None,
 
-            d_fun_stop = {
-                    'dcm': loglikelihood_dcm,
-                    'CReAMa': loglikelihood_CReAMa,
+                    'CReAMa-newton': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),
+                    'CReAMa-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa(x,self.args),
+                    'CReAMa-fixed-point': None,
                     }
-            if model=='CReAMa':
-                self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
-            else:
-                self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
-            self.fun = lambda x: -d_fun[model](x, self.args)
-            self.fun_jac = lambda x: -d_fun_jac[model](x, self.args)
-            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
-        
-        elif method in ['fixed-point']:
-            d_fun = {
-                    'dcm': iterative_dcm,
-                    'CReAMa': iterative_CReAMa,
-                    }
+        d_fun_stop = {
+                     'dcm-newton': lambda x: -loglikelihood_dcm(x,self.args),
+                     'dcm-quasinewton': lambda x: -loglikelihood_dcm(x,self.args),
+                     'dcm-fixed-point': lambda x: -loglikelihood_dcm(x,self.args),
 
-            d_fun_stop = {
-                    'dcm': loglikelihood_dcm,
-                    'CReAMa': loglikelihood_CReAMa,
-                    }
-            if model=='CReAMa':
-                self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
-            else:
-                self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
-
-            self.fun = lambda x: -d_fun[model](x, self.args)
-            self.fun_jac = None 
-            self.stop_fun = lambda x: -d_fun_stop[model](x, self.args)
-        else:
+                     'CReAMa-newton': lambda x: -loglikelihood_CReAMa(x,self.args),
+                     'CReAMa-quasinewton': lambda x: -loglikelihood_CReAMa(x,self.args),
+                     'CReAMa-fixed-point': lambda x: -loglikelihood_CReAMa(x,self.args),
+                     }
+        try:
+            self.fun = d_fun[mod_met]
+            self.fun_jac = d_fun_jac[mod_met]
+            self.stop_fun = d_fun_stop[mod_met]
+        except:    
             raise ValueError('Method must be "newton","quasi-newton", or "fixed-point".')
+            
         d_pmatrix = {
                     'dcm': pmatrix_dcm
                     }
-        if model != 'CReAMa':
-            self.args_p = (self.n_nodes, np.nonzero(self.dseq_out)[0], np.nonzero(self.dseq_in)[0])
-            self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
-
-
+        
+        self.args_p = (self.n_nodes, np.nonzero(self.dseq_out)[0], np.nonzero(self.dseq_in)[0])
+        self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
+    
+    
     def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
         if model == 'CReAMa':
             if not isinstance(adjacency,(list,np.ndarray,str)):
                 raise ValueError('adjacency must be a matrix or a method')
             elif isinstance(adjacency,str):
                 #TODO: sostituire questa parte nell'elif con una call a _solve problem
-                self.initial_guess = initial_guess
-                self._initialize_problem_CReAMa(adjacency, method)
-                x0 = np.concatenate((self.r_x, self.r_y))
-                sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
-                self._set_solved_problem(sol)
+                self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
                 self.adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
             elif isinstance(adjacency,list):
                 self.adjacency = np.array(adjacency)
@@ -1977,27 +1885,13 @@ class DirectedGraph:
                 raise ValueError(r'adjacency matrix must be $n \times n$')
 
             self.initial_guess = 'strengths'
-            self._initialize_problem_CReAMa(model,method)
+            self._initialize_problem(model,method)
             x0 = np.concatenate((self.b_out, self.b_in))
             
             sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
 
             self.b_out = sol[:self.n_nodes]
             self.b_in = sol[self.n_nodes:]
-            
-        else:
-            
-            #TODO: eliminare questa parte dopo l'else
-            self.initial_guess = initial_guess
-            self._initialize_problem(model, method)
-            x0 = np.concatenate((self.r_x, self.r_y))
-            # print('x0', x0)
-            # print('index',self.nz_index_out, self.nz_index_in)
-
-            sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
-
-            self._set_solved_problem(sol)
-
 
     def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False):
         """ function to switch around the various problems
