@@ -1248,6 +1248,7 @@ def hessian_regulariser_function(B, eps):
     """Trasform input matrix in a positive defined matrix
     input matrix should be numpy.array
     """
+    eps = 1e-8
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = np.linalg.eigh(B)
     ll = np.array([0 if li>eps else eps-li for li in l])
@@ -1719,7 +1720,8 @@ class DirectedGraph:
 
 
     def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
-
+        
+        self.full_return = full_return
         self.initial_guess = initial_guess
         self._initialize_problem(model, method)
         x0 = np.concatenate((self.r_x, self.r_y))
@@ -1732,14 +1734,19 @@ class DirectedGraph:
 
 
     def _set_solved_problem(self, solution):
-        if ~self.full_return:
+        if self.full_return:
+            self.r_xy = solution[0]
+            self.comput_time = solution[1]
+            self.n_steps = solution[2]
+            self.norm_seq = solution[3]
+        else:
             self.r_xy = solution 
             
-            self.r_x = self.r_xy[:self.rnz_n_out]
-            self.r_y = self.r_xy[self.rnz_n_out:]
+        self.r_x = self.r_xy[:self.rnz_n_out]
+        self.r_y = self.r_xy[self.rnz_n_out:]
 
-            self.x = self.r_x[self.r_invert_dseq]
-            self.y = self.r_y[self.r_invert_dseq]
+        self.x = self.r_x[self.r_invert_dseq]
+        self.y = self.r_y[self.r_invert_dseq]
         
         
     def degree_reduction(self):
@@ -1883,15 +1890,27 @@ class DirectedGraph:
 
             if self.adjacency.shape[0] != self.adjacency.shape[1]:
                 raise ValueError(r'adjacency matrix must be $n \times n$')
-
+            
+            self.full_return = full_return
             self.initial_guess = 'strengths'
             self._initialize_problem(model,method)
             x0 = np.concatenate((self.b_out, self.b_in))
             
             sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
-
-            self.b_out = sol[:self.n_nodes]
-            self.b_in = sol[self.n_nodes:]
+            
+            self._set_solved_problem_CReAMa(sol)
+    
+    def _set_solved_problem_CReAMa(self, solution):
+        if self.full_return:
+            self.b_out = solution[0][:self.n_nodes]
+            self.b_in = solution[0][self.n_nodes:]
+            self.comput_time_crema = solution[1]
+            self.n_steps_crema = solution[2]
+            self.norm_seq_crema = solution[3]
+        
+        else:
+            self.b_out = solution[:self.n_nodes]
+            self.b_in = solution[self.n_nodes:]
 
     def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False):
         """ function to switch around the various problems
