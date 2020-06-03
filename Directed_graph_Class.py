@@ -1928,7 +1928,6 @@ class DirectedGraph:
         if model in ['dcm']:
             self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
         elif model in ['CReAMa']:
-            self.last_model =
             self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
 
 
