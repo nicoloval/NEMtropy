@@ -229,7 +229,7 @@ def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None
         return A
 
                                            
-@jit(forceobj=True)
+jit(forceobj=True)
 def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=False, seed=None):
     if sym==False:
         np.random.seed(seed = seed)
@@ -1298,7 +1298,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='
     toc_init = 0
     tic = time.time()
 
-    stop_fun = g  # TODO: change g to stop_fun in the header and all functions below
+    stop_fun = g  #TODO: change g to stop_fun in the header and all functions below
 
     # algorithm
     beta = .5  # to compute alpha
@@ -1536,12 +1536,6 @@ class DirectedGraph:
         self._initialize_graph(adjacency=adjacency, edgelist=edgelist,
                                degree_sequence=degree_sequence, strength_sequence=strength_sequence)
         self.avg_mat = None
-        self.x = None
-        self.y = None
-        self.xy = None
-        self.b_out = None
-        self.b_in = None
-        
 
         self.initial_guess = None
         # Reduced problem parameters
@@ -1558,6 +1552,12 @@ class DirectedGraph:
         self.r_multiplicity = None
 
         # Problem solutions
+        self.x = None
+        self.y = None
+        self.xy = None
+        self.b_out = None
+        self.b_in = None
+        # reduced solutions
         self.r_x = None
         self.r_y = None
         self.r_xy = None
@@ -1572,6 +1572,7 @@ class DirectedGraph:
         self.rnz_dseq_in = None
         
         # model
+        self.x0 = None
         self.error = None
         self.error_strength = None
         self.relative_error_strength = None
@@ -1734,7 +1735,7 @@ class DirectedGraph:
         self._set_solved_problem(sol)
 
 
-    def _set_solved_problem(self, solution):
+    def _set_solved_problem_dcm(self, solution):
         if self.full_return:
             self.r_xy = solution[0]
             self.comput_time = solution[1]
@@ -1749,6 +1750,31 @@ class DirectedGraph:
         self.x = self.r_x[self.r_invert_dseq]
         self.y = self.r_y[self.r_invert_dseq]
         
+
+    def _set_solved_problem_decm(self, solution):
+        if self.full_return:
+            self.r_xy = solution[0]
+            self.comput_time = solution[1]
+            self.n_steps = solution[2]
+            self.norm_seq = solution[3]
+        else:
+            self.r_xy = solution 
+
+        self.x = self.r_xy[:self.n_nodes]
+        self.y = self.r_xy[self.n_nodes: 2*self.n_nodes]
+        self.b_out = self.r_xy[2*self.n_nodes:3*self.n_nodes]
+        self.b_in = self.r_xy[3*self.n_nodes:]
+ 
+
+    def _set_solved_problem(self, solution):
+        model = self.last_model
+        if model == 'dcm':
+            self._set_solved_problem_dcm(solution)
+        elif model == 'decm':
+            self._set_solved_problem_decm(solution)
+        elif model == 'CReAMa':
+            self._set_solved_problem_CReAMa(solution)
+
         
     def degree_reduction(self):
         self.dseq = np.array(list(zip(self.dseq_out, self.dseq_in)))
@@ -1767,9 +1793,23 @@ class DirectedGraph:
         self.is_reduced = True
 
 
-    def _set_initial_guess(self, model, method):
+    def _set_initial_guess(self, model):
+
+        if model == 'dcm':
+            self._set_initial_guess_dcm()
+        elif model == 'decm':
+            self._set_initial_guess_decm()
+        elif model == 'CReAMa':
+            self._set_initial_guess_CReAMa()
+
+
+    def _set_initial_guess_dcm(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+
+        if ~self.is_reduced:
+            self.degree_reduction()
+
         if self.initial_guess is None:
             self.r_x = self.rnz_dseq_out / (np.sqrt(self.n_edges) + 1)  # This +1 increases the stability of the solutions.
             self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
@@ -1787,6 +1827,51 @@ class DirectedGraph:
         self.r_y[self.rnz_dseq_in == 0] = 0
 
         self.x0 = np.concatenate((self.r_x, self.r_y))
+
+
+    def _set_initial_guess_CReAMa(self):
+        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        #TODO: mettere un self.is_weighted bool 
+        if self.initial_guess is None:
+            self.b_out = (self.out_strength>0).astype(float) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
+            self.b_in = (self.in_strength>0).astype(float) / self.in_strength.sum()
+        elif self.initial_guess == 'strengths':
+            self.b_out = (self.out_strength>0).astype(float) / (self.out_strength + 1)
+            self.b_in = (self.in_strength>0).astype(float) / (self.in_strength + 1)
+
+        self.x0 = np.concatenate((self.b_out, self.b_in))
+
+
+    def _set_initial_guess_decm(self):
+        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        if self.initial_guess is None:
+            self.x = self.dseq_out.astype(float) / (self.n_edges + 1)
+            self.y = self.dseq_in_in.astype(float) / (self.n_edges + 1)
+            self.b_out = self.out_strength.astype(float) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
+            self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
+        elif self.initial_guess == 'strengths':
+            self.x = self.dseq_out.astype(float) / (self.dseq_out + 1)
+            self.y = self.dseq_in.astype(float) / (self.dseq_in + 1)
+            self.b_out = self.out_strength.astype(float) / (self.out_strength + 1)
+            self.b_in = self.in_strength.astype(float) / (self.in_strength + 1)
+        elif self.initial_guess == 'random':
+            self.x = np.random.rand(self.n_nodes).astype(np.float64)
+            self.y = np.random.rand(self.n_nodes).astype(np.float64)
+            self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
+            self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
+        elif self.initial_guess == 'uniform':
+            self.x = 0.9*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.y = 0.9*np.ones(self.n_nodes, dtype=np.float64)
+            self.b_out = 0.9*np.ones(self.n_nodes, dtype=np.float64) 
+            self.b_in = 0.9*np.ones(self.n_nodes, dtype=np.float64)
+ 
+        
+        self.x[self.rnz_dseq_out == 0] = 0
+        self.y[self.rnz_dseq_in == 0] = 0
+
+        self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
 
 
     def solution_error(self):
@@ -1810,35 +1895,32 @@ class DirectedGraph:
                 self.error_strength = np.linalg.norm(ex_s - s)
                 self.relative_error_strength = self.error_strength/self.out_strength.sum()
         # potremmo strutturarlo così per evitare ridondanze
-        #elif self.last_model in ['decm']:
-
-
+        elif self.last_model in ['decm']:
+                sol = np.concatenate((self.x, self.y, self.b_out, self.b_in))
+                ex = expected_decm(sol)
+                k = np.concatenate((self.dseq_out, self.dseq_in, self.out_strength, self.in_strength))
+                self.expected_dseq = ex[:2*self.n_nodes]
+                self.expected_stregth_seq = ex[2*self.n_nodes:]
+                self.error = np.linalg.norm(ex - k)
+                self.relative_error_strength = self.error/self.out_strength.sum()
     
-    def _set_initial_guess_CReAMa(self, model, method):
-        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
-        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
-        #TODO: unificare con initial_guess
-        #TODO: mettere un self.is_weighted bool 
-        if self.initial_guess is None:
-            self.b_out = (self.out_strength>0).astype(float) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
-            self.b_in = (self.in_strength>0).astype(float) / self.in_strength.sum()
-        elif self.initial_guess == 'strengths':
-            self.b_out = (self.out_strength>0).astype(float) / (self.out_strength + 1)
-            self.b_in = (self.in_strength>0).astype(float) / (self.in_strength + 1)
 
-        self.x0 = np.concatenate((self.b_out, self.b_in))
+    def _set_args(self, model):
+
+        if model=='CReAMa':
+            self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
+        elif model == 'dcm':
+            self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
+        elif model == 'decm':
+            self.args = (self.dseq_out, self.dseq_in, self.out_strength, self.in_strength) 
 
 
     def _initialize_problem(self, model, method):
         
-        if model=='CReAMa':
-            self._set_initial_guess_CReAMa(model, method)
-            self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
-        else:
-            if ~self.is_reduced:
-                self.degree_reduction()
-            self._set_initial_guess(model,method)
-            self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
+        self._set_initial_guess(model)
+
+        self._set_args(model)
+
         mod_met = '-'
         mod_met = mod_met.join([model,method])
 
@@ -1847,9 +1929,14 @@ class DirectedGraph:
                 'dcm-quasinewton': lambda x: -loglikelihood_prime_dcm(x,self.args),
                 'dcm-fixed-point': lambda x: -iterative_dcm(x,self.args),
 
+
                 'CReAMa-newton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
                 'CReAMa-quasinewton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
                 'CReAMa-fixed-point': lambda x: -iterative_CReAMa(x,self.args),
+
+                'decm-newton': lambda x: -loglikelihood_prime_decm(x,self.args),
+                'decm-quasinewton': lambda x: -loglikelihood_prime_decm(x,self.args),
+                'decm-fixed-point': lambda x: iterative_decm(x,self.args),
                 }
 
         d_fun_jac = {
@@ -1860,6 +1947,10 @@ class DirectedGraph:
                     'CReAMa-newton': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),
                     'CReAMa-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa(x,self.args),
                     'CReAMa-fixed-point': None,
+
+                    'decm-newton': lambda x: -loglikelihood_hessian_decm(x,self.args),
+                    'decm-quasinewton': lambda x: -loglikelihood_hessian_diag_decm(x,self.args),
+                    'decm-fixed-point': None,
                     }
         d_fun_stop = {
                      'dcm-newton': lambda x: -loglikelihood_dcm(x,self.args),
@@ -1869,6 +1960,10 @@ class DirectedGraph:
                      'CReAMa-newton': lambda x: -loglikelihood_CReAMa(x,self.args),
                      'CReAMa-quasinewton': lambda x: -loglikelihood_CReAMa(x,self.args),
                      'CReAMa-fixed-point': lambda x: -loglikelihood_CReAMa(x,self.args),
+
+                     'decm-newton': lambda x: -loglikelihood_decm(x,self.args),
+                     'decm-quasinewton': lambda x: -loglikelihood_decm(x,self.args),
+                     'decm-fixed-point': lambda x: -loglikelihood_decm(x,self.args),
                      }
         try:
             self.fun = d_fun[mod_met]
@@ -1877,6 +1972,7 @@ class DirectedGraph:
         except:    
             raise ValueError('Method must be "newton","quasi-newton", or "fixed-point".')
             
+        #TODO: mancano metodi
         d_pmatrix = {
                     'dcm': pmatrix_dcm
                     }
@@ -1911,6 +2007,7 @@ class DirectedGraph:
             
         self._set_solved_problem_CReAMa(sol)
     
+
     def _set_solved_problem_CReAMa(self, solution):
         if self.full_return:
             self.b_out = solution[0][:self.n_nodes]
@@ -1923,11 +2020,12 @@ class DirectedGraph:
             self.b_out = solution[:self.n_nodes]
             self.b_in = solution[self.n_nodes:]
 
+
     def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False):
         """ function to switch around the various problems
         """
         #TODO: aggiungere tutti i metodi
-        if model in ['dcm']:
+        if model in ['dcm', 'decm']:
             self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
         elif model in ['CReAMa']:
             self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)

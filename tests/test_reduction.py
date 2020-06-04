@@ -24,7 +24,7 @@ class MyTest(unittest.TestCase):
         g.degree_reduction()
 
         g.initial_guess = 'degrees'
-        g._set_initial_guess('dcm', 'quasinewton')
+        g._set_initial_guess('dcm')
 
         # debug
         # print(g.r_dseq_out)
@@ -33,6 +33,7 @@ class MyTest(unittest.TestCase):
         # print(g.rnz_dseq_in)
 
         sol = np.concatenate((g.r_x, g.r_y))
+        g.last_model = 'dcm'
         g._set_solved_problem(sol)
 
         # test result

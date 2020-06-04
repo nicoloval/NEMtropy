@@ -25,7 +25,7 @@ class MyTest(unittest.TestCase):
         g.degree_reduction()
         g.initial_guess='uniform'
         g._initialize_problem('dcm', 'quasinewton')
-        x0 = np.concatenate((g.r_x, g.r_y))
+        x0 = g.x0 
 
 	# call loglikelihood function 
         f_sample = -g.stop_fun(x0)
@@ -73,9 +73,10 @@ class MyTest(unittest.TestCase):
         g.degree_reduction()
         g.initial_guess='uniform'
         g._initialize_problem('dcm', 'quasinewton')
-        x0 = np.concatenate((g.r_x, g.r_y))
+        x0 = g.x0 
 
         f_sample = -g.fun(x0)
+        g.last_model = 'dcm'
         g._set_solved_problem(f_sample)
         f_full = np.concatenate((g.x, g.y))
         # f_correct = np.array([3.2, 1.2, 3.2, 1.2])
@@ -135,9 +136,10 @@ class MyTest(unittest.TestCase):
         g.degree_reduction()
         g.initial_guess='uniform'
         g._initialize_problem('dcm', 'quasinewton')
-        x0 = np.concatenate((g.r_x, g.r_y))
+        x0 = g.x0 
 
         f_sample = -g.fun_jac(x0)
+        g.last_model = 'dcm'
         g._set_solved_problem(f_sample)
         f_full = np.concatenate((g.x, g.y))
         # f_correct = np.array([3.2, 1.2, 3.2, 1.2])
@@ -226,6 +228,7 @@ class MyTest(unittest.TestCase):
         x0 = 0.5*np.ones(4) 
 
         f_sample = -g.fun(x0)
+        g.last_model = 'dcm'
         g._set_solved_problem(f_sample)
         f_full = np.concatenate((g.x, g.y))
         f_correct = np.array([2.5, 1.25, 1.25, 2.5, 1.25, 1.25])
