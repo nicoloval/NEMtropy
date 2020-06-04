@@ -1727,9 +1727,7 @@ class DirectedGraph:
         self.full_return = full_return
         self.initial_guess = initial_guess
         self._initialize_problem(model, method)
-        x0 = np.concatenate((self.r_x, self.r_y))
-        # print('x0', x0)
-        # print('index',self.nz_index_out, self.nz_index_in)
+        x0 = self.x0 
 
         sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
 
@@ -1788,6 +1786,8 @@ class DirectedGraph:
         self.r_x[self.rnz_dseq_out == 0] = 0
         self.r_y[self.rnz_dseq_in == 0] = 0
 
+        self.x0 = np.concatenate((self.r_x, self.r_y))
+
 
     def solution_error(self):
         if self.last_model in ['dcm','CReAMa']:
@@ -1825,6 +1825,8 @@ class DirectedGraph:
         elif self.initial_guess == 'strengths':
             self.b_out = (self.out_strength>0).astype(float) / (self.out_strength + 1)
             self.b_in = (self.in_strength>0).astype(float) / (self.in_strength + 1)
+
+        self.x0 = np.concatenate((self.b_out, self.b_in))
 
 
     def _initialize_problem(self, model, method):
@@ -1903,7 +1905,7 @@ class DirectedGraph:
         self.full_return = full_return
         self.initial_guess = 'strengths'
         self._initialize_problem(model,method)
-        x0 = np.concatenate((self.b_out, self.b_in))
+        x0 = self.x0 
             
         sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
             
