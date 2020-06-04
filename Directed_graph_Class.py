@@ -179,9 +179,8 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
     return f
 
 
-
-
-def random_binary_matrix_generator_nozeros(n, sym=False, seed=None):
+@jit(forceobj=True)
+def random_binary_matrix_generator_dense(n, sym=False, seed=None):
         if sym == False:
                 np.random.seed(seed = seed)
                 A = np.random.randint(0, 2, size=(n, n))
@@ -189,15 +188,18 @@ def random_binary_matrix_generator_nozeros(n, sym=False, seed=None):
                 for i in range(n):
                     A[i, i] = 0
                 k_in = np.sum(A, axis=0)
-                for ind, k in enumerate(k_in):
-                        if k==0:
-                                A[0, ind] = 1
                 k_out = np.sum(A, axis=1)
-                for ind, k in enumerate(k_out):
-                        if k==0:
-                                A[ind, 0] = 1
-            
+                for ind, ki, ko in zip(np.arange(k_in.shape[0]),k_in,k_out):
+                    if (ki==0)and(ko==0):
+                        while((np.sum(A[:,ind])==0) and (np.sum(A[ind,:])==0)):
+                            if np.random.random() >0.5:
+                                A[np.random.randint(A.shape[0]), ind] = 1
+                            else:
+                                A[ind,np.random.randint(A.shape[0])] = 1
+                            
+                            A[ind,ind] = 0
         return A
+
 
 @jit(forceobj=True)
 def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None):
@@ -207,13 +209,16 @@ def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None
         np.fill_diagonal(A,0)
         
         k_in = np.sum(A, axis=0)
-        for ind, k in enumerate(k_in):
-            if k==0:
-                A[0, ind] = np.random.random() * sup_ext
         k_out = np.sum(A, axis=1)
-        for ind, k in enumerate(k_out):
-            if k==0:
-                A[ind, 0] = np.random.random() * sup_ext
+        for ind, ki, ko in zip(np.arange(k_in.shape[0]),k_in,k_out):
+            if (ki==0) and (ko==0):
+                while((np.sum(A[:,ind])==0) and (np.sum(A[ind,:])==0)):
+                    if np.random.random() >0.5:
+                        A[np.random.randint(A.shape[0]), ind] = np.random.random() * sup_ext
+                    else:
+                        A[ind,np.random.randint(A.shape[0])] = np.random.random() * sup_ext
+                            
+                    A[ind,ind] = 0
         return A
     else:
         np.random.seed(seed = seed)
@@ -224,29 +229,35 @@ def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None
         degree = np.sum(A, axis=0)
         for ind, k in enumerate(degree):
             if k==0:
-                A[0, ind] = np.random.random() * sup_ext
-                A[ind, 0] = A[0, ind]
+                while(np.sum(A[:,ind])==0):
+                    indices = np.random.randint(A.shape[0])
+                    if indices!= ind:
+                        A[0, indices] = np.random.random() * sup_ext
+                        A[indices, 0] = A[0, indices]
         return A
 
-                                           
+
 jit(forceobj=True)
-def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=False, seed=None):
+def random_binary_matrix_generator_custom_density(n, p=0.1 , sym=False, seed=None):
     if sym==False:
         np.random.seed(seed = seed)
         A = np.zeros(shape=(n, n))
         for i in range(n):
             for j in range(n):
                 if np.random.random()<=p:
-                    A[i,j] = np.random.random()*sup_ext
+                    A[i,j] = 1
         np.fill_diagonal(A,0)
         k_in = np.sum(A, axis=0)
-        for ind, k in enumerate(k_in):
-            if k==0:
-                A[0, ind] = np.random.random() * sup_ext
         k_out = np.sum(A, axis=1)
-        for ind, k in enumerate(k_out):
-            if k==0:
-                A[ind, 0] = np.random.random() * sup_ext
+        for ind, ki, ko in zip(np.arange(k_in.shape[0]),k_in,k_out):
+            if (ki==0) and (ko==0):
+                while((np.sum(A[:,ind])==0) and (np.sum(A[ind,:])==0)):
+                    if np.random.random() >0.5:
+                        A[np.random.randint(A.shape[0]), ind] = 1
+                    else:
+                        A[ind,np.random.randint(A.shape[0])] = 1
+                            
+                    A[ind,ind] = 0
         return A
     else:
         np.random.seed(seed = seed)
@@ -259,9 +270,54 @@ def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=
         degree = np.sum(A, axis=0)
         for ind, k in enumerate(degree):
             if k==0:
-                A[0, ind] = np.random.random() * sup_ext
-                A[ind, 0] = A[0, ind]
+                while(np.sum(A[:,ind])==0):
+                    indices = np.random.randint(A.shape[0])
+                    if indices!= ind:
+                        A[0, indices] = np.random.random() * sup_ext
+                        A[indices, 0] = A[0, indices]
         return A
+  
+
+jit(forceobj=True)
+def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=False, seed=None):
+    if sym==False:
+        np.random.seed(seed = seed)
+        A = np.zeros(shape=(n, n))
+        for i in range(n):
+            for j in range(n):
+                if np.random.random()<=p:
+                    A[i,j] = np.random.random()*sup_ext
+        np.fill_diagonal(A,0)
+        k_in = np.sum(A, axis=0)
+        k_out = np.sum(A, axis=1)
+        for ind, ki, ko in zip(np.arange(k_in.shape[0]),k_in,k_out):
+            if (ki==0) and (ko==0):
+                while((np.sum(A[:,ind])==0) and (np.sum(A[ind,:])==0)):
+                    if np.random.random() >0.5:
+                        A[np.random.randint(A.shape[0]), ind] = np.random.random() * sup_ext
+                    else:
+                        A[ind,np.random.randint(A.shape[0])] = np.random.random() * sup_ext
+                            
+                    A[ind,ind] = 0
+        return A
+    else:
+        np.random.seed(seed = seed)
+        A = np.zeros(shape=(n, n))
+        for i in range(n):
+            for j in range(i+1,n):
+                if np.random.random()<=p:
+                    A[i,j] = np.random.random()*sup_ext
+                    A[j,i] = A[i,j]
+        degree = np.sum(A, axis=0)
+        for ind, k in enumerate(degree):
+            if k==0:
+                while(np.sum(A[:,ind])==0):
+                    indices = np.random.randint(A.shape[0])
+                    if indices!= ind:
+                        A[0, indices] = np.random.random() * sup_ext
+                        A[indices, 0] = A[0, indices]
+        return A
+
 
 @jit(nopython=True)
 def loglikelihood_dcm(x, args):
