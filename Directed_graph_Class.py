@@ -202,7 +202,7 @@ def random_binary_matrix_generator_dense(n, sym=False, seed=None):
 
 
 @jit(forceobj=True)
-def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None):
+def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None, dtype = np.float64):
     if sym==False:
         np.random.seed(seed = seed)
         A = np.random.random(size=(n, n)) * sup_ext
@@ -219,7 +219,7 @@ def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None
                         A[ind,np.random.randint(A.shape[0])] = np.random.random() * sup_ext
                             
                     A[ind,ind] = 0
-        return A
+        return A.astype(dtype)
     else:
         np.random.seed(seed = seed)
         b = np.random.random(size=(n, n)) * sup_ext
@@ -234,7 +234,7 @@ def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None
                     if indices!= ind:
                         A[0, indices] = np.random.random() * sup_ext
                         A[indices, 0] = A[0, indices]
-        return A
+        return A.astype(dtype)
 
 
 jit(forceobj=True)
@@ -279,7 +279,7 @@ def random_binary_matrix_generator_custom_density(n, p=0.1 , sym=False, seed=Non
   
 
 jit(forceobj=True)
-def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=False, seed=None):
+def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=False, seed=None, dtype = np.float64):
     if sym==False:
         np.random.seed(seed = seed)
         A = np.zeros(shape=(n, n))
@@ -299,7 +299,7 @@ def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=
                         A[ind,np.random.randint(A.shape[0])] = np.random.random() * sup_ext
                             
                     A[ind,ind] = 0
-        return A
+        return A.astype(dtype)
     else:
         np.random.seed(seed = seed)
         A = np.zeros(shape=(n, n))
@@ -316,7 +316,7 @@ def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=
                     if indices!= ind:
                         A[0, indices] = np.random.random() * sup_ext
                         A[indices, 0] = A[0, indices]
-        return A
+        return A.astype(dtype)
 
 
 @jit(nopython=True)
@@ -736,7 +736,7 @@ def loglikelihood_hessian_diag_dcm_loop(x, args):
         f[i] = fx - k_out[i]/(x[i]*x[i])
 
     for j in range(n_in):
-        fy = 0
+        fy = 0 
         for i in range(n_out):
             fy += x[i]*x[i]/((1 + x[j+n_out]*x[i])*(1 + x[j+n_out]*x[i]))
         # original prime
@@ -1613,6 +1613,7 @@ class DirectedGraph:
         self.xy = None
         self.b_out = None
         self.b_in = None
+
         # reduced solutions
         self.r_x = None
         self.r_y = None
