@@ -1363,8 +1363,8 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
     n_steps = 0
     x = x0  # initial point
 
-    # norm = np.linalg.norm(fun(x), ord=np.inf)
-    norm = np.linalg.norm(fun(x))
+    f = fun(x)
+    norm = np.linalg.norm(f)
     diff = 1
 
     if full_return:
@@ -1415,21 +1415,16 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         # discending direction computation
         tic = time.time()
         if method == 'newton':
-            # print(l)
-            # print('here', B, fun(x))
-            # print('max', np.amax(B))
-            # print('min', np.amin(B))
-            # print('sum', np.sum(B))
-            dx = np.linalg.solve(B, - fun(x))
+            dx = np.linalg.solve(B, - f)
         elif method == 'quasinewton':
-            dx = - fun(x)/B
+            dx = - f/B
         elif method == 'fixed-point':
-            dx = fun(x) - x
+            dx = f - x
         toc_dx += time.time() - tic
 
         # backtraking line search
         tic = time.time()
-        if linsearch == True:
+        if linsearch:
             alfa = 1 
             i = 0
             #TODO: fun(x) non e' il graident di step_funx
@@ -1441,8 +1436,9 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
             while sufficient_decrease_condition(s_old, \
                 s_new, alfa, fun(x), dx) == False and i<50:
             """
-            while sufficient_decrease_condition(step_fun(x), \
-                step_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
+            s_old = step_fun(x)
+            while sufficient_decrease_condition(s_old, \
+                step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
                 alfa *= beta
                 i +=1
         else:
@@ -1466,9 +1462,10 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         x = x + alfa*dx
         toc_update += time.time() - tic
 
+        f = fun(x)
+
         # stopping condition computation
-        # norm = np.linalg.norm(fun(x), ord=np.inf)
-        norm = np.linalg.norm(fun(x))
+        norm = np.linalg.norm(f)
         diff = np.linalg.norm(x - x_old)
 
         if full_return:
@@ -1480,7 +1477,7 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         if verbose == True:
             print('step {}'.format(n_steps))
             print('alpha = {}'.format(alfa))
-            print('fun = {}'.format(fun(x)))
+            print('fun = {}'.format(f))
             print('dx = {}'.format(dx))
             print('x = {}'.format(x))
             print('|f(x)| = {}'.format(norm))
