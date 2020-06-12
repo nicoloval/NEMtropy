@@ -1350,15 +1350,13 @@ def expected_in_stregth_CReAMa(sol,adj):
 
 
 
-def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
+def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
 
     tic_all = time.time()
     toc_init = 0
     tic = time.time()
-
-    stop_fun = g  #TODO: change g to stop_fun in the header and all functions below
 
     # algorithm
     beta = .5  # to compute alpha
@@ -1434,7 +1432,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='
         if linsearch == True:
             alfa = 1 
             i = 0
-            #TODO: fun(x) non e' il graident di stop_funx
+            #TODO: fun(x) non e' il graident di step_funx
             #TODO: check dianati fornisce una direzione di discesa 
 
             """
@@ -1443,8 +1441,8 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='
             while sufficient_decrease_condition(s_old, \
                 s_new, alfa, fun(x), dx) == False and i<50:
             """
-            while sufficient_decrease_condition(stop_fun(x), \
-                stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
+            while sufficient_decrease_condition(step_fun(x), \
+                step_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
                 alfa *= beta
                 i +=1
         else:
@@ -1465,11 +1463,7 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='
         tic = time.time()
         # solution update
         # direction= dx@fun(x).T
-        if method in ['newton', 'quasinewton']:
-            x = x + alfa*dx
-        if method in ['fixed-point']:
-            # x = alfa*(x + dx)
-            x = x + alfa*dx
+        x = x + alfa*dx
         toc_update += time.time() - tic
 
         # stopping condition computation
@@ -1490,13 +1484,6 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='
             print('dx = {}'.format(dx))
             print('x = {}'.format(x))
             print('|f(x)| = {}'.format(norm))
-
-            # print('x_old = {}'.format(x_old))
-            # print('fun_old = {}'.format(fun(x_old)))
-            # print('H_old = {}'.format(fun_jac(x_old)))
-
-            # if method in ['newton', 'quasinewton']:
-                # print('B = {}'.format(B))
 
     toc_loop = time.time() - tic_loop
     toc_all = time.time() - tic_all
@@ -1801,7 +1788,7 @@ class DirectedGraph:
         self._initialize_problem(model, method)
         x0 = self.x0 
 
-        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
 
         self._set_solved_problem(sol)
 
@@ -2023,7 +2010,7 @@ class DirectedGraph:
                     'decm-quasinewton': lambda x: -loglikelihood_hessian_diag_decm(x,self.args),
                     'decm-fixed-point': None,
                     }
-        d_fun_stop = {
+        d_fun_step = {
                      'dcm-newton': lambda x: -loglikelihood_dcm(x,self.args),
                      'dcm-quasinewton': lambda x: -loglikelihood_dcm(x,self.args),
                      'dcm-fixed-point': lambda x: -loglikelihood_dcm(x,self.args),
@@ -2039,7 +2026,7 @@ class DirectedGraph:
         try:
             self.fun = d_fun[mod_met]
             self.fun_jac = d_fun_jac[mod_met]
-            self.stop_fun = d_fun_stop[mod_met]
+            self.step_fun = d_fun_step[mod_met]
         except:    
             raise ValueError('Method must be "newton","quasi-newton", or "fixed-point".')
             
@@ -2074,7 +2061,7 @@ class DirectedGraph:
         self._initialize_problem(model,method)
         x0 = self.x0 
             
-        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
+        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
             
         self._set_solved_problem_CReAMa(sol)
     

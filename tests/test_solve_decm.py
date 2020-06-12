@@ -33,9 +33,9 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
 
         fun = lambda x: sample.iterative_decm(x, args)
-        stop_fun = lambda x: -sample.loglikelihood_decm(x, args)
+        step_fun = lambda x: -sample.loglikelihood_decm(x, args)
 
-        sol = sample.solver(x0, fun=fun, g=stop_fun, tol=1e-6, eps=1e-10, max_steps=300, method='fixed-point', verbose=False, regularise=True, full_return = False)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, tol=1e-6, eps=1e-10, max_steps=300, method='fixed-point', verbose=False, regularise=True, full_return = False)
 
         ek = sample.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
@@ -67,9 +67,9 @@ class MyTest(unittest.TestCase):
 
         fun = lambda x: -sample.loglikelihood_prime_decm(x, args)
         fun_jac = lambda x: -sample.loglikelihood_hessian_diag_decm(x, args)
-        stop_fun = lambda x: -sample.loglikelihood_decm(x, args)
+        step_fun = lambda x: -sample.loglikelihood_decm(x, args)
 
-        sol = sample.solver(x0, fun=fun, g=stop_fun, fun_jac=fun_jac, tol=1e-6, eps=1e-10, max_steps=300, method='quasinewton', verbose=False, regularise=True, full_return = False)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac, tol=1e-6, eps=1e-10, max_steps=300, method='quasinewton', verbose=False, regularise=True, full_return = False)
 
         ek = sample.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
@@ -101,9 +101,9 @@ class MyTest(unittest.TestCase):
 
         fun = lambda x: -sample.loglikelihood_prime_decm(x, args)
         fun_jac = lambda x: -sample.loglikelihood_hessian_decm(x, args)
-        stop_fun = lambda x: -sample.loglikelihood_decm(x, args)
+        step_fun = lambda x: -sample.loglikelihood_decm(x, args)
 
-        sol = sample.solver(x0, fun=fun, g=stop_fun, fun_jac=fun_jac, tol=1e-6, eps=1e-3, max_steps=300, method='newton', verbose=False, regularise=True, full_return = False)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac, tol=1e-6, eps=1e-3, max_steps=300, method='newton', verbose=False, regularise=True, full_return = False)
 
         ek = sample.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))

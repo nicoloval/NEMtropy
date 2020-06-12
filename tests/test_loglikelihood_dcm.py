@@ -28,7 +28,7 @@ class MyTest(unittest.TestCase):
         x0 = np.concatenate((g.r_x, g.r_y))
 
 	# call loglikelihood function 
-        f_sample = -g.stop_fun(x0)
+        f_sample = -g.step_fun(x0)
         f_correct = 4*np.log(1/2) - 3*np.log(5/4)
         # debug
         # print(x0)
