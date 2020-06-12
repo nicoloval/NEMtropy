@@ -39,26 +39,6 @@ class MyTest(unittest.TestCase):
         self.assertTrue(round(f_sample, 3) == round(f_correct, 3))
 
 
-    def test_loglikelihood_dcm_notrd(self):
-        n, seed = (3, 42)
-        a = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        k_out = np.sum(a > 0, 1) 
-        k_in = np.sum(a > 0, 0)
-        nz_ind_out = np.nonzero(k_out)[0]
-        nz_ind_in = np.nonzero(k_in)[0]
-        args = (k_out, k_in, nz_ind_out, nz_ind_in)
-        x = 0.5*np.ones(len(k_out)+len(k_in))
-	# call loglikelihood function 
-        f_sample = sample.loglikelihood_dcm_notrd(x, args )
-        f_correct = 4*np.log(1/2) - 3*np.log(5/4)
-        # debug
-        # print(args)
-        # print(f_sample)
-        # print(f_correct)
-
-        self.assertTrue(round(f_sample, 3) == round(f_correct, 3))
-
-
     def test_loglikelihood_prime_dcm(self):
         """
         a = np.array([[0, 1, 1],
@@ -98,28 +78,6 @@ class MyTest(unittest.TestCase):
 
         # test result
         self.assertTrue(np.allclose(f_full, f_notrd))
-
-
-    def test_loglikelihood_prime_dcm_notrd(self):
-        a = np.array([[0, 1, 1],
-                      [1, 0, 1],
-                      [0, 1, 0]])
-        k_out = np.sum(a > 0, 1) 
-        k_in = np.sum(a > 0, 0)
-        nz_ind_out = np.nonzero(k_out)[0]
-        nz_ind_in = np.nonzero(k_in)[0]
-        args = (k_out, k_in, nz_ind_out, nz_ind_in)
-        x = 0.5*np.ones(len(k_out)+len(k_in))
-	# call loglikelihood function 
-        f_sample = sample.loglikelihood_prime_dcm_notrd(x, args)
-        f_correct = np.array([-4/5+4,4-4/5, 2-4/5, -4/5+2, -4/5+4, -4/5+4])  
-        # debug
-        # print(par)
-        # print(f_sample)
-        # print(f_correct)
-
-        # test result
-        self.assertTrue(np.allclose(f_sample, f_correct))
 
 
     def test_loglikelihood_prime_dcm_0(self):
@@ -163,7 +121,6 @@ class MyTest(unittest.TestCase):
         self.assertTrue(np.allclose(f_full, f_notrd))
 
 
-
     def test_loglikelihood_hessian_diag_dcm(self):
         a = np.array([[0, 1, 1],
                       [1, 0, 1],
@@ -179,29 +136,6 @@ class MyTest(unittest.TestCase):
 	# call loglikelihood function 
         f_sample = sample.loglikelihood_hessian_diag_dcm(x, args)
         f_correct = sample.loglikelihood_hessian_diag_dcm_notrd(x, args_notrd)
-        # debug
-        # print(par)
-        # print(f_sample)
-        # print(f_correct)
-
-        # test result
-        self.assertTrue(np.allclose(f_sample, f_correct))
-
-
-    def test_loglikelihood_hessian_diag_dcm_notrd(self):
-        a = np.array([[0, 0, 1],
-                      [1, 0, 1],
-                      [0, 1, 0]])
-
-        k_out = np.sum(a > 0, 1) 
-        k_in = np.sum(a > 0, 0)
-        nz_ind_out = np.nonzero(k_out)[0]
-        nz_ind_in = np.nonzero(k_in)[0]
-        args = (k_out, k_in, nz_ind_out, nz_ind_in)
-        x = 0.5*np.ones(len(k_out)+len(k_in))
-	# call loglikelihood function 
-        f_sample = sample.loglikelihood_hessian_diag_dcm_notrd(x, args)
-        f_correct = np.array([8/25-4, 8/25-8, 8/25-4,8/25-4, 8/25-4, 8/25-8])  
         # debug
         # print(par)
         # print(f_sample)

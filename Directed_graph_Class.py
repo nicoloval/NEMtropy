@@ -352,51 +352,6 @@ def loglikelihood_dcm(x, args):
 
 
 @jit(nopython=True)
-def loglikelihood_dcm_notrd(x, args):
-    """loglikelihood function for dcm
-    """
-    # problem fixed parameters
-    k_out = args[0]
-    k_in = args[1]
-    nz_index_out = args[2]
-    nz_index_in = args[3]
-    n = len(k_in)
-
-    f = 0
-    for i in nz_index_out:
-        f += k_out[i]*np.log(x[i])
-        for j in nz_index_in:
-            if i != j:
-                f -= np.log(1 + x[i]*x[n+j])
-
-    for j in nz_index_in:
-            f += k_in[j]*np.log(x[j+n])
-
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_dcm_loop(x, args):
-    """loglikelihood function for dcm
-    """
-    # problem fixed parameters
-    k_out = args[0]
-    k_in = args[1]
-    n_out = len(k_out)
-    n_in = len(k_in)
-    f = 0
-    for i in range(n_out):
-        f += k_out[i]*np.log(x[i])
-        for j in range(n_in):
-            f -= np.log(1 + x[i]*x[n_out+j])
-
-    for j in range(n_in):
-        f += k_in[j]*np.log(x[j+n_out])
-
-    return f
-
-
-@jit(nopython=True)
 def loglikelihood_prime_dcm(x, args):
     """iterative function for loglikelihood gradient dcm
     """
@@ -475,7 +430,7 @@ def loglikelihood_hessian_dcm(x, args):
                 # const = c[h]*c[i]
                 const = c[i]
 
-            out[h, h] += const*(x[i+n]**2)/(1 + x[h]*x[i+n])**2
+            out[h, h] += const*(x[i+n]/(1 + x[h]*x[i+n]))**2
             out[h, i+n] = -const/(1 + x[i+n]*x[h])**2
 
     for i in nz_in_index:
@@ -538,108 +493,6 @@ def iterative_dcm(x, args):
 
 
 @jit(nopython=True)
-def iterative_dcm_old(x, args):
-    """Return the next iterative step for the Directed Configuration Model Reduced version.
-
-    :param numpy.ndarray v: old iteration step 
-    :param numpy.ndarray par: constant parameters of the cm function
-    :return: next iteration step 
-    :rtype: numpy.ndarray
-    """
-
-    # problem fixed parameters
-    k_out = args[0]
-    k_in = args[1]
-    n = len(k_out)
-    nz_index_out = args[2]
-    nz_index_in = args[3]
-    c = args[4]
-
-    f = np.zeros(2*n)
-
-    for i in nz_index_out:
-        for j in nz_index_in:
-            if j != i:
-                f[i] += c[j]*x[j+n]/(1 + x[i]*x[j+n])
-            else:
-                f[i] += (c[j] - 1)*x[j+n]/(1 + x[i]*x[j+n])
-
-    for j in nz_index_in:
-        for i in nz_index_out:
-            if j != i:
-                f[j+n] += c[i]*x[i]/(1 + x[i]*x[j+n])
-            else:
-                f[j+n] += (c[i] - 1)*x[i]/(1 + x[i]*x[j+n])
-
-    tmp = np.concatenate((k_out, k_in))
-    # ff = np.array([tmp[i]/f[i] if tmp[i] != 0 else 0 for i in range(2*n)])
-    ff = np.array([tmp[i]/f[i] for i in range(2*n)])
-
-    return ff 
-
-
-@jit(nopython=True)
-def loglikelihood_prime_dcm_notrd(x, args):
-    """iterative function for loglikelihood gradient dcm
-    """
-    # problem fixed parameters
-    k_out = args[0]
-    k_in = args[1]
-    nz_index_out = args[2]
-    nz_index_in = args[3]
-    n = len(k_in)
-
-    f = np.zeros(2*n)
-
-    for i in nz_index_out:
-        fx = 0
-        for j in nz_index_in:
-            if i!= j:
-                fx += x[j+n]/(1 + x[i]*x[j+n])
-        # original prime
-        f[i] = -fx + k_out[i]/x[i]
-
-    for j in nz_index_in:
-        fy = 0
-        for i in nz_index_out:
-            if i!= j:
-                fy += x[i]/(1 + x[j+n]*x[i])
-        # original prime
-        f[j+n] = -fy + k_in[j]/x[j+n]
-
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_prime_dcm_loop(x, args):
-    """iterative function for loglikelihood gradient dcm
-    """
-    # problem fixed parameters
-    k_out = args[0]
-    k_in = args[1]
-    n_out = len(k_out)
-    n_in = len(k_in)
-
-    f = np.zeros(n_out+n_in)
-
-    for i in range(n_out):
-        fx = 0
-        for j in range(n_in):
-            fx += x[j+n_out]/(1 + x[i]*x[j+n_out])
-        # original prime
-        f[i] = -fx + k_out[i]/x[i]
-
-    for j in range(n_in):
-        fy = 0
-        for i in range(n_out):
-            fy += x[i]/(1 + x[j+n_out]*x[i])
-        # original prime
-        f[j+n_out] = -fy + k_in[j]/x[j+n_out]
-
-    return f
-
-
-@jit(nopython=True)
 def loglikelihood_hessian_diag_dcm(x, args):
     """hessian diagonal of dcm loglikelihood
     """
@@ -663,7 +516,8 @@ def loglikelihood_hessian_diag_dcm(x, args):
                 # const = c[i]*(c[j] - 1)
                 const = (c[j] - 1)
             
-            fx += const*x[j+n]*x[j+n]/((1 + x[i]*x[j+n])*(1 + x[i]*x[j+n]))
+            tmp = (1 + x[i]*x[j+n])
+            fx += const*x[j+n]*x[j+n]/(tmp*tmp)
         # original prime
         f[i] = fx - k_out[i]/(x[i]*x[i])
 
@@ -677,77 +531,14 @@ def loglikelihood_hessian_diag_dcm(x, args):
                 # const = c[i]*(c[j] - 1)
                 const = (c[j] - 1)
             
-            fy += const*x[i]*x[i]/((1 + x[j+n]*x[i])*(1 + x[j+n]*x[i]))
+            tmp = (1 + x[j+n]*x[i])*(1 + x[j+n]*x[i])
+            fy += const*x[i]*x[i]/(tmp)
         # original prime
         f[j+n] = fy - k_in[j]/(x[j+n]*x[j+n])
 
     # f[f == 0] = 1
 
     return f
-
-
-@jit(nopython=True)
-def loglikelihood_hessian_diag_dcm_notrd(x, args):
-    """hessian diagonal of dcm loglikelihood
-    """
-    # problem fixed paprameters
-    k_out = args[0]
-    k_in = args[1]
-    nz_index_out = args[2]
-    nz_index_in = args[3]
-    n = len(k_in)
-
-    f = np.zeros(2*n)
-
-    for i in nz_index_out:
-        fx = 0
-        for j in nz_index_in:
-            if i!= j:
-                fx += x[j+n]*x[j+n]/((1 + x[i]*x[j+n])*(1 + x[i]*x[j+n]))
-        # original prime
-        f[i] = fx - k_out[i]/(x[i]*x[i])
-
-    for j in nz_index_in:
-        fy = 0
-        for i in nz_index_out:
-            if i!= j:
-                fy += x[i]*x[i]/((1 + x[j+n]*x[i])*(1 + x[j+n]*x[i]))
-        # original prime
-        f[j+n] = fy - k_in[j]/(x[j+n]*x[j+n])
-
-    # f[f == 0] = 1
-
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_hessian_diag_dcm_loop(x, args):
-    """hessian diagonal of dcm loglikelihood
-    """
-    # problem fixed parameters
-    k_out = args[0]
-    k_in = args[1]
-    n_out = len(k_out)
-    n_in = len(k_in)
-
-    f = np.zeros(n_out + n_in)
-
-    for i in range(n_out):
-        fx = 0
-        for j in range(n_in):
-            fx += x[j+n_out]*x[j+n_out]/((1 + x[i]*x[j+n_out])*(1 + x[i]*x[j+n_out]))
-        # original prime
-        f[i] = fx - k_out[i]/(x[i]*x[i])
-
-    for j in range(n_in):
-        fy = 0 
-        for i in range(n_out):
-            fy += x[i]*x[i]/((1 + x[j+n_out]*x[i])*(1 + x[j+n_out]*x[i]))
-        # original prime
-        f[j+n_out] = fy - k_in[j]/(x[j+n_out]*x[j+n_out])
-
-    return f
-
 
 
 @jit(nopython=True)
@@ -769,9 +560,10 @@ def loglikelihood_decm(x, args):
             + s_in[i]*np.log(x[i+3*n])
         for j in range(n):
             if i != j:
-                f += np.log(1 - x[i+2*n]*x[j+3*n])
-                f -= np.log(1 - x[i+2*n]*x[j+3*n] \
-                     + x[i+2*n]*x[j+3*n]*x[i]*x[j+n])
+                tmp = x[i+2*n]*x[j+3*n]
+                f += np.log(1 - tmp)
+                f -= np.log(1 - tmp \
+                     + tmp*x[i]*x[j+n])
     return f
 
 
@@ -794,20 +586,24 @@ def loglikelihood_prime_decm(x, args):
         fb_in = 0
         for j in range(n):
             if i != j:
-                fa_out += x[j+n]*x[i+2*n]*x[j+3*n]\
-                          /(1 - x[i+2*n]*x[j+3*n]\
-                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
-                fa_in += x[j]*x[j+2*n]*x[i+3*n]\
-                         /(1 - x[j+2*n]*x[i+3*n]\
-                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
-                fb_out += x[j +3*n]/(1 - x[j+3*n]*x[i+2*n])\
+                tmp = x[i+2*n]*x[j+3*n]
+                fa_out += x[j+n]*tmp\
+                          /(1 - tmp\
+                          + x[i]*x[j+n]*tmp)
+                tmp = x[j+2*n]*x[i+3*n] 
+                fa_in += x[j]*tmp\
+                         /(1 - tmp\
+                         + x[j]*x[i+n]*tmp)
+                tmp = x[j+3*n]*x[i+2*n]
+                fb_out += x[j +3*n]/(1 - tmp)\
                           + (x[j+n]*x[i] - 1)*x[j+3*n]\
-                          /(1 - x[i+2*n]*x[j+3*n]\
-                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
-                fb_in += x[j +2*n]/(1 - x[i+3*n]*x[j+2*n])\
+                          /(1 - tmp\
+                          + x[i]*x[j+n]*tmp)
+                tmp = x[i+3*n]*x[j+2*n]
+                fb_in += x[j +2*n]/(1 - tmp)\
                          + (x[i+n]*x[j] - 1)*x[j+2*n]\
-                         /(1 - x[j+2*n]*x[i+3*n]\
-                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+                         /(1 - tmp\
+                         + x[j]*x[i+n]*tmp)
 
         f[i] = k_out[i]/x[i] - fa_out
         f[i+n] = k_in[i]/x[i+n] - fa_in
@@ -836,20 +632,23 @@ def loglikelihood_hessian_diag_decm(x, args):
         fb_in = 0
         for j in range(n):
             if i != j:
-                fa_out += (x[j+n]*x[i+2*n]*x[j+3*n])**2\
-                          /(1 - x[i+2*n]*x[j+3*n]\
-                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])**2
-                fa_in += (x[j]*x[j+2*n]*x[i+3*n])**2\
-                         /(1 - x[j+2*n]*x[i+3*n]\
-                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])**2
-                fb_out += x[j +3*n]**2/(1 - x[j+3*n]*x[i+2*n])**2\
-                          - ((x[j+n]*x[i] - 1)*x[j+3*n])**2\
-                          /(1 - x[i+2*n]*x[j+3*n]\
-                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])**2
-                fb_in += x[j +2*n]**2/(1 - x[i+3*n]*x[j+2*n])**2\
-                         - ((x[i+n]*x[j] - 1)*x[j+2*n])**2\
-                         /(1 - x[j+2*n]*x[i+3*n]\
-                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])**2
+                tmp0 = x[i+2*n]*x[j+3*n]
+                tmp = (x[j+n]*tmp0)/(1 - tmp0 + x[i]*x[j+n]*tmp0)
+                fa_out += tmp*tmp
+
+                tmp0 = x[j+2*n]*x[i+3*n]
+                tmp = (x[j]*tmp0)/(1 - tmp0 + x[j]*x[i+n]*tmp0)
+                fa_in += tmp*tmp 
+
+                tmp0 = x[j+3*n]*x[i+2*n]
+                tmp1 = x[j+3*n]/(1 - tmp0)
+                tmp2 = ((x[j+n]*x[i] - 1)*x[j+3*n])/(1 - tmp0 + x[i]*x[j+n]*tmp0)
+                fb_out += tmp1*tmp1 - tmp2*tmp2
+
+                tmp0 = x[i+3*n]*x[j+2*n]
+                tmp1 = x[j +2*n]**2/(1 - tmp0)
+                tmp2 = ((x[i+n]*x[j] - 1)*x[j+2*n])/(1 - tmp0 + x[j]*x[i+n]*tmp0)
+                fb_in += tmp1*tmp1 - tmp2*tmp2 
 
         f[i] = -k_out[i]/x[i]**2 + fa_out
         f[i+n] = -k_in[i]/x[i+n]**2 + fa_in
@@ -993,187 +792,6 @@ def loglikelihood_hessian_decm(x, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_decm_old(x, args):
-    # MINUS log-likelihood function Hessian : DECM case
-    # x : where the function is computed : np.array
-    # par : real data constant parameters : np.array
-    # rem: size(x)=size(par)
-
-    # REMARK:
-    # the ll fun is to max but the algorithm minimize,
-    # so the fun return -H
-
-    k_out = args[0]
-    k_in = args[1] 
-    s_out = args[2] 
-    s_in = args[3] 
-
-    n = len(k_out)
-    f = np.zeros((n * 4, n * 4))
-
-    a_out = x[:n]
-    a_in = x[n:2*n]
-    b_out = x[2*n:3*n]
-    b_in = x[3*n:]
-
-    for h in range(n):
-        for l in range(n):
-            if h == l:
-                # dll / da^in da^in
-                f[h+n, l+n] = -k_in[h] / a_in[h] ** 2
-                # dll / da^out da^out
-                f[h, l] = -k_out[h] / a_out[h] ** 2
-                # dll / db^in db^in
-                f[h+3*n, l+3*n] = -s_in[h] / b_in[h] ** 2
-                # dll / db^out db^out
-                f[h+2*n, l+2*n] = -s_out[h] / b_out[h] ** 2
-
-                for j in range(h):
-                    # dll / da^in da^in
-                    f[h+n, l+n] = (f[h+n, l+n]
-                               + (a_out[j] * b_in[h] * b_out[j]
-                                  / (1 - b_in[h] * b_out[j]
-                                     + a_in[h] * a_out[j]
-                                     * b_in[h] * b_out[j])) ** 2)
-                    # dll / da^in db^in
-                    f[h+n, l+3*n] = (f[h+n, l+3*n]
-                                   - a_out[j]*b_out[j]
-                                   / (1-b_in[h]*b_out[j]
-                                      + a_in[h]*a_out[j]*b_in[h]*b_out[j])**2)
-                    # dll / da^out da^out
-                    f[h, l] = (f[h, l]
-                                       + (a_in[j] * b_in[j] * b_out[h]) ** 2
-                                       / (1 - b_in[j] * b_out[h] +
-                                          a_in[j] * a_out[h] *
-                                          b_in[j] * b_out[h]) ** 2)
-                    # dll / da^out db^out
-                    f[h, l+2*n] = (f[h, l+2*n]
-                                           - a_in[j] * b_in[j]
-                                           / (1 - b_in[j] * b_out[h]
-                                              + a_in[j] * a_out[h]
-                                              * b_in[j] * b_out[h])**2)
-                    # dll / db^in da^in
-                    f[h+3*n,l+n] = (f[h+3*n, l+n] - a_out[j] * b_out[j]
-                                       / (1 - b_in[h] * b_out[j] + a_in[h]
-                                       * a_out[j] * b_in[h] * b_out[j]) ** 2)
-                    # dll / db_in db_in
-                    f[h+3*n, l+3*n] = (f[h+3*n, l+3*n]
-                                       - (b_out[j]/(1-b_in[h]*b_out[j]))**2
-                                       + (b_out[j]*(a_in[h]*a_out[j]-1)
-                                          / (1-b_in[h]*b_out[j]
-                                             + a_in[h]*a_out[j]
-                                             * b_in[h]*b_out[j]))**2)
-                    # dll / db_out da_out
-                    f[h+2*n, l] = (f[h+2*n, l]
-                                           - a_in[j] * b_in[j]
-                                           / (1 - b_in[j] * b_out[h]
-                                              + a_in[l] * a_out[h]
-                                              * b_in[l] * b_out[h]) ** 2)
-                    # dll / db^out db^out
-                    f[h+2*n, l+2*n] = (f[h+2*n, l+2*n]
-                                       - (b_in[j]/(1-b_in[j]*b_out[h]))**2
-                                       + ((a_in[j]*a_out[h]-1)*b_in[j]
-                                          / (1-b_in[j]*b_out[h]
-                                             + a_in[j]*a_out[h]
-                                             * b_in[j]*b_out[h]))**2)
-
-                for j in range(h + 1, n):
-                    # dll / da^in da^in
-                    f[h+n, l+n] = (f[h+n, l+n]
-                               + (a_out[j] * b_in[h] * b_out[j]
-                                  / (1 - b_in[h] * b_out[j]
-                                     + a_in[h] * a_out[j]
-                                     * b_in[h] * b_out[j])) ** 2)
-                    # dll / da^in db^in
-                    f[h+n, l+3*n] = (f[h+n, l+3*n]
-                                   - a_out[j]*b_out[j]
-                                   / (1-b_in[h]*b_out[j]
-                                      + a_in[h]*a_out[j]*b_in[h]*b_out[j])**2)
-                    # dll / da^out da^out
-                    f[h, l] = (f[h, l]
-                                       + (a_in[j] * b_in[j] * b_out[h]) ** 2
-                                       / (1 - b_in[j] * b_out[h] +
-                                          a_in[j] * a_out[h] *
-                                          b_in[j] * b_out[h]) ** 2)
-                    # dll / da^out db^out
-                    f[h, l+2*n] = (f[h, l+2*n]
-                                           - a_in[j] * b_in[j]
-                                           / (1 - b_in[j] * b_out[h]
-                                              + a_in[j] * a_out[h]
-                                              * b_in[j] * b_out[h])**2)
-                    # dll / db^in da^in
-                    f[h+3*n, l+n] = (f[h+3*n, l+n] - a_out[j] * b_out[j]
-                                       / (1 - b_in[h] * b_out[j]
-                                          + a_in[h] * a_out[j]
-                                          * b_in[h] * b_out[j]) ** 2)
-                    # dll / db_in db_in
-                    f[h+3*n, l+3*n] = (f[h+3*n, l+3*n]
-                                       - (b_out[j]/(1-b_in[h]*b_out[j]))**2
-                                       + (b_out[j]*(a_in[h]*a_out[j]-1)
-                                          / (1-b_in[h]*b_out[j]
-                                             + a_in[h]*a_out[j]
-                                             * b_in[h]*b_out[j]))**2)
-                    # dll / db_out da_out
-                    f[h+2*n, l] = (f[h+2*n, l]
-                                           - a_in[j] * b_in[j]
-                                           / (1 - b_in[j]*b_out[h]
-                                              + a_in[l] * a_out[h]
-                                              * b_in[l] * b_out[h]) ** 2)
-                    # dll / db^out db^out
-                    f[h+2*n, l+2*n] = (f[h+2*n, l+2*n]
-                                       - (b_in[j]/(1-b_in[j]*b_out[h]))**2
-                                       + ((a_in[j]*a_out[h]-1)*b_in[j]
-                                          / (1-b_in[j]*b_out[h]
-                                             + a_in[j]*a_out[h]
-                                             * b_in[j]*b_out[h]))**2)
-            else:
-                # dll / da_in da_out
-                f[h+n, l] = (- b_in[h] * b_out[l] * (1 - b_in[h] * b_out[l])
-                               / (1 - b_in[h] * b_out[l]
-                                  + a_in[h] * a_out[l]
-                                  * b_in[h] * b_out[l]) ** 2)
-                # dll / da_in db_out
-                f[h+n, l+2*n] = (- a_out[l] * b_in[h]
-                                   / (1 - b_in[h] * b_out[l]
-                                      + a_in[h] * a_out[l]
-                                      * b_in[h] * b_out[l]) ** 2)
-                # dll / da_out da_in
-                f[h, l+n] = (- b_in[l] * b_out[h]*(1 - b_in[l] * b_out[h])
-                               / (1 - b_in[l] * b_out[h]
-                                  + a_in[l] * a_out[h]
-                                  * b_in[l] * b_out[h]) ** 2)
-                # dll / da_out db_in
-                f[h, l+3*n] = (-a_in[l] * b_out[h]
-                                       / (1 - b_in[l] * b_out[h]
-                                       + a_in[l] * a_out[h]
-                                       * b_in[l] * b_out[h]) ** 2)
-                # dll / db_in da_out
-                f[h+3*n, l] = (- a_in[h] * b_out[l]
-                                       / (1 - b_in[h] * b_out[l]
-                                          + a_in[h] * a_out[l]
-                                          * b_in[h] * b_out[l]) ** 2)
-                # dll / db_in db_out
-                f[h+3*n, l+2*n] = (-1 / (1 - b_in[h] * b_out[l])**2
-                                           - (a_out[l] * a_in[h] - 1)
-                                           / (1 - b_in[h] * b_out[l]
-                                              + a_in[h] * a_out[l]
-                                              * b_in[h] * b_out[l]) ** 2)
-                # dll / db_out da_in
-                f[h+2*n, l+n] = (- a_out[h] * b_in[l]
-                                   / (1 - b_in[l] * b_out[h]
-                                      + a_in[l] * a_out[h]
-                                      * b_in[l] * b_out[h]) ** 2)
-                # dll / db_out db_in
-                f[h+2*n, l+3*n] = (-1 / (1 - b_in[l] * b_out[h]) ** 2
-                                           - (a_in[l] * a_out[h] - 1)
-                                           / (1 - b_in[l] * b_out[h]
-                                              + a_in[l] * a_out[h]
-                                              * b_in[l] * b_out[h]) ** 2)
-
-    return f
-
-
-@jit(nopython=True)
 def iterative_decm(x, args):
     """iterative function for decm
     """
@@ -1194,20 +812,20 @@ def iterative_decm(x, args):
         b = 0
         for j in range(n):
             if i != j:
-                fa_out += x[j+n]*x[i+2*n]*x[j+3*n]\
-                          /(1 - x[i+2*n]*x[j+3*n]\
-                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
-                fa_in += x[j]*x[j+2*n]*x[i+3*n]\
-                         /(1 - x[j+2*n]*x[i+3*n]\
-                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
-                fb_out += x[j+3*n]/(1 - x[j+3*n]*x[i+2*n])\
-                          + (x[j+n]*x[i] - 1)*x[j+3*n]\
-                          /(1 - x[i+2*n]*x[j+3*n]\
-                          + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
-                fb_in += x[j+2*n]/(1 - x[i+3*n]*x[j+2*n])\
-                         + (x[i+n]*x[j] - 1)*x[j+2*n]\
-                         /(1 - x[j+2*n]*x[i+3*n]\
-                         + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+                tmp = x[i+2*n]*x[j+3*n]
+                fa_out += x[j+n]*tmp/(1 - tmp + x[i]*x[j+n]*tmp)
+
+                tmp = x[j+2*n]*x[i+3*n]
+                fa_in += x[j]*tmp/(1 - tmp + x[j]*x[i+n]*tmp)
+
+                tmp = x[j+3*n]*x[i+2*n]
+                tmp0 = x[j+n]*x[i]
+                fb_out += x[j+3*n]/(1 - tmp) + ( tmp0- 1)*x[j+3*n]\
+                          /(1 - tmp + tmp0*tmp)
+                tmp = x[i+3*n]*x[j+2*n]
+                tmp0 = x[i+n]*x[j]
+                fb_in += x[j+2*n]/(1 - tmp)+ (tmp0 - 1)*x[j+2*n]\
+                         /(1 - tmp + tmp0*tmp)
             
         """
         if k_out[i] != 0:
