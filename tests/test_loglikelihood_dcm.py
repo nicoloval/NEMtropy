@@ -19,7 +19,7 @@ class MyTest(unittest.TestCase):
                       [0, 1, 0]])
         """
         n, seed = (3, 42)
-        a = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        a = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(a)
         g.degree_reduction()
@@ -29,7 +29,7 @@ class MyTest(unittest.TestCase):
 
 	# call loglikelihood function 
         f_sample = -g.stop_fun(x0)
-        f_correct = 8*np.log(1/2) - 6*np.log(5/4)
+        f_correct = 4*np.log(1/2) - 3*np.log(5/4)
         # debug
         # print(x0)
         # print(f_sample)
@@ -41,7 +41,7 @@ class MyTest(unittest.TestCase):
 
     def test_loglikelihood_dcm_notrd(self):
         n, seed = (3, 42)
-        a = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        a = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         k_out = np.sum(a > 0, 1) 
         k_in = np.sum(a > 0, 0)
         nz_ind_out = np.nonzero(k_out)[0]
@@ -50,7 +50,7 @@ class MyTest(unittest.TestCase):
         x = 0.5*np.ones(len(k_out)+len(k_in))
 	# call loglikelihood function 
         f_sample = sample.loglikelihood_dcm_notrd(x, args )
-        f_correct = 8*np.log(1/2) - 6*np.log(5/4)
+        f_correct = 4*np.log(1/2) - 3*np.log(5/4)
         # debug
         # print(args)
         # print(f_sample)
@@ -66,7 +66,7 @@ class MyTest(unittest.TestCase):
                       [0, 1, 0]])
         """
         n, seed = (3, 42)
-        a = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        a = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         # rd
         g = sample.DirectedGraph(a)
@@ -129,7 +129,7 @@ class MyTest(unittest.TestCase):
                       [0, 1, 0]])
         """
         n, seed = (3, 42)
-        a = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        a = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         # rd
         g = sample.DirectedGraph(a)
@@ -212,13 +212,9 @@ class MyTest(unittest.TestCase):
 
 
     def test_iterative_dcm(self):
-        """
-        a = np.array([[0, 1, 1],
-                      [1, 0, 1],
-                      [0, 1, 0]])
-        """
+
         n, seed = (3, 42)
-        a = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        a = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         # rd
         g = sample.DirectedGraph(a)
@@ -231,11 +227,12 @@ class MyTest(unittest.TestCase):
         g.last_model = 'dcm'
         g._set_solved_problem(f_sample)
         f_full = np.concatenate((g.x, g.y))
-        f_correct = np.array([2.5, 1.25, 1.25, 2.5, 1.25, 1.25])
+        f_correct = - np.array([2.5, 2.5, 0, 0, 1, 1.25])
 
         # debug
         # print(a)
         # print(x0, x)
+        # print(f_full)
 
         # test result
         self.assertTrue(np.allclose(f_full, f_correct))
@@ -255,7 +252,7 @@ class MyTest(unittest.TestCase):
         f_sample = -g.fun(x0)
         # g._set_solved_problem(f_sample)
         # f_full = np.concatenate((g.x, g.y))
-        f_correct = np.array([0, 0.5, 1, 1, 1, 0])
+        f_correct = - np.array([0, 0.5, 1, 1, 1, 0])
 
         # debug
         # print(g.args)

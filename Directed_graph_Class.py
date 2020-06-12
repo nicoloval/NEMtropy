@@ -3,6 +3,7 @@ import scipy.sparse
 from numba import jit
 import time
 
+
 @jit(nopython=True)
 def pmatrix_dcm(x,args):
     """
@@ -20,6 +21,7 @@ def pmatrix_dcm(x,args):
             P[i,j] = aux/(1+aux)
     return P
 
+
 @jit(nopython=True)
 def weighted_adjacency(x,adj):
     n = adj.shape[0]
@@ -32,6 +34,7 @@ def weighted_adjacency(x,adj):
             if adj[i,j]>0:
                 weighted_adj[i,j] = adj[i,j]/(beta_out[i]+beta_in[j])
     return weighted_adj
+
 
 @jit(nopython=True)
 def iterative_CReAMa(beta,args):
@@ -64,6 +67,7 @@ def iterative_CReAMa(beta,args):
                 yd[i] -= aux/s_in[i]
     
     return(np.concatenate((xd,yd)))
+
 
 @jit(nopython=True)
 def loglikelihood_CReAMa(beta,args):
@@ -1430,6 +1434,15 @@ def solver(x0, fun, g, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='
         if linsearch == True:
             alfa = 1 
             i = 0
+            #TODO: fun(x) non e' il graident di stop_funx
+            #TODO: check dianati fornisce una direzione di discesa 
+
+            """
+            s_new = np.linalg.norm(fun(x+alfa*dx)-x-alfa*dx)
+            s_old = np.linalg.norm(fun(x)-x)
+            while sufficient_decrease_condition(s_old, \
+                s_new, alfa, fun(x), dx) == False and i<50:
+            """
             while sufficient_decrease_condition(stop_fun(x), \
                 stop_fun(x + alfa*dx), alfa, fun(x), dx) == False and i<50:
                 alfa *= beta
@@ -1508,6 +1521,7 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
     """return boolean indicator if upper wolfe condition are respected.
     """
     # print(f_old, f_new, alpha, grad_f, p)
+    # c1 = 0
     
     #print ('f_old',f_old)
     #print ('c1',c1)
@@ -1984,7 +1998,7 @@ class DirectedGraph:
         d_fun = {
                 'dcm-newton': lambda x: -loglikelihood_prime_dcm(x,self.args),
                 'dcm-quasinewton': lambda x: -loglikelihood_prime_dcm(x,self.args),
-                'dcm-fixed-point': lambda x: -iterative_dcm(x,self.args),
+                'dcm-fixed-point': lambda x: iterative_dcm(x,self.args),
 
 
                 'CReAMa-newton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),

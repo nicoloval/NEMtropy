@@ -52,7 +52,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (4, 22)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         # print(A)
 
         g = sample.DirectedGraph(A)
@@ -84,7 +84,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (5, 22)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         A[0,:] = 0
         # print(A)
 
@@ -117,7 +117,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (4, 22)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
@@ -140,7 +140,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (10, 22)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
 
@@ -169,7 +169,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='dcm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = 'False')
+        g._solve_problem(model='dcm', method='fixed-point', max_steps=100, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
@@ -189,7 +189,7 @@ class MyTest(unittest.TestCase):
         """classes with cardinality > 1, no zero degree
         """
         n, seed = (4, 22)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
 
@@ -214,7 +214,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (5, 22)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
@@ -240,7 +240,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (4, 22)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
@@ -266,7 +266,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (100, 22)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
 
@@ -317,7 +317,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (4, 22)
-        A = sample.random_binary_matrix_generator_nozeros(n, sym=False, seed=seed)
+        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
