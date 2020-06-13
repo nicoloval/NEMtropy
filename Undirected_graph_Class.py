@@ -4,21 +4,21 @@ from numba import jit
 import time
 
 
-def pmatrix_cm(x,args):
+def pmatrix_cm(x, args):
 	n = args[0]
 	nz_index = args[1]
-	f = np.zeros(shape=(n,n),dtype=np.float64)
+	f = np.zeros(shape=(n, n), dtype=np.float64)
 	for i in np.arange(n):
-		for j in np.arange(i+1,n):
+		for j in np.arange(i+1, n):
 			aux = x[i]*x[j]
 			aux1 = aux/(1+aux)
-			f[i,j] = aux1
-			f[j,i] = aux1
+			f[i, j] = aux1
+			f[j, i] = aux1
 	return f
 
 
 @jit(nopython=True)
-def iterative_cm(x,args):
+def iterative_cm(x, args):
 	k = args[0]
     c = args[1]
     n = len(k)
@@ -262,8 +262,8 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         if linsearch:
             alfa = 1 
             i = 0
-            #TODO: fun(x) non e' il graident di step_funx
-            #TODO: check dianati fornisce una direzione di discesa 
+            # TODO: fun(x) non e' il graident di step_funx
+            # TODO: check dianati fornisce una direzione di discesa 
 
             """
             s_new = np.linalg.norm(fun(x+alfa*dx)-x-alfa*dx)
@@ -342,11 +342,11 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
     # print(f_old, f_new, alpha, grad_f, p)
     # c1 = 0
     
-    #print ('f_old',f_old)
-    #print ('c1',c1)
-    #print('alpha',alpha)
-    #print ('grad_f',grad_f)
-    #print('p.T',p.T)
+    # print ('f_old',f_old)
+    # print ('c1',c1)
+    # print('alpha',alpha)
+    # print ('grad_f',grad_f)
+    # print('p.T',p.T)
 
     sup = f_old + c1 *alpha*grad_f@p.T
     # print(alpha, f_new, sup)
@@ -693,7 +693,7 @@ def _set_initial_guess_CReAMa(self):
         self.x0 = self.beta
 
 
-    ##### DA SISTEMARE
+    # DA SISTEMARE
     def solution_error(self):
         if self.last_model in ['cm','CReAMa']:
             if (self.x is not None):
@@ -785,7 +785,7 @@ def _set_initial_guess_CReAMa(self):
         except:    
             raise ValueError('Method must be "newton","quasi-newton", or "fixed-point".')
             
-        #TODO: mancano metodi
+        # TODO: mancano metodi
         d_pmatrix = {
                     'cm': pmatrix_cm
                     }
@@ -835,7 +835,7 @@ def _set_initial_guess_CReAMa(self):
     def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False):
         """ function to switch around the various problems
         """
-        #TODO: aggiungere tutti i metodi
+        # TODO: aggiungere tutti i metodi
         if model in ['cm', 'ecm']:
             self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
         elif model in ['CReAMa']:
