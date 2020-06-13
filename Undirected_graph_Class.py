@@ -699,8 +699,7 @@ class UndirectedGraph:
     def solution_error(self):
         if self.last_model in ['cm','CReAMa']:
             if (self.x is not None):
-                sol = np.concatenate((self.x, self.y))
-                ex_k = expected_degree_cm(sol)
+                ex_k = expected_degree_cm(self.x)
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
                 self.error = np.linalg.norm(ex_k - self.dseq)
