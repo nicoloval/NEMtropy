@@ -1664,9 +1664,9 @@ class DirectedGraph:
             self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
             self.adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
         elif isinstance(adjacency,list):
-            self.adjacency = np.array(adjacency)
+            self.adjacency = np.array(adjacency).astype(float)
         elif isinstance(adjacency,np.ndarray):
-            self.adjacency = adjacency
+            self.adjacency = adjacency.astype(float)
 
         if self.adjacency.shape[0] != self.adjacency.shape[1]:
             raise ValueError(r'adjacency matrix must be $n \times n$')
