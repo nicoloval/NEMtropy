@@ -187,23 +187,23 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
 @jit(forceobj=True)
 def random_binary_matrix_generator_dense(n, sym=False, seed=None):
-        if sym == False:
-                np.random.seed(seed = seed)
-                A = np.random.randint(0, 2, size=(n, n))
-                # zeros on the diagonal
-                for i in range(n):
-                    A[i, i] = 0
-                k_in = np.sum(A, axis=0)
-                k_out = np.sum(A, axis=1)
-                for ind, ki, ko in zip(np.arange(k_in.shape[0]),k_in,k_out):
-                    if (ki==0)and(ko==0):
-                        while((np.sum(A[:,ind])==0) and (np.sum(A[ind,:])==0)):
-                            if np.random.random() >0.5:
-                                A[np.random.randint(A.shape[0]), ind] = 1
-                            else:
-                                A[ind,np.random.randint(A.shape[0])] = 1
+    if sym == False:
+        np.random.seed(seed = seed)
+        A = np.random.randint(0, 2, size=(n, n))
+        # zeros on the diagonal
+        for i in range(n):
+            A[i, i] = 0
+        k_in = np.sum(A, axis=0)
+        k_out = np.sum(A, axis=1)
+        for ind, ki, ko in zip(np.arange(k_in.shape[0]),k_in,k_out):
+            if (ki==0)and(ko==0):
+                while((np.sum(A[:,ind])==0) and (np.sum(A[ind,:])==0)):
+                    if np.random.random() >0.5:
+                        A[np.random.randint(A.shape[0]), ind] = 1
+                    else:
+                        A[ind,np.random.randint(A.shape[0])] = 1
                             
-                            A[ind,ind] = 0
+                    A[ind,ind] = 0
         return A
 
 
@@ -279,8 +279,9 @@ def random_binary_matrix_generator_custom_density(n, p=0.1 , sym=False, seed=Non
                 while(np.sum(A[:,ind])==0):
                     indices = np.random.randint(A.shape[0])
                     if indices!= ind:
-                        A[0, indices] = 1
-                        A[indices, 0] = A[0, indices]
+                        A[ind, indices] = 1
+                        A[indices, ind] = A[ind, indices]
+                    A[ind,ind] = 0
         return A
   
 
