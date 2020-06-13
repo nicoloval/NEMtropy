@@ -783,7 +783,7 @@ class UndirectedGraph:
         try:
             self.fun = d_fun[mod_met]
             self.fun_jac = d_fun_jac[mod_met]
-            self.stop_fun = d_fun_stop[mod_met]
+            self.step_fun = d_fun_stop[mod_met]
         except:    
             raise ValueError('Method must be "newton","quasi-newton", or "fixed-point".')
             
