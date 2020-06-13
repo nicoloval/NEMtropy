@@ -725,7 +725,7 @@ class UndirectedGraph:
         if model=='CReAMa':
             self.args = (self.strength_sequence, self.adjacency, self.nz_index)
         elif model == 'cm':
-            self.args = (self.dseq, self.r_multiplicity)
+            self.args = (self.r_dseq, self.r_multiplicity)
         elif model == 'ecm':
             self.args = (self.dseq, self.strength_sequence) 
 
