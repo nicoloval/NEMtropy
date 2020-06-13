@@ -28,7 +28,7 @@ def weighted_adjacency(x,adj):
     beta_out = x[:n]
     beta_in = x[n:]
     
-    weighted_adj = np.zeros_like(adj)
+    weighted_adj = np.zeros_like(adj,dtype=np.float64)
     for i in np.arange(n):
         for j in np.arange(n):
             if adj[i,j]>0:
@@ -54,8 +54,8 @@ def iterative_CReAMa(beta,args):
     beta_out = beta[:aux_n]
     beta_in = beta[aux_n:]
     
-    xd = np.zeros(aux_n)
-    yd = np.zeros(aux_n)
+    xd = np.zeros(aux_n,dtype=np.float64)
+    yd = np.zeros(aux_n,dtype=np.float64)
     
     for i in np.arange(aux_n):
         for j in np.arange(aux_n):
@@ -82,7 +82,7 @@ def loglikelihood_CReAMa(beta,args):
     beta_out = beta[:aux_n]
     beta_in = beta[aux_n:]
     
-    f=0
+    f=0.0
     
     for i in nz_index_out:
         f -= s_out[i] * beta_out[i] 
@@ -109,8 +109,8 @@ def loglikelihood_prime_CReAMa(beta, args):
     beta_out = beta[0:aux_n]
     beta_in = beta[aux_n:2*aux_n]
 
-    aux_F_out = np.zeros_like(beta_out)
-    aux_F_in = np.zeros_like(beta_in)
+    aux_F_out = np.zeros_like(beta_out,dtype=np.float64)
+    aux_F_in = np.zeros_like(beta_in,dtype=np.float64)
 
     for i in np.arange(aux_n):
         aux_F_out[i] -= s_out[i]
@@ -137,7 +137,7 @@ def loglikelihood_hessian_CReAMa(beta, args):
     beta_out = beta[:aux_n]
     beta_in = beta[aux_n:]
 
-    f = np.zeros(shape=(2*aux_n, 2*aux_n))
+    f = np.zeros(shape=(2*aux_n, 2*aux_n),dtype=np.float64)
     
     for i in np.arange(aux_n):
         for j in np.arange(aux_n):
@@ -169,7 +169,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
     beta_out = beta[:aux_n]
     beta_in = beta[aux_n:]
 
-    f = np.zeros(2*aux_n)
+    f = np.zeros(2*aux_n,dtype=np.float64)
 
     for i in np.arange(aux_n):
         for j in  np.arange(aux_n):
