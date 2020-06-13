@@ -1659,7 +1659,7 @@ class DirectedGraph:
             self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
     
     
-    def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
+    def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
         self.last_model = model
         if not isinstance(adjacency,(list,np.ndarray,str)):
             raise ValueError('adjacency must be a matrix or a method')
