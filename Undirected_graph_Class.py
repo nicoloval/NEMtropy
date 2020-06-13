@@ -6,7 +6,8 @@ import time
 
 def pmatrix_cm(x,args):
 	n = args[0]
-	f = np.ones(shape=(n,n),dtype=np.float64)
+	nz_index = args[1]
+	f = np.zeros(shape=(n,n),dtype=np.float64)
 	for i in np.arange(n):
 		for j in np.arange(i+1,n):
 			aux = x[i]*x[j]
@@ -21,7 +22,7 @@ def iterative_cm(x,args):
 	k = args[0]
     c = args[1]
     n = len(k)
-    f = np.ones_like(k,dtype=np.float64)
+    f = np.zeros_like(k,dtype=np.float64)
     for i in np.arange(n):
     	fx=0
     	for j in np.arange(n):
@@ -55,7 +56,7 @@ def loglikelihood_prime_cm(x,args):
     k = args[0]
     c = args[1]
     n = len(k)
-    f = np.ones_like(k,dtype=np.float64)
+    f = np.zeros_like(k,dtype=np.float64)
     for i in np.arange(n):
         f[i] += k[i]/x[i]
         for j in np.arange(n):
@@ -71,7 +72,7 @@ def loglikelihood_hessian_cm(x,args):
     k = args[0]
     c = args[1]
     n = len(k)
-    f = np.ones(shape=(n,n),dtype=np.float64)
+    f = np.zeros(shape=(n,n),dtype=np.float64)
     for i in np.arange(n):
         for j in np.arange(i,n):
             if i==j:
@@ -96,7 +97,7 @@ def loglikelihood_hessian_diag_cm(x,args):
 	k = args[0]
     c = args[1]
     n = len(k)
-    f = np.ones(n,dtype=np.float64)
+    f = np.zeros(n,dtype=np.float64)
     for i in np.arange(n):
     	f[i] - k[i]/(x[i]*x[i])
     	for j in np.arange(n):
@@ -110,20 +111,284 @@ def loglikelihood_hessian_diag_cm(x,args):
 
 
 @jit(nopython=True)
-def loglikelihood_CReAMa(x,args):
+def loglikelihood_CReAMa(beta,args):
+	s = args[0]
+	adj = args[1]
+	nz_index = args[2]
+
+	n = len(s)
+
+	f = 0.0
+	for i in np.arange(n):
+		f -= s[i] * beta[i]
+		for j in np.arange(0,i):
+			if adj[i,j]!=0:
+				f += adj[i,j] * np.log(beta[i]+beta[j])
+	return f
+
+@jit(nopython=True)
+def loglikelihood_prime_CReAMa(beta,args):
+	s = args[0]
+	adj = args[1]
+	nz_index = args[2]
+
+	n = len(s)
+
+	f = np.zeros_like(s,dtype=np.float64)
+	for i in np.arange(n):
+		f[i] -= s[i]
+		for j in np.arange(n):
+			if (i!=j) and adj[i,j]!=0:
+				f[i] += adj[i,j] / (beta[i] + beta[j])
+	return f
+
+@jit(nopython=True)
+def loglikelihood_hessian_CReAMa(beta,args):
+	s = args[0]
+	adj = args[1]
+	nz_index = args[2]
+
+	n = len(s)
+
+	f = np.zeros_like(shape=(n,n), dtype=np.float64)
+	for i in np.arange(n):
+		for j in np.arange(i):
+			if i==j:
+				aux_f = 0.0
+				for h in np.arange(n):
+					if (adj[i,h]!=0) and (i!=h):
+						aux = beta[i]+beta[j]
+						aux_f -= adj[i,h]/(aux*aux)
+			else:
+				if adj[i,j]!=0:
+					aux = beta[i] + beta[j]
+					aux_f = - adj[i,j]/(aux*aux)
+			f[i,j] = aux_f
+			f[j,i] = aux_f
+	return f
 
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa(x,args):
+def loglikelihood_hessian_diag_CReAMa(beta,args):
+	s = args[0]
+	adj = args[1]
+	nz_index = args[2]
+
+	n = len(s)
+
+	f = zeros_like(s, dtype=np.float64)
+	for i in np.arange(n):
+
+		for j in np.arange(n):
+			if (i!=j) and (adj[i,j]!=0):
+				f[i] -= adj[i,j]/(beta[i]+beta[j])
+	return f
+
+
+def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
+    """Find roots of eq. f = 0, using newton, quasinewton or dianati.
+    """
+
+    tic_all = time.time()
+    toc_init = 0
+    tic = time.time()
+
+    # algorithm
+    beta = .5  # to compute alpha
+    n_steps = 0
+    x = x0  # initial point
+
+    f = fun(x)
+    norm = np.linalg.norm(f)
+    diff = 1
+
+    if full_return:
+        norm_seq = [norm]
+
+    if verbose:
+        print('\nx0 = {}'.format(x))
+        print('|f(x0)| = {}'.format(norm))
+
+    toc_init = time.time() - tic
+
+    toc_alfa = 0
+    toc_update = 0
+    toc_dx = 0
+    toc_jacfun = 0
+
+    tic_loop = time.time()
+
+    while norm > tol and diff > tol and n_steps < max_steps:  # stopping condition
+
+        x_old = x  # save previous iteration
+
+        # f jacobian
+        tic = time.time()
+        if method == 'newton':
+            H = fun_jac(x)  # original jacobian
+            # check the hessian is positive definite
+            # l, e = np.linalg.eigh(H)
+            l, e = np.linalg.eig(H)
+            ml = np.min(l)
+            # if it's not positive definite -> regularise
+            if ml < eps:
+                regularise = True
+            # regularisation
+            if regularise == True:
+                B = hessian_regulariser_function(H, eps)
+                l, e = np.linalg.eigh(B)
+                new_ml = np.min(l)
+            else:
+                B = H.__array__()
+        elif method == 'quasinewton':
+            # quasinewton hessian approximation
+            B = fun_jac(x)  # Jacobian diagonal
+            if regularise == True:
+                B = np.maximum(B, B*0 + 1e-8)
+        toc_jacfun += time.time() - tic
+
+        # discending direction computation
+        tic = time.time()
+        if method == 'newton':
+            dx = np.linalg.solve(B, - f)
+        elif method == 'quasinewton':
+            dx = - f/B
+        elif method == 'fixed-point':
+            dx = f - x
+        toc_dx += time.time() - tic
+
+        # backtraking line search
+        tic = time.time()
+        if linsearch:
+            alfa = 1 
+            i = 0
+            #TODO: fun(x) non e' il graident di step_funx
+            #TODO: check dianati fornisce una direzione di discesa 
+
+            """
+            s_new = np.linalg.norm(fun(x+alfa*dx)-x-alfa*dx)
+            s_old = np.linalg.norm(fun(x)-x)
+            while sufficient_decrease_condition(s_old, \
+                s_new, alfa, fun(x), dx) == False and i<50:
+            """
+            s_old = step_fun(x)
+            while sufficient_decrease_condition(s_old, \
+                step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
+                alfa *= beta
+                i +=1
+        else:
+            """
+            if True:
+                alfa = 0.1
+                eps2=1e-2
+                alfa0 = (eps2-1)*x/dx
+                for a in alfa0:
+                    if a>=0:
+                        alfa = min(alfa, a)
+            """
+            alfa = 1
+
+
+        toc_alfa += time.time() - tic
+
+        tic = time.time()
+        # solution update
+        # direction= dx@fun(x).T
+        x = x + alfa*dx
+        toc_update += time.time() - tic
+
+        f = fun(x)
+
+        # stopping condition computation
+        norm = np.linalg.norm(f)
+        diff = np.linalg.norm(x - x_old)
+
+        if full_return:
+            norm_seq.append(norm)
+
+        # step update
+        n_steps += 1
+
+        if verbose == True:
+            print('step {}'.format(n_steps))
+            print('alpha = {}'.format(alfa))
+            print('fun = {}'.format(f))
+            print('dx = {}'.format(dx))
+            print('x = {}'.format(x))
+            print('|f(x)| = {}'.format(norm))
+
+    toc_loop = time.time() - tic_loop
+    toc_all = time.time() - tic_all
+
+    if verbose == True:
+        print('Number of steps for convergence = {}'.format(n_steps))
+        print('toc_init = {}'.format(toc_init))
+        print('toc_jacfun = {}'.format(toc_jacfun))
+        print('toc_alfa = {}'.format(toc_alfa))
+        print('toc_dx = {}'.format(toc_dx))
+        print('toc_update = {}'.format(toc_update))
+        print('toc_loop = {}'.format(toc_loop))
+        print('toc_all = {}'.format(toc_all))
+
+    if full_return:
+        return (x, toc_all, n_steps, np.array(norm_seq))
+    else:
+        return x
+
+
+def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=.9):
+    """return boolean indicator if upper wolfe condition are respected.
+    """
+    # print(f_old, f_new, alpha, grad_f, p)
+    # c1 = 0
+    
+    #print ('f_old',f_old)
+    #print ('c1',c1)
+    #print('alpha',alpha)
+    #print ('grad_f',grad_f)
+    #print('p.T',p.T)
+
+    sup = f_old + c1 *alpha*grad_f@p.T
+    # print(alpha, f_new, sup)
+    return bool(f_new < sup)
+
+
+def hessian_regulariser_function(B, eps):
+    """Trasform input matrix in a positive defined matrix
+    input matrix should be numpy.array
+    """
+    eps = 1e-8
+    B = (B + B.transpose())*0.5  # symmetrization
+    l, e = np.linalg.eigh(B)
+    ll = np.array([0 if li>eps else eps-li for li in l])
+    Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    # lll, eee = np.linalg.eigh(Bf)
+    # debug check
+    # print('B regularised eigenvalues =\n {}'.format(lll))
+    return Bf
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_CReAMa(x,args):
+def expected_degree_cm(sol):
+	ex_k = np.zeros_like(sol, dtype=np.float64)
+	n = len(sol)
+	for i in np.arange(n):
+		for j in np.arange(n):
+			if i!=j:
+				aux = x[i]*x[j]
+				ex_k[i] += aux/(1+aux)
+	return ex_k
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa(x,args):
-
+def expected_strength_CReAMa(sol):
+	ex_s = np.zeros_like(sol, dtype=np.float64)
+	n = len(sol)
+	for i in np.arange(n):
+		for j in np.arange(n):
+			if (i!=j) and (adj[i,j]!=0):
+				ex_s += adj[i,j]/(beta[i]+beta[j])
+	return ex_s
 
 def edgelist_from_edgelist(edgelist):
     """
@@ -375,7 +640,7 @@ class UndirectedGraph:
         if model == 'cm':
             self._set_solved_problem_cm(solution)
         elif model == 'ecm':
-            self._set_solved_problem_decm(solution)
+            self._set_solved_problem_ecm(solution)
         elif model == 'CReAMa':
             self._set_solved_problem_CReAMa(solution)
 
@@ -414,27 +679,34 @@ class UndirectedGraph:
 
         self.r_x[self.r_dseq == 0] = 0
 
-
         self.x0 = self.r_x
+
+
+def _set_initial_guess_CReAMa(self):
+        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        if self.initial_guess is None:
+            self.beta = (self.strength_sequence>0).astype(float) / self.strength_sequence.sum()
+        elif self.initial_guess == 'strengths':
+            self.beta = (self.strength_sequence>0).astype(float) / (self.strength_sequence + 1)
+
+        self.x0 = self.beta
+
 
     ##### DA SISTEMARE
     def solution_error(self):
         if self.last_model in ['cm','CReAMa']:
             if (self.x is not None):
                 sol = np.concatenate((self.x, self.y))
-                ex_k = expected__cm(sol)
+                ex_k = expected_degree_cm(sol)
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
                 self.error = np.linalg.norm(ex_k - self.dseq)
             if (self.b_out is not None) and (self.b_in is not None):
-                sol = np.concatenate([self.b_out,self.b_in])
-                ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency)
-                ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency)
-                ex_s = np.concatenate([ex_s_out,ex_s_in])
-                s = np.concatenate([self.out_strength,self.in_strength])
+                ex_s = expected_stregth_seq(self.beta,self.adjacency)
                 self.expected_stregth_seq = ex_s
-                self.error_strength = np.linalg.norm(ex_s - s)
-                self.relative_error_strength = self.error_strength/self.out_strength.sum()
+                self.error_strength = np.linalg.norm(ex_s - self.strength_sequence)
+                self.relative_error_strength = self.error_strength/self.strength_sequence.sum()
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ['ecm']:
                 sol = np.concatenate((self.x, self.y, self.b_out, self.b_in))
@@ -449,11 +721,11 @@ class UndirectedGraph:
     def _set_args(self, model):
 
         if model=='CReAMa':
-            self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
+            self.args = (self.strength_sequence, self.adjacency, self.nz_index)
         elif model == 'cm':
             self.args = (self.dseq, self.r_multiplicity)
         elif model == 'ecm':
-            self.args = (self.dseq_out, self.dseq_in, self.out_strength, self.in_strength) 
+            self.args = (self.dseq, self.strength_sequence) 
 
 
     def _initialize_problem(self, model, method):
@@ -520,17 +792,17 @@ class UndirectedGraph:
         
         # Così basta aggiungere il decm e funziona tutto
         if model in ['cm']:
-            self.args_p = (self.n_nodes, np.nonzero(self.dseq_out)[0], np.nonzero(self.dseq_in)[0])
+            self.args_p = (self.n_nodes, np.nonzero(self.dseq)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
     
     
-    def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
+    def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='cm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
         self.last_model = model
         if not isinstance(adjacency,(list,np.ndarray,str)):
             raise ValueError('adjacency must be a matrix or a method')
         elif isinstance(adjacency,str):
             self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
-            self.adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
+            self.adjacency = self.fun_pmatrix(self.x)
         elif isinstance(adjacency,list):
             self.adjacency = np.array(adjacency)
         elif isinstance(adjacency,np.ndarray):
@@ -547,7 +819,17 @@ class UndirectedGraph:
         sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, g=self.stop_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
             
         self._set_solved_problem_CReAMa(sol)
-    
+
+
+    def _set_solved_problem_CReAMa(self, solution):
+        if self.full_return:
+            self.beta = solution[0]
+            self.comput_time_creama = solution[1]
+            self.n_steps_creama = solution[2]
+            self.norm_seq_creama = solution[3]
+        
+        else:
+            self.beta = solution
 
 
     def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False):
