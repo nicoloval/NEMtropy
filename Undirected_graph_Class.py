@@ -21,7 +21,7 @@ def pmatrix_cm(x, args):
 
 @jit(nopython=True)
 def iterative_cm(x, args):
-	k = args[0]
+    k = args[0]
     c = args[1]
     n = len(k)
     f = np.zeros_like(k,dtype=np.float64)
@@ -96,18 +96,18 @@ def loglikelihood_hessian_cm(x,args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_cm(x,args):
-	k = args[0]
+    k = args[0]
     c = args[1]
     n = len(k)
     f = np.zeros(n,dtype=np.float64)
     for i in np.arange(n):
     	f[i] - k[i]/(x[i]*x[i])
     	for j in np.arange(n):
-    		if i==j:
-    			aux = 1 + x[j]*x[j]
+            if i==j:
+                aux = 1 + x[j]*x[j]
                 f[i] += ((x[j]*x[j])/(aux*aux))*(c[j]-1)
-    		else:
-    			aux = 1 + x[i]*x[j]
+            else:
+                aux = 1 + x[i]*x[j]
                 f[i] += ((x[j]*x[j])/(aux*aux))*c[j]
     return i
 
@@ -684,7 +684,7 @@ class UndirectedGraph:
         self.x0 = self.r_x
 
 
-def _set_initial_guess_CReAMa(self):
+    def _set_initial_guess_CReAMa(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         if self.initial_guess is None:
