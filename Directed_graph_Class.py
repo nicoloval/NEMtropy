@@ -269,7 +269,7 @@ def random_binary_matrix_generator_custom_density(n, p=0.1 , sym=False, seed=Non
         for i in range(n):
             for j in range(i+1,n):
                 if np.random.random()<=p:
-                    A[i,j] = np.random.random()*sup_ext
+                    A[i,j] = 1
                     A[j,i] = A[i,j]
         degree = np.sum(A, axis=0)
         for ind, k in enumerate(degree):
@@ -277,7 +277,7 @@ def random_binary_matrix_generator_custom_density(n, p=0.1 , sym=False, seed=Non
                 while(np.sum(A[:,ind])==0):
                     indices = np.random.randint(A.shape[0])
                     if indices!= ind:
-                        A[0, indices] = np.random.random() * sup_ext
+                        A[0, indices] = 1
                         A[indices, 0] = A[0, indices]
         return A
   
