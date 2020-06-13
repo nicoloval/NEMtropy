@@ -116,9 +116,9 @@ def loglikelihood_prime_CReAMa(beta, args):
         aux_F_out[i] -= s_out[i]
         aux_F_in[i] -= s_in[i]
         for j in np.arange(aux_n):
-            if adj[i, j] > 0:
+            if (adj[i, j] > 0) and (i!=j):
                 aux_F_out[i] += adj[i, j]/(beta_out[i]+beta_in[j])
-            if adj[j, i] > 0:
+            if (adj[j, i] > 0) and (i!=j):
                     aux_F_in[i] += adj[j, i]/(beta_out[j]+beta_in[i])
 
     return (np.concatenate((aux_F_out,aux_F_in)))
@@ -141,12 +141,12 @@ def loglikelihood_hessian_CReAMa(beta, args):
     
     for i in np.arange(aux_n):
         for j in np.arange(aux_n):
-            if adj[i,j]>0:
+            if (adj[i,j]>0) and (i!=j):
                 aux = adj[i,j]/((beta_out[i]+beta_in[j])**2)
                 f[i,i] += -aux
                 f[i,j+aux_n] = - aux
                 f[j+aux_n,i] = -aux
-            if adj[j,i]>0:
+            if (adj[j,i]>0) and (i!=j):
                 aux = adj[j,i]/((beta_out[j]+beta_in[i])**2)
                 f[i+aux_n,i+aux_n] += -aux
                 
@@ -173,7 +173,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
     for i in np.arange(aux_n):
         for j in  np.arange(aux_n):
-            if adj[i,j]>0:
+            if (adj[i,j]>0) and (i!=j):
                 f[i] -= adj[i, j] / \
                          ((beta_out[i]+beta_in[j])**2)
             if adj[j,i]>0:
