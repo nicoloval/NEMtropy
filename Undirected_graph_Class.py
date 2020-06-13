@@ -29,9 +29,9 @@ def iterative_cm(x, args):
     	fx=0
     	for j in np.arange(n):
     		if i==j:
-    			fx += c[j] * (x[j]/(1+x[j]*x[i]))
-    		else:
     			fx += (c[j]-1) * (x[j]/(1+x[j]*x[i]))
+    		else:
+    			fx += (c[j]) * (x[j]/(1+x[j]*x[i]))
 
     	f[i] = k[i]/fx
     return f
