@@ -3,7 +3,6 @@ import scipy.sparse
 from numba import jit
 import time
 
-
 def pmatrix_cm(x, args):
 	n = args[0]
 	nz_index = args[1]
@@ -19,7 +18,7 @@ def pmatrix_cm(x, args):
 
 @jit(nopython=True)
 def iterative_cm(x, args):
-	k = args[0]
+    k = args[0]
     c = args[1]
     n = len(k)
     f = np.zeros_like(k,dtype=np.float64)
