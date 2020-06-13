@@ -377,7 +377,7 @@ def expected_degree_cm(sol):
 	for i in np.arange(n):
 		for j in np.arange(n):
 			if i!=j:
-				aux = x[i]*x[j]
+				aux = sol[i]*sol[j]
 				ex_k[i] += aux/(1+aux)
 	return ex_k
 
@@ -389,7 +389,7 @@ def expected_strength_CReAMa(sol):
 	for i in np.arange(n):
 		for j in np.arange(n):
 			if (i!=j) and (adj[i,j]!=0):
-				ex_s += adj[i,j]/(beta[i]+beta[j])
+				ex_s += adj[i,j]/(sol[i]+sol[j])
 	return ex_s
 
 def edgelist_from_edgelist(edgelist):
@@ -703,7 +703,7 @@ class UndirectedGraph:
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
                 self.error = np.linalg.norm(ex_k - self.dseq)
-            if (self.b_out is not None) and (self.b_in is not None):
+            if (self.beta is not None):
                 ex_s = expected_stregth_seq(self.beta,self.adjacency)
                 self.expected_stregth_seq = ex_s
                 self.error_strength = np.linalg.norm(ex_s - self.strength_sequence)
