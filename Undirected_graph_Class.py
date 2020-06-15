@@ -721,7 +721,7 @@ class UndirectedGraph:
                 self.expected_dseq = ex_k
                 self.error = np.linalg.norm(ex_k - self.dseq)
             if (self.beta is not None):
-                ex_s = expected_stregth_seq(self.beta,self.adjacency)
+                ex_s = expected_strength_CReAMa(self.beta,self.adjacency)
                 self.expected_stregth_seq = ex_s
                 self.error_strength = np.linalg.norm(ex_s - self.strength_sequence)
                 self.relative_error_strength = self.error_strength/self.strength_sequence.sum()
