@@ -741,7 +741,7 @@ class UndirectedGraph:
         d_fun = {
                 'cm-newton': lambda x: -loglikelihood_prime_cm(x,self.args),
                 'cm-quasinewton': lambda x: -loglikelihood_prime_cm(x,self.args),
-                'cm-fixed-point': lambda x: -iterative_cm(x,self.args),
+                'cm-fixed-point': lambda x: iterative_cm(x,self.args),
 
 
                 'CReAMa-newton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
