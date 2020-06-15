@@ -113,7 +113,24 @@ def loglikelihood_hessian_diag_cm(x,args):
 
 
 @jit(nopython=True)
-def loglikelihood_CReAMa(beta,args):
+def iterative_CReAMa_CM(beta,args):
+    s = args[0]
+    adj = args[1]
+    nz_index = args[2]
+
+    n = len(s)
+
+    f = np.zeros_like(s, dtype=np.float64)
+
+    for i in np.arange(n):
+        for j in np.arange(n):
+            if (i!=j) and (adj[i,j]!=0):
+                f[i] += (adj[i,j] /(1+(beta[j]/beta[i])))/s[i]
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_CReAMa_CM(beta,args):
 	s = args[0]
 	adj = args[1]
 	nz_index = args[2]
@@ -129,7 +146,7 @@ def loglikelihood_CReAMa(beta,args):
 	return f
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa(beta,args):
+def loglikelihood_prime_CReAMa_CM(beta,args):
 	s = args[0]
 	adj = args[1]
 	nz_index = args[2]
@@ -145,7 +162,7 @@ def loglikelihood_prime_CReAMa(beta,args):
 	return f
 
 @jit(nopython=True)
-def loglikelihood_hessian_CReAMa(beta,args):
+def loglikelihood_hessian_CReAMa_CM(beta,args):
 	s = args[0]
 	adj = args[1]
 	nz_index = args[2]
@@ -171,7 +188,7 @@ def loglikelihood_hessian_CReAMa(beta,args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa(beta,args):
+def loglikelihood_hessian_diag_CReAMa_CM(beta,args):
 	s = args[0]
 	adj = args[1]
 	nz_index = args[2]
@@ -744,9 +761,9 @@ class UndirectedGraph:
                 'cm-fixed-point': lambda x: iterative_cm(x,self.args),
 
 
-                'CReAMa-newton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
-                'CReAMa-quasinewton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
-                'CReAMa-fixed-point': lambda x: -iterative_CReAMa(x,self.args),
+                'CReAMa-newton': lambda x: -loglikelihood_prime_CReAMa_CM(x,self.args),
+                'CReAMa-quasinewton': lambda x: -loglikelihood_prime_CReAMa_CM(x,self.args),
+                'CReAMa-fixed-point': lambda x: -iterative_CReAMa_CM(x,self.args),
 
                 'ecm-newton': lambda x: -loglikelihood_prime_decm(x,self.args),
                 'ecm-quasinewton': lambda x: -loglikelihood_prime_decm(x,self.args),
@@ -758,8 +775,8 @@ class UndirectedGraph:
                     'cm-quasinewton': lambda x: -loglikelihood_hessian_diag_cm(x,self.args),
                     'cm-fixed-point': None,
 
-                    'CReAMa-newton': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),
-                    'CReAMa-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa(x,self.args),
+                    'CReAMa-newton': lambda x: -loglikelihood_hessian_CReAMa_CM(x,self.args),
+                    'CReAMa-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa_CM(x,self.args),
                     'CReAMa-fixed-point': None,
 
                     'ecm-newton': lambda x: -loglikelihood_hessian_decm(x,self.args),
@@ -771,9 +788,9 @@ class UndirectedGraph:
                      'cm-quasinewton': lambda x: -loglikelihood_cm(x,self.args),
                      'cm-fixed-point': lambda x: -loglikelihood_cm(x,self.args),
 
-                     'CReAMa-newton': lambda x: -loglikelihood_CReAMa(x,self.args),
-                     'CReAMa-quasinewton': lambda x: -loglikelihood_CReAMa(x,self.args),
-                     'CReAMa-fixed-point': lambda x: -loglikelihood_CReAMa(x,self.args),
+                     'CReAMa-newton': lambda x: -loglikelihood_CReAMa_CM(x,self.args),
+                     'CReAMa-quasinewton': lambda x: -loglikelihood_CReAMa_CM(x,self.args),
+                     'CReAMa-fixed-point': lambda x: -loglikelihood_CReAMa_CM(x,self.args),
 
                      'ecm-newton': lambda x: -loglikelihood_decm(x,self.args),
                      'ecm-quasinewton': lambda x: -loglikelihood_decm(x,self.args),
