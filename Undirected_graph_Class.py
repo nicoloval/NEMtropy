@@ -817,7 +817,7 @@ class UndirectedGraph:
         self._initialize_problem(model,method)
         x0 = self.x0 
             
-        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, fun_jac=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
+        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
             
         self._set_solved_problem_CReAMa(sol)
 
