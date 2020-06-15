@@ -188,6 +188,7 @@ def loglikelihood_hessian_CReAMa_CM(beta, args):
                     aux = beta[i] + beta[j]
                     aux_f = - adj[i, j]/(aux*aux)
                     f[i,j] = aux_f
+                    f[j,i] = aux_f
     return f
 
 
