@@ -209,6 +209,74 @@ def loglikelihood_hessian_diag_CReAMa_CM(beta,args):
 	return f
 
 
+@jit(nopython=True)
+def loglikelihood_ecm(sol,args):
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+    f = 0.0
+    for i in np.arange(n):
+        f += k[i] * np.log(x[i]) + s[i] * np.log(y[i])
+        for j in np.arange(i+1,n):
+            aux = y[i] * y[j]
+            f += np.log((1-aux)/(1-aux+x[i]*x[j]*aux))
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_ecm(sol,args):
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+    f = np.zeros(2*n,dtype = np.float64)
+    for i in np.arange(n):
+        f[i] += k[i]/x[i]
+        f[i+n] += s[i]/y[i]
+        for j in np.arange(n):
+            if (i!=j):
+                aux1 = x[i]*x[j]
+                aux2 = y[i]*y[j]
+                f[i] -= (x[j]*aux2)/(1-aux2+aux1*aux2)
+                f[i+n] -= (aux1*y[j])/((1-aux2)*(1-aux2+aux1*aux2))
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_ecm(sol,args):
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+    f = np.zeros(shape=(n,n),dtype=np.float64)
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_ecm(sol,args):
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+    f = np.zeros(n,dtype=np.float64)
+
+    return f
+
+
 def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
