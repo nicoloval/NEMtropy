@@ -24,11 +24,11 @@ def iterative_cm(x, args):
     k = args[0]
     c = args[1]
     n = len(k)
-    f = np.zeros_like(k,dtype=np.float64)
+    f = np.zeros_like(k, dtype=np.float64)
     for i in np.arange(n):
-    	fx=0
+    	fx = 0
     	for j in np.arange(n):
-    		if i==j:
+    		if i == j:
     			fx += (c[j]-1) * (x[j]/(1+x[j]*x[i]))
     		else:
     			fx += (c[j]) * (x[j]/(1+x[j]*x[i]))
@@ -38,11 +38,11 @@ def iterative_cm(x, args):
 
 
 @jit(nopython=True)
-def loglikelihood_cm(x,args):
+def loglikelihood_cm(x, args):
     k = args[0]
     c = args[1]
     n = len(k)
-    f=0.0
+    f = 0.0
     for i in np.arange(n):
         f += c[i] * k[i] * np.log(x[i])
         for j in np.arange(n):
@@ -54,15 +54,15 @@ def loglikelihood_cm(x,args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_cm(x,args):
+def loglikelihood_prime_cm(x, args):
     k = args[0]
     c = args[1]
     n = len(k)
-    f = np.zeros_like(k,dtype=np.float64)
+    f = np.zeros_like(k, dtype=np.float64)
     for i in np.arange(n):
         f[i] += k[i]/x[i]
         for j in np.arange(n):
-            if i==j:
+            if i == j:
                 f[i] -= (c[j]-1) * (x[j]/(1+(x[j]**2)))
             else:
                 f[i] -= c[j] * (x[j]/(1+x[i]*x[j]))
@@ -70,17 +70,17 @@ def loglikelihood_prime_cm(x,args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_cm(x,args):
+def loglikelihood_hessian_cm(x, args):
     k = args[0]
     c = args[1]
     n = len(k)
-    f = np.zeros(shape=(n,n),dtype=np.float64)
+    f = np.zeros(shape=(n, n), dtype=np.float64)
     for i in np.arange(n):
-        for j in np.arange(i,n):
-            if i==j:
+        for j in np.arange(i, n):
+            if i == j:
                 aux_f = - k[i]/(x[i]*x[i])
                 for h in range(n):
-                    if i==h:
+                    if i == h:
                         aux = 1 + x[h]*x[h]
                         aux_f += ((x[h]*x[h])/(aux*aux))*(c[h]-1)
                     else:
@@ -89,21 +89,22 @@ def loglikelihood_hessian_cm(x,args):
             else:
                 aux = 1+x[i]*x[j]
                 aux_f = ((x[j]*x[j]-aux)/(aux*aux))*c[j]
-            
-            f[i,j] = aux_f
-            f[j,i] = aux_f
+
+            f[i, j] = aux_f
+            f[j, i] = aux_f
     return f
 
+
 @jit(nopython=True)
-def loglikelihood_hessian_diag_cm(x,args):
+def loglikelihood_hessian_diag_cm(x, args):
     k = args[0]
     c = args[1]
     n = len(k)
-    f = np.zeros(n,dtype=np.float64)
+    f = np.zeros(n, dtype=np.float64)
     for i in np.arange(n):
     	f[i] - k[i]/(x[i]*x[i])
     	for j in np.arange(n):
-            if i==j:
+            if i == j:
                 aux = 1 + x[j]*x[j]
                 f[i] += ((x[j]*x[j])/(aux*aux))*(c[j]-1)
             else:
@@ -113,7 +114,7 @@ def loglikelihood_hessian_diag_cm(x,args):
 
 
 @jit(nopython=True)
-def iterative_CReAMa_CM(beta,args):
+def iterative_CReAMa_CM(beta, args):
     s = args[0]
     adj = args[1]
     nz_index = args[2]
@@ -124,13 +125,13 @@ def iterative_CReAMa_CM(beta,args):
 
     for i in np.arange(n):
         for j in np.arange(n):
-            if (i!=j) and (adj[i,j]!=0):
-                f[i] -= (adj[i,j] /(1+(beta[j]/beta[i])))/s[i]
+            if (i != j) and (adj[i, j] != 0):
+                f[i] -= (adj[i, j] / (1+(beta[j]/beta[i])))/s[i]
     return f
 
 
 @jit(nopython=True)
-def loglikelihood_CReAMa_CM(beta,args):
+def loglikelihood_CReAMa_CM(beta, args):
 	s = args[0]
 	adj = args[1]
 	nz_index = args[2]
@@ -140,50 +141,52 @@ def loglikelihood_CReAMa_CM(beta,args):
 	f = 0.0
 	for i in np.arange(n):
 		f -= s[i] * beta[i]
-		for j in np.arange(0,i):
-			if adj[i,j]!=0:
-				f += adj[i,j] * np.log(beta[i]+beta[j])
+		for j in np.arange(0, i):
+			if adj[i, j] != 0:
+				f += adj[i, j] * np.log(beta[i]+beta[j])
 	return f
 
+
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa_CM(beta,args):
+def loglikelihood_prime_CReAMa_CM(beta, args):
 	s = args[0]
 	adj = args[1]
 	nz_index = args[2]
 
 	n = len(s)
 
-	f = np.zeros_like(s,dtype=np.float64)
+	f = np.zeros_like(s, dtype=np.float64)
 	for i in np.arange(n):
 		f[i] -= s[i]
 		for j in np.arange(n):
-			if (i!=j) and adj[i,j]!=0:
-				f[i] += adj[i,j] / (beta[i] + beta[j])
+			if (i != j) and adj[i, j] != 0:
+				f[i] += adj[i, j] / (beta[i] + beta[j])
 	return f
 
+
 @jit(nopython=True)
-def loglikelihood_hessian_CReAMa_CM(beta,args):
+def loglikelihood_hessian_CReAMa_CM(beta, args):
 	s = args[0]
 	adj = args[1]
 	nz_index = args[2]
 
 	n = len(s)
 
-	f = np.zeros(shape=(n,n), dtype=np.float64)
+	f = np.zeros(shape=(n, n), dtype=np.float64)
 	for i in np.arange(n):
 		for j in np.arange(i):
-			if i==j:
+			if i == j:
 				aux_f = 0.0
 				for h in np.arange(n):
-					if (adj[i,h]!=0) and (i!=h):
+					if (adj[i, h] != 0) and (i != h):
 						aux = beta[i]+beta[j]
-						aux_f -= adj[i,h]/(aux*aux)
+						aux_f -= adj[i, h]/(aux*aux)
+                aux[i, j] = aux_f
 			else:
-				if adj[i,j]!=0:
+				if adj[i, j] != 0:
 					aux = beta[i] + beta[j]
-					aux_f = - adj[i,j]/(aux*aux)
-			f[i,j] = aux_f
-			f[j,i] = aux_f
+					aux_f = - adj[i, j]/(aux*aux)
+                    aux[i,j] = aux_f
 	return f
 
 
