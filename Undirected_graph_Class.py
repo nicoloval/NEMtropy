@@ -400,7 +400,7 @@ def expected_degree_cm(sol):
 
 
 @jit(nopython=True)
-def expected_strength_CReAMa(sol):
+def expected_strength_CReAMa(sol,adj):
 	ex_s = np.zeros_like(sol, dtype=np.float64)
 	n = len(sol)
 	for i in np.arange(n):
