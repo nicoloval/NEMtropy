@@ -406,7 +406,7 @@ def expected_strength_CReAMa(sol,adj):
 	for i in np.arange(n):
 		for j in np.arange(n):
 			if (i!=j) and (adj[i,j]!=0):
-				ex_s += adj[i,j]/(sol[i]+sol[j])
+				ex_s[i] += adj[i,j]/(sol[i]+sol[j])
 	return ex_s
 
 def edgelist_from_edgelist(edgelist):
