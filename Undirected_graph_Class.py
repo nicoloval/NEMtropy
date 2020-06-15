@@ -169,7 +169,7 @@ def loglikelihood_hessian_CReAMa_CM(beta,args):
 
 	n = len(s)
 
-	f = np.zeros_like(shape=(n,n), dtype=np.float64)
+	f = np.zeros(shape=(n,n), dtype=np.float64)
 	for i in np.arange(n):
 		for j in np.arange(i):
 			if i==j:
