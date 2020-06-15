@@ -125,7 +125,7 @@ def iterative_CReAMa_CM(beta,args):
     for i in np.arange(n):
         for j in np.arange(n):
             if (i!=j) and (adj[i,j]!=0):
-                f[i] += (adj[i,j] /(1+(beta[j]/beta[i])))/s[i]
+                f[i] -= (adj[i,j] /(1+(beta[j]/beta[i])))/s[i]
     return f
 
 
