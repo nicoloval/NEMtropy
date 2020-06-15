@@ -121,7 +121,7 @@ def loglikelihood_prime_CReAMa(beta, args):
             if (adj[i, j] > 0) and (i!=j):
                 aux_F_out[i] += adj[i, j]/(beta_out[i]+beta_in[j])
             if (adj[j, i] > 0) and (i!=j):
-                    aux_F_in[i] += adj[j, i]/(beta_out[j]+beta_in[i])
+                aux_F_in[i] += adj[j, i]/(beta_out[j]+beta_in[i])
 
     return (np.concatenate((aux_F_out,aux_F_in)))
 
