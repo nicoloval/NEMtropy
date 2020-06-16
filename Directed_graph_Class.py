@@ -1880,7 +1880,7 @@ class DirectedGraph:
     
     
     def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
-        if not isinstance(adjacency,(list,np.ndarray,str)):
+        if not isinstance(adjacency,(list,np.ndarray,str)) and (not scipy.sparse.isspmatrix(adjacency)):
             raise ValueError('adjacency must be a matrix or a method')
         elif isinstance(adjacency,str):
             self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
