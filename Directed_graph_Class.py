@@ -259,8 +259,8 @@ def loglikelihood_prime_CReAMa(beta, args):
         for i in nz_index_in:
             aux_F_in[i] -= s_in[i]
             for j in nz_index_out:
-                if (adj[j, i] > 0) and (i!=j):
-                    aux_F_in[i] += adj[j, i]/(beta_out[j]+beta_in[i])
+                if (adj[i, j] > 0) and (i!=j):
+                    aux_F_in[i] += adj[i, j]/(beta_out[j]+beta_in[i])
 
         return (np.concatenate((aux_F_out,aux_F_in)))
 
