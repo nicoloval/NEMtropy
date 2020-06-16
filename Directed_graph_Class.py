@@ -1892,6 +1892,8 @@ class DirectedGraph:
             self.adjacency_CReAMa = np.array(adjacency).astype(float)
         elif isinstance(adjacency,np.ndarray):
             self.adjacency_CReAMa = adjacency.astype(float)
+        elif scipy.sparse.isspmatrix(adjacency):
+            self.adjacency_CReAMa = adjacency
 
         #if self.adjacency_CReAMa.shape[0] != self.adjacadjacency_CReAMaency.shape[1]:
         #    raise ValueError(r'adjacency matrix must be $n \times n$')
