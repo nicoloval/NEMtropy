@@ -1483,7 +1483,7 @@ class DirectedGraph:
             if not isinstance(adjacency, (list, np.ndarray)) and not scipy.sparse.isspmatrix(adjacency):
                 raise TypeError('The adjacency matrix must be passed as a list or numpy array or scipy sparse matrix.')
             elif adjacency.size > 0:
-                if (adjacency<0).any():
+                if np.sum(adjacency<0):
                     raise TypeError('The adjacency matrix entries must be positive.')
                 if isinstance(adjacency, list): # Cast it to a numpy array: if it is given as a list it should not be too large
                     self.adjacency = np.array(adjacency)
