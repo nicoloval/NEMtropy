@@ -78,12 +78,12 @@ def pmatrix_dcm(x,args):
     return P
 
 
-@jit(nopython=True)
+@jit(forceobj=True)
 def weighted_adjacency(x, adj, is_sparse):
     n = adj.shape[0]
     beta_out = x[:n]
     beta_in = x[n:]
-    if self.is_sparse:
+    if is_sparse:
         weighted = scipy.sparse.csr_matrix((n,n),dtype=np.float64)
     else:
         weighted_adj = np.zeros_like(adj,dtype=np.float64)
@@ -196,11 +196,11 @@ def loglikelihood_CReAMa(beta,args):
     else:
         adj = aux_adj
         for i in nz_index_out:
-            f -= s_out[i] * beta_out[i] 
-            for j in nz_index_in:
-                if (i!=j) and (adj[i,j]>0):
-                    f += adj[i,j] * np.log(beta_out[i] + beta_in[j])
-        
+        f -= s_out[i] * beta_out[i] 
+        for j in nz_index_in:
+            if (i!=j) and (adj[i,j]!=0):
+                f += adj[i,j] * np.log(beta_out[i] + beta_in[j])
+    
         for i in nz_index_in:
             f -=  s_in[i] * beta_in[i]
         
