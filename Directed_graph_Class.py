@@ -286,7 +286,7 @@ def loglikelihood_hessian_CReAMa(beta, args):
                 if (i!=j):
                     aux = x[i]*y[j]
                     aux_entry = aux/(1+aux)
-                    if (aux_entry>0)
+                    if (aux_entry>0):
                         aux = aux_entry/((beta_out[i]+beta_in[j])**2)
                         f[i,i] += -aux
                         f[i,j+aux_n] = - aux
