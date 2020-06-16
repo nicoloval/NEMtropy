@@ -1130,7 +1130,7 @@ def hessian_regulariser_function(B, eps):
     return Bf
 
 
-@jit(nopython=True)
+@jit(forceobj=True)
 def expected_out_strength_CReAMa(sol,adj):
     n = int(sol.size/2)
     b_out = sol[:n]
@@ -1156,7 +1156,7 @@ def expected_out_strength_CReAMa(sol,adj):
         return s
 
 
-@jit(nopython=True)
+@jit(forceobj=True)
 def expected_in_stregth_CReAMa(sol,adj):  
     n = int(sol.size/2)
     b_out = sol[:n]
