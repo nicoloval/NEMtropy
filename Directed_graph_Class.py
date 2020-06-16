@@ -130,7 +130,7 @@ def iterative_CReAMa(beta,args):
                         aux = aux_entry/(1+beta_in[j]/beta_out[i])
                         xd[i] -= aux/s_out[i]
 
-        for i in nz_index_sin:
+        for i in nz_index_in:
             for j in nz_index_out:
                 if i!=j:
                     aux = x[j]*y[i]
