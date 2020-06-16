@@ -343,7 +343,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
                 if (i!=j):
                     aux = x[i]*y[j]
                     aux_entry = aux/(1+aux)
-                    if (aux_entry>0)
+                    if (aux_entry>0):
                         f[i] -= aux_entry / \
                                  ((beta_out[i]+beta_in[j])**2)
 
@@ -352,7 +352,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
                 if (i!=j):
                     aux = x[j]*y[i]
                     aux_entry = aux/(1+aux)
-                    if aux_entry>0:
+                    if (aux_entry>0):
                         f[i+aux_n] -= aux_entry / \
                                        ((beta_out[j]+beta_in[i])**2)
 
