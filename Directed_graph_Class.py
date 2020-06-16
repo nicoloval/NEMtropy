@@ -94,7 +94,7 @@ def weighted_adjacency(x, adj, is_sparse):
     return weighted_adj
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
 def iterative_CReAMa(beta,args):
     """Return the next iterative step for the CReAMa Model.
 
@@ -108,6 +108,7 @@ def iterative_CReAMa(beta,args):
     aux_adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
     
     aux_n = len(s_out)
     
@@ -117,7 +118,7 @@ def iterative_CReAMa(beta,args):
     xd = np.zeros(aux_n,dtype=np.float64)
     yd = np.zeros(aux_n,dtype=np.float64)
     
-    if (aux_adj.size==2*aux_n) and (not scipy.sparse.isspmatrix(aux_adj)):
+    if (aux_adj.size==2*aux_n) and (not is_sparse):
         x = aux_adj[:aux_n]
         y = aux_adj[aux_n:]
 
@@ -158,13 +159,14 @@ def iterative_CReAMa(beta,args):
         return(np.concatenate((xd,yd)))
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
 def loglikelihood_CReAMa(beta,args):
     s_out = args[0]
     s_in = args[1]
     aux_adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
     
     aux_n = len(s_out)
 
@@ -173,7 +175,7 @@ def loglikelihood_CReAMa(beta,args):
     
     f=0.0
     
-    if (aux_adj.size==2*aux_n) and (not scipy.sparse.isspmatrix(aux_adj)):
+    if (aux_adj.size==2*aux_n) and (not is_sparse):
         x = aux_adj[:aux_n]
         y = aux_adj[aux_n:]
 
@@ -205,13 +207,14 @@ def loglikelihood_CReAMa(beta,args):
         return f
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
 def loglikelihood_prime_CReAMa(beta, args):
     s_out = args[0]
     s_in = args[1]
     aux_adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
     
     aux_n = len(s_out)
 
@@ -221,7 +224,7 @@ def loglikelihood_prime_CReAMa(beta, args):
     aux_F_out = np.zeros_like(beta_out,dtype=np.float64)
     aux_F_in = np.zeros_like(beta_in,dtype=np.float64)
 
-    if (aux_adj.size==2*aux_n) and (not scipy.sparse.isspmatrix(aux_adj)):
+    if (aux_adj.size==2*aux_n) and (not is_sparse):
         x = aux_adj[:aux_n]
         y = aux_adj[aux_n:]
         
@@ -262,13 +265,14 @@ def loglikelihood_prime_CReAMa(beta, args):
         return (np.concatenate((aux_F_out,aux_F_in)))
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
 def loglikelihood_hessian_CReAMa(beta, args):
     s_out = args[0]
     s_in = args[1]
     aux_adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
 
     aux_n  = len(s_out)
 
@@ -277,7 +281,7 @@ def loglikelihood_hessian_CReAMa(beta, args):
 
     f = np.zeros(shape=(2*aux_n, 2*aux_n),dtype=np.float64)
 
-    if (aux_adj.size==2*aux_n) and (not scipy.sparse.isspmatrix(aux_adj)):
+    if (aux_adj.size==2*aux_n) and (not is_sparse):
         x = aux_adj[:aux_n]
         y = aux_adj[aux_n:]
     
@@ -319,13 +323,14 @@ def loglikelihood_hessian_CReAMa(beta, args):
             return f
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
 def loglikelihood_hessian_diag_CReAMa(beta, args):
     s_out = args[0]
     s_in = args[1]
     aux_adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
 
     aux_n  = len(s_out)
 
@@ -334,7 +339,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
     f = np.zeros(2*aux_n,dtype=np.float64)
 
-    if (aux_adj.size==2*aux_n) and (not scipy.sparse.isspmatrix(aux_adj)):
+    if (aux_adj.size==2*aux_n) and (not is_sparse):
         x = aux_adj[:aux_n]
         y = aux_adj[aux_n:]
 
@@ -1799,7 +1804,7 @@ class DirectedGraph:
     def _set_args(self, model):
 
         if model=='CReAMa':
-            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin, self.is_sparse)
+            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin, scipy.sparse.isspmatrix(self.adjacency_CReAMa))
         elif model == 'dcm':
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
         elif model == 'decm':
