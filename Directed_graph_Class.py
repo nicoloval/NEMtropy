@@ -94,7 +94,7 @@ def weighted_adjacency(x, adj, is_sparse):
     return weighted_adj
 
 
-@jit(nopython=True)
+@jit(forceobj=True)
 def iterative_CReAMa(beta,args):
     """Return the next iterative step for the CReAMa Model.
 
@@ -159,7 +159,7 @@ def iterative_CReAMa(beta,args):
         return(np.concatenate((xd,yd)))
 
 
-@jit(nopython=True)
+@jit(forceobj=True)
 def loglikelihood_CReAMa(beta,args):
     s_out = args[0]
     s_in = args[1]
@@ -207,7 +207,7 @@ def loglikelihood_CReAMa(beta,args):
         return f
 
 
-@jit(nopython=True)
+@jit(forceobj=True)
 def loglikelihood_prime_CReAMa(beta, args):
     s_out = args[0]
     s_in = args[1]
@@ -265,7 +265,7 @@ def loglikelihood_prime_CReAMa(beta, args):
         return (np.concatenate((aux_F_out,aux_F_in)))
 
 
-@jit(nopython=True)
+@jit(forceobj=True)
 def loglikelihood_hessian_CReAMa(beta, args):
     s_out = args[0]
     s_in = args[1]
@@ -323,7 +323,7 @@ def loglikelihood_hessian_CReAMa(beta, args):
             return f
 
 
-@jit(nopython=True)
+@jit(forceobj=True)
 def loglikelihood_hessian_diag_CReAMa(beta, args):
     s_out = args[0]
     s_in = args[1]
