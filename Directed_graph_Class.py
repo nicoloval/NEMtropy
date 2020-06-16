@@ -373,8 +373,8 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
         for i in nz_index_in:
             for j in nz_index_out:
-                if adj[j,i]>0:
-                    f[i+aux_n] -= adj[j,i] / \
+                if adj[i,j]>0:
+                    f[i+aux_n] -= adj[i,j] / \
                                    ((beta_out[j]+beta_in[i])**2)
 
         return f
