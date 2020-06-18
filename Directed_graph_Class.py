@@ -238,8 +238,9 @@ def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None
                 while(np.sum(A[:,ind])==0):
                     indices = np.random.randint(A.shape[0])
                     if indices!= ind:
-                        A[0, indices] = np.random.random() * sup_ext
-                        A[indices, 0] = A[0, indices]
+                        aux_ind = np.random.randint(A.shape[0])
+                        A[aux_ind, indices] = np.random.random() * sup_ext
+                        A[indices, aux_ind] = A[aux_ind, indices]
         return A.astype(dtype)
 
 
@@ -321,8 +322,9 @@ def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=
                 while(np.sum(A[:,ind])==0):
                     indices = np.random.randint(A.shape[0])
                     if indices!= ind:
-                        A[0, indices] = np.random.random() * sup_ext
-                        A[indices, 0] = A[0, indices]
+                        aux_ind = np.random.randint(A.shape[0])
+                        A[aux_ind, indices] = np.random.random() * sup_ext
+                        A[indices, aux_ind] = A[aux_ind, indices]
         return A.astype(dtype)
 
 
