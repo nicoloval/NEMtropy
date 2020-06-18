@@ -58,8 +58,8 @@ def iterative_cm(x, args):
                 fx += (c[j]-1) * (x[j]/(1+x[j]*x[i]))
             else:
                 fx += (c[j]) * (x[j]/(1+x[j]*x[i]))
-
-        f[i] = k[i]/fx
+        if fx:
+            f[i] = k[i]/fx
     return f
 
 
@@ -229,6 +229,35 @@ def loglikelihood_hessian_diag_CReAMa(beta,args):
 			if (i!=j) and (adj[i,j]!=0):
 				f[i] -= adj[i,j]/(beta[i]+beta[j])**2
 	return f
+
+
+@jit(nopython=True)
+def iterative_ecm(sol,args):
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+
+    f = np.zeros(2*n, dtype=np.float64)
+    for i in np.arange(n):
+        fx = 0.0
+        fy = 0.0
+        for j in np.arange(n):
+            if i!=j:
+                aux1 = x[i] * x[j]
+                aux2 = y[i] * y[j]
+                fx += (x[i] * aux2)/(1-aux2+aux1*aux2)
+                fy += (aux1 * y[j])/((1-aux2)*(1-aux2+aux1*aux2))
+        if fx:
+            f[i] = k[i] / fx
+        if fy:
+            f[i+n] = s[i] / fy 
+
+    return f
+
 
 
 @jit(nopython=True)
@@ -940,12 +969,12 @@ class UndirectedGraph:
             self.step_fun = d_fun_stop[mod_met]
         except:    
             raise ValueError('Method must be "newton","quasi-newton", or "fixed-point".')
-            
+        
         # TODO: mancano metodi
         d_pmatrix = {
                     'cm': pmatrix_cm
                     }
-        
+
         if model in ['cm']:
             self.args_p = (self.n_nodes, np.nonzero(self.dseq)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
