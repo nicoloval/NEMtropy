@@ -200,7 +200,7 @@ def loglikelihood_hessian_CReAMa_CM(beta, args):
 
     f = np.zeros(shape=(n, n), dtype=np.float64)
     for i in np.arange(n):
-        for j in np.arange(i+1):
+        for j in np.arange(n):
             if i == j:
                 aux_f = 0.0
                 for h in np.arange(n):
@@ -209,12 +209,12 @@ def loglikelihood_hessian_CReAMa_CM(beta, args):
                         aux_f -= adj[i, h]/(aux*aux)
                 f[i, j] = aux_f
             else:
-                aux_f = 0
+                aux_f = 0.0
                 if adj[i, j] != 0: 
                     aux = beta[i] + beta[j]
                     aux_f = - adj[i, j]/(aux*aux)
                     f[i,j] = aux_f
-                    f[j,i] = aux_f
+                    #f[j,i] = aux_f
     return f
 
 
