@@ -522,8 +522,8 @@ def expected_ecm(sol):
     n = int(len(sol)/2)
     for i in np.arange(n):
         for j in np.arange(n):
-            aux1 = x[i]x[j]
-            aux2 = y[i]y[j]
+            aux1 = x[i]*x[j]
+            aux2 = y[i]*y[j]
             aux3 = (aux1*aux2)/(1-aux2+aux1*aux2)
             ex_ks[i] += aux3
             ex_ks[i+n] += aux3/(1-aux2)
