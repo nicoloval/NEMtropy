@@ -3,7 +3,33 @@ import scipy.sparse
 from numba import jit
 import time
 
-# ciao
+
+def degree(a):
+    """returns matrix A out degrees
+
+    :param a: numpy.ndarray, a matrix
+    :return: numpy.ndarray
+    """
+    # if the matrix is a numpy array
+    if type(a) == np.ndarray:
+        return np.sum(a > 0, 1)
+    # if the matrix is a scipy sparse matrix
+    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
+        return np.sum(a > 0, 1).A1
+
+
+def strength(a):
+    """returns matrix A out degrees
+
+    :param a: numpy.ndarray, a matrix
+    :return: numpy.ndarray
+    """
+    # if the matrix is a numpy array
+    if type(a) == np.ndarray:
+        return np.sum(a, 1)
+    # if the matrix is a scipy sparse matrix
+    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
+        return np.sum(a , 1).A1
 
 
 def pmatrix_cm(x, args):
@@ -584,19 +610,20 @@ class UndirectedGraph:
             if not isinstance(adjacency, (list, np.ndarray)) and not scipy.sparse.isspmatrix(adjacency):
                 raise TypeError('The adjacency matrix must be passed as a list or numpy array or scipy sparse matrix.')
             elif adjacency.size > 0:
-                if (adjacency<0).any():
+                if np.sum(adjacency<0):
                     raise TypeError('The adjacency matrix entries must be positive.')
                 if isinstance(adjacency, list): # Cast it to a numpy array: if it is given as a list it should not be too large
                     self.adjacency = np.array(adjacency)
                 elif isinstance(adjacency, np.ndarray):
                     self.adjacency = adjacency
                 else:
-                    self.sparse_adjacency = adjacency
+                    self.adjacency = adjacency
+                    self.is_sparse = True
                 if np.sum(adjacency)==np.sum(adjacency>0):
-                    self.dseq = np.sum(adjacency, axis=0)
+                    self.dseq = degree(adjacency)
                 else:
-                    self.dseq = np.sum(adjacency>0, axis=0)
-                    self.strength_sequence = np.sum(adjacency, axis=0)
+                    self.dseq = degree(adjacency)
+                    self.strength_sequence = strength(adjacency)
                     self.nz_index = np.nonzero(self.strength_sequence)[0]
                     self.is_weighted = True
                     
@@ -794,7 +821,7 @@ class UndirectedGraph:
                 self.expected_dseq = ex_k
                 self.error = np.linalg.norm(ex_k - self.dseq)
             if (self.beta is not None):
-                ex_s = expected_strength_CReAMa(self.beta,self.adjacency)
+                ex_s = expected_strength_CReAMa(self.beta,self.adjacency_CReAMa)
                 self.expected_stregth_seq = ex_s
                 self.error_strength = np.linalg.norm(ex_s - self.strength_sequence)
                 self.relative_error_strength = self.error_strength/self.strength_sequence.sum()
@@ -812,7 +839,7 @@ class UndirectedGraph:
     def _set_args(self, model):
 
         if model=='CReAMa':
-            self.args = (self.strength_sequence, self.adjacency, self.nz_index)
+            self.args = (self.strength_sequence, self.adjacency_CReAMa, self.nz_index)
         elif model == 'cm':
             self.args = (self.r_dseq, self.r_multiplicity)
         elif model == 'ecm':
@@ -888,20 +915,23 @@ class UndirectedGraph:
     
     
     def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='cm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
-        self.last_model = model
         if not isinstance(adjacency,(list,np.ndarray,str)):
             raise ValueError('adjacency must be a matrix or a method')
         elif isinstance(adjacency,str):
             self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
-            self.adjacency = self.fun_pmatrix(self.x)
+            if self.is_sparse:
+                self.adjacency_CReAMa = self.x
+            else:
+                self.adjacency_CReAMa = self.fun_pmatrix(self.x)
         elif isinstance(adjacency,list):
-            self.adjacency = np.array(adjacency)
+            self.adjacency_CReAMa = np.array(adjacency)
         elif isinstance(adjacency,np.ndarray):
-            self.adjacency = adjacency
+            self.adjacency_CReAMa = adjacency
 
-        if self.adjacency.shape[0] != self.adjacency.shape[1]:
-            raise ValueError(r'adjacency matrix must be $n \times n$')
+        #if self.adjacency_CReAMa.shape[0] != self.adjacency_CReAMa.shape[1]:
+        #    raise ValueError(r'adjacency matrix must be $n \times n$')
 
+        self.last_model = model
         self.full_return = full_return
         self.initial_guess = 'strengths'
         self._initialize_problem(model,method)
