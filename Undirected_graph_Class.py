@@ -903,9 +903,9 @@ class UndirectedGraph:
                 'CReAMa-quasinewton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
                 'CReAMa-fixed-point': lambda x: -iterative_CReAMa(x,self.args),
 
-                'ecm-newton': lambda x: -loglikelihood_prime_decm(x,self.args),
-                'ecm-quasinewton': lambda x: -loglikelihood_prime_decm(x,self.args),
-                'ecm-fixed-point': lambda x: iterative_decm(x,self.args),
+                'ecm-newton': lambda x: -loglikelihood_prime_ecm(x,self.args),
+                'ecm-quasinewton': lambda x: -loglikelihood_prime_ecm(x,self.args),
+                'ecm-fixed-point': lambda x: iterative_ecm(x,self.args),
                 }
 
         d_fun_jac = {
@@ -917,8 +917,8 @@ class UndirectedGraph:
                     'CReAMa-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa(x,self.args),
                     'CReAMa-fixed-point': None,
 
-                    'ecm-newton': lambda x: -loglikelihood_hessian_decm(x,self.args),
-                    'ecm-quasinewton': lambda x: -loglikelihood_hessian_diag_decm(x,self.args),
+                    'ecm-newton': lambda x: -loglikelihood_hessian_ecm(x,self.args),
+                    'ecm-quasinewton': lambda x: -loglikelihood_hessian_diag_ecm(x,self.args),
                     'ecm-fixed-point': None,
                     }
         d_fun_stop = {
@@ -930,9 +930,9 @@ class UndirectedGraph:
                      'CReAMa-quasinewton': lambda x: -loglikelihood_CReAMa(x,self.args),
                      'CReAMa-fixed-point': lambda x: -loglikelihood_CReAMa(x,self.args),
 
-                     'ecm-newton': lambda x: -loglikelihood_decm(x,self.args),
-                     'ecm-quasinewton': lambda x: -loglikelihood_decm(x,self.args),
-                     'ecm-fixed-point': lambda x: -loglikelihood_decm(x,self.args),
+                     'ecm-newton': lambda x: -loglikelihood_ecm(x,self.args),
+                     'ecm-quasinewton': lambda x: -loglikelihood_ecm(x,self.args),
+                     'ecm-fixed-point': lambda x: -loglikelihood_ecm(x,self.args),
                      }
         try:
             self.fun = d_fun[mod_met]
@@ -946,7 +946,6 @@ class UndirectedGraph:
                     'cm': pmatrix_cm
                     }
         
-        # Così basta aggiungere il decm e funziona tutto
         if model in ['cm']:
             self.args_p = (self.n_nodes, np.nonzero(self.dseq)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
