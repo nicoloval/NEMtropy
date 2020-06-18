@@ -833,7 +833,7 @@ class UndirectedGraph:
         self.x0 = self.beta
 
 
-def _set_initial_guess_ecm(self):
+    def _set_initial_guess_ecm(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         if self.initial_guess is None:
