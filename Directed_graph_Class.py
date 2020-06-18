@@ -423,8 +423,7 @@ def loglikelihood_hessian_dcm(x, args):
     out = np.zeros((2*n, 2*n))  # hessian matrix
 
     for h in nz_out_index:
-        out[h, h] = -c[h]*k_out[h]/(x[h])**2
-        # out[h+n, h+n] = -c[h]*k_in[h]/(x[h+n])**2
+        out[h, h] = -k_out[h]/(x[h])**2
         for i in nz_in_index:
             if i == h:
                 # const = c[h]*(c[h] - 1)
@@ -437,14 +436,14 @@ def loglikelihood_hessian_dcm(x, args):
             out[h, i+n] = -const/(1 + x[i+n]*x[h])**2
 
     for i in nz_in_index:
-        out[i+n, i+n] = -c[i]*k_in[i]/(x[i+n])**2
+        out[i+n, i+n] = -k_in[i]/(x[i+n]*x[i+n])
         for h in nz_out_index:
             if i == h:
                 # const = c[h]*(c[h] - 1)
-                const = (c[h] - 1)
+                const = (c[i] - 1)
             else:
                 # const = c[h]*c[i]
-                const = c[i]
+                const = c[h]
 
             out[i+n, i+n] += const*(x[h]**2)/(1 + x[i+n]*x[h])**2
             out[i+n, h] = -const/(1 + x[i+n]*x[h])**2
@@ -517,7 +516,7 @@ def loglikelihood_hessian_diag_dcm(x, args):
                 const = c[j]
             else:
                 # const = c[i]*(c[j] - 1)
-                const = (c[j] - 1)
+                const = (c[i] - 1)
             
             tmp = (1 + x[i]*x[j+n])
             fx += const*x[j+n]*x[j+n]/(tmp*tmp)
