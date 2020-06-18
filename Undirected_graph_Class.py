@@ -300,7 +300,13 @@ def loglikelihood_hessian_diag_ecm(sol,args):
         f[i] -= k[i]/(x[i]*x[i])
         f[i+n] -= s[i]/(y[i]*y[i])
         for j in np.arange(n):
-
+            if j!=i:
+                aux1 = x[i]*x[j]
+                aux2 = y[i]*y[j]
+                aux3 = (1 - aux2)**2
+                aux4 = (1- aux2 + aux1 * aux2)**2
+                f[i] += ((x[j]*aux2)**2)/aux4
+                f[i+n] += (aux1*y[j] * (aux1*y[j] * (1-2*aux2) - 2*y[j]*(1-aux2)))/(aux3*aux4)
     return f
 
 
