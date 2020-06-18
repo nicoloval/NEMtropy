@@ -942,7 +942,7 @@ class UndirectedGraph:
 
                 'ecm-newton': lambda x: -loglikelihood_prime_ecm(x,self.args),
                 'ecm-quasinewton': lambda x: -loglikelihood_prime_ecm(x,self.args),
-                'ecm-fixed-point': lambda x: iterative_ecm(x,self.args),
+                'ecm-fixed-point': lambda x: -iterative_ecm(x,self.args),
                 }
 
         d_fun_jac = {
