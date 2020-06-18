@@ -1024,6 +1024,19 @@ class UndirectedGraph:
             self.beta = solution
 
 
+    def _set_solved_problem_ecm(self, solution):
+        if self.full_return:
+            self.r_xy = solution[0]
+            self.comput_time = solution[1]
+            self.n_steps = solution[2]
+            self.norm_seq = solution[3]
+        else:
+            self.r_xy = solution 
+
+        self.x = self.r_xy[:self.n_nodes]
+        self.y = self.r_xy[self.n_nodes:]
+
+
     def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False):
         """ function to switch around the various problems
         """
