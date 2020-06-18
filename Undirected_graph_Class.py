@@ -549,13 +549,16 @@ def expected_strength_CReAMa(sol,adj):
 def expected_ecm(sol):
     ex_ks = np.zeros_like(sol, dtype=np.float64)
     n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
     for i in np.arange(n):
         for j in np.arange(n):
-            aux1 = x[i]*x[j]
-            aux2 = y[i]*y[j]
-            aux3 = (aux1*aux2)/(1-aux2+aux1*aux2)
-            ex_ks[i] += aux3
-            ex_ks[i+n] += aux3/(1-aux2)
+            if i!=j:
+                aux1 = x[i]*x[j]
+                aux2 = y[i]*y[j]
+                aux3 = (aux1*aux2)/(1-aux2+aux1*aux2)
+                ex_ks[i] += aux3
+                ex_ks[i+n] += aux3/(1-aux2)
     return ex_ks
 
 def edgelist_from_edgelist(edgelist):
