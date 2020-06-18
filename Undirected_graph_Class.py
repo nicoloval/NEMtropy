@@ -249,7 +249,7 @@ def iterative_ecm(sol,args):
             if i!=j:
                 aux1 = x[i] * x[j]
                 aux2 = y[i] * y[j]
-                fx += (x[i] * aux2)/(1-aux2+aux1*aux2)
+                fx += (x[j] * aux2)/(1-aux2+aux1*aux2)
                 fy += (aux1 * y[j])/((1-aux2)*(1-aux2+aux1*aux2))
         if fx:
             f[i] = k[i] / fx
