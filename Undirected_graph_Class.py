@@ -878,6 +878,11 @@ class UndirectedGraph:
             self.x = 0.9*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
             self.y = 0.9*np.ones(self.n_nodes, dtype=np.float64)
 
+        self.x[self.dseq == 0] = 0
+        self.y[self.strength_sequence == 0] = 0
+
+        self.x0 = np.concatenate((self.x,self.y))
+
 
     # DA SISTEMARE
     def solution_error(self):
