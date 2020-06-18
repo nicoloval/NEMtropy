@@ -908,7 +908,7 @@ class UndirectedGraph:
                 self.expected_dseq = ex[:self.n_nodes]
                 self.expected_stregth_seq = ex[self.n_nodes:]
                 self.error = np.linalg.norm(ex - k)
-                self.relative_error_strength = self.error/self.out_strength.sum()
+                self.relative_error_strength = self.error/self.strength_sequence.sum()
     
 
     def _set_args(self, model):
