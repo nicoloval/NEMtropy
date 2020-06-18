@@ -547,10 +547,10 @@ def expected_strength_CReAMa(sol,adj):
 
 @jit(nopython=True)
 def expected_ecm(sol):
-    ex_ks = np.zeros_like(sol, dtype=np.float64)
     n = int(len(sol)/2)
     x = sol[:n]
     y = sol[n:]
+    ex_ks = np.zeros(2*n, dtype=np.float64)
     for i in np.arange(n):
         for j in np.arange(n):
             if i!=j:
