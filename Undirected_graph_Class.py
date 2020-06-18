@@ -515,6 +515,20 @@ def expected_strength_CReAMa(sol,adj):
 				ex_s[i] += adj[i,j]/(sol[i]+sol[j])
 	return ex_s
 
+
+@jit(nopython=True)
+def expected_ecm(sol):
+    ex_ks = np.zeros_like(sol, dtype=np.float64)
+    n = int(len(sol)/2)
+    for i in np.arange(n):
+        for j in np.arange(n):
+            aux1 = x[i]x[j]
+            aux2 = y[i]y[j]
+            aux3 = (aux1*aux2)/(1-aux2+aux1*aux2)
+            ex_ks[i] += aux3
+            ex_ks[i+n] += aux3/(1-aux2)
+    return ex_ks
+
 def edgelist_from_edgelist(edgelist):
     """
         Creates a new edgelist with the indexes of the nodes instead of the names.
@@ -819,6 +833,23 @@ class UndirectedGraph:
         self.x0 = self.beta
 
 
+def _set_initial_guess_ecm(self):
+        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        if self.initial_guess is None:
+            self.x = self.dseq.astype(float) / (self.n_edges + 1)
+            self.y = self.strength_sequence.astype(float) / self.strength_sequence.sum()  # This +1 increases the stability of the solutions.
+        elif self.initial_guess == 'strengths':
+            self.x = self.dseq.astype(float) / (self.dseq + 1)
+            self.y = self.strength_sequence.astype(float) / (self.strength_sequence + 1)
+        elif self.initial_guess == 'random':
+            self.x = np.random.rand(self.n_nodes).astype(np.float64)
+            self.y = np.random.rand(self.n_nodes).astype(np.float64)
+        elif self.initial_guess == 'uniform':
+            self.x = 0.9*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.y = 0.9*np.ones(self.n_nodes, dtype=np.float64)
+
+
     # DA SISTEMARE
     def solution_error(self):
         if self.last_model in ['cm','CReAMa']:
@@ -834,11 +865,11 @@ class UndirectedGraph:
                 self.relative_error_strength = self.error_strength/self.strength_sequence.sum()
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ['ecm']:
-                sol = np.concatenate((self.x, self.y, self.b_out, self.b_in))
-                ex = expected_decm(sol)
-                k = np.concatenate((self.dseq_out, self.dseq_in, self.out_strength, self.in_strength))
-                self.expected_dseq = ex[:2*self.n_nodes]
-                self.expected_stregth_seq = ex[2*self.n_nodes:]
+                sol = np.concatenate((self.x, self.y))
+                ex = expected_ecm(sol)
+                k = np.concatenate((self.dseq, self.strength_sequence))
+                self.expected_dseq = ex[:self.n_nodes]
+                self.expected_stregth_seq = ex[self.n_nodes:]
                 self.error = np.linalg.norm(ex - k)
                 self.relative_error_strength = self.error/self.out_strength.sum()
     
