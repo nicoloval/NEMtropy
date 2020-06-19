@@ -309,7 +309,7 @@ def loglikelihood_hessian_ecm(sol,args):
 
     x = sol[:n]
     y = sol[n:]
-    f = np.zeros(shape=(n,n),dtype=np.float64)
+    f = np.zeros(shape=(2*n,2*n),dtype=np.float64)
     for i in np.arange(n):
 
         for j in np.arange(i,n):
