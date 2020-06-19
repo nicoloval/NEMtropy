@@ -878,8 +878,8 @@ class UndirectedGraph:
             self.x = np.random.rand(self.n_nodes).astype(np.float64)
             self.y = np.random.rand(self.n_nodes).astype(np.float64)
         elif self.initial_guess == 'uniform':
-            self.x = 0.9*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
-            self.y = 0.9*np.ones(self.n_nodes, dtype=np.float64)
+            self.x = 0.00001*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.y = 0.00001*np.ones(self.n_nodes, dtype=np.float64)
 
         self.x[self.dseq == 0] = 0
         self.y[self.strength_sequence == 0] = 0
