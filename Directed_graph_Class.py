@@ -1561,7 +1561,10 @@ class DirectedGraph:
                 k = np.concatenate((self.dseq_out, self.dseq_in))
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
-                self.error = np.linalg.norm(ex_k - k)
+                # norm 2 error
+                # self.error = np.linalg.norm(ex_k - k)
+                # norm inf error
+                self.error = max(abs(ex_k - k))
             if (self.b_out is not None) and (self.b_in is not None):
                 sol = np.concatenate([self.b_out,self.b_in])
                 ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency)
@@ -1569,7 +1572,10 @@ class DirectedGraph:
                 ex_s = np.concatenate([ex_s_out,ex_s_in])
                 s = np.concatenate([self.out_strength,self.in_strength])
                 self.expected_stregth_seq = ex_s
-                self.error_strength = np.linalg.norm(ex_s - s)
+                # norm 2 error
+                # self.error_strength = np.linalg.norm(ex_s - s)
+                # norm inf error
+                self.error_strength = max(abs(ex_s - s))
                 self.relative_error_strength = self.error_strength/self.out_strength.sum()
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ['decm']:
