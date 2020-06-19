@@ -872,8 +872,8 @@ class UndirectedGraph:
             self.x = self.dseq.astype(float) / (self.n_edges + 1)
             self.y = self.strength_sequence.astype(float) / self.strength_sequence.sum()  # This +1 increases the stability of the solutions.
         elif self.initial_guess == 'strengths':
-            self.x = self.dseq.astype(float) / (self.dseq + 1)
-            self.y = self.strength_sequence.astype(float) / (self.strength_sequence + 1)
+            self.x = np.ones_like(self.dseq, dtype=np.float64) / (self.dseq + 1)
+            self.y = np.ones_like(self.strength_sequence, dtype=np.float64) / (self.strength_sequence + 1)
         elif self.initial_guess == 'random':
             self.x = np.random.rand(self.n_nodes).astype(np.float64)
             self.y = np.random.rand(self.n_nodes).astype(np.float64)
