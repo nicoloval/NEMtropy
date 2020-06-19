@@ -253,9 +253,12 @@ def iterative_ecm(sol,args):
                 fy += (aux1 * y[j])/((1-aux2)*(1-aux2+aux1*aux2))
         if fx:
             f[i] = k[i] / fx
+        else:
+            f[i] = 0.0
         if fy:
             f[i+n] = s[i] / fy 
-
+        else:
+            f[i+n] = 0.0
     return f
 
 
@@ -983,7 +986,7 @@ class UndirectedGraph:
 
                 'ecm-newton': lambda x: -loglikelihood_prime_ecm(x,self.args),
                 'ecm-quasinewton': lambda x: -loglikelihood_prime_ecm(x,self.args),
-                'ecm-fixed-point': lambda x: -iterative_ecm(x,self.args),
+                'ecm-fixed-point': lambda x: iterative_ecm(x,self.args),
                 }
 
         d_fun_jac = {
