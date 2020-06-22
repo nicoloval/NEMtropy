@@ -3,7 +3,61 @@ import scipy.sparse
 from numba import jit
 import time
 
-#ciao
+
+def out_degree(a):
+    """returns matrix A out degrees
+
+    :param a: numpy.ndarray, a matrix
+    :return: numpy.ndarray
+    """
+    # if the matrix is a numpy array
+    if type(a) == np.ndarray:
+        return np.sum(a > 0, 1)
+    # if the matrix is a scipy sparse matrix
+    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
+        return np.sum(a > 0, 1).A1
+
+
+def in_degree(a):
+    """returns matrix A in degrees
+
+    :param a: np.ndarray, a matrix
+    :return: numpy.ndarray
+    """
+    # if the matrix is a numpy array
+    if type(a) == np.ndarray:
+        return np.sum(a > 0, 0)
+    # if the matrix is a scipy sparse matrix
+    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
+        return np.sum(a > 0, 0).A1
+
+
+def out_strength(a):
+    """returns matrix A out degrees
+
+    :param a: numpy.ndarray, a matrix
+    :return: numpy.ndarray
+    """
+    # if the matrix is a numpy array
+    if type(a) == np.ndarray:
+        return np.sum(a, 1)
+    # if the matrix is a scipy sparse matrix
+    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
+        return np.sum(a , 1).A1
+
+
+def in_strength(a):
+    """returns matrix A out degrees
+
+    :param a: numpy.ndarray, a matrix
+    :return: numpy.ndarray
+    """
+    # if the matrix is a numpy array
+    if type(a) == np.ndarray:
+        return np.sum(a, 0)
+    # if the matrix is a scipy sparse matrix
+    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
+        return np.sum(a , 0).A1
 
 
 @jit(nopython=True)
@@ -59,16 +113,35 @@ def iterative_CReAMa(beta,args):
     xd = np.zeros(aux_n,dtype=np.float64)
     yd = np.zeros(aux_n,dtype=np.float64)
     
-    for i in np.arange(aux_n):
-        for j in np.arange(aux_n):
-            if adj[i,j]>0:
-                aux = adj[i,j]/(1+beta_in[j]/beta_out[i])
-                xd[i] -= aux/s_out[i]
-            if adj[j,i]>0:
-                aux = adj[j,i]/(1+beta_out[j]/beta_in[i])
-                yd[i] -= aux/s_in[i]
-    
-    return(np.concatenate((xd,yd)))
+    if len(adj)==3:
+        raw_ind = adj[0]
+        col_ind = adj[1]
+        weigths_val = adj[2]
+        for i,j,w in zip(raw_ind,col_ind,weigths_val):
+            xd[i] -= (w/(1+beta_out[i]/beta_in[j]))/s_out[i]
+            yd[j] -= (w/(1+beta_out[i]/beta_in[j]))/s_in[j]
+        
+        return(np.concatenate((xd,yd)))
+    elif len(adj)==2:
+        x = adj[0]
+        y = adj[1]
+
+        for i in np.arange(n):
+            for j in np.arange(n):
+                if i!=j:
+                    aux = x[i]*y[j]
+                    aux_entry = aux/(1+aux)
+                    if aux_entry>0:
+                        aux = aux_entry/(1+beta_in[j]/beta_out[i])
+                        xd[i] -= aux/s_out[i]
+                    aux = x[j]*y[i]
+                    aux_entry = aux/(1+aux)
+                    if aux_entry>0:
+                        aux = aux_entry/(1+beta_out[j]/beta_in[i])
+                        yd[i] -= aux/s_in[i]
+        
+        return(np.concatenate((xd,yd)))
+
 
 
 @jit(nopython=True)
@@ -86,17 +159,38 @@ def loglikelihood_CReAMa(beta,args):
     
     f=0.0
     
-    for i in nz_index_out:
-        f -= s_out[i] * beta_out[i] 
-        for j in nz_index_in:
-            if (i!=j) and (adj[i,j]!=0):
-                f += adj[i,j] * np.log(beta_out[i] + beta_in[j])
-    
-    for i in nz_index_in:
-        f -=  s_in[i] * beta_in[i]
-    
-    return f
+    if len(adj)==3:
+        raw_ind = adj[0]
+        col_ind = adj[1]
+        weigths_val = adj[2]
 
+        for i in nz_index_out:
+            f -= s_out[i]*beta_out[i]
+        for i in nz_index_in:
+            f -= s_in[i]*beta_in[i]
+
+        for i,j,w in zip(raw_ind,col_ind,weigths_val):
+            f += w * np.log(beta_out[i]+beta_in[j])
+
+        return f
+
+    elif len(adj)==2:
+        x = adj[0]
+        y = adj[1]
+
+        for i in nz_index_out:
+            f -= s_out[i] * beta_out[i] 
+            for j in nz_index_in:
+                if i!=j:
+                    aux = x[i]*y[j]
+                    aux_entry = aux/(1+aux)
+                    if (aux_entry>0):
+                        f += aux_entry * np.log(beta_out[i] + beta_in[j])
+        
+        for i in nz_index_in:
+            f -=  s_in[i] * beta_in[i]
+        
+        return f
 
 @jit(nopython=True)
 def loglikelihood_prime_CReAMa(beta, args):
@@ -943,30 +1037,61 @@ def hessian_regulariser_function(B, eps):
 
 @jit(nopython=True)
 def expected_out_strength_CReAMa(sol,adj):
-    n = adj.shape[0]
+    n = int(sol.size/2)
     b_out = sol[:n]
     b_in = sol[n:]
     s = np.zeros(n)
-    for i in range(n):
-        for j in range(n):
-            if adj[i,j]!=0:
-                s[i] += adj[i,j]/(b_out[i]+b_in[j])
+    if len(adj)==3:
+        raw_ind = adj[0]
+        col_ind = adj[1]
+        weigths_val = adj[2]
 
-    return s
+        for i,j,w in zip(raw_ind, col_ind, weigths_val):
+            s[i] += w/(beta_out[i] + beta_in[j])
+        return s
+
+    elif len(adj)==2:
+        x = adj[0]
+        y = adj[1]
+
+        for i in range(n):
+            for j in range(n):
+                if i!=j:
+                    aux = x[i] * y[j]
+                    aux_entry = aux/(1+aux)
+                    if aux_entry>0:
+                        s[i] += aux_entry/(b_out[i]+b_in[j])
+        return s
 
 
 @jit(nopython=True)
 def expected_in_stregth_CReAMa(sol,adj):  
-    n = adj.shape[0]
+    n = int(sol.size/2)
     b_out = sol[:n]
     b_in = sol[n:]
     s = np.zeros(n)
-    for i in range(n):
-        for j in range(n):
-            if adj[j,i]!=0:
-                s[i] += adj[j,i]/(b_out[j]+b_in[i])
+    if len(adj)==3:
+        raw_ind = adj[0]
+        col_ind = adj[1]
+        weigths_val = adj[2]
 
-    return s
+        for i,j,w in zip(raw_ind, col_ind, weigths_val):
+            s[j] += w/(beta_out[i]+beta_in[j])
+
+        return s
+    elif len(adj)==2:
+        x = adj[0]
+        y = adj[1]
+
+        for i in range(n):
+            for j in range(n):
+                if i!=j:
+                    aux = x[j] * y[i]
+                    aux_entry = aux/(1+aux)
+                    if aux_entry>0:
+                        s[i] += aux_entry/(b_out[j]+b_in[i])
+        return s
+
 
 
 
@@ -1196,7 +1321,7 @@ class DirectedGraph:
         self.n_nodes = None
         self.n_edges = None
         self.adjacency = None
-        self.sparse_adjacency = None
+        self.is_sparse = False
         self.edgelist = None
         self.dseq = None
         self.dseq_out = None
@@ -1270,22 +1395,23 @@ class DirectedGraph:
             if not isinstance(adjacency, (list, np.ndarray)) and not scipy.sparse.isspmatrix(adjacency):
                 raise TypeError('The adjacency matrix must be passed as a list or numpy array or scipy sparse matrix.')
             elif adjacency.size > 0:
-                if (adjacency<0).any():
+                if np.sum(adjacency<0):
                     raise TypeError('The adjacency matrix entries must be positive.')
                 if isinstance(adjacency, list): # Cast it to a numpy array: if it is given as a list it should not be too large
                     self.adjacency = np.array(adjacency)
                 elif isinstance(adjacency, np.ndarray):
                     self.adjacency = adjacency
                 else:
-                    self.sparse_adjacency = adjacency
+                    self.adjacency = adjacency
+                    self.is_sparse = True
                 if np.sum(adjacency)==np.sum(adjacency>0):
-                    self.dseq_in = np.sum(adjacency, axis=0)
-                    self.dseq_out = np.sum(adjacency, axis=1)
+                    self.dseq_in = in_degree(adjacency)
+                    self.dseq_out = out_degree(adjacency)
                 else:
-                    self.dseq_in = np.sum(adjacency>0, axis=0)
-                    self.dseq_out = np.sum(adjacency>0, axis=1)
-                    self.in_strength = np.sum(adjacency, axis=0)
-                    self.out_strength = np.sum(adjacency, axis=1)
+                    self.dseq_in = in_degree(adjacency)
+                    self.dseq_out = out_degree(adjacency)
+                    self.in_strength = in_strength(adjacency)
+                    self.out_strength = out_strength(adjacency)
                     self.nz_index_sout = np.nonzero(self.out_strength)[0]
                     self.nz_index_sin = np.nonzero(self.in_strength)[0]
                     self.is_weighted = True
@@ -1525,7 +1651,7 @@ class DirectedGraph:
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         if self.initial_guess is None:
             self.x = self.dseq_out.astype(float) / (self.n_edges + 1)
-            self.y = self.dseq_in_in.astype(float) / (self.n_edges + 1)
+            self.y = self.dseq_in.astype(float) / (self.n_edges + 1)
             self.b_out = self.out_strength.astype(float) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
             self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
         elif self.initial_guess == 'strengths':
@@ -1585,7 +1711,7 @@ class DirectedGraph:
     def _set_args(self, model):
 
         if model=='CReAMa':
-            self.args = (self.out_strength, self.in_strength, self.adjacency, self.nz_index_sout, self.nz_index_sin)
+            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
         elif model == 'dcm':
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
         elif model == 'decm':
@@ -1661,20 +1787,32 @@ class DirectedGraph:
     
     
     def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
-        self.last_model = model
-        if not isinstance(adjacency,(list,np.ndarray,str)):
+        if not isinstance(adjacency,(list,np.ndarray,str)) and (not scipy.sparse.isspmatrix(adjacency)):
             raise ValueError('adjacency must be a matrix or a method')
         elif isinstance(adjacency,str):
             self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
-            self.adjacency = self.fun_pmatrix(np.concatenate([self.x,self.y]))
+            if self.is_sparse:
+                self.adjacency_CReAMa = (self.x,self.y)
+            else:
+                pmatrix = self.fun_pmatrix(np.concatenate([self.x,self.y]))
+                raw_ind,col_ind = np.nonzero(pmatrix)
+                weigths_value = pmatrix[raw_ind,col_ind]
+                self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
         elif isinstance(adjacency,list):
-            self.adjacency = np.array(adjacency).astype(float)
+            adjacency = np.array(adjacency).astype(float)
+            raw_ind,col_ind = np.nonzero(adjacency)
+            weigths_value = adjacency[raw_ind,col_ind]
+            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
         elif isinstance(adjacency,np.ndarray):
-            self.adjacency = adjacency.astype(float)
+            raw_ind,col_ind = np.nonzero(adjacency)
+            weigths_value = adjacency[raw_ind,col_ind]
+            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+        elif scipy.sparse.isspmatrix(adjacency):
+            raw_ind,col_ind = adjacency.nonzero()
+            weigths_value = adjacency[raw_ind,col_ind].A1
+            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
 
-        if self.adjacency.shape[0] != self.adjacency.shape[1]:
-            raise ValueError(r'adjacency matrix must be $n \times n$')
-
+        self.last_model = model
         self.full_return = full_return
         self.initial_guess = 'strengths'
         self._initialize_problem(model,method)
