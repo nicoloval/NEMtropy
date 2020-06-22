@@ -1826,12 +1826,13 @@ class DirectedGraph:
             weigths_value = adjacency[raw_ind,col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
         elif isinstance(adjacency,np.ndarray):
+            adjacency = adjacency.astype(np.float64)
             raw_ind,col_ind = np.nonzero(adjacency)
             weigths_value = adjacency[raw_ind,col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
         elif scipy.sparse.isspmatrix(adjacency):
             raw_ind,col_ind = adjacency.nonzero()
-            weigths_value = adjacency[raw_ind,col_ind].A1
+            weigths_value = (adjacency[raw_ind,col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
 
         self.last_model = model
