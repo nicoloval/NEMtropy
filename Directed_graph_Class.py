@@ -1843,7 +1843,7 @@ class DirectedGraph:
         elif isinstance(adjacency,str):
             self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
             if self.is_sparse:
-                self.adjacency_CReAMa = (self.x,self.y,0)
+                self.adjacency_CReAMa = (self.x,self.y,self.x)
             else:
                 pmatrix = self.fun_pmatrix(np.concatenate([self.x,self.y]))
                 raw_ind,col_ind = np.nonzero(pmatrix)
