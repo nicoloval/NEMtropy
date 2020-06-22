@@ -126,8 +126,8 @@ def iterative_CReAMa(beta,args):
         x = adj[0]
         y = adj[1]
 
-        for i in np.arange(n):
-            for j in np.arange(n):
+        for i in np.arange(aux_n):
+            for j in np.arange(aux_n):
                 if i!=j:
                     aux = x[i]*y[j]
                     aux_entry = aux/(1+aux)
@@ -208,16 +208,36 @@ def loglikelihood_prime_CReAMa(beta, args):
     aux_F_out = np.zeros_like(beta_out,dtype=np.float64)
     aux_F_in = np.zeros_like(beta_in,dtype=np.float64)
 
-    for i in np.arange(aux_n):
-        aux_F_out[i] -= s_out[i]
-        aux_F_in[i] -= s_in[i]
-        for j in np.arange(aux_n):
-            if (adj[i, j] > 0) and (i!=j):
-                aux_F_out[i] += adj[i, j]/(beta_out[i]+beta_in[j])
-            if (adj[j, i] > 0) and (i!=j):
-                aux_F_in[i] += adj[j, i]/(beta_out[j]+beta_in[i])
+    if len(adj)==3:
+        raw_ind = adj[0]
+        col_ind = adj[1]
+        weigths_val = adj[2]
+        for i,j,w in zip(raw_ind, col_ind, weigths_val):
 
-    return (np.concatenate((aux_F_out,aux_F_in)))
+
+
+        return (np.concatenate((aux_F_out,aux_F_in)))
+
+
+
+    elif len(adj)==2:
+        x = adj[0]
+        y = adj[1]
+
+        for i in np.arange(n):
+            aux_F_out[i] -= s_out[i]
+            aux_F_in[i] -= s_in[i]
+            for j in np.arange(n):
+                aux = x[i]*y[j]
+                aux_value = aux/(1+aux)
+                if aux_value>0:
+                    aux_F_out += aux_value/(beta_out[i]+beta_in[j])
+                aux = x[j]*y[i]
+                aux_value = aux/(1+aux)
+                if aux_value >0 :
+                    aux_F_in += aux_value/(beta_out[j]+beta_in[i])
+
+        return (np.concatenate((aux_F_out,aux_F_in)))
 
 
 @jit(nopython=True)
@@ -1690,8 +1710,8 @@ class DirectedGraph:
                 self.error = np.linalg.norm(ex_k - k)
             if (self.b_out is not None) and (self.b_in is not None):
                 sol = np.concatenate([self.b_out,self.b_in])
-                ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency)
-                ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency)
+                ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency_CReAMa)
+                ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency_CReAMa)
                 ex_s = np.concatenate([ex_s_out,ex_s_in])
                 s = np.concatenate([self.out_strength,self.in_strength])
                 self.expected_stregth_seq = ex_s
