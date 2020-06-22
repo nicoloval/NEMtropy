@@ -106,6 +106,7 @@ def iterative_CReAMa(beta,args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
     
     aux_n = len(s_out)
     
@@ -114,8 +115,8 @@ def iterative_CReAMa(beta,args):
     
     xd = np.zeros(aux_n,dtype=np.float64)
     yd = np.zeros(aux_n,dtype=np.float64)
-    
-    if len(adj)==3:
+
+    if not is_sparse:
         raw_ind = adj[0]
         col_ind = adj[1]
         weigths_val = adj[2]
@@ -128,7 +129,7 @@ def iterative_CReAMa(beta,args):
             yd[i] = yd[i]/s_in[i]
         
         return(np.concatenate((xd,yd)))
-    elif len(adj)==2:
+    else:
         x = adj[0]
         y = adj[1]
 
@@ -157,6 +158,7 @@ def loglikelihood_CReAMa(beta,args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
     
     aux_n = len(s_out)
 
@@ -165,7 +167,7 @@ def loglikelihood_CReAMa(beta,args):
     
     f=0.0
     
-    if len(adj)==3:
+    if not is_sparse:
         raw_ind = adj[0]
         col_ind = adj[1]
         weigths_val = adj[2]
@@ -180,7 +182,7 @@ def loglikelihood_CReAMa(beta,args):
 
         return f
 
-    elif len(adj)==2:
+    else:
         x = adj[0]
         y = adj[1]
 
@@ -205,6 +207,7 @@ def loglikelihood_prime_CReAMa(beta, args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
     
     aux_n = len(s_out)
 
@@ -214,7 +217,7 @@ def loglikelihood_prime_CReAMa(beta, args):
     aux_F_out = np.zeros_like(beta_out,dtype=np.float64)
     aux_F_in = np.zeros_like(beta_in,dtype=np.float64)
 
-    if len(adj)==3:
+    if not is_sparse:
         raw_ind = adj[0]
         col_ind = adj[1]
         weigths_val = adj[2]
@@ -228,7 +231,7 @@ def loglikelihood_prime_CReAMa(beta, args):
 
         return (np.concatenate((aux_F_out,aux_F_in)))
 
-    elif len(adj)==2:
+    else:
         x = adj[0]
         y = adj[1]
 
@@ -255,6 +258,7 @@ def loglikelihood_hessian_CReAMa(beta, args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
 
     aux_n  = len(s_out)
 
@@ -287,6 +291,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
+    is_sparse = args[5]
 
     aux_n  = len(s_out)
 
@@ -295,17 +300,35 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
     f = np.zeros(2*aux_n,dtype=np.float64)
 
-    for i in np.arange(aux_n):
-        for j in  np.arange(aux_n):
-            if (adj[i,j]>0) and (i!=j):
-                f[i] -= adj[i, j] / \
-                         ((beta_out[i]+beta_in[j])**2)
-            if adj[j,i]>0:
-                f[i+aux_n] -= adj[j,i] / \
-                               ((beta_out[j]+beta_in[i])**2)
 
-    return f
+    if not is_sparse:
+        raw_ind = adj[0]
+        col_ind = adj[1]
+        weigths_val = adj[2]
+        for i,j,w in zip(raw_ind, col_ind, weigths_val):
+            f[i] -= w / ((beta_out[i]+beta_in[j])**2)
+            f[j+n] -= w / ((beta_out[i]+beta_in[j])**2)
 
+        return f
+    else:
+        x = adj[0]
+        y = adj[1]
+
+        for i in np.arange(aux_n):
+            for j in  np.arange(aux_n):
+                if (i!=j):
+                    aux = x[i]*y[j]
+                    aux_entry = aux/(1+aux)
+                    if (aux_entry>0):
+                        f[i] -= aux_entry / \
+                                 ((beta_out[i]+beta_in[j])**2)
+                    aux = x[j] * y[i]
+                    aux_entry = aux/(1+aux)
+                    if aux_entry>0:
+                        f[i+n] -= aux_entry/ \
+                                 ((beta_out[j]+beta_in[i])**2)
+
+        return f
 
 @jit(forceobj=True)
 def random_binary_matrix_generator_dense(n, sym=False, seed=None):
@@ -1739,7 +1762,7 @@ class DirectedGraph:
     def _set_args(self, model):
 
         if model=='CReAMa':
-            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
+            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin, self.is_sparse)
         elif model == 'dcm':
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
         elif model == 'decm':
