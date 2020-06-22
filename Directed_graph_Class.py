@@ -1069,7 +1069,7 @@ def expected_out_strength_CReAMa(sol,adj):
         weigths_val = adj[2]
 
         for i,j,w in zip(raw_ind, col_ind, weigths_val):
-            s[i] += w/(beta_out[i] + beta_in[j])
+            s[i] += w/(b_out[i] + b_in[j])
         return s
 
     elif len(adj)==2:
@@ -1098,7 +1098,7 @@ def expected_in_stregth_CReAMa(sol,adj):
         weigths_val = adj[2]
 
         for i,j,w in zip(raw_ind, col_ind, weigths_val):
-            s[j] += w/(beta_out[i]+beta_in[j])
+            s[j] += w/(b_out[i]+b_in[j])
 
         return s
     elif len(adj)==2:
