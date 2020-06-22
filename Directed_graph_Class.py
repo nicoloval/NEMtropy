@@ -118,8 +118,8 @@ def iterative_CReAMa(beta,args):
         col_ind = adj[1]
         weigths_val = adj[2]
         for i,j,w in zip(raw_ind,col_ind,weigths_val):
-            xd[i] -= (w/(1+beta_out[i]/beta_in[j]))/s_out[i]
-            yd[j] -= (w/(1+beta_out[i]/beta_in[j]))/s_in[j]
+            xd[i] -= (w/(1+(beta_out[i]/beta_in[j])))/s_out[i]
+            yd[j] -= (w/(1+beta_in[j]/beta_out[i]))/s_in[j]
         
         return(np.concatenate((xd,yd)))
     elif len(adj)==2:
