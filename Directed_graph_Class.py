@@ -104,6 +104,8 @@ def iterative_CReAMa(beta,args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
     
     aux_n = len(s_out)
     
@@ -118,8 +120,12 @@ def iterative_CReAMa(beta,args):
         col_ind = adj[1]
         weigths_val = adj[2]
         for i,j,w in zip(raw_ind,col_ind,weigths_val):
-            xd[i] -= (w/(1+(beta_out[i]/beta_in[j])))/s_out[i]
-            yd[j] -= (w/(1+beta_in[j]/beta_out[i]))/s_in[j]
+            xd[i] -= (w/(1+(beta_out[i]/beta_in[j])))
+            yd[j] -= (w/(1+(beta_in[j]/beta_out[i])))
+        for i in nz_index_out:
+            xd[i] = xd[i]/s_out[i]
+        for i in nz_index_in:
+            yd[i] = yd[i]/s_in[i]
         
         return(np.concatenate((xd,yd)))
     elif len(adj)==2:
@@ -1821,7 +1827,7 @@ class DirectedGraph:
                 weigths_value = pmatrix[raw_ind,col_ind]
                 self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
         elif isinstance(adjacency,list):
-            adjacency = np.array(adjacency).astype(float)
+            adjacency = np.array(adjacency).astype(np.float64)
             raw_ind,col_ind = np.nonzero(adjacency)
             weigths_value = adjacency[raw_ind,col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
