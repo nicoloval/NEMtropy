@@ -1525,7 +1525,7 @@ class DirectedGraph:
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         if self.initial_guess is None:
             self.x = self.dseq_out.astype(float) / (self.n_edges + 1)
-            self.y = self.dseq_in_in.astype(float) / (self.n_edges + 1)
+            self.y = self.dseq_in.astype(float) / (self.n_edges + 1)
             self.b_out = self.out_strength.astype(float) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
             self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
         elif self.initial_guess == 'strengths':
