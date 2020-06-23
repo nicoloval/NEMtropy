@@ -379,7 +379,7 @@ def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
                 aux = x[j] * y[i]
                 aux_entry = aux/(1+aux)
                 if aux_entry>0:
-                    f[i+n] -= aux_entry/ \
+                    f[i+aux_n] -= aux_entry/ \
                              ((beta_out[j]+beta_in[i])**2)
     return f
 
