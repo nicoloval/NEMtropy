@@ -1862,8 +1862,8 @@ class DirectedGraph:
                 'decm-quasinewton': lambda x: -loglikelihood_prime_decm(x,self.args),
                 'decm-fixed-point': lambda x: iterative_decm(x,self.args),
 
-                'CReAMa-sparse-newton': lambda x: -loglikelihood_CReAMa_Sparse(x,self.args),
-                'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_CReAMa_Sparse(x,self.args),
+                'CReAMa-sparse-newton': lambda x: -loglikelihood_prime_CReAMa_Sparse(x,self.args),
+                'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_prime_CReAMa_Sparse(x,self.args),
                 'CReAMa-sparse-fixed-point': lambda x: -iterative_CReAMa_Sparse(x,self.args),
                 }
 
@@ -1880,8 +1880,8 @@ class DirectedGraph:
                     'decm-quasinewton': lambda x: -loglikelihood_hessian_diag_decm(x,self.args),
                     'decm-fixed-point': None,
 
-                    'CReAMa-sparse-newton': lambda x: ,
-                    'CReAMa-sparse-quasinewton': lambda x: ,
+                    'CReAMa-sparse-newton': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),,
+                    'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa_Sparse(x,self.args),
                     'CReAMa-sparse-fixed-point': None,
                     }
         d_fun_step = {
@@ -1897,9 +1897,9 @@ class DirectedGraph:
                      'decm-quasinewton': lambda x: -loglikelihood_decm(x,self.args),
                      'decm-fixed-point': lambda x: -loglikelihood_decm(x,self.args),
 
-                     'CReAMa-sparse-newton': lambda x: ,
-                     'CReAMa-sparse-quasinewton': lambda x: ,
-                     'CReAMa-sparse-fixed-point': lambda x: ,
+                     'CReAMa-sparse-newton': lambda x: -loglikelihood_CReAMa_Sparse(x,self.args),
+                     'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_CReAMa_Sparse(x,self.args),
+                     'CReAMa-sparse-fixed-point': lambda x: -loglikelihood_CReAMa_Sparse(x,self.args),
                      }
         try:
             self.fun = d_fun[mod_met]
