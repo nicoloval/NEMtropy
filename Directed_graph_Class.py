@@ -250,9 +250,9 @@ def loglikelihood_prime_CReAMa(beta, args):
     col_ind = adj[1]
     weigths_val = adj[2]
     for i in nz_index_out:
-        aux_F_out -= s_out[i]
+        aux_F_out[i] -= s_out[i]
     for i in nz_index_in:
-        aux_F_in -= s_in[i]
+        aux_F_in[i] -= s_in[i]
     for i,j,w in zip(raw_ind, col_ind, weigths_val):
         aux_F_out[i] += w / (beta_out[i]+beta_in[j])
         aux_F_in[j] += w / (beta_out[i]+beta_in[j])
