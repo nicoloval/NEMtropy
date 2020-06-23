@@ -73,8 +73,9 @@ def pmatrix_dcm(x,args):
     yin = x[n:]
     for i in index_out:
         for j in index_in:
-            aux = xout[i]*yin[j]
-            P[i,j] = aux/(1+aux)
+            if i!=j:
+                aux = xout[i]*yin[j]
+                P[i,j] = aux/(1+aux)
     return P
 
 
@@ -309,6 +310,10 @@ def loglikelihood_hessian_CReAMa(beta, args):
     beta_in = beta[aux_n:]
 
     f = np.zeros(shape=(2*aux_n, 2*aux_n),dtype=np.float64)
+
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
     
     for i in np.arange(aux_n):
         for j in np.arange(aux_n):
