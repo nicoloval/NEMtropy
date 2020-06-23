@@ -317,8 +317,7 @@ def loglikelihood_hessian_CReAMa(beta, args):
     weigths_val = adj[2]
 
     for i,j,w in zip(raw_ind, col_ind, weigths_val):
-
-    
+        aux = w/((beta_out[i]+beta_in[j])**2)
 #    for i in np.arange(aux_n):
 #        for j in np.arange(aux_n):
 #            if (adj[i,j]>0) and (i!=j):
@@ -329,7 +328,6 @@ def loglikelihood_hessian_CReAMa(beta, args):
 #            if (adj[j,i]>0) and (i!=j):
 #                aux = adj[j,i]/((beta_out[j]+beta_in[i])**2)
 #                f[i+aux_n,i+aux_n] += -aux
-                
     
     return f
 
