@@ -106,7 +106,6 @@ def iterative_CReAMa(beta,args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
-    is_sparse = args[5]
     
     aux_n = len(s_out)
     
@@ -116,39 +115,56 @@ def iterative_CReAMa(beta,args):
     xd = np.zeros(aux_n,dtype=np.float64)
     yd = np.zeros(aux_n,dtype=np.float64)
 
-    if not is_sparse:
-        raw_ind = adj[0]
-        col_ind = adj[1]
-        weigths_val = adj[2]
-        for i,j,w in zip(raw_ind,col_ind,weigths_val):
-            xd[i] -= (w/(1+(beta_in[j]/beta_out[i])))
-            yd[j] -= (w/(1+(beta_out[i]/beta_in[j])))
-        for i in nz_index_out:
-            xd[i] = xd[i]/s_out[i]
-        for i in nz_index_in:
-            yd[i] = yd[i]/s_in[i]
-        
-        return(np.concatenate((xd,yd)))
-    else:
-        x = adj[0]
-        y = adj[1]
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
 
-        for i in np.arange(aux_n):
-            for j in np.arange(aux_n):
-                if i!=j:
-                    aux = x[i]*y[j]
-                    aux_entry = aux/(1+aux)
-                    if aux_entry>0:
-                        aux = aux_entry/(1+beta_in[j]/beta_out[i])
-                        xd[i] -= aux/s_out[i]
-                    aux = x[j]*y[i]
-                    aux_entry = aux/(1+aux)
-                    if aux_entry>0:
-                        aux = aux_entry/(1+beta_out[j]/beta_in[i])
-                        yd[i] -= aux/s_in[i]
-        
-        return(np.concatenate((xd,yd)))
+    for i,j,w in zip(raw_ind,col_ind,weigths_val):
+        xd[i] -= (w/(1+(beta_in[j]/beta_out[i])))
+        yd[j] -= (w/(1+(beta_out[i]/beta_in[j])))
+    for i in nz_index_out:
+        xd[i] = xd[i]/s_out[i]
+    for i in nz_index_in:
+        yd[i] = yd[i]/s_in[i]
+    
+    return(np.concatenate((xd,yd)))
 
+
+
+@jit(nopython=True)
+def iterative_CReAMa_Sparse(beta,args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+    
+    aux_n = len(s_out)
+    
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+    
+    xd = np.zeros(aux_n,dtype=np.float64)
+    yd = np.zeros(aux_n,dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in np.arange(aux_n):
+        for j in np.arange(aux_n):
+            if i!=j:
+                aux = x[i]*y[j]
+                aux_entry = aux/(1+aux)
+                if aux_entry>0:
+                    aux = aux_entry/(1+beta_in[j]/beta_out[i])
+                    xd[i] -= aux/s_out[i]
+                aux = x[j]*y[i]
+                aux_entry = aux/(1+aux)
+                if aux_entry>0:
+                    aux = aux_entry/(1+beta_out[j]/beta_in[i])
+                    yd[i] -= aux/s_in[i]
+    
+    return(np.concatenate((xd,yd)))
 
 
 @jit(nopython=True)
@@ -158,7 +174,6 @@ def loglikelihood_CReAMa(beta,args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
-    is_sparse = args[5]
     
     aux_n = len(s_out)
 
@@ -167,38 +182,53 @@ def loglikelihood_CReAMa(beta,args):
     
     f=0.0
     
-    if not is_sparse:
-        raw_ind = adj[0]
-        col_ind = adj[1]
-        weigths_val = adj[2]
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
 
-        for i in nz_index_out:
-            f -= s_out[i]*beta_out[i]
-        for i in nz_index_in:
-            f -= s_in[i]*beta_in[i]
+    for i in nz_index_out:
+        f -= s_out[i]*beta_out[i]
+    for i in nz_index_in:
+        f -= s_in[i]*beta_in[i]
 
-        for i,j,w in zip(raw_ind,col_ind,weigths_val):
-            f += w * np.log(beta_out[i]+beta_in[j])
+    for i,j,w in zip(raw_ind,col_ind,weigths_val):
+        f += w * np.log(beta_out[i]+beta_in[j])
 
-        return f
+    return f
 
-    else:
-        x = adj[0]
-        y = adj[1]
 
-        for i in nz_index_out:
-            f -= s_out[i] * beta_out[i] 
-            for j in nz_index_in:
-                if i!=j:
-                    aux = x[i]*y[j]
-                    aux_entry = aux/(1+aux)
-                    if (aux_entry>0):
-                        f += aux_entry * np.log(beta_out[i] + beta_in[j])
-        
-        for i in nz_index_in:
-            f -=  s_in[i] * beta_in[i]
-        
-        return f
+@jit(nopython=True)
+def loglikelihood_CReAMa_Sparse(beta,args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+    
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+    
+    f=0.0
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in nz_index_out:
+        f -= s_out[i] * beta_out[i] 
+        for j in nz_index_in:
+            if i!=j:
+                aux = x[i]*y[j]
+                aux_entry = aux/(1+aux)
+                if (aux_entry>0):
+                    f += aux_entry * np.log(beta_out[i] + beta_in[j])
+
+    for i in nz_index_in:
+        f -=  s_in[i] * beta_in[i]
+
+    return f
+
 
 @jit(nopython=True)
 def loglikelihood_prime_CReAMa(beta, args):
@@ -207,7 +237,6 @@ def loglikelihood_prime_CReAMa(beta, args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
-    is_sparse = args[5]
     
     aux_n = len(s_out)
 
@@ -217,38 +246,53 @@ def loglikelihood_prime_CReAMa(beta, args):
     aux_F_out = np.zeros_like(beta_out,dtype=np.float64)
     aux_F_in = np.zeros_like(beta_in,dtype=np.float64)
 
-    if not is_sparse:
-        raw_ind = adj[0]
-        col_ind = adj[1]
-        weigths_val = adj[2]
-        for i in nz_index_out:
-            aux_F_out -= s_out[i]
-        for j in nz_index_in:
-            aux_F_in -= s_in[i]
-        for i,j,w in zip(raw_ind, col_ind, weigths_val):
-            aux_F_out[i] += w / (beta_out[i]+beta_in[j])
-            aux_F_in[j] += w / (beta_out[i]+beta_in[j])
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+    for i in nz_index_out:
+        aux_F_out -= s_out[i]
+    for j in nz_index_in:
+        aux_F_in -= s_in[i]
+    for i,j,w in zip(raw_ind, col_ind, weigths_val):
+        aux_F_out[i] += w / (beta_out[i]+beta_in[j])
+        aux_F_in[j] += w / (beta_out[i]+beta_in[j])
 
-        return (np.concatenate((aux_F_out,aux_F_in)))
+    return (np.concatenate((aux_F_out,aux_F_in)))
 
-    else:
-        x = adj[0]
-        y = adj[1]
 
-        for i in np.arange(n):
-            aux_F_out[i] -= s_out[i]
-            aux_F_in[i] -= s_in[i]
-            for j in np.arange(n):
-                aux = x[i]*y[j]
-                aux_value = aux/(1+aux)
-                if aux_value>0:
-                    aux_F_out += aux_value/(beta_out[i]+beta_in[j])
-                aux = x[j]*y[i]
-                aux_value = aux/(1+aux)
-                if aux_value >0 :
-                    aux_F_in += aux_value/(beta_out[j]+beta_in[i])
+@jit(nopython=True)
+def loglikelihood_prime_CReAMa_Sparse(beta, args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+    
+    aux_n = len(s_out)
 
-        return (np.concatenate((aux_F_out,aux_F_in)))
+    beta_out = beta[0:aux_n]
+    beta_in = beta[aux_n:2*aux_n]
+
+    aux_F_out = np.zeros_like(beta_out,dtype=np.float64)
+    aux_F_in = np.zeros_like(beta_in,dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in np.arange(n):
+        aux_F_out[i] -= s_out[i]
+        aux_F_in[i] -= s_in[i]
+        for j in np.arange(n):
+            aux = x[i]*y[j]
+            aux_value = aux/(1+aux)
+            if aux_value>0:
+                aux_F_out += aux_value/(beta_out[i]+beta_in[j])
+            aux = x[j]*y[i]
+            aux_value = aux/(1+aux)
+            if aux_value >0 :
+                aux_F_in += aux_value/(beta_out[j]+beta_in[i])
+
+    return (np.concatenate((aux_F_out,aux_F_in)))
 
 
 @jit(nopython=True)
@@ -258,7 +302,6 @@ def loglikelihood_hessian_CReAMa(beta, args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
-    is_sparse = args[5]
 
     aux_n  = len(s_out)
 
@@ -282,8 +325,6 @@ def loglikelihood_hessian_CReAMa(beta, args):
     return f
 
 
-
-
 @jit(nopython=True)
 def loglikelihood_hessian_diag_CReAMa(beta, args):
     s_out = args[0]
@@ -291,7 +332,6 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
     adj = args[2]
     nz_index_out = args[3]
     nz_index_in = args[4]
-    is_sparse = args[5]
 
     aux_n  = len(s_out)
 
@@ -301,34 +341,49 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
     f = np.zeros(2*aux_n,dtype=np.float64)
 
 
-    if not is_sparse:
-        raw_ind = adj[0]
-        col_ind = adj[1]
-        weigths_val = adj[2]
-        for i,j,w in zip(raw_ind, col_ind, weigths_val):
-            f[i] -= w / ((beta_out[i]+beta_in[j])**2)
-            f[j+n] -= w / ((beta_out[i]+beta_in[j])**2)
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+    for i,j,w in zip(raw_ind, col_ind, weigths_val):
+        f[i] -= w / ((beta_out[i]+beta_in[j])**2)
+        f[j+n] -= w / ((beta_out[i]+beta_in[j])**2)
 
-        return f
-    else:
-        x = adj[0]
-        y = adj[1]
+    return f
 
-        for i in np.arange(aux_n):
-            for j in  np.arange(aux_n):
-                if (i!=j):
-                    aux = x[i]*y[j]
-                    aux_entry = aux/(1+aux)
-                    if (aux_entry>0):
-                        f[i] -= aux_entry / \
-                                 ((beta_out[i]+beta_in[j])**2)
-                    aux = x[j] * y[i]
-                    aux_entry = aux/(1+aux)
-                    if aux_entry>0:
-                        f[i+n] -= aux_entry/ \
-                                 ((beta_out[j]+beta_in[i])**2)
 
-        return f
+@jit(nopython=True)
+def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n  = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    f = np.zeros(2*aux_n,dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in np.arange(aux_n):
+        for j in  np.arange(aux_n):
+            if (i!=j):
+                aux = x[i]*y[j]
+                aux_entry = aux/(1+aux)
+                if (aux_entry>0):
+                    f[i] -= aux_entry / \
+                             ((beta_out[i]+beta_in[j])**2)
+                aux = x[j] * y[i]
+                aux_entry = aux/(1+aux)
+                if aux_entry>0:
+                    f[i+n] -= aux_entry/ \
+                             ((beta_out[j]+beta_in[i])**2)
+    return f
+
 
 @jit(forceobj=True)
 def random_binary_matrix_generator_dense(n, sym=False, seed=None):
@@ -1092,27 +1147,34 @@ def expected_out_strength_CReAMa(sol,adj):
     b_out = sol[:n]
     b_in = sol[n:]
     s = np.zeros(n)
-    if len(adj)==3:
-        raw_ind = adj[0]
-        col_ind = adj[1]
-        weigths_val = adj[2]
 
-        for i,j,w in zip(raw_ind, col_ind, weigths_val):
-            s[i] += w/(b_out[i] + b_in[j])
-        return s
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
 
-    elif len(adj)==2:
-        x = adj[0]
-        y = adj[1]
+    for i,j,w in zip(raw_ind, col_ind, weigths_val):
+        s[i] += w/(b_out[i] + b_in[j])
+    return s
 
-        for i in range(n):
-            for j in range(n):
-                if i!=j:
-                    aux = x[i] * y[j]
-                    aux_entry = aux/(1+aux)
-                    if aux_entry>0:
-                        s[i] += aux_entry/(b_out[i]+b_in[j])
-        return s
+
+@jit(nopython=True)
+def expected_out_strength_CReAMa_Sparse(sol,adj):
+    n = int(sol.size/2)
+    b_out = sol[:n]
+    b_in = sol[n:]
+    s = np.zeros(n)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in range(n):
+        for j in range(n):
+            if i!=j:
+                aux = x[i] * y[j]
+                aux_entry = aux/(1+aux)
+                if aux_entry>0:
+                    s[i] += aux_entry/(b_out[i]+b_in[j])
+    return s
 
 
 @jit(nopython=True)
@@ -1121,31 +1183,35 @@ def expected_in_stregth_CReAMa(sol,adj):
     b_out = sol[:n]
     b_in = sol[n:]
     s = np.zeros(n)
-    if len(adj)==3:
-        raw_ind = adj[0]
-        col_ind = adj[1]
-        weigths_val = adj[2]
 
-        for i,j,w in zip(raw_ind, col_ind, weigths_val):
-            s[j] += w/(b_out[i]+b_in[j])
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
 
-        return s
-    elif len(adj)==2:
-        x = adj[0]
-        y = adj[1]
+    for i,j,w in zip(raw_ind, col_ind, weigths_val):
+        s[j] += w/(b_out[i]+b_in[j])
 
-        for i in range(n):
-            for j in range(n):
-                if i!=j:
-                    aux = x[j] * y[i]
-                    aux_entry = aux/(1+aux)
-                    if aux_entry>0:
-                        s[i] += aux_entry/(b_out[j]+b_in[i])
-        return s
+    return s
 
 
+@jit(nopython=True)
+def expected_in_stregth_CReAMa_Sparse(sol,adj):  
+    n = int(sol.size/2)
+    b_out = sol[:n]
+    b_in = sol[n:]
+    s = np.zeros(n)
 
+    x = adj[0]
+    y = adj[1]
 
+    for i in range(n):
+        for j in range(n):
+            if i!=j:
+                aux = x[j] * y[i]
+                aux_entry = aux/(1+aux)
+                if aux_entry>0:
+                    s[i] += aux_entry/(b_out[j]+b_in[i])
+    return s
 
 
 def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
@@ -1626,7 +1692,7 @@ class DirectedGraph:
             self._set_solved_problem_dcm(solution)
         elif model == 'decm':
             self._set_solved_problem_decm(solution)
-        elif model == 'CReAMa':
+        elif model in ['CReAMa', 'CReAMa-sparse']:
             self._set_solved_problem_CReAMa(solution)
 
         
@@ -1653,7 +1719,7 @@ class DirectedGraph:
             self._set_initial_guess_dcm()
         elif model == 'decm':
             self._set_initial_guess_decm()
-        elif model == 'CReAMa':
+        elif model in ['CReAMa','CReAMa-sparse']:
             self._set_initial_guess_CReAMa()
 
 
@@ -1729,7 +1795,7 @@ class DirectedGraph:
 
 
     def solution_error(self):
-        if self.last_model in ['dcm','CReAMa']:
+        if self.last_model in ['dcm','CReAMa','CReAMa-sparse']:
             if (self.x is not None) and (self.y is not None):
                 sol = np.concatenate((self.x, self.y))
                 ex_k_out = expected_out_degree_dcm(sol)
@@ -1741,8 +1807,12 @@ class DirectedGraph:
                 self.error = np.linalg.norm(ex_k - k)
             if (self.b_out is not None) and (self.b_in is not None):
                 sol = np.concatenate([self.b_out,self.b_in])
-                ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency_CReAMa)
-                ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency_CReAMa)
+                if self.is_sparse:
+                    ex_s_out = expected_out_strength_CReAMa_Sparse(sol,self.adjacency_CReAMa)
+                    ex_s_in = expected_in_stregth_CReAMa_Sparse(sol,self.adjacency_CReAMa)
+                else:
+                    ex_s_out = expected_out_strength_CReAMa(sol,self.adjacency_CReAMa)
+                    ex_s_in = expected_in_stregth_CReAMa(sol,self.adjacency_CReAMa)
                 ex_s = np.concatenate([ex_s_out,ex_s_in])
                 s = np.concatenate([self.out_strength,self.in_strength])
                 self.expected_stregth_seq = ex_s
@@ -1761,8 +1831,8 @@ class DirectedGraph:
 
     def _set_args(self, model):
 
-        if model=='CReAMa':
-            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin, self.is_sparse)
+        if model in ['CReAMa', 'CReAMa-sparse']:
+            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
         elif model == 'dcm':
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
         elif model == 'decm':
@@ -1791,6 +1861,10 @@ class DirectedGraph:
                 'decm-newton': lambda x: -loglikelihood_prime_decm(x,self.args),
                 'decm-quasinewton': lambda x: -loglikelihood_prime_decm(x,self.args),
                 'decm-fixed-point': lambda x: iterative_decm(x,self.args),
+
+                'CReAMa-sparse-newton': lambda x: -loglikelihood_CReAMa_Sparse(x,self.args),
+                'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_CReAMa_Sparse(x,self.args),
+                'CReAMa-sparse-fixed-point': lambda x: -iterative_CReAMa_Sparse(x,self.args),
                 }
 
         d_fun_jac = {
@@ -1805,6 +1879,10 @@ class DirectedGraph:
                     'decm-newton': lambda x: -loglikelihood_hessian_decm(x,self.args),
                     'decm-quasinewton': lambda x: -loglikelihood_hessian_diag_decm(x,self.args),
                     'decm-fixed-point': None,
+
+                    'CReAMa-sparse-newton': lambda x: ,
+                    'CReAMa-sparse-quasinewton': lambda x: ,
+                    'CReAMa-sparse-fixed-point': None,
                     }
         d_fun_step = {
                      'dcm-newton': lambda x: -loglikelihood_dcm(x,self.args),
@@ -1818,6 +1896,10 @@ class DirectedGraph:
                      'decm-newton': lambda x: -loglikelihood_decm(x,self.args),
                      'decm-quasinewton': lambda x: -loglikelihood_decm(x,self.args),
                      'decm-fixed-point': lambda x: -loglikelihood_decm(x,self.args),
+
+                     'CReAMa-sparse-newton': lambda x: ,
+                     'CReAMa-sparse-quasinewton': lambda x: ,
+                     'CReAMa-sparse-fixed-point': lambda x: ,
                      }
         try:
             self.fun = d_fun[mod_met]
@@ -1868,9 +1950,14 @@ class DirectedGraph:
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse=False
 
-        self.last_model = model
+        if self.is_sparse:
+            self.last_model = 'CReAMa-sparse'
+        else:
+            self.last_model = model
         self.full_return = full_return
         self.initial_guess = 'strengths'
+
+        # Mettere qua lo if is_sparse, e aggiungere i method per sparse
         self._initialize_problem(model,method)
         x0 = self.x0 
             
