@@ -279,10 +279,10 @@ def loglikelihood_prime_CReAMa_Sparse(beta, args):
     x = adj[0]
     y = adj[1]
 
-    for i in np.arange(n):
+    for i in np.arange(aux_n):
         aux_F_out[i] -= s_out[i]
         aux_F_in[i] -= s_in[i]
-        for j in np.arange(n):
+        for j in np.arange(aux_n):
             aux = x[i]*y[j]
             aux_value = aux/(1+aux)
             if aux_value>0:
@@ -1957,7 +1957,7 @@ class DirectedGraph:
         self.initial_guess = 'strengths'
 
         # Mettere qua lo if is_sparse, e aggiungere i method per sparse
-        self._initialize_problem(self.last_model,method)
+        self._initialize_problem(self.last_model, method)
         x0 = self.x0 
             
         sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
