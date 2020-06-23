@@ -19,8 +19,9 @@ def pmatrix_dcm(x,args):
     yin = x[n:]
     for i in index_out:
         for j in index_in:
-            aux = xout[i]*yin[j]
-            P[i,j] = aux/(1+aux)
+            if i!=j:
+                aux = xout[i]*yin[j]
+                P[i,j] = aux/(1+aux)
     return P
 
 
