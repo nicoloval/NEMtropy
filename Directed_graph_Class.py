@@ -1830,7 +1830,9 @@ class DirectedGraph:
 
     def _set_args(self, model):
 
-        if model in ['CReAMa', 'CReAMa-sparse']:
+        if model == 'CReAMa':
+            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
+        if model == 'CReAMa-sparse':
             self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
         elif model == 'dcm':
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
