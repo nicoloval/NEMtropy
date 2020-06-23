@@ -1880,7 +1880,7 @@ class DirectedGraph:
                     'decm-quasinewton': lambda x: -loglikelihood_hessian_diag_decm(x,self.args),
                     'decm-fixed-point': None,
 
-                    'CReAMa-sparse-newton': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),,
+                    'CReAMa-sparse-newton': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),
                     'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa_Sparse(x,self.args),
                     'CReAMa-sparse-fixed-point': None,
                     }
