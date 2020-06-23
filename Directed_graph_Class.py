@@ -1830,9 +1830,7 @@ class DirectedGraph:
 
     def _set_args(self, model):
 
-        if model == 'CReAMa':
-            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
-        if model == 'CReAMa-sparse':
+        if model in ['CReAMa', 'CReAMa-sparse']:
             self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
         elif model == 'dcm':
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
@@ -1959,7 +1957,7 @@ class DirectedGraph:
         self.initial_guess = 'strengths'
 
         # Mettere qua lo if is_sparse, e aggiungere i method per sparse
-        self._initialize_problem(model,method)
+        self._initialize_problem(self.last_model,method)
         x0 = self.x0 
             
         sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
