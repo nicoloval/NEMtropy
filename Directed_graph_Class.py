@@ -284,14 +284,15 @@ def loglikelihood_prime_CReAMa_Sparse(beta, args):
         aux_F_out[i] -= s_out[i]
         aux_F_in[i] -= s_in[i]
         for j in np.arange(aux_n):
-            aux = x[i]*y[j]
-            aux_value = aux/(1+aux)
-            if aux_value>0:
-                aux_F_out[i] += aux_value/(beta_out[i]+beta_in[j])
-            aux = x[j]*y[i]
-            aux_value = aux/(1+aux)
-            if aux_value >0 :
-                aux_F_in[i] += aux_value/(beta_out[j]+beta_in[i])
+            if i!=j:
+                aux = x[i]*y[j]
+                aux_value = aux/(1+aux)
+                if aux_value>0:
+                    aux_F_out[i] += aux_value/(beta_out[i]+beta_in[j])
+                aux = x[j]*y[i]
+                aux_value = aux/(1+aux)
+                if aux_value >0 :
+                    aux_F_in[i] += aux_value/(beta_out[j]+beta_in[i])
 
     return (np.concatenate((aux_F_out,aux_F_in)))
 
@@ -314,17 +315,20 @@ def loglikelihood_hessian_CReAMa(beta, args):
     raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
+
+    for i,j,w in zip(raw_ind, col_ind, weigths_val):
+
     
-    for i in np.arange(aux_n):
-        for j in np.arange(aux_n):
-            if (adj[i,j]>0) and (i!=j):
-                aux = adj[i,j]/((beta_out[i]+beta_in[j])**2)
-                f[i,i] += -aux
-                f[i,j+aux_n] = - aux
-                f[j+aux_n,i] = -aux
-            if (adj[j,i]>0) and (i!=j):
-                aux = adj[j,i]/((beta_out[j]+beta_in[i])**2)
-                f[i+aux_n,i+aux_n] += -aux
+#    for i in np.arange(aux_n):
+#        for j in np.arange(aux_n):
+#            if (adj[i,j]>0) and (i!=j):
+#                aux = adj[i,j]/((beta_out[i]+beta_in[j])**2)
+#                f[i,i] += -aux
+#                f[i,j+aux_n] = - aux
+#                f[j+aux_n,i] = -aux
+#            if (adj[j,i]>0) and (i!=j):
+#                aux = adj[j,i]/((beta_out[j]+beta_in[i])**2)
+#                f[i+aux_n,i+aux_n] += -aux
                 
     
     return f
