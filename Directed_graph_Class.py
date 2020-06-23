@@ -251,7 +251,7 @@ def loglikelihood_prime_CReAMa(beta, args):
     weigths_val = adj[2]
     for i in nz_index_out:
         aux_F_out -= s_out[i]
-    for j in nz_index_in:
+    for i in nz_index_in:
         aux_F_in -= s_in[i]
     for i,j,w in zip(raw_ind, col_ind, weigths_val):
         aux_F_out[i] += w / (beta_out[i]+beta_in[j])
@@ -339,7 +339,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
     beta_in = beta[aux_n:]
 
     f = np.zeros(2*aux_n,dtype=np.float64)
-    
+
     raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
