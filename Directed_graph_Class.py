@@ -339,14 +339,13 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
     beta_in = beta[aux_n:]
 
     f = np.zeros(2*aux_n,dtype=np.float64)
-
-
+    
     raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
     for i,j,w in zip(raw_ind, col_ind, weigths_val):
         f[i] -= w / ((beta_out[i]+beta_in[j])**2)
-        f[j+n] -= w / ((beta_out[i]+beta_in[j])**2)
+        f[j+aux_n] -= w / ((beta_out[i]+beta_in[j])**2)
 
     return f
 
