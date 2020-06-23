@@ -286,11 +286,11 @@ def loglikelihood_prime_CReAMa_Sparse(beta, args):
             aux = x[i]*y[j]
             aux_value = aux/(1+aux)
             if aux_value>0:
-                aux_F_out += aux_value/(beta_out[i]+beta_in[j])
+                aux_F_out[i] += aux_value/(beta_out[i]+beta_in[j])
             aux = x[j]*y[i]
             aux_value = aux/(1+aux)
             if aux_value >0 :
-                aux_F_in += aux_value/(beta_out[j]+beta_in[i])
+                aux_F_in[i] += aux_value/(beta_out[j]+beta_in[i])
 
     return (np.concatenate((aux_F_out,aux_F_in)))
 
