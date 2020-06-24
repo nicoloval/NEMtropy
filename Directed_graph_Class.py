@@ -318,10 +318,10 @@ def loglikelihood_hessian_CReAMa(beta, args):
 
     for i,j,w in zip(raw_ind, col_ind, weigths_val):
         aux = w/((beta_out[i]+beta_in[j])**2)
-        f[i,i] -= aux
+        f[i,i] += -aux
         f[i,j+aux_n] = -aux
         f[j+aux_n,i] = -aux
-        f[j+aux_n,j+aux_n] -= aux
+        f[j+aux_n,j+aux_n] += -aux
     return f
 
 
@@ -1924,7 +1924,7 @@ class DirectedGraph:
         elif isinstance(adjacency,str):
             self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
             if self.is_sparse:
-                self.adjacency_CReAMa = (self.x,self.y,self.x)
+                self.adjacency_CReAMa = (self.x,self.y)
             else:
                 pmatrix = self.fun_pmatrix(np.concatenate([self.x,self.y]))
                 raw_ind,col_ind = np.nonzero(pmatrix)
