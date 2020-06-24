@@ -12,7 +12,7 @@ class MyTest(unittest.TestCase):
         pass
 
 
-    def test_newton_dcm_10(self):
+    def test_newton_decm_0(self):
         """test with 3 classes of cardinality 1
         and no zero degrees
         """
@@ -28,13 +28,14 @@ class MyTest(unittest.TestCase):
 
         g.solution_error()
         # debug
-        # print(g.relative_error_strength)
+        # print(g.error)
+        ##  print(g.error_dseq)
 
         # test result
         self.assertTrue(g.relative_error_strength < 1e-1)
 
 
-    def test_newton_dcm_11(self):
+    def test_newton_decm_1(self):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
@@ -48,8 +49,59 @@ class MyTest(unittest.TestCase):
 
         g.solution_error()
 
+        # debug
+        # print(g.error)
+        # print(g.error_dseq)
+
         # test result
-        self.assertTrue(g.relative_error_strength < 1)
+        self.assertTrue(g.error < 1e-1)
+
+
+    def test_newton_decm_2(self):
+        """classes with cardinality more than 1 and zero degrees
+        """
+        # test Matrix 1
+        n, seed = (20, 22)
+        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed)
+        A[0,:] = 0
+
+        g = sample.DirectedGraph(A)
+
+        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform')
+
+        g.solution_error()
+
+        # print(g.expected_dseq)
+        # print(g.dseq_out,g.dseq_in)
+        # print(g.error)
+        # print(g.error_dseq)
+
+        # test result
+        self.assertTrue(g.error < 1e-1)
+
+
+    def test_newton_decm_3(self):
+        """classes with cardinality more than 1 and zero degrees
+        """
+        # test Matrix 1
+        n, seed = (100, 22)
+        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed)
+        A[0,:] = 0
+
+        g = sample.DirectedGraph(A)
+
+        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform')
+
+        g.solution_error()
+
+        # print(g.expected_dseq)
+        # print(g.dseq_out,g.dseq_in)
+        # print(g.error)
+        # print(g.error_dseq)
+
+        # test result
+        self.assertTrue(g.error < 1e-1)
+
 
 
 if __name__ == '__main__':

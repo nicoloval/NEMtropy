@@ -401,6 +401,73 @@ def loglikelihood_prime_dcm(x, args):
     return f
 
 
+
+@jit(nopython=True)
+def loglikelihood_hessian_dcm_old(x, args):
+    """
+    :param x: np.array
+    :param args: list
+    :return: np.array
+
+    x = [a_in, a_out] where a^{in}_i = e^{-\theta^{in}_i} for rd class i
+    par = [k_in, k_out, c]
+        c is the cardinality of each class
+
+    log-likelihood hessian: Directed Configuration Model reduced.
+
+    """
+    k_out = args[0]
+    k_in = args[1]
+    nz_out_index = args[2]
+    nz_in_index = args[3]
+    c = args[4]
+    n = len(k_out)
+
+    out = np.zeros((2*n, 2*n))  # hessian matrix
+    # zero elemnts in x have hessian -1
+    """
+    ind_out = np.array([i if i not in nz_out_index for i in range(n)])
+    ind_in = np.array([i if i not in nz_in_index for i in range(n)])
+    out[ind_out,nz_in_index] = -1
+    out[nz_out_index,ind_in] = -1
+    """
+
+    for h in range(n):
+        if x[h] != 0:
+            out[h, h] = -k_out[h]/(x[h])**2
+        else:
+            out[h, h] = 0
+
+        for i in range(n):
+            if i == h:
+                # const = c[h]*(c[h] - 1)
+                const = (c[h] - 1)
+            else:
+                # const = c[h]*c[i]
+                const = c[i]
+
+            out[h, h] += const*(x[i+n]/(1 + x[h]*x[i+n]))**2
+            out[h, i+n] = -const/(1 + x[i+n]*x[h])**2
+
+    for i in range(n):
+        if x[i+n] != 0:
+            out[i+n, i+n] = -k_in[i]/(x[i+n]*x[i+n])
+        else:
+            out[i+n, i+n] = 0 
+        for h in range(n):
+            if i == h:
+                # const = c[h]*(c[h] - 1)
+                const = (c[i] - 1)
+            else:
+                # const = c[h]*c[i]
+                const = c[h]
+
+            out[i+n, i+n] += const*(x[h]**2)/(1 + x[i+n]*x[h])**2
+            out[i+n, h] = -const/(1 + x[i+n]*x[h])**2
+    
+    return out
+
+
 @jit(nopython=True)
 def loglikelihood_hessian_dcm(x, args):
     """
@@ -423,6 +490,13 @@ def loglikelihood_hessian_dcm(x, args):
     n = len(k_out)
 
     out = np.zeros((2*n, 2*n))  # hessian matrix
+    # zero elemnts in x have hessian -1
+    """
+    ind_out = np.array([i if i not in nz_out_index for i in range(n)])
+    ind_in = np.array([i if i not in nz_in_index for i in range(n)])
+    out[ind_out,nz_in_index] = -1
+    out[nz_out_index,ind_in] = -1
+    """
 
     for h in nz_out_index:
         out[h, h] = -k_out[h]/(x[h])**2
@@ -930,7 +1004,7 @@ def hessian_regulariser_function(B, eps):
     """Trasform input matrix in a positive defined matrix
     input matrix should be numpy.array
     """
-    eps = 1e-8
+    eps = 1e-4
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = np.linalg.eigh(B)
     ll = np.array([0 if li>eps else eps-li for li in l])
@@ -1583,8 +1657,10 @@ class DirectedGraph:
                 ex = expected_decm(sol)
                 k = np.concatenate((self.dseq_out, self.dseq_in, self.out_strength, self.in_strength))
                 self.expected_dseq = ex[:2*self.n_nodes]
-                self.expected_stregth_seq = ex[2*self.n_nodes:]
+                self.expected_strength_seq = ex[2*self.n_nodes:]
                 self.error = np.linalg.norm(ex - k)
+                self.error_dseq = np.linalg.norm(np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)
+                self.error_sseq = np.linalg.norm(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq)
                 self.relative_error_strength = self.error/self.out_strength.sum()
     
 
