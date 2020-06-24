@@ -1845,9 +1845,7 @@ class DirectedGraph:
 
     def _set_args(self, model):
 
-        if model == 'CReAMa':
-            self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
-        elif model == 'CReAMa-sparse':
+        if model in ['CReAMa', 'CReAMa-sparse']:
             self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
         elif model == 'dcm':
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
@@ -1951,17 +1949,23 @@ class DirectedGraph:
         elif isinstance(adjacency,list):
             adjacency = np.array(adjacency).astype(np.float64)
             raw_ind,col_ind = np.nonzero(adjacency)
+            raw_ind = raw_ind.astype(np.int64)
+            col_ind = col_ind.astype(np.int64)
             weigths_value = adjacency[raw_ind,col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse=False
         elif isinstance(adjacency,np.ndarray):
             adjacency = adjacency.astype(np.float64)
             raw_ind,col_ind = np.nonzero(adjacency)
+            raw_ind = raw_ind.astype(np.int64)
+            col_ind = col_ind.astype(np.int64)
             weigths_value = adjacency[raw_ind,col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse=False
         elif scipy.sparse.isspmatrix(adjacency):
             raw_ind,col_ind = adjacency.nonzero()
+            raw_ind = raw_ind.astype(np.int64)
+            col_ind = col_ind.astype(np.int64)
             weigths_value = (adjacency[raw_ind,col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse=False
