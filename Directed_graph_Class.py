@@ -411,7 +411,7 @@ def random_binary_matrix_generator_dense(n, sym=False, seed=None):
         for i in range(n):
             A[i, i] = 0
         k = np.sum(A, axis=0)
-        for ind, kk in zip(np.arange(k_in.shape[0]),k):
+        for ind, kk in zip(np.arange(k.shape[0]),k):
             if (kk==0):
                 while((np.sum(A[:,ind])==0)):    
                     indices = np.random.randint(A.shape[0])
