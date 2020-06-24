@@ -253,9 +253,12 @@ def iterative_ecm(sol,args):
                 fy += (aux1 * y[j])/((1-aux2)*(1-aux2+aux1*aux2))
         if fx:
             f[i] = k[i] / fx
+        else:
+            f[i] = 0.0
         if fy:
             f[i+n] = s[i] / fy 
-
+        else:
+            f[i+n] = 0.0
     return f
 
 
@@ -309,7 +312,48 @@ def loglikelihood_hessian_ecm(sol,args):
 
     x = sol[:n]
     y = sol[n:]
-    f = np.zeros(shape=(n,n),dtype=np.float64)
+    f = np.zeros(shape=(2*n,2*n),dtype=np.float64)
+    for i in np.arange(n):
+
+        for j in np.arange(i,n):
+            if i==j:
+                f1 = - k[i]/(x[i]**2)
+                f2 =  - s[i]/(y[i])**2
+                f3 = 0.0
+                for h in np.arange(n):
+                    if h!=i:
+                        aux1 = x[i]*x[h]
+                        aux2 = y[i]*y[h]
+                        aux3 = (1-aux2)**2
+                        aux4 = (1- aux2 + aux1*aux2)**2
+                        f1 += ((x[h] * aux2)**2)/aux4
+                        f2 += (aux1*y[h] * (aux1*y[h] * (1-2*aux2) - 2*y[h]*(1-aux2)))/(aux3*aux4)
+                        f3 -= (x[h]*y[h])/aux4
+                f[i,i] = f1
+                f[i+n,i+n] = f2
+                f[i+n,i] = f3
+                f[i,i+n] = f3
+            else:
+                aux1 = x[i] * x[j]
+                aux2 =  y[i] * y[j] 
+                aux3 = (1 - aux2)**2
+                aux4 = (1- aux2 + aux1*aux2)**2
+
+                aux = - (aux2*(1-aux2))/aux4
+                f[i,j] = aux
+                f[j,i] = aux
+
+                aux = -(x[j]*y[i])/aux4
+                f[i,j+n] = aux
+                f[j+n,i] = aux
+
+                aux = - (aux1 * (1 - aux2**2 + aux1 * (aux2**2)))/aux3*aux4
+                f[i+n,j+n] = aux
+                f[j+n,i+n] = aux
+
+                aux = - (x[i]*y[j])/aux4
+                f[i+n,j] = aux
+                f[j,i+n] = aux
 
     return f
 
@@ -942,7 +986,7 @@ class UndirectedGraph:
 
                 'ecm-newton': lambda x: -loglikelihood_prime_ecm(x,self.args),
                 'ecm-quasinewton': lambda x: -loglikelihood_prime_ecm(x,self.args),
-                'ecm-fixed-point': lambda x: -iterative_ecm(x,self.args),
+                'ecm-fixed-point': lambda x: iterative_ecm(x,self.args),
                 }
 
         d_fun_jac = {
