@@ -404,7 +404,21 @@ def random_binary_matrix_generator_dense(n, sym=False, seed=None):
                             
                     A[ind,ind] = 0
         return A
-
+    else:
+        np.random.seed(seed = seed)
+        A = np.random.randint(0, 2, size=(n, n))
+        # zeros on the diagonal
+        for i in range(n):
+            A[i, i] = 0
+        k = np.sum(A, axis=0)
+        for ind, kk in zip(np.arange(k_in.shape[0]),k):
+            if (kk==0):
+                while((np.sum(A[:,ind])==0)):    
+                    indices = np.random.randint(A.shape[0])
+                    A[indices, ind] = 1
+                    A[ind, indices] = 1
+                    A[ind,ind] = 0
+        return A
 
 @jit(forceobj=True)
 def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None, dtype = np.float64):
