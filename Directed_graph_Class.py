@@ -407,6 +407,7 @@ def random_binary_matrix_generator_dense(n, sym=False, seed=None):
     else:
         np.random.seed(seed = seed)
         A = np.random.randint(0, 2, size=(n, n))
+        A = ((A + A.T)/2).astype(int)
         # zeros on the diagonal
         for i in range(n):
             A[i, i] = 0
