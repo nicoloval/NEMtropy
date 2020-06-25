@@ -1542,8 +1542,8 @@ class DirectedGraph:
                 else:
                     self.dseq_in = in_degree(adjacency)
                     self.dseq_out = out_degree(adjacency)
-                    self.in_strength = in_strength(adjacency)
-                    self.out_strength = out_strength(adjacency)
+                    self.in_strength = in_strength(adjacency).astype(np.float64)
+                    self.out_strength = out_strength(adjacency).astype(np.float64)
                     self.nz_index_sout = np.nonzero(self.out_strength)[0]
                     self.nz_index_sin = np.nonzero(self.in_strength)[0]
                     self.is_weighted = True

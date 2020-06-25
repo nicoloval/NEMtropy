@@ -601,8 +601,8 @@ def expected_ecm(sol):
                 aux1 = x[i]*x[j]
                 aux2 = y[i]*y[j]
                 aux3 = (aux1*aux2)/(1-aux2+aux1*aux2)
-                ex_ks[i] += aux3
-                ex_ks[i+n] += aux3/(1-aux2)
+                ex_ks[i] += (aux1*aux2)/(1-aux2+aux1*aux2)
+                ex_ks[i+n] += ((aux1*aux2)/(1-aux2+aux1*aux2)*(1-aux2))
     return ex_ks
 
 def edgelist_from_edgelist(edgelist):
@@ -717,10 +717,10 @@ class UndirectedGraph:
                     self.adjacency = adjacency
                     self.is_sparse = True
                 if np.sum(adjacency)==np.sum(adjacency>0):
-                    self.dseq = degree(adjacency)
+                    self.dseq = degree(adjacency).astype(np.float64)
                 else:
-                    self.dseq = degree(adjacency)
-                    self.strength_sequence = strength(adjacency)
+                    self.dseq = degree(adjacency).astype(np.float64)
+                    self.strength_sequence = strength(adjacency).astype(np.float64)
                     self.nz_index = np.nonzero(self.strength_sequence)[0]
                     self.is_weighted = True
                     
@@ -756,7 +756,7 @@ class UndirectedGraph:
                         raise ValueError('A degree cannot be negative.')
                 else:
                     self.n_nodes = int(len(degree_sequence))
-                    self.dseq = degree_sequence
+                    self.dseq = degree_sequence.astype(np.float64)
                     self.n_edges = np.sum(self.dseq)
                     self.is_initialized = True
                 if strength_sequence is not None:
@@ -773,7 +773,7 @@ class UndirectedGraph:
                             if len(strength_sequence) != len(degree_sequence):
                                 raise ValueError('Degrees and strengths arrays must have same length.')
                             self.n_nodes = int(len(strength_sequence))
-                            self.strength_sequence = strength_sequence
+                            self.strength_sequence = strength_sequence.astype(np.float64)
                             self.nz_index = np.nonzero(self.strength_sequence)[0]
                             self.is_weighted = True
                             self.is_initialized = True
@@ -922,8 +922,8 @@ class UndirectedGraph:
             self.x = np.random.rand(self.n_nodes).astype(np.float64)
             self.y = np.random.rand(self.n_nodes).astype(np.float64)
         elif self.initial_guess == 'uniform':
-            self.x = 0.00001*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
-            self.y = 0.00001*np.ones(self.n_nodes, dtype=np.float64)
+            self.x = 0.001*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.y = 0.001*np.ones(self.n_nodes, dtype=np.float64)
 
         self.x[self.dseq == 0] = 0
         self.y[self.strength_sequence == 0] = 0
