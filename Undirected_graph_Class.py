@@ -34,8 +34,6 @@ def strength(a):
 
 def pmatrix_cm(x, args):
     n = args[0]
-    if not args[1]==None:
-       nz_index = args[1]
     f = np.zeros(shape=(n, n), dtype=np.float64)
     for i in np.arange(n):
         for j in np.arange(i+1, n):
@@ -162,8 +160,6 @@ def iterative_CReAMa(beta, args):
 def loglikelihood_CReAMa(beta, args):
     s = args[0]
     adj = args[1]
-    if not args[2]==None:
-       nz_index = args[2]
 
     n = len(s)
 
@@ -180,8 +176,6 @@ def loglikelihood_CReAMa(beta, args):
 def loglikelihood_prime_CReAMa(beta, args):
     s = args[0]
     adj = args[1]
-    if not args[2]==None:
-        nz_index = args[2]
 
     n = len(s)
 
@@ -198,8 +192,6 @@ def loglikelihood_prime_CReAMa(beta, args):
 def loglikelihood_hessian_CReAMa(beta, args):
     s = args[0]
     adj = args[1]
-    if not args[2]==None:
-        nz_index = args[2]
 
     n = len(s)
 
@@ -223,8 +215,6 @@ def loglikelihood_hessian_CReAMa(beta, args):
 def loglikelihood_hessian_diag_CReAMa(beta,args):
     s = args[0]
     adj = args[1]
-    if not args[2]==None:
-        nz_index = args[2]
 
     n = len(s)
 
