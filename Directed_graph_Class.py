@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.sparse
+import scipy
 from numba import jit
 import time
 
@@ -1140,21 +1141,6 @@ def expected_decm(x):
     return f
 
 
-def hessian_regulariser_function(B, eps):
-    """Trasform input matrix in a positive defined matrix
-    input matrix should be numpy.array
-    """
-    eps = 1e-8
-    B = (B + B.transpose())*0.5  # symmetrization
-    l, e = np.linalg.eigh(B)
-    ll = np.array([0 if li>eps else eps-li for li in l])
-    Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
-    # lll, eee = np.linalg.eigh(Bf)
-    # debug check
-    # print('B regularised eigenvalues =\n {}'.format(lll))
-    return Bf
-
-
 @jit(nopython=True)
 def expected_out_strength_CReAMa(sol,adj):
     n = int(sol.size/2)
@@ -1228,6 +1214,21 @@ def expected_in_stregth_CReAMa_Sparse(sol,adj):
     return s
 
 
+def hessian_regulariser_function(B, eps):
+    """Trasform input matrix in a positive defined matrix
+    input matrix should be numpy.array
+    """
+    B = (B + B.transpose())*0.5  # symmetrization
+    l, e = scipy.linalg.eigh(B)
+    eps = 1e-8 * np.max(l)
+    ll = np.array([0 if li>eps else eps-li for li in l])
+    Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    # lll, eee = np.linalg.eigh(Bf)
+    # debug check
+    # print('B regularised eigenvalues =\n {}'.format(lll))
+    return Bf
+
+
 def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
@@ -1271,7 +1272,7 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
             H = fun_jac(x)  # original jacobian
             # check the hessian is positive definite
             # l, e = np.linalg.eigh(H)
-            l, e = np.linalg.eig(H)
+            l, e = scipy.linalg.eig(H)
             ml = np.min(l)
             # if it's not positive definite -> regularise
             if ml < eps:
@@ -1279,7 +1280,7 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
             # regularisation
             if regularise == True:
                 B = hessian_regulariser_function(H, eps)
-                l, e = np.linalg.eigh(B)
+                l, e = scipy.linalg.eigh(B)
                 new_ml = np.min(l)
             else:
                 B = H.__array__()
