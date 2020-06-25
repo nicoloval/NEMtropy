@@ -655,7 +655,7 @@ class UndirectedGraph:
         self.n_nodes = None
         self.n_edges = None
         self.adjacency = None
-        self.sparse_adjacency = None
+        self.is_sparse = False
         self.edgelist = None
         self.dseq = None
         self.strength_sequence = None
