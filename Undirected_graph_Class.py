@@ -34,7 +34,8 @@ def strength(a):
 
 def pmatrix_cm(x, args):
 	n = args[0]
-	nz_index = args[1]
+    if not args[1]==None:
+	   nz_index = args[1]
 	f = np.zeros(shape=(n, n), dtype=np.float64)
 	for i in np.arange(n):
 		for j in np.arange(i+1, n):
@@ -143,7 +144,8 @@ def loglikelihood_hessian_diag_cm(x, args):
 def iterative_CReAMa(beta, args):
     s = args[0]
     adj = args[1]
-    nz_index = args[2]
+    if not args[2]==None:
+        nz_index = args[2]
 
     n = len(s)
 
@@ -158,43 +160,46 @@ def iterative_CReAMa(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_CReAMa(beta, args):
-	s = args[0]
-	adj = args[1]
-	nz_index = args[2]
+    s = args[0]
+    adj = args[1]
+    if not args[2]==None:
+       nz_index = args[2]
 
-	n = len(s)
+    n = len(s)
 
-	f = 0.0
-	for i in np.arange(n):
-		f -= s[i] * beta[i]
-		for j in np.arange(0, i):
-			if adj[i, j] != 0:
-				f += adj[i, j] * np.log(beta[i]+beta[j])
-	return f
+    f = 0.0
+    for i in np.arange(n):
+        f -= s[i] * beta[i]
+        for j in np.arange(0, i):
+            if adj[i, j] != 0:
+                f += adj[i, j] * np.log(beta[i]+beta[j])
+    return f
 
 
 @jit(nopython=True)
 def loglikelihood_prime_CReAMa(beta, args):
-	s = args[0]
-	adj = args[1]
-	nz_index = args[2]
+    s = args[0]
+    adj = args[1]
+    if not args[2]==None:
+        nz_index = args[2]
 
-	n = len(s)
+    n = len(s)
 
-	f = np.zeros_like(s, dtype=np.float64)
-	for i in np.arange(n):
-		f[i] -= s[i]
-		for j in np.arange(n):
-			if (i != j) and adj[i, j] != 0:
-				f[i] += adj[i, j] / (beta[i] + beta[j])
-	return f
+    f = np.zeros_like(s, dtype=np.float64)
+    for i in np.arange(n):
+        f[i] -= s[i]
+        for j in np.arange(n):
+            if (i != j) and adj[i, j] != 0:
+                f[i] += adj[i, j] / (beta[i] + beta[j])
+    return f
 
 
 @jit(nopython=True)
 def loglikelihood_hessian_CReAMa(beta, args):
     s = args[0]
     adj = args[1]
-    nz_index = args[2]
+    if not args[2]==None:
+        nz_index = args[2]
 
     n = len(s)
 
@@ -216,19 +221,20 @@ def loglikelihood_hessian_CReAMa(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_CReAMa(beta,args):
-	s = args[0]
-	adj = args[1]
-	nz_index = args[2]
+    s = args[0]
+    adj = args[1]
+    if not args[2]==None:
+        nz_index = args[2]
 
-	n = len(s)
+    n = len(s)
 
-	f = np.zeros_like(s, dtype=np.float64)
-	for i in np.arange(n):
+    f = np.zeros_like(s, dtype=np.float64)
+    for i in np.arange(n):
 
-		for j in np.arange(n):
-			if (i!=j) and (adj[i,j]!=0):
-				f[i] -= adj[i,j]/(beta[i]+beta[j])**2
-	return f
+        for j in np.arange(n):
+            if (i!=j) and (adj[i,j]!=0):
+                f[i] -= adj[i,j]/(beta[i]+beta[j])**2
+    return f
 
 
 @jit(nopython=True)
