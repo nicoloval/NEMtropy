@@ -34,7 +34,7 @@ class MyTest(unittest.TestCase):
         print('\ntest 0  error = {}'.format(g.error))
 
         # test result
-        self.assertTrue(g.error < 1e-2)
+        self.assertTrue(g.error < 1e-1)
 
 
 
@@ -42,7 +42,7 @@ class MyTest(unittest.TestCase):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
-        n, seed = (5, 22)
+        n, seed = (80, 22)
         A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
@@ -86,7 +86,7 @@ class MyTest(unittest.TestCase):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
-        n, seed = (400, 22)
+        n, seed = (150, 22)
         A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
