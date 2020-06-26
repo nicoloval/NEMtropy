@@ -16,10 +16,12 @@ class MyTest(unittest.TestCase):
         """test with 3 classes of cardinality 1
         and no zero degrees
         """
-        A = np.array([[0, 3, 2],
-                      [6, 0, 0],
-                      [0, 4, 0],
-			], dtype=np.float64)
+
+        A = np.array([[0, 2, 3, 0],
+                      [1, 0, 1, 0],
+                      [0, 3, 0, 1],
+                      [1, 0, 2, 0]])
+
 
         g = sample.DirectedGraph(A)
 
@@ -28,7 +30,7 @@ class MyTest(unittest.TestCase):
 
         g.solution_error()
         # debug
-        # print(g.error)
+        print('\n test 0 error = {}'.format(g.error))
         ##  print(g.error_dseq)
 
         # test result
@@ -50,7 +52,7 @@ class MyTest(unittest.TestCase):
         g.solution_error()
 
         # debug
-        # print(g.error)
+        print('\n test 1 error = {}'.format(g.error))
         # print(g.error_dseq)
 
         # test result
@@ -75,6 +77,7 @@ class MyTest(unittest.TestCase):
         # print(g.dseq_out,g.dseq_in)
         # print(g.error)
         # print(g.error_dseq)
+        print('\n test 2 error = {}'.format(g.error))
 
         # test result
         self.assertTrue(g.error < 1e-1)
@@ -96,7 +99,7 @@ class MyTest(unittest.TestCase):
 
         # print(g.expected_dseq)
         # print(g.dseq_out,g.dseq_in)
-        # print(g.error)
+        print('\n test 3 error = {}'.format(g.error))
         # print(g.error_dseq)
 
         # test result
