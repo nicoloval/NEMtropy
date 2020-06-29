@@ -423,7 +423,7 @@ def random_binary_matrix_generator_dense(n, sym=False, seed=None):
         return A
 
 @jit(forceobj=True)
-def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None, dtype = np.float64):
+def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None, intweights = False):
     if sym==False:
         np.random.seed(seed = seed)
         A = np.random.random(size=(n, n)) * sup_ext
@@ -440,7 +440,10 @@ def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None
                         A[ind,np.random.randint(A.shape[0])] = np.random.random() * sup_ext
                             
                     A[ind,ind] = 0
-        return A.astype(dtype)
+        if intweights
+            return np.ceil(A)
+        else: 
+            return A
     else:
         np.random.seed(seed = seed)
         b = np.random.random(size=(n, n)) * sup_ext
@@ -456,7 +459,10 @@ def random_weighted_matrix_generator_dense(n, sup_ext = 10, sym=False, seed=None
                         aux_ind = np.random.randint(A.shape[0])
                         A[aux_ind, indices] = np.random.random() * sup_ext
                         A[indices, aux_ind] = A[aux_ind, indices]
-        return A.astype(dtype)
+        if intweights
+            return np.ceil(A)
+        else: 
+            return A
 
 
 jit(forceobj=True)
@@ -502,7 +508,7 @@ def random_binary_matrix_generator_custom_density(n, p=0.1 , sym=False, seed=Non
   
 
 jit(forceobj=True)
-def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=False, seed=None, dtype = np.float64):
+def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=False, seed=None, intweights = False):
     if sym==False:
         np.random.seed(seed = seed)
         A = np.zeros(shape=(n, n))
@@ -522,7 +528,10 @@ def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=
                         A[ind,np.random.randint(A.shape[0])] = np.random.random() * sup_ext
                             
                     A[ind,ind] = 0
-        return A.astype(dtype)
+        if intweights
+            return np.ceil(A)
+        else: 
+            return A
     else:
         np.random.seed(seed = seed)
         A = np.zeros(shape=(n, n))
@@ -540,7 +549,10 @@ def random_weighted_matrix_generator_custom_density(n, p=0.1 ,sup_ext = 10, sym=
                         aux_ind = np.random.randint(A.shape[0])
                         A[aux_ind, indices] = np.random.random() * sup_ext
                         A[indices, aux_ind] = A[aux_ind, indices]
-        return A.astype(dtype)
+        if intweights
+            return np.ceil(A)
+        else: 
+            return A
 
 
 @jit(nopython=True)
@@ -1944,6 +1956,8 @@ class DirectedGraph:
             else:
                 pmatrix = self.fun_pmatrix(np.concatenate([self.x,self.y]))
                 raw_ind,col_ind = np.nonzero(pmatrix)
+                raw_ind = raw_ind.astype(np.int64)
+                col_ind = col_ind.astype(np.int64)
                 weigths_value = pmatrix[raw_ind,col_ind]
                 self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
                 self.is_sparse=False
@@ -1977,8 +1991,6 @@ class DirectedGraph:
             self.last_model = model
         self.full_return = full_return
         self.initial_guess = 'strengths'
-
-        # Mettere qua lo if is_sparse, e aggiungere i method per sparse
         self._initialize_problem(self.last_model, method)
         x0 = self.x0 
             
