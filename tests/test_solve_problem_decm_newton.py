@@ -42,8 +42,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (4, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed)
-        A[0,:] = 0
+        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, dtype=np.int64)
 
         g = sample.DirectedGraph(A)
 
@@ -63,13 +62,13 @@ class MyTest(unittest.TestCase):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
-        n, seed = (20, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed)
+        n, seed = (4, 22)
+        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, dtype=np.int64)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=True, initial_guess='uniform')
 
         g.solution_error()
 
@@ -87,8 +86,8 @@ class MyTest(unittest.TestCase):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
-        n, seed = (100, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed)
+        n, seed = (50, 22)
+        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, dtype=np.int64)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)

@@ -703,16 +703,18 @@ def loglikelihood_hessian_decm(x, args):
                 for j in range(n):
                     if j != h:
                         # dll / da^in da^in
-                        f[h+n, l+n] = (f[h+n, l+n]
-                                   + (a_out[j] * b_in[h] * b_out[j]
-                                      / (1 - b_in[h] * b_out[j]
-                                         + a_in[h] * a_out[j]
-                                         * b_in[h] * b_out[j])) ** 2)
+                        f[h+n, l+n] = f[h+n, l+n] \
+                                + (a_out[j] * b_in[h] * b_out[j] \
+                                / (1 - b_in[h] * b_out[j] \
+                                + a_in[h]*a_out[j]*b_in[h]*b_out[j] \
+                                ) \
+                                ) ** 2
                         # dll / da^in db^in
-                        f[h+n, l+3*n] = (f[h+n, l+3*n]
-                                       - a_out[j]*b_out[j]
-                                       / (1-b_in[h]*b_out[j]
-                                          + a_in[h]*a_out[j]*b_in[h]*b_out[j])**2)
+                        f[h+n, l+3*n] = f[h+n, l+3*n] \
+                                       - a_out[j]*b_out[j] \
+                                       / (1-b_in[h]*b_out[j] \
+                                          + a_in[h]*a_out[j]*b_in[h]*b_out[j] \
+                                          )**2
                         # dll / da^out da^out
                         f[h, l] = (f[h, l]
                                            + (a_in[j] * b_in[j] * b_out[h]) ** 2
@@ -1547,8 +1549,10 @@ class DirectedGraph:
             self.b_in = 0.9*np.ones(self.n_nodes, dtype=np.float64)
  
         
-        self.x[self.rnz_dseq_out == 0] = 0
-        self.y[self.rnz_dseq_in == 0] = 0
+        # self.x[self.dseq_out == 0] = 0
+        # self.y[self.dseq_in == 0] = 0
+        # self.b_out[self.out_strength == 0] = 0
+        # self.b_in[self.in_strength == 0] = 0
 
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
 
