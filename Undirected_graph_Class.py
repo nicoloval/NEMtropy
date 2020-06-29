@@ -1068,7 +1068,7 @@ class UndirectedGraph:
 
     def _set_args(self, model):
 
-        if model in ['CReAMa','CReAMA-sparse']:
+        if model in ['CReAMa','CReAMa-sparse']:
             self.args = (self.strength_sequence, self.adjacency_CReAMa, self.nz_index)
         elif model == 'cm':
             self.args = (self.r_dseq, self.r_multiplicity)
