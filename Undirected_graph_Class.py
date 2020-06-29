@@ -251,7 +251,7 @@ def loglikelihood_hessian_CReAMa(beta, args):
     adj = args[1]
     n = len(s)
     f = np.zeros(shape=(n, n), dtype=np.float64)
-    aw_ind = adj[0]
+    raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
 
