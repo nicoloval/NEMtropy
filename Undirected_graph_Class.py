@@ -142,17 +142,33 @@ def loglikelihood_hessian_diag_cm(x, args):
 def iterative_CReAMa(beta, args):
     s = args[0]
     adj = args[1]
-    if not args[2]==None:
-        nz_index = args[2]
-
     n = len(s)
-
     f = np.zeros_like(s, dtype=np.float64)
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
+for i,j,w in zip(raw_ind,col_ind,weigths_val):
+    f[i] -= w/(1 + (beta[j]/beta[i]))
+    f[j] -= w/(1 + (beta[i]/beta[j]))
+    return f
+
+
+@jit(nopython=True)
+def iterative_CReAMa_sparse(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
 
     for i in np.arange(n):
         for j in np.arange(n):
-            if (i != j) and (adj[i, j] != 0):
-                f[i] -= (adj[i, j] / (1+(beta[j]/beta[i])))/s[i]
+            if i!=j:
+                aux = x[i]*x[j]
+                aux_value = aux/(1+aux)
+                if aux_value>0:
+                    f[i] -= aux_value/(beta[i]+beta[j])
     return f
 
 
@@ -160,15 +176,35 @@ def iterative_CReAMa(beta, args):
 def loglikelihood_CReAMa(beta, args):
     s = args[0]
     adj = args[1]
-
     n = len(s)
-
     f = 0.0
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
     for i in np.arange(n):
         f -= s[i] * beta[i]
-        for j in np.arange(0, i):
-            if adj[i, j] != 0:
-                f += adj[i, j] * np.log(beta[i]+beta[j])
+    for i,j,w in zip(raw_ind,col_ind,weigths_val):
+        f += w * np.log(beta[i]+ beta[j])
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_CReAMa_sparse(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = 0.0
+    x = adj[0]
+
+    for i in np.arange(n):
+        f -= s[i]*beta[i]
+        for j in np.arane(0,i):
+            aux = x[i]*x[j]
+            aux_value = aux/(1+aux)
+            if aux_value>0:
+                f += aux_value * np.log(beta[i]+beta[j]) 
     return f
 
 
@@ -176,15 +212,37 @@ def loglikelihood_CReAMa(beta, args):
 def loglikelihood_prime_CReAMa(beta, args):
     s = args[0]
     adj = args[1]
-
     n = len(s)
-
     f = np.zeros_like(s, dtype=np.float64)
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
     for i in np.arange(n):
         f[i] -= s[i]
-        for j in np.arange(n):
-            if (i != j) and adj[i, j] != 0:
-                f[i] += adj[i, j] / (beta[i] + beta[j])
+    for i,j,w in zip(raw_ind, col_ind, weigths_val):
+        aux = (beta[i] + beta[j])
+        f[i] += w / aux
+        f[j] += w / aux
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_CReAMa_sparse(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    for i in np.arange(n):
+        f[i] -= s[i]
+        for j in np.arange(0,i):
+            aux = x[i]*x[j]
+            aux_value = aux/(1+aux)
+            if aux_value>0:
+                aux = (beta[i] + beta[j])
+                f[i] += aux_value / aux
+                f[j] += aux_value / aux
     return f
 
 
@@ -192,22 +250,38 @@ def loglikelihood_prime_CReAMa(beta, args):
 def loglikelihood_hessian_CReAMa(beta, args):
     s = args[0]
     adj = args[1]
-
     n = len(s)
-
     f = np.zeros(shape=(n, n), dtype=np.float64)
+    aw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
+    for i,j,w in zip(raw_ind,col_ind,weigths_val):
+        aux = -w/((beta[i]+beta[j])**2)
+        f[i,j] = aux
+        f[j,i] = aux
+        f[i,i] += aux
+        f[j,j] += aux
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_CReAMa_sparse(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros(shape=(n, n), dtype=np.float64)
+    x = adj[0]
     for i in np.arange(n):
-        for j in np.arange(n):
-            if i !=j:
-                aux_f = 0.0
-                if adj[i, j] != 0: 
-                    aux = beta[i] + beta[j]
-                    aux_f = - adj[i, j]/(aux*aux)
-                    f[i,j] = aux_f
-    for i in np.arange(n):
-        for j in np.arange(n):
-            if (i!=j) and (adj[i,j]!=0):
-                f[i,i] -= adj[i,j]/(beta[i]+beta[j])**2
+        for j in np.arange(0,i):
+            aux = x[i]*x[j]
+            aux_value = aux/(1+aux)
+            if aux_value>0:
+                aux = -aux_value/((beta[i]+beta[j])**2)
+                f[i,j] = aux
+                f[j,i] = aux
+                f[i,i] += aux
+                f[j,j] += aux
     return f
 
 
@@ -215,15 +289,35 @@ def loglikelihood_hessian_CReAMa(beta, args):
 def loglikelihood_hessian_diag_CReAMa(beta,args):
     s = args[0]
     adj = args[1]
-
     n = len(s)
-
     f = np.zeros_like(s, dtype=np.float64)
-    for i in np.arange(n):
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
 
-        for j in np.arange(n):
-            if (i!=j) and (adj[i,j]!=0):
-                f[i] -= adj[i,j]/(beta[i]+beta[j])**2
+    for i,j,w in zip(raw_ind,col_ind,weigths_val):
+        aux = w/((beta[i]+beta[j])**2)
+        f[i] -= aux
+        f[j] -= aux
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_CReAMa_sparse(beta,args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    for i in np.arange(n):
+        for j in np.arange(0,i):
+            if i!=j:
+                aux = x[i]*x[j]
+                aux_value = aux/(1+aux)
+                if aux_value>0:
+                    aux = aux_value/((beta[i]+beta[j])**2)
+                    f[i] -= aux
+                    f[j] -= aux
     return f
 
 
@@ -564,26 +658,45 @@ def hessian_regulariser_function(B, eps):
 
 @jit(nopython=True)
 def expected_degree_cm(sol):
-	ex_k = np.zeros_like(sol, dtype=np.float64)
-	n = len(sol)
-	for i in np.arange(n):
-		for j in np.arange(n):
-			if i!=j:
-				aux = sol[i]*sol[j]
-				ex_k[i] += aux/(1+aux)
-	return ex_k
+    ex_k = np.zeros_like(sol, dtype=np.float64)
+    n = len(sol)
+    for i in np.arange(n):
+        for j in np.arange(n):
+            if i!=j:
+                aux = sol[i]*sol[j]
+                ex_k[i] += aux/(1+aux)
+    return ex_k
 
 
 @jit(nopython=True)
 def expected_strength_CReAMa(sol,adj):
-	ex_s = np.zeros_like(sol, dtype=np.float64)
-	n = len(sol)
-	for i in np.arange(n):
-		for j in np.arange(n):
-			if (i!=j) and (adj[i,j]!=0):
-				ex_s[i] += adj[i,j]/(sol[i]+sol[j])
-	return ex_s
+    ex_s = np.zeros_like(sol, dtype=np.float64)
+    n = len(sol)
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
 
+    for i,j,w in zip(raw_ind, col_ind, weigths_val):
+        aux = w/(sol[i]+sol[j])
+        ex_s[i] += aux
+        ex_s[j] += aux
+    return ex_s
+
+
+@jit(nopython=True)
+def expected_strength_CReAMa_sparse(sol,adj):
+    ex_s = np.zeros_like(sol, dtype=np.float64)
+    n = len(sol)
+    x = adj[0]
+    for i in np.arange(n):
+        for j in (i):
+            aux = x[i]*x[j]
+            aux_value = aux/(1+aux)
+            if aux_value>0:
+                aux = aux_value/(beta[i]+beta[j])
+                ex_s[i] += aux
+                ex_s[j] += aux
+    return ex_s
 
 @jit(nopython=True)
 def expected_ecm(sol):
@@ -853,7 +966,7 @@ class UndirectedGraph:
             self._set_solved_problem_cm(solution)
         elif model == 'ecm':
             self._set_solved_problem_ecm(solution)
-        elif model == 'CReAMa':
+        elif model in ['CReAMa','CReAMA-sparse']:
             self._set_solved_problem_CReAMa(solution)
 
         
@@ -869,7 +982,7 @@ class UndirectedGraph:
             self._set_initial_guess_cm()
         elif model == 'ecm':
             self._set_initial_guess_ecm()
-        elif model == 'CReAMa':
+        elif model in ['CReAMa','CReAMA-sparse']:
             self._set_initial_guess_CReAMa()
 
 
@@ -936,7 +1049,10 @@ class UndirectedGraph:
                 self.expected_dseq = ex_k
                 self.error = np.linalg.norm(ex_k - self.dseq)
             if (self.beta is not None):
-                ex_s = expected_strength_CReAMa(self.beta,self.adjacency_CReAMa)
+                if self.is_sparse:
+                    ex_s = expected_strength_CReAMa_sparse(self.beta,self.adjacency_CReAMa)
+                else:
+                    ex_s = expected_strength_CReAMa(self.beta,self.adjacency_CReAMa)
                 self.expected_stregth_seq = ex_s
                 self.error_strength = np.linalg.norm(ex_s - self.strength_sequence)
                 self.relative_error_strength = self.error_strength/self.strength_sequence.sum()
@@ -953,7 +1069,7 @@ class UndirectedGraph:
 
     def _set_args(self, model):
 
-        if model=='CReAMa':
+        if model in ['CReAMa','CReAMA-sparse']:
             self.args = (self.strength_sequence, self.adjacency_CReAMa, self.nz_index)
         elif model == 'cm':
             self.args = (self.r_dseq, self.r_multiplicity)
@@ -983,6 +1099,10 @@ class UndirectedGraph:
                 'ecm-newton': lambda x: -loglikelihood_prime_ecm(x,self.args),
                 'ecm-quasinewton': lambda x: -loglikelihood_prime_ecm(x,self.args),
                 'ecm-fixed-point': lambda x: iterative_ecm(x,self.args),
+
+                'CReAMa-newton-sparse': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
+                'CReAMa-quasinewton-sparse': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
+                'CReAMa-fixed-point-sparse': lambda x: -iterative_CReAMa(x,self.args),
                 }
 
         d_fun_jac = {
@@ -997,6 +1117,10 @@ class UndirectedGraph:
                     'ecm-newton': lambda x: -loglikelihood_hessian_ecm(x,self.args),
                     'ecm-quasinewton': lambda x: -loglikelihood_hessian_diag_ecm(x,self.args),
                     'ecm-fixed-point': None,
+
+                    'CReAMa-newton-sparse': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),
+                    'CReAMa-quasinewton-sparse': lambda x: -loglikelihood_hessian_diag_CReAMa(x,self.args),
+                    'CReAMa-fixed-point-sparse': None,
                     }
         d_fun_stop = {
                      'cm-newton': lambda x: -loglikelihood_cm(x,self.args),
@@ -1010,6 +1134,10 @@ class UndirectedGraph:
                      'ecm-newton': lambda x: -loglikelihood_ecm(x,self.args),
                      'ecm-quasinewton': lambda x: -loglikelihood_ecm(x,self.args),
                      'ecm-fixed-point': lambda x: -loglikelihood_ecm(x,self.args),
+
+                     'CReAMa-newton-sparse': lambda x: -loglikelihood_CReAMa(x,self.args),
+                     'CReAMa-quasinewton-sparse': lambda x: -loglikelihood_CReAMa(x,self.args),
+                     'CReAMa-fixed-point-sparse': lambda x: -loglikelihood_CReAMa(x,self.args),
                      }
         try:
             self.fun = d_fun[mod_met]
@@ -1029,23 +1157,48 @@ class UndirectedGraph:
     
     
     def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='cm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
-        if not isinstance(adjacency,(list,np.ndarray,str)):
+        if not isinstance(adjacency,(list,np.ndarray,str)) and (not scipy.sparse.isspmatrix(adjacency)):
             raise ValueError('adjacency must be a matrix or a method')
         elif isinstance(adjacency,str):
             self._solve_problem(initial_guess=initial_guess, model=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
             if self.is_sparse:
-                self.adjacency_CReAMa = self.x
+                self.adjacency_CReAMa = (self.x,)
             else:
                 self.adjacency_CReAMa = self.fun_pmatrix(self.x)
+                raw_ind,col_ind = np.nonzero(np.triu(pmatrix))
+                raw_ind = raw_ind.astype(np.int64)
+                col_ind = col_ind.astype(np.int64)
+                weigths_value = pmatrix[raw_ind,col_ind]
+                self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+                self.is_sparse=False
         elif isinstance(adjacency,list):
-            self.adjacency_CReAMa = np.array(adjacency)
+            adjacency = np.array(adjacency).astype(np.float64)
+            raw_ind,col_ind = np.nonzero(np.triu(adjacency))
+            raw_ind = raw_ind.astype(np.int64)
+            col_ind = col_ind.astype(np.int64)
+            weigths_value = adjacency[raw_ind,col_ind]
+            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+            self.is_sparse=False
         elif isinstance(adjacency,np.ndarray):
-            self.adjacency_CReAMa = adjacency
+            adjacency = adjacency.astype(np.float64)
+            raw_ind,col_ind = np.nonzero(np.triu(adjacency))
+            raw_ind = raw_ind.astype(np.int64)
+            col_ind = col_ind.astype(np.int64)
+            weigths_value = adjacency[raw_ind,col_ind]
+            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+            self.is_sparse=False
+        elif scipy.sparse.isspmatrix(adjacency):
+            raw_ind,col_ind = scipy.sparse.triu(adjacency).nonzero()
+            raw_ind = raw_ind.astype(np.int64)
+            col_ind = col_ind.astype(np.int64)
+            weigths_value = (adjacency[raw_ind,col_ind].A1).astype(np.float64)
+            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+            self.is_sparse=False
 
-        #if self.adjacency_CReAMa.shape[0] != self.adjacency_CReAMa.shape[1]:
-        #    raise ValueError(r'adjacency matrix must be $n \times n$')
-
-        self.last_model = model
+        if self.is_sparse:
+            self.last_model = 'CReAMa-sparse'
+        else:
+            self.last_model = model
         self.full_return = full_return
         self.initial_guess = 'strengths'
         self._initialize_problem(model,method)
