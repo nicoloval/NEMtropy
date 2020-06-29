@@ -869,8 +869,7 @@ def iterative_decm(x, args):
             f[i+3*n] = s_in[i]/fb_in
         else:
             f[i+3*n] = 0 
- 
- 
+
     return f
 
 
