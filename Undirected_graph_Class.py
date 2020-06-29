@@ -407,7 +407,7 @@ def loglikelihood_hessian_ecm(sol,args):
         for j in np.arange(i,n):
             if i==j:
                 f1 = - k[i]/(x[i]**2)
-                f2 =  - s[i]/(y[i])**2
+                f2 =  - s[i]/((y[i])**2)
                 f3 = 0.0
                 for h in np.arange(n):
                     if h!=i:
@@ -416,7 +416,7 @@ def loglikelihood_hessian_ecm(sol,args):
                         aux3 = (1-aux2)**2
                         aux4 = (1- aux2 + aux1*aux2)**2
                         f1 += ((x[h] * aux2)**2)/aux4
-                        f2 += (aux1*y[h] * (aux1*y[h] * (1-2*aux2) - 2*y[h]*(1-aux2)))/(aux3*aux4)
+                        f2 += ((aux1*y[h] * (aux1*y[h] * (1-2*aux2) - 2*y[h]*(1-aux2))))/(aux3*aux4)
                         f3 -= (x[h]*y[h])/aux4
                 f[i,i] = f1
                 f[i+n,i+n] = f2
@@ -436,7 +436,7 @@ def loglikelihood_hessian_ecm(sol,args):
                 f[i,j+n] = aux
                 f[j+n,i] = aux
 
-                aux = - (aux1 * (1 - aux2**2 + aux1 * (aux2**2)))/aux3*aux4
+                aux = - (aux1 * (1 - aux2**2 + aux1 * (aux2**2)))/(aux3*aux4)
                 f[i+n,j+n] = aux
                 f[j+n,i+n] = aux
 
