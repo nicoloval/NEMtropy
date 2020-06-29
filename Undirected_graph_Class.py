@@ -1099,9 +1099,9 @@ class UndirectedGraph:
                 'ecm-quasinewton': lambda x: -loglikelihood_prime_ecm(x,self.args),
                 'ecm-fixed-point': lambda x: iterative_ecm(x,self.args),
 
-                'CReAMa-newton-sparse': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
-                'CReAMa-quasinewton-sparse': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
-                'CReAMa-fixed-point-sparse': lambda x: -iterative_CReAMa(x,self.args),
+                'CReAMa-sparse-newton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
+                'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
+                'CReAMa-sparse-fixed-point': lambda x: -iterative_CReAMa(x,self.args),
                 }
 
         d_fun_jac = {
@@ -1117,9 +1117,9 @@ class UndirectedGraph:
                     'ecm-quasinewton': lambda x: -loglikelihood_hessian_diag_ecm(x,self.args),
                     'ecm-fixed-point': None,
 
-                    'CReAMa-newton-sparse': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),
-                    'CReAMa-quasinewton-sparse': lambda x: -loglikelihood_hessian_diag_CReAMa(x,self.args),
-                    'CReAMa-fixed-point-sparse': None,
+                    'CReAMa-sparse-newton': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),
+                    'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa(x,self.args),
+                    'CReAMa-sparse-fixed-point': None,
                     }
         d_fun_stop = {
                      'cm-newton': lambda x: -loglikelihood_cm(x,self.args),
@@ -1134,9 +1134,9 @@ class UndirectedGraph:
                      'ecm-quasinewton': lambda x: -loglikelihood_ecm(x,self.args),
                      'ecm-fixed-point': lambda x: -loglikelihood_ecm(x,self.args),
 
-                     'CReAMa-newton-sparse': lambda x: -loglikelihood_CReAMa(x,self.args),
-                     'CReAMa-quasinewton-sparse': lambda x: -loglikelihood_CReAMa(x,self.args),
-                     'CReAMa-fixed-point-sparse': lambda x: -loglikelihood_CReAMa(x,self.args),
+                     'CReAMa-sparse-newton': lambda x: -loglikelihood_CReAMa(x,self.args),
+                     'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_CReAMa(x,self.args),
+                     'CReAMa-sparse-fixed-point': lambda x: -loglikelihood_CReAMa(x,self.args),
                      }
         try:
             self.fun = d_fun[mod_met]
