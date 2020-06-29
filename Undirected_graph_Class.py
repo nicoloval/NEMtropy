@@ -710,7 +710,7 @@ def expected_ecm(sol):
                 aux2 = y[i]*y[j]
                 aux3 = (aux1*aux2)/(1-aux2+aux1*aux2)
                 ex_ks[i] += (aux1*aux2)/(1-aux2+aux1*aux2)
-                ex_ks[i+n] += ((aux1*aux2)/(1-aux2+aux1*aux2)*(1-aux2))
+                ex_ks[i+n] += ((aux1*aux2)/((1-aux2+aux1*aux2)*(1-aux2)))
     return ex_ks
 
 def edgelist_from_edgelist(edgelist):
