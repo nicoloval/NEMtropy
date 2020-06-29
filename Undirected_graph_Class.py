@@ -199,7 +199,7 @@ def loglikelihood_CReAMa_sparse(beta, args):
 
     for i in np.arange(n):
         f -= s[i]*beta[i]
-        for j in np.arane(0,i):
+        for j in np.arange(0,i):
             aux = x[i]*x[j]
             aux_value = aux/(1+aux)
             if aux_value>0:
