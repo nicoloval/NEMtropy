@@ -981,7 +981,7 @@ class UndirectedGraph:
             self._set_initial_guess_cm()
         elif model == 'ecm':
             self._set_initial_guess_ecm()
-        elif model in ['CReAMa','CReAMA-sparse']:
+        elif model in ['CReAMa','CReAMa-sparse']:
             self._set_initial_guess_CReAMa()
 
 
