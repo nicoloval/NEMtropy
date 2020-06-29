@@ -147,10 +147,9 @@ def iterative_CReAMa(beta, args):
     raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
-
-for i,j,w in zip(raw_ind,col_ind,weigths_val):
-    f[i] -= w/(1 + (beta[j]/beta[i]))
-    f[j] -= w/(1 + (beta[i]/beta[j]))
+    for i,j,w in zip(raw_ind,col_ind,weigths_val):
+        f[i] -= w/(1 + (beta[j]/beta[i]))
+        f[j] -= w/(1 + (beta[i]/beta[j]))
     return f
 
 
