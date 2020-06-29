@@ -688,11 +688,11 @@ def expected_strength_CReAMa_sparse(sol,adj):
     n = len(sol)
     x = adj[0]
     for i in np.arange(n):
-        for j in (i):
+        for j in np.arange(0,i):
             aux = x[i]*x[j]
             aux_value = aux/(1+aux)
             if aux_value>0:
-                aux = aux_value/(beta[i]+beta[j])
+                aux = aux_value/(sol[i]+sol[j])
                 ex_s[i] += aux
                 ex_s[j] += aux
     return ex_s
