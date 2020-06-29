@@ -836,23 +836,12 @@ def iterative_decm(x, args):
                          /(1 - tmp + tmp0*tmp)
             
         """
-        if k_out[i] != 0:
-            f[i] = x[i] - k_out[i]/fa_out
-        else:
-            f[i] = x[i] 
-        if k_in[i] != 0:
-            f[i+n] = x[i+n] - k_in[i]/fa_in
-        else:
-            f[i+n] = x[i+n]
-        if s_out[i] != 0:
-            f[i+2*n] = x[i+2*n] - s_out[i]/fb_out
-        else:
-            f[i+2*n] = 0
-        if s_in[i] != 0:
-            f[i+3*n] = x[i+3*n] - s_in[i]/fb_in
-        else:
-            f[i+3*n] = x[i+3*n]
-        """
+        f[i] = k_out[i]/fa_out
+        f[i+n] = k_in[i]/fa_in
+        f[i+2*n] = s_out[i]/fb_out
+        f[i+3*n] = s_in[i]/fb_in
+
+        """    
         if k_out[i] != 0:
             f[i] = k_out[i]/fa_out
         else:
@@ -1589,9 +1578,13 @@ class DirectedGraph:
                 k = np.concatenate((self.dseq_out, self.dseq_in, self.out_strength, self.in_strength))
                 self.expected_dseq = ex[:2*self.n_nodes]
                 self.expected_strength_seq = ex[2*self.n_nodes:]
-                self.error = np.linalg.norm(ex - k)
-                self.error_dseq = np.linalg.norm(np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)
-                self.error_sseq = np.linalg.norm(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq)
+
+                # self.error = np.linalg.norm(ex - k)
+                self.error = max(abs(ex - k))
+                # self.error_dseq = np.linalg.norm(np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)
+                self.error_dseq = max(abs((np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)))
+                # self.error_sseq = np.linalg.norm(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq)
+                self.error_sseq = max(abs(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq))
                 self.relative_error_strength = self.error/self.out_strength.sum()
     
 
