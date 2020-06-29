@@ -1041,7 +1041,7 @@ class UndirectedGraph:
 
     # DA SISTEMARE
     def solution_error(self):
-        if self.last_model in ['cm','CReAMa']:
+        if self.last_model in ['cm','CReAMa','CReAMa-sparse']:
             if (self.x is not None):
                 ex_k = expected_degree_cm(self.x)
                 # print(k, ex_k)
@@ -1200,7 +1200,7 @@ class UndirectedGraph:
             self.last_model = model
         self.full_return = full_return
         self.initial_guess = 'strengths'
-        self._initialize_problem(model,method)
+        self._initialize_problem(self.last_model,method)
         x0 = self.x0 
             
         sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
