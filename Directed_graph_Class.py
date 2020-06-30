@@ -552,18 +552,22 @@ def loglikelihood_decm(x, args):
     """not reduced
     """
     # problem fixed parameters
-    k_out = args[0] 
-    k_in = args[1] 
-    s_out = args[2] 
-    s_in = args[3] 
-    n = len(k_out) 
+    k_out = args[0]
+    k_in = args[1]
+    s_out = args[2]
+    s_in = args[3]
+    n = len(k_out)
 
     f = 0
     for i in range(n):
-        f += k_out[i]*np.log(x[i]) \
-            + k_in[i]*np.log(x[i+n]) \
-            + s_out[i]*np.log(x[i+2*n]) \
-            + s_in[i]*np.log(x[i+3*n])
+        if k_out[i]:
+            f += k_out[i]*np.log(x[i])
+        if k_in[i]:
+            f += k_in[i]*np.log(x[i+n])
+        if s_out[i]:
+            f += s_out[i]*np.log(x[i+2*n]) 
+        if s_in[i]:
+            f += s_in[i]*np.log(x[i+3*n])
         for j in range(n):
             if i != j:
                 tmp = x[i+2*n]*x[j+3*n]
@@ -610,11 +614,22 @@ def loglikelihood_prime_decm(x, args):
                          + (x[i+n]*x[j] - 1)*x[j+2*n]\
                          /(1 - tmp\
                          + x[j]*x[i+n]*tmp)
-
-        f[i] = k_out[i]/x[i] - fa_out
-        f[i+n] = k_in[i]/x[i+n] - fa_in
-        f[i+2*n] = s_out[i]/x[i+2*n] - fb_out
-        f[i+3*n] = s_in[i]/x[i+3*n] - fb_in
+        if k_out[i]:
+            f[i] = k_out[i]/x[i] - fa_out
+        else:
+            f[i] = - fa_out
+        if k_in[i]:
+            f[i+n] = k_in[i]/x[i+n] - fa_in
+        else:
+            f[i+n] = -fa_in
+        if s_out[i]:
+            f[i+2*n] = s_out[i]/x[i+2*n] - fb_out
+        else:
+            f[i+2*n] = - fb_out
+        if s_in[i]:
+            f[i+3*n] = s_in[i]/x[i+3*n] - fb_in
+        else:
+            f[i+3*n] = - fb_in
 
     return f
 
@@ -655,11 +670,22 @@ def loglikelihood_hessian_diag_decm(x, args):
                 tmp1 = x[j +2*n]**2/(1 - tmp0)
                 tmp2 = ((x[i+n]*x[j] - 1)*x[j+2*n])/(1 - tmp0 + x[j]*x[i+n]*tmp0)
                 fb_in += tmp1*tmp1 - tmp2*tmp2 
-
-        f[i] = -k_out[i]/x[i]**2 + fa_out
-        f[i+n] = -k_in[i]/x[i+n]**2 + fa_in
-        f[i+2*n] = -s_out[i]/x[i+2*n]**2 - fb_out
-        f[i+3*n] = -s_in[i]/x[i+3*n]**2 - fb_in
+        if k_out[i]:
+            f[i] = -k_out[i]/x[i]**2 + fa_out
+        else:
+            f[i] = fa_out
+        if k_in[i]:
+            f[i+n] = -k_in[i]/x[i+n]**2 + fa_in
+        else:
+            f[i+n] = fa_in
+        if s_out[i]:
+            f[i+2*n] = -s_out[i]/x[i+2*n]**2 - fb_out
+        else:
+            f[i+2*n] = - fb_out
+        if s_in[i]:
+            f[i+3*n] = -s_in[i]/x[i+3*n]**2 - fb_in
+        else:
+            f[i+3*n] = fb_in
 
     return f
 
@@ -1537,10 +1563,10 @@ class DirectedGraph:
             self.b_in = 0.9*np.ones(self.n_nodes, dtype=np.float64)
  
         
-        # self.x[self.dseq_out == 0] = 0
-        # self.y[self.dseq_in == 0] = 0
-        # self.b_out[self.out_strength == 0] = 0
-        # self.b_in[self.in_strength == 0] = 0
+        self.x[self.dseq_out == 0] = 0
+        self.y[self.dseq_in == 0] = 0
+        self.b_out[self.out_strength == 0] = 0
+        self.b_in[self.in_strength == 0] = 0
 
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
 
