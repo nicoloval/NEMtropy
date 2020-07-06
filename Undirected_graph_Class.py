@@ -364,7 +364,7 @@ def loglikelihood_ecm(sol,args):
     f = 0.0
     for i in np.arange(n):
         f += k[i] * np.log(x[i]) + s[i] * np.log(y[i])
-        for j in np.arange(i+1,n):
+        for j in np.arange(0,i):
             aux = y[i] * y[j]
             f += np.log((1-aux)/(1-aux+x[i]*x[j]*aux))
     return f
@@ -468,7 +468,7 @@ def loglikelihood_hessian_diag_ecm(sol,args):
                 aux3 = (1 - aux2)**2
                 aux4 = (1- aux2 + aux1 * aux2)**2
                 f[i] += ((x[j]*aux2)**2)/aux4
-                f[i+n] += (aux1*y[j] * (aux1*y[j] * (1-2*aux2) - 2*y[j]*(1-aux2)))/(aux3*aux4)
+                f[i+n] += (aux1*y[j] * (aux1*y[j] * (1-2*aux2) - 2*y[j]*(1-aux2)))t/(aux3*aux4)
     return f
 
 
@@ -708,7 +708,6 @@ def expected_ecm(sol):
             if i!=j:
                 aux1 = x[i]*x[j]
                 aux2 = y[i]*y[j]
-                aux3 = (aux1*aux2)/(1-aux2+aux1*aux2)
                 ex_ks[i] += (aux1*aux2)/(1-aux2+aux1*aux2)
                 ex_ks[i+n] += ((aux1*aux2)/((1-aux2+aux1*aux2)*(1-aux2)))
     return ex_ks
@@ -1021,8 +1020,8 @@ class UndirectedGraph:
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         if self.initial_guess is None:
-            self.x = self.dseq.astype(float) / (self.n_edges + 1)
-            self.y = self.strength_sequence.astype(float) / self.strength_sequence.sum()  # This +1 increases the stability of the solutions.
+            self.x = self.dseq.astype(float) / (self.n_edges + 1)  # This +1 increases the stability of the solutions.
+            self.y = self.strength_sequence.astype(float) / self.strength_sequence.sum()
         elif self.initial_guess == 'strengths':
             self.x = np.ones_like(self.dseq, dtype=np.float64) / (self.dseq + 1)
             self.y = np.ones_like(self.strength_sequence, dtype=np.float64) / (self.strength_sequence + 1)
@@ -1030,7 +1029,7 @@ class UndirectedGraph:
             self.x = np.random.rand(self.n_nodes).astype(np.float64)
             self.y = np.random.rand(self.n_nodes).astype(np.float64)
         elif self.initial_guess == 'uniform':
-            self.x = 0.001*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.x = 0.001*np.ones(self.n_nodes, dtype=np.float64)
             self.y = 0.001*np.ones(self.n_nodes, dtype=np.float64)
 
         self.x[self.dseq == 0] = 0
@@ -1163,7 +1162,7 @@ class UndirectedGraph:
             if self.is_sparse:
                 self.adjacency_CReAMa = (self.x,)
             else:
-                self.adjacency_CReAMa = self.fun_pmatrix(self.x)
+                pmatrix = self.fun_pmatrix(self.x)
                 raw_ind,col_ind = np.nonzero(np.triu(pmatrix))
                 raw_ind = raw_ind.astype(np.int64)
                 col_ind = col_ind.astype(np.int64)
