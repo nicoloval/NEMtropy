@@ -474,7 +474,7 @@ def loglikelihood_hessian_diag_ecm(sol,args):
                 aux3 = (1 - aux2)**2
                 aux4 = (1- aux2 + aux1 * aux2)**2
                 f[i] += ((x[j]*aux2)**2)/aux4
-                f[i+n] += (aux1*y[j] * (aux1*y[j] * (1-2*aux2) - 2*y[j]*(1-aux2)))t/(aux3*aux4)
+                f[i+n] += (aux1*y[j] * (aux1*y[j] * (1-2*aux2) - 2*y[j]*(1-aux2)))/(aux3*aux4)
     return f
 
 
