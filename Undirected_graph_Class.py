@@ -150,6 +150,9 @@ def iterative_CReAMa(beta, args):
     for i,j,w in zip(raw_ind,col_ind,weigths_val):
         f[i] -= w/(1 + (beta[j]/beta[i]))
         f[j] -= w/(1 + (beta[i]/beta[j]))
+    for i in np.arange(n):
+        if s[i]!=0:
+            f[i] = f[i]/s[i]
     return f
 
 
@@ -167,7 +170,10 @@ def iterative_CReAMa_sparse(beta, args):
                 aux = x[i]*x[j]
                 aux_value = aux/(1+aux)
                 if aux_value>0:
-                    f[i] -= aux_value/(beta[i]+beta[j])
+                    f[i] -= aux_value/(1+(beta[j]/beta[i]))
+    for i in np.arange(n):
+        if s[i]!=0:
+            f[i] = f[i]/s[i]
     return f
 
 
@@ -472,7 +478,7 @@ def loglikelihood_hessian_diag_ecm(sol,args):
     return f
 
 
-def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
+def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
 
@@ -514,8 +520,7 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         if method == 'newton':
             H = fun_jac(x)  # original jacobian
             # check the hessian is positive definite
-            # l, e = np.linalg.eigh(H)
-            l, e = np.linalg.eig(H)
+            l, e = scipy.linalg.eigh(H)
             ml = np.min(l)
             # if it's not positive definite -> regularise
             if ml < eps:
@@ -523,7 +528,7 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
             # regularisation
             if regularise == True:
                 B = hessian_regulariser_function(H, eps)
-                l, e = np.linalg.eigh(B)
+                l, e = scipy.linalg.eigh(B)
                 new_ml = np.min(l)
             else:
                 B = H.__array__()
@@ -546,35 +551,13 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
 
         # backtraking line search
         tic = time.time()
+
         if linsearch:
-            alfa = 1 
-            i = 0
-            # TODO: fun(x) non e' il graident di step_funx
-            # TODO: check dianati fornisce una direzione di discesa 
-
-            """
-            s_new = np.linalg.norm(fun(x+alfa*dx)-x-alfa*dx)
-            s_old = np.linalg.norm(fun(x)-x)
-            while sufficient_decrease_condition(s_old, \
-                s_new, alfa, fun(x), dx) == False and i<50:
-            """
-            s_old = step_fun(x)
-            while sufficient_decrease_condition(s_old, \
-                step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
-                alfa *= beta
-                i +=1
+            alfa1 = 1
+            X = (x,dx,beta,alfa1,f)
+            alfa = linsearch_fun(X)
         else:
-            """
-            if True:
-                alfa = 0.1
-                eps2=1e-2
-                alfa0 = (eps2-1)*x/dx
-                for a in alfa0:
-                    if a>=0:
-                        alfa = min(alfa, a)
-            """
             alfa = 1
-
 
         toc_alfa += time.time() - tic
 
@@ -623,20 +606,87 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         return x
 
 
+def linsearch_fun_CReAMa(X,args):
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    
+    i=0
+    s_old = step_fun(x)
+    while sufficient_decrease_condition(s_old, \
+        step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
+        alfa *= beta
+        i +=1
+    
+    return alfa
+
+
+def linsearch_fun_CM(X,args):
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    
+    #print(alfa)
+    
+    eps2=1e-2
+    alfa0 = (eps2-1)*x/dx
+    for a in alfa0:
+        if a>=0:
+            alfa = min(alfa, a)
+    #print(alfa)
+    i=0
+    s_old = step_fun(x)
+    while sufficient_decrease_condition(s_old, \
+        step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
+        alfa *= beta
+        i +=1
+    #print(alfa)
+    return alfa
+
+
+def linsearch_fun_ECM(X,args):
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    
+    eps2=1e-2
+    alfa0 = (eps2-1)*x/dx
+    for a in alfa0:
+        if a>=0:
+            alfa = min(alfa, a)
+            
+    nnn = int(len(x)/2)
+    while True:
+        ind_max_y = (x[nnn:] + alfa*dx[nnn:]).argsort()[-2:][::-1]
+        if np.prod(x[nnn:][ind_max_y] + alfa*dx[nnn:][ind_max_y])<1:
+            break
+        else:
+            alfa *= beta
+    
+    i=0
+    s_old = step_fun(x)
+    while sufficient_decrease_condition(s_old, \
+        step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
+        alfa *= beta
+        i +=1
+    
+    return alfa
+
+
 def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=.9):
     """return boolean indicator if upper wolfe condition are respected.
     """
-    # print(f_old, f_new, alpha, grad_f, p)
-    # c1 = 0
-    
-    # print ('f_old',f_old)
-    # print ('c1',c1)
-    # print('alpha',alpha)
-    # print ('grad_f',grad_f)
-    # print('p.T',p.T)
-
     sup = f_old + c1 *alpha*grad_f@p.T
-    # print(alpha, f_new, sup)
+    
     return bool(f_new < sup)
 
 
@@ -644,9 +694,9 @@ def hessian_regulariser_function(B, eps):
     """Trasform input matrix in a positive defined matrix
     input matrix should be numpy.array
     """
-    eps = 1e-8
     B = (B + B.transpose())*0.5  # symmetrization
-    l, e = np.linalg.eigh(B)
+    l, e = scipy.linalg.eigh(B)
+    eps = np.max(l)*1e-8
     ll = np.array([0 if li>eps else eps-li for li in l])
     Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
     # lll, eee = np.linalg.eigh(Bf)
@@ -939,7 +989,7 @@ class UndirectedGraph:
         self._initialize_problem(model, method)
         x0 = self.x0 
 
-        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, linsearch_fun = self.fun_linsearch, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
 
         self._set_solved_problem(sol)
 
@@ -1144,7 +1194,6 @@ class UndirectedGraph:
         except:    
             raise ValueError('Method must be "newton","quasi-newton", or "fixed-point".')
         
-        # TODO: mancano metodi
         d_pmatrix = {
                     'cm': pmatrix_cm
                     }
@@ -1152,6 +1201,17 @@ class UndirectedGraph:
         if model in ['cm']:
             self.args_p = (self.n_nodes, np.nonzero(self.dseq)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
+
+        self.args_lins = (self.step_fun,)
+        
+        lins_fun = {
+                    'cm': lambda x: linsearch_fun_CM(x,self.args_lins),
+                    'CReAMa': lambda x: linsearch_fun_CReAMa(x,self.args_lins),
+                    'CReAMa-sparse': lambda x: linsearch_fun_CReAMa(x,self.args_lins),
+                    'ecm': lambda x: linsearch_fun_ECM(x,self.args_lins),
+                   }
+        
+        self.fun_linsearch = lins_fun[model]
     
     
     def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='cm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
@@ -1202,7 +1262,7 @@ class UndirectedGraph:
         self._initialize_problem(self.last_model,method)
         x0 = self.x0 
             
-        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
+        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, linsearch_fun = self.fun_linsearch, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
             
         self._set_solved_problem_CReAMa(sol)
 
