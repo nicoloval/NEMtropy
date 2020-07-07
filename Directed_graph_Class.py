@@ -1283,8 +1283,7 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         if method == 'newton':
             H = fun_jac(x)  # original jacobian
             # check the hessian is positive definite
-            # l, e = np.linalg.eigh(H)
-            l, e = scipy.linalg.eig(H)
+            l, e = scipy.linalg.eigh(H)
             ml = np.min(l)
             # if it's not positive definite -> regularise
             if ml < eps:
