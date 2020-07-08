@@ -226,14 +226,14 @@ def random_weighted_matrix_generator_gaussian_custom_density(n, mean, sigma, p=0
 
 def random_binary_matrix_generator_custom_density_sparse(n, p=0.1 , sym=False, seed=None):
     if sym:
-        nx_graph = nx.gnp_random_graph(n, p=p, seed=seed)
+        nx_graph = nx.fast_gnp_random_graph(n, p=p, seed=seed)
         largest_cc = max(nx.connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
         return adj_sparse
 
     else:
-        nx_graph = nx.gnp_random_graph(n, p=p, seed=seed, directed=True)
+        nx_graph = nx.fast_gnp_random_graph(n, p=p, seed=seed, directed=True)
         largest_cc = max(nx.weakly_connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
@@ -243,7 +243,7 @@ def random_binary_matrix_generator_custom_density_sparse(n, p=0.1 , sym=False, s
 jit(forceobj=True)
 def random_uniform_weighted_matrix_generator_custom_density_sparse(n, sup_ext, p=0.1, sym=False, seed=None, intweights=False):
     if sym:
-        nx_graph = nx.gnp_random_graph(n, p=p, seed=seed)
+        nx_graph = nx.fast_gnp_random_graph(n, p=p, seed=seed)
         largest_cc = max(nx.connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
@@ -262,7 +262,7 @@ def random_uniform_weighted_matrix_generator_custom_density_sparse(n, sup_ext, p
         return adj_sparse
 
     else:
-        nx_graph = nx.gnp_random_graph(n, p=p, seed=seed, directed=True)
+        nx_graph = nx.fast_gnp_random_graph(n, p=p, seed=seed, directed=True)
         largest_cc = max(nx.weakly_connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
@@ -282,7 +282,7 @@ def random_uniform_weighted_matrix_generator_custom_density_sparse(n, sup_ext, p
 jit(forceobj=True)
 def random_gaussian_weighted_matrix_generator_custom_density_sparse(n, mean, sigma, p=0.1, sym=False, seed=None, intweights=False):
     if sym:
-        nx_graph = nx.gnp_random_graph(n, p=p, seed=seed)
+        nx_graph = nx.fast_gnp_random_graph(n, p=p, seed=seed)
         largest_cc = max(nx.connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
@@ -301,7 +301,7 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(n, mean, sig
         return adj_sparse
 
     else:
-        nx_graph = nx.gnp_random_graph(n, p=p, seed=seed, directed=True)
+        nx_graph = nx.fast_gnp_random_graph(n, p=p, seed=seed, directed=True)
         largest_cc = max(nx.weakly_connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
