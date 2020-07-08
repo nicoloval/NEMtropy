@@ -250,11 +250,12 @@ def random_uniform_weighted_matrix_generator_custom_density_sparse(n, sup_ext, p
 
         # Weigths
         raw_ind, col_ind = scipy.sparse.triu(adj_sparse).nonzero()
-        for i,j in zip(raw_ind,col_ind):
-            if intweights:
+        if intweights:
+            for i,j in zip(raw_ind,col_ind):
                 adj_sparse[i,j] = np.ceil(np.random.random() * sup_ext)
                 adj_sparse[j,i] = adj_sparse[i,j]
-            else:
+        else:
+            for i,j in zip(raw_ind,col_ind):
                 adj_sparse[i,j] = np.random.random() * sup_ext
                 adj_sparse[j,i] = adj_sparse[i,j]
 
@@ -268,10 +269,11 @@ def random_uniform_weighted_matrix_generator_custom_density_sparse(n, sup_ext, p
 
         # Weigths
         raw_ind, col_ind = adj_sparse.nonzero()
-        for i,j in zip(raw_ind,col_ind):
-            if intweights:
+        if intweights:
+            for i,j in zip(raw_ind,col_ind):
                 adj_sparse[i,j] = np.ceil(np.random.random() * sup_ext)
-            else:
+        else:
+            for i,j in zip(raw_ind,col_ind):
                 adj_sparse[i,j] = np.random.random() * sup_ext
 
         return adj_sparse
@@ -287,11 +289,12 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(n, mean, sig
 
         # Weigths
         raw_ind, col_ind = scipy.sparse.triu(adj_sparse).nonzero()
-        for i,j in zip(raw_ind,col_ind):
-            if intweights:
+        if intweights:
+            for i,j in zip(raw_ind,col_ind):
                 adj_sparse[i,j] = np.ceil(np.random.normal(loc=mean,scale=sigma))
                 adj_sparse[j,i] = adj_sparse[i,j]
-            else:
+        else:
+            for i,j in zip(raw_ind,col_ind):
                 adj_sparse[i,j] = np.random.normal(loc=mean,scale=sigma)
                 adj_sparse[j,i] = adj_sparse[i,j]
 
@@ -305,10 +308,11 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(n, mean, sig
 
         # Weigths
         raw_ind, col_ind = adj_sparse.nonzero()
-        for i,j in zip(raw_ind,col_ind):
-            if intweights:
+        if intweights:
+            for i,j in zip(raw_ind,col_ind):
                 adj_sparse[i,j] = np.ceil(np.random.normal(loc=mean,scale=sigma))
-            else:
+        else:
+            for i,j in zip(raw_ind,col_ind):
                 adj_sparse[i,j] = np.random.normal(loc=mean,scale=sigma)
 
         return adj_sparse
