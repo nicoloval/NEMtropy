@@ -1408,6 +1408,8 @@ class DirectedGraph:
                 self.n_nodes = len(self.dseq_out)
                 self.n_edges = np.sum(self.dseq_out)
                 self.is_initialized = True
+                if self.n_nodes > 2000:
+                    self.is_sparse = True
 
         elif degree_sequence is not None:
             if not isinstance(degree_sequence, (list, np.ndarray)):
@@ -1427,6 +1429,9 @@ class DirectedGraph:
                     self.dseq_in = degree_sequence[self.n_nodes:]
                     self.n_edges = np.sum(self.dseq_out)
                     self.is_initialized = True
+                    if self.n_nodes > 2000:
+                        self.is_sparse = True
+
                 if strength_sequence is not None:
                     if not isinstance(strength_sequence, (list, np.ndarray)):
                         raise TypeError('The strength sequence must be passed as a list or numpy array.')
@@ -1468,6 +1473,8 @@ class DirectedGraph:
                     self.nz_index_sin = np.nonzero(self.in_strength)[0]
                     self.is_weighted = True
                     self.is_initialized = True
+                    if self.n_nodes > 2000:
+                        self.is_sparse = True
 
 
     def set_adjacency_matrix(self, adjacency):

@@ -900,6 +900,8 @@ class UndirectedGraph:
                 self.n_nodes = len(self.dseq)
                 self.n_edges = np.sum(self.dseq)
                 self.is_initialized = True
+                if self.n_nodes > 2000:
+                    self.is_sparse = True
 
         elif degree_sequence is not None:
             if not isinstance(degree_sequence, (list, np.ndarray)):
@@ -916,6 +918,9 @@ class UndirectedGraph:
                     self.dseq = degree_sequence.astype(np.float64)
                     self.n_edges = np.sum(self.dseq)
                     self.is_initialized = True
+                    if self.n_nodes > 2000:
+                        self.is_sparse = True
+
                 if strength_sequence is not None:
                     if not isinstance(strength_sequence, (list, np.ndarray)):
                         raise TypeError('The strength sequence must be passed as a list or numpy array.')
@@ -951,6 +956,8 @@ class UndirectedGraph:
                     self.nz_index = np.nonzero(self.strength_sequence)[0]
                     self.is_weighted = True
                     self.is_initialized = True
+                    if self.n_nodes > 2000:
+                        self.is_sparse = True
 
 
     def set_adjacency_matrix(self, adjacency):
