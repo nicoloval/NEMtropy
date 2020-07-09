@@ -247,6 +247,7 @@ def random_uniform_weighted_matrix_generator_custom_density_sparse(n, sup_ext, p
         largest_cc = max(nx.connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
+        adj_sparse = adj_sparse.astype(np.float64)
 
         # Weigths
         raw_ind, col_ind = scipy.sparse.triu(adj_sparse).nonzero()
@@ -266,6 +267,7 @@ def random_uniform_weighted_matrix_generator_custom_density_sparse(n, sup_ext, p
         largest_cc = max(nx.weakly_connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
+        adj_sparse = adj_sparse.astype(np.float64)
 
         # Weigths
         raw_ind, col_ind = adj_sparse.nonzero()
@@ -286,6 +288,7 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(n, mean, sig
         largest_cc = max(nx.connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
+        adj_sparse = adj_sparse.astype(np.float64)
 
         # Weigths
         raw_ind, col_ind = scipy.sparse.triu(adj_sparse).nonzero()
@@ -305,6 +308,7 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(n, mean, sig
         largest_cc = max(nx.weakly_connected_components(nx_graph), key=len)
         nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
         adj_sparse = nx.to_scipy_sparse_matrix(nx_graph_lcc)
+        adj_sparse = adj_sparse.astype(np.float64)
 
         # Weigths
         raw_ind, col_ind = adj_sparse.nonzero()
