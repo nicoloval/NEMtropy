@@ -1667,7 +1667,7 @@ class DirectedGraph:
                 k = np.concatenate((self.dseq_out, self.dseq_in))
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
-                self.error = np.linalg.norm(ex_k - k)
+                self.error = np.linalg.norm(ex_k - k, ord = np.inf)
             if (self.b_out is not None) and (self.b_in is not None):
                 sol = np.concatenate([self.b_out,self.b_in])
                 if self.is_sparse:
@@ -1679,7 +1679,7 @@ class DirectedGraph:
                 ex_s = np.concatenate([ex_s_out,ex_s_in])
                 s = np.concatenate([self.out_strength,self.in_strength])
                 self.expected_stregth_seq = ex_s
-                self.error_strength = np.linalg.norm(ex_s - s)
+                self.error_strength = np.linalg.norm(ex_s - s, ord = np.inf)
                 self.relative_error_strength = self.error_strength/self.out_strength.sum()
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ['decm']:
@@ -1688,7 +1688,7 @@ class DirectedGraph:
                 k = np.concatenate((self.dseq_out, self.dseq_in, self.out_strength, self.in_strength))
                 self.expected_dseq = ex[:2*self.n_nodes]
                 self.expected_stregth_seq = ex[2*self.n_nodes:]
-                self.error = np.linalg.norm(ex - k)
+                self.error = np.linalg.norm(ex - k, ord = np.inf)
                 self.relative_error_strength = self.error/self.out_strength.sum()
     
 
