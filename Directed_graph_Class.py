@@ -1511,7 +1511,7 @@ class DirectedGraph:
         self.is_initialized = False
 
 
-    def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
+    def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True, regularise=True):
         
         self.last_model = model
         self.full_return = full_return
@@ -1519,7 +1519,7 @@ class DirectedGraph:
         self._initialize_problem(model, method)
         x0 = self.x0 
 
-        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=regularise, full_return = full_return, linsearch=linsearch)
 
         self._set_solved_problem(sol)
 
@@ -1697,7 +1697,7 @@ class DirectedGraph:
                 k = np.concatenate((self.dseq_out, self.dseq_in, self.out_strength, self.in_strength))
                 self.expected_dseq = ex[:2*self.n_nodes]
 
-                self.expected_stregth_seq = ex[2*self.n_nodes:]
+                self.expected_strength_seq = ex[2*self.n_nodes:]
                 self.error = np.linalg.norm(ex - k, ord = np.inf)
                 # self.error_dseq = np.linalg.norm(np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)
                 self.error_dseq = max(abs((np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)))
