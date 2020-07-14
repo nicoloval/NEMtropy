@@ -43,7 +43,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform', regularise=False)
 
         g.solution_error()
 
@@ -91,7 +91,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform', regularise=False)
 
         g.solution_error()
 
