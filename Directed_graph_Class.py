@@ -1121,9 +1121,10 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
             # check the hessian is positive definite
             l, e = scipy.linalg.eigh(H)
             ml = np.min(l)
+            #TODO: check this regularity condition
             # if it's not positive definite -> regularise
-            if ml < eps:
-                regularise = True
+            # if ml < eps:
+            #     regularise = True
             # regularisation
             if regularise == True:
                 B = hessian_regulariser_function(H, eps)

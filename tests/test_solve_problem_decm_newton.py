@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 import Directed_graph_Class as sample
+import Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
 
@@ -13,11 +14,12 @@ class MyTest(unittest.TestCase):
 
 
     def test_newton_decm_1(self):
-        """classes with cardinality more than 1 and zero degrees
+        """ 
+        * no zeros
         """
         # test Matrix 1
         n, seed = (4, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, dtype=np.int64)
+        A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
 
         g = sample.DirectedGraph(A)
 
@@ -34,16 +36,18 @@ class MyTest(unittest.TestCase):
 
 
     def test_newton_decm_2(self):
-        """classes with cardinality more than 1 and zero degrees
+        """
+        * zeros
+        * works only with regularise=False
         """
         # test Matrix 1
         n, seed = (4, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, dtype=np.int64)
+        A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform', regularise=False)
 
         g.solution_error()
 
@@ -58,11 +62,12 @@ class MyTest(unittest.TestCase):
 
 
     def test_newton_decm_3(self):
-        """classes with cardinality more than 1 and zero degrees
+        """
+        * no zeros
         """
         # test Matrix 1
         n, seed = (50, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, dtype=np.int64)
+        A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
 
         g = sample.DirectedGraph(A)
 
@@ -82,16 +87,18 @@ class MyTest(unittest.TestCase):
 
 
     def test_newton_decm_4(self):
-        """classes with cardinality more than 1 and zero degrees
+        """
+        * zeros
+        * works only with regularise=False
         """
         # test Matrix 1
         n, seed = (50, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, dtype=np.int64)
+        A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform')
+        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform', regularise=False)
 
         g.solution_error()
 
