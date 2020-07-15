@@ -1331,7 +1331,7 @@ def linsearch_fun_DECM(X,args):
     while True:
         ind_yout = np.argmax(x[2*nnn:3*nnn])
         ind_yin = np.argmax(x[3*nnn:])
-        if ((x[2*nnn:3*nnn][ind_yout] + dx[2*nnn:3*nnn][ind_yout])*(x[3*nnn:][ind_yin] + dx[3*nnn:][ind_yin])) < 1:
+        if ((x[2*nnn:3*nnn][ind_yout] + alfa*dx[2*nnn:3*nnn][ind_yout])*(x[3*nnn:][ind_yin] + alfa*dx[3*nnn:][ind_yin])) < 1:
             break
         else:
             alfa *= beta
