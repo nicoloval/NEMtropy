@@ -605,7 +605,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
     else:
         return x
 
-
+@jit
 def linsearch_fun_CReAMa(X,args):
     x = X[0]
     dx = X[1]
@@ -623,7 +623,7 @@ def linsearch_fun_CReAMa(X,args):
     
     return alfa
 
-
+@jit
 def linsearch_fun_CM(X,args):
     x = X[0]
     dx = X[1]
@@ -649,7 +649,7 @@ def linsearch_fun_CM(X,args):
     #print(alfa)
     return alfa
 
-
+@jit
 def linsearch_fun_ECM(X,args):
     x = X[0]
     dx = X[1]

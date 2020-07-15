@@ -1113,7 +1113,7 @@ def hessian_regulariser_function(B, eps):
     return Bf
 
 
-def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
+def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True):
     """Find roots of eq. f = 0, using newton, quasinewton or dianati.
     """
 
@@ -1187,35 +1187,14 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
 
         # backtraking line search
         tic = time.time()
+
+        # Linsearch
         if linsearch:
-            #TODO: fun(x) non e' il gradient di step_funx
-            #TODO: check dianati fornisce una direzione di discesa 
-
-            i = 0
+            alfa1 = 1
+            X = (x,dx,beta,alfa1,f)
+            alfa = linsearch_fun(X)
+        else:
             alfa = 1
-            eps2=1e-2
-            alfa0 = (eps2-1)*x/dx
-            for a in alfa0:
-                if a>=0:
-                    alfa = min(alfa, a)
-            """
-            nnn = int(len(x)/4)
-            while True:
-                ind_max_y_in = (x[3*nnn:] + alfa*dx[3*nnn:]).argsort()[-1:]
-                ind_max_y_out = (x[2*nnn:3*nnn] + alfa*dx[2*nnn:3*nnn]).argsort()[-1:]
-
-                if (x[2*nnn:3*nnn][ind_max_y_out] + alfa*dx[2*nnn:3*nnn][ind_max_y_out])*(x[3*nnn:][ind_max_y_in] + alfa*dx[3*nnn:][ind_max_y_in])<1:
-                    print((x[2*nnn:3*nnn][ind_max_y_out] + alfa*dx[2*nnn:3*nnn][ind_max_y_out])*(x[3*nnn:][ind_max_y_in] + alfa*dx[3*nnn:][ind_max_y_in]))
-                    break
-                else:
-                    alfa *= beta
-            """
-
-            s_old = step_fun(x)
-            while sufficient_decrease_condition(s_old, \
-                step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
-                alfa *= beta
-                i +=1
 
         toc_alfa += time.time() - tic
 
@@ -1285,12 +1264,86 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
     # print(alpha, f_new, sup)
     return bool(f_new < sup)
 
+@jit
+def linsearch_fun_DCM(X,args):
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+
+    eps2=1e-2
+    alfa0 = (eps2-1)*x/dx
+    for a in alfa0:
+        if a>=0:
+            alfa = min(alfa, a)
+
+    
+    i=0
+    s_old = step_fun(x)
+    while sufficient_decrease_condition(s_old, \
+        step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
+        alfa *= beta
+        i +=1
+    return alfa
+
+@jit
+def linsearch_fun_CReAMa(X,args):
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    
+    i=0
+    s_old = step_fun(x)
+    while sufficient_decrease_condition(s_old, \
+        step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
+        alfa *= beta
+        i +=1
+    return alfa
+
+@jit
+def linsearch_fun_DECM(X,args):
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+
+    eps2=1e-2
+    alfa0 = (eps2-1)*x/dx
+    for a in alfa0:
+        if a>=0:
+            alfa = min(alfa, a)
+
+    # Mettere il check sulle y
+    nnn = int(len(x)/4)
+    while True:
+        ind_yout = np.argmax(x[2*nnn:3*nnn])
+        ind_yin = np.argmax(x[3*nnn:])
+        if ((x[2*nnn:3*nnn][ind_yout] + dx[2*nnn:3*nnn][ind_yout])*(x[3*nnn:][ind_yin] + dx[3*nnn:][ind_yin])) < 1:
+            break
+        else:
+            alfa *= beta
+
+    i=0
+    s_old = step_fun(x)
+    while sufficient_decrease_condition(s_old, \
+        step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
+        alfa *= beta
+        i +=1
+    return alfa
+
 
 def edgelist_from_edgelist(edgelist):
     """
-        Creates a new edgelist with the indexes of the nodes instead of the names.
-        Returns also two dictionaries that keep track of the nodes.
-        """
+    Creates a new edgelist with the indexes of the nodes instead of the names.
+    Returns also two dictionaries that keep track of the nodes.
+    """
     if len(edgelist[0]) == 2:
         nodetype = type(edgelist[0][0])
         edgelist = np.array(edgelist, dtype=np.dtype(
@@ -1561,7 +1614,7 @@ class DirectedGraph:
         self._initialize_problem(model, method)
         x0 = self.x0 
 
-        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=tol, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=regularise, full_return = full_return, linsearch=linsearch)
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun ,linsearch_fun = self.fun_linsearch, tol=tol, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=regularise, full_return = full_return, linsearch=linsearch)
 
         self._set_solved_problem(sol)
 
@@ -1836,6 +1889,17 @@ class DirectedGraph:
         if model in ['dcm']:
             self.args_p = (self.n_nodes, np.nonzero(self.dseq_out)[0], np.nonzero(self.dseq_in)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
+
+        self.args_lins = (self.step_fun,)
+
+        lins_fun = {
+                    'dcm': linsearch_fun_DCM(x,self.args_lins),
+                    'CReAMa': linsearch_fun_CReAMa(x,self.args_lins),
+                    'CReAMa-sparse': linsearch_fun_CReAMa(x,self.args_lins),
+                    'decm': linsearch_fun_DECM(x,self.args_lins),
+                    }
+
+        self.fun_linsearch = lins_fun[model]
     
     
     def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
@@ -1886,7 +1950,7 @@ class DirectedGraph:
         self._initialize_problem(self.last_model, method)
         x0 = self.x0 
             
-        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
+        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun ,linsearch_fun = self.fun_linsearch, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
             
         self._set_solved_problem_CReAMa(sol)
     
