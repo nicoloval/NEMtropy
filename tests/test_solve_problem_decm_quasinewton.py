@@ -35,7 +35,8 @@ class MyTest(unittest.TestCase):
 
 
     def test_qn_3(self):
-        """classes with cardinality more than 1 and zero degrees
+        """
+        * zeros
         """
         # test Matrix 1
         n, seed = (4, 22)
@@ -55,7 +56,8 @@ class MyTest(unittest.TestCase):
 
 
     def test_qn_dcm_3(self):
-        """classes with cardinality more than 1 and zero degrees
+        """
+        * no zeros
         """
         # test Matrix 1
         n, seed = (50, 22)
@@ -74,7 +76,8 @@ class MyTest(unittest.TestCase):
 
 
     def test_qn_dcm_4(self):
-        """classes with cardinality more than 1 and zero degrees
+        """
+        * zeros
         """
         # test Matrix 1
         n, seed = (50, 23)
