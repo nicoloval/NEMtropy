@@ -608,18 +608,22 @@ def loglikelihood_decm(x, args):
     """not reduced
     """
     # problem fixed parameters
-    k_out = args[0] 
-    k_in = args[1] 
-    s_out = args[2] 
-    s_in = args[3] 
-    n = len(k_out) 
+    k_out = args[0]
+    k_in = args[1]
+    s_out = args[2]
+    s_in = args[3]
+    n = len(k_out)
 
     f = 0
     for i in range(n):
-        f += k_out[i]*np.log(x[i]) \
-            + k_in[i]*np.log(x[i+n]) \
-            + s_out[i]*np.log(x[i+2*n]) \
-            + s_in[i]*np.log(x[i+3*n])
+        if k_out[i]:
+            f += k_out[i]*np.log(x[i])
+        if k_in[i]:
+            f += k_in[i]*np.log(x[i+n])
+        if s_out[i]:
+            f += s_out[i]*np.log(x[i+2*n]) 
+        if s_in[i]:
+            f += s_in[i]*np.log(x[i+3*n])
         for j in range(n):
             if i != j:
                 tmp = x[i+2*n]*x[j+3*n]
@@ -657,20 +661,34 @@ def loglikelihood_prime_decm(x, args):
                          /(1 - tmp\
                          + x[j]*x[i+n]*tmp)
                 tmp = x[j+3*n]*x[i+2*n]
-                fb_out += x[j +3*n]/(1 - tmp)\
+                if x[i]:
+                    fb_out += x[j +3*n]/(1 - tmp)\
                           + (x[j+n]*x[i] - 1)*x[j+3*n]\
                           /(1 - tmp\
                           + x[i]*x[j+n]*tmp)
+                else:
+                    fb_out += 0
                 tmp = x[i+3*n]*x[j+2*n]
                 fb_in += x[j +2*n]/(1 - tmp)\
                          + (x[i+n]*x[j] - 1)*x[j+2*n]\
                          /(1 - tmp\
                          + x[j]*x[i+n]*tmp)
-
-        f[i] = k_out[i]/x[i] - fa_out
-        f[i+n] = k_in[i]/x[i+n] - fa_in
-        f[i+2*n] = s_out[i]/x[i+2*n] - fb_out
-        f[i+3*n] = s_in[i]/x[i+3*n] - fb_in
+        if k_out[i]:
+            f[i] = k_out[i]/x[i] - fa_out
+        else:
+            f[i] = - fa_out
+        if k_in[i]:
+            f[i+n] = k_in[i]/x[i+n] - fa_in
+        else:
+            f[i+n] = -fa_in
+        if s_out[i]:
+            f[i+2*n] = s_out[i]/x[i+2*n] - fb_out
+        else:
+            f[i+2*n] = - fb_out
+        if s_in[i]:
+            f[i+3*n] = s_in[i]/x[i+3*n] - fb_in
+        else:
+            f[i+3*n] = - fb_in
 
     return f
 
@@ -707,15 +725,27 @@ def loglikelihood_hessian_diag_decm(x, args):
                 tmp2 = ((x[j+n]*x[i] - 1)*x[j+3*n])/(1 - tmp0 + x[i]*x[j+n]*tmp0)
                 fb_out += tmp1*tmp1 - tmp2*tmp2
 
+                #P2
                 tmp0 = x[i+3*n]*x[j+2*n]
-                tmp1 = x[j +2*n]**2/(1 - tmp0)
+                tmp1 = x[j +2*n]/(1 - tmp0)
                 tmp2 = ((x[i+n]*x[j] - 1)*x[j+2*n])/(1 - tmp0 + x[j]*x[i+n]*tmp0)
                 fb_in += tmp1*tmp1 - tmp2*tmp2 
-
-        f[i] = -k_out[i]/x[i]**2 + fa_out
-        f[i+n] = -k_in[i]/x[i+n]**2 + fa_in
-        f[i+2*n] = -s_out[i]/x[i+2*n]**2 - fb_out
-        f[i+3*n] = -s_in[i]/x[i+3*n]**2 - fb_in
+        if k_out[i]:
+            f[i] = -k_out[i]/x[i]**2 + fa_out
+        else:
+            f[i] = fa_out
+        if k_in[i]:
+            f[i+n] = -k_in[i]/x[i+n]**2 + fa_in
+        else:
+            f[i+n] = fa_in
+        if s_out[i]:
+            f[i+2*n] = -s_out[i]/x[i+2*n]**2 - fb_out
+        else:
+            f[i+2*n] = - fb_out
+        if s_in[i]:
+            f[i+3*n] = -s_in[i]/x[i+3*n]**2 - fb_in
+        else:
+            f[i+3*n] = fb_in
 
     return f
 
@@ -748,13 +778,17 @@ def loglikelihood_hessian_decm(x, args):
         for l in range(n):
             if h == l:
                 # dll / da^in da^in
-                f[h+n, l+n] = -k_in[h] / a_in[h] ** 2
+                if k_in[h]:
+                    f[h+n, l+n] = -k_in[h] / a_in[h] ** 2
                 # dll / da^out da^out
-                f[h, l] = -k_out[h] / a_out[h] ** 2
+                if k_out[h]:
+                    f[h, l] = -k_out[h] / a_out[h] ** 2
                 # dll / db^in db^in
-                f[h+3*n, l+3*n] = -s_in[h] / b_in[h] ** 2
+                if s_in[h]:
+                    f[h+3*n, l+3*n] = -s_in[h] / b_in[h] ** 2
                 # dll / db^out db^out
-                f[h+2*n, l+2*n] = -s_out[h] / b_out[h] ** 2
+                if s_out[h]:
+                    f[h+2*n, l+2*n] = -s_out[h] / b_out[h] ** 2
 
                 for j in range(n):
                     if j != h:
@@ -898,19 +932,19 @@ def iterative_decm(x, args):
         f[i+3*n] = s_in[i]/fb_in
 
         """    
-        if k_out[i] != 0:
+        if k_out[i]:
             f[i] = k_out[i]/fa_out
         else:
             f[i] = 0 
-        if k_in[i] != 0:
+        if k_in[i]:
             f[i+n] = k_in[i]/fa_in
         else:
             f[i+n] = 0 
-        if s_out[i] != 0:
+        if s_out[i]:
             f[i+2*n] = s_out[i]/fb_out
         else:
             f[i+2*n] = 0
-        if s_in[i] != 0:
+        if s_in[i]:
             f[i+3*n] = s_in[i]/fb_in
         else:
             f[i+3*n] = 0 
@@ -981,6 +1015,8 @@ def hessian_regulariser_function(B, eps):
     eps = 1e-4
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = np.linalg.eigh(B)
+    # lmax = max(l)
+    # eps = 1e-8*lmax
     ll = np.array([0 if li>eps else eps-li for li in l])
     Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
     # lll, eee = np.linalg.eigh(Bf)
@@ -1117,16 +1153,16 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         # f jacobian
         tic = time.time()
         if method == 'newton':
+            # regularise
             H = fun_jac(x)  # original jacobian
             # check the hessian is positive definite
             l, e = scipy.linalg.eigh(H)
             ml = np.min(l)
             #TODO: check this regularity condition
             # if it's not positive definite -> regularise
-            # if ml < eps:
-            #     regularise = True
             # regularisation
-            if regularise == True:
+            #TODO: check regulirise for decm, it's not working
+            if regularise:
                 B = hessian_regulariser_function(H, eps)
                 l, e = scipy.linalg.eigh(B)
                 new_ml = np.min(l)
@@ -1152,34 +1188,34 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         # backtraking line search
         tic = time.time()
         if linsearch:
-            alfa = 1 
-            i = 0
-            #TODO: fun(x) non e' il graident di step_funx
+            #TODO: fun(x) non e' il gradient di step_funx
             #TODO: check dianati fornisce una direzione di discesa 
 
+            i = 0
+            alfa = 1
+            eps2=1e-2
+            alfa0 = (eps2-1)*x/dx
+            for a in alfa0:
+                if a>=0:
+                    alfa = min(alfa, a)
             """
-            s_new = np.linalg.norm(fun(x+alfa*dx)-x-alfa*dx)
-            s_old = np.linalg.norm(fun(x)-x)
-            while sufficient_decrease_condition(s_old, \
-                s_new, alfa, fun(x), dx) == False and i<50:
+            nnn = int(len(x)/4)
+            while True:
+                ind_max_y_in = (x[3*nnn:] + alfa*dx[3*nnn:]).argsort()[-1:]
+                ind_max_y_out = (x[2*nnn:3*nnn] + alfa*dx[2*nnn:3*nnn]).argsort()[-1:]
+
+                if (x[2*nnn:3*nnn][ind_max_y_out] + alfa*dx[2*nnn:3*nnn][ind_max_y_out])*(x[3*nnn:][ind_max_y_in] + alfa*dx[3*nnn:][ind_max_y_in])<1:
+                    print((x[2*nnn:3*nnn][ind_max_y_out] + alfa*dx[2*nnn:3*nnn][ind_max_y_out])*(x[3*nnn:][ind_max_y_in] + alfa*dx[3*nnn:][ind_max_y_in]))
+                    break
+                else:
+                    alfa *= beta
             """
+
             s_old = step_fun(x)
             while sufficient_decrease_condition(s_old, \
                 step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
                 alfa *= beta
                 i +=1
-        else:
-            """
-            if True:
-                alfa = 0.1
-                eps2=1e-2
-                alfa0 = (eps2-1)*x/dx
-                for a in alfa0:
-                    if a>=0:
-                        alfa = min(alfa, a)
-            """
-            alfa = 1
-
 
         toc_alfa += time.time() - tic
 
@@ -1202,12 +1238,17 @@ def solver(x0, fun, step_fun, fun_jac=None, tol=1e-6, eps=1e-3, max_steps=100, m
         n_steps += 1
 
         if verbose == True:
-            print('step {}'.format(n_steps))
+            print('\nstep {}'.format(n_steps))
             print('alpha = {}'.format(alfa))
-            print('fun = {}'.format(f))
-            print('dx = {}'.format(dx))
-            print('x = {}'.format(x))
+            # print('fun = {}'.format(f))
+            # print('dx = {}'.format(dx))
+            # print('x = {}'.format(x))
             print('|f(x)| = {}'.format(norm))
+            print('F(x) = {}'.format(step_fun(x)))
+            print('diff = {}'.format(diff))
+            if method =='newton':
+                print('ml = {}'.format(ml))
+                # print('\neig = {}'.format(l))
 
     toc_loop = time.time() - tic_loop
     toc_all = time.time() - tic_all
@@ -1361,7 +1402,7 @@ class DirectedGraph:
         self.full_return = False
         self.last_model = None
 
-        # function
+        # functen
         self.args = None
 
 
@@ -1658,10 +1699,10 @@ class DirectedGraph:
             self.b_in = 0.9*np.ones(self.n_nodes, dtype=np.float64)
  
         
-        # self.x[self.dseq_out == 0] = 0
-        # self.y[self.dseq_in == 0] = 0
-        # self.b_out[self.out_strength == 0] = 0
-        # self.b_in[self.in_strength == 0] = 0
+        self.x[self.dseq_out == 0] = 0
+        self.y[self.dseq_in == 0] = 0
+        self.b_out[self.out_strength == 0] = 0
+        self.b_in[self.in_strength == 0] = 0
 
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
 

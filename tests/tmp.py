@@ -13,10 +13,11 @@ class MyTest(unittest.TestCase):
 
 
     def test_0(self):
-        """u been trickeu been trickedd
+        """u been tricked
         """
         # test Matrix 1
-        n, seed = (50, 22)
+        # n, seed = (5, 22)  # caso divergente senza regolarizazione
+        n, seed = (50,22)
         A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext=100, dtype=np.int64)
         A[0,:] = 0
 
@@ -24,14 +25,18 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform')
+        print(g.dseq_out)
+        print(g.dseq_in)
+        print(g.out_strength)
+        print(g.in_strength)
+
+        g._solve_problem(model='decm', method='fixed-point', max_steps=1500, tol=1e-3, verbose=True, initial_guess='uniform',regularise=False, linsearch=True)
 
         g.solution_error()
 
         # print(g.expected_dseq)
         # print(g.dseq_out,g.dseq_in)
         # print(g.error)
-        # print(g.error_dseq)
         print('\n test 2 error = {}'.format(g.error))
         print('\n dseq error = {}'.format(g.error_dseq))
         print('\n sseq error = {}'.format(g.error_sseq))
