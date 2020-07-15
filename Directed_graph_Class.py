@@ -1248,6 +1248,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
         return x
 
 
+@jit(forceobj=True)
 def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=.9):
     """return boolean indicator if upper wolfe condition are respected.
     """
@@ -1264,7 +1265,8 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
     # print(alpha, f_new, sup)
     return bool(f_new < sup)
 
-@jit
+
+@jit(forceobj=True)
 def linsearch_fun_DCM(X,args):
     x = X[0]
     dx = X[1]
@@ -1288,7 +1290,8 @@ def linsearch_fun_DCM(X,args):
         i +=1
     return alfa
 
-@jit
+
+@jit(forceobj=True)
 def linsearch_fun_CReAMa(X,args):
     x = X[0]
     dx = X[1]
@@ -1305,7 +1308,8 @@ def linsearch_fun_CReAMa(X,args):
         i +=1
     return alfa
 
-@jit
+
+@jit(forceobj=True)
 def linsearch_fun_DECM(X,args):
     x = X[0]
     dx = X[1]
