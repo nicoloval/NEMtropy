@@ -1512,7 +1512,7 @@ class DirectedGraph:
         self.is_initialized = False
 
 
-    def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True, regularise=True):
+    def _solve_problem(self, initial_guess=None, model='dcm', method='quasinewton', max_steps=100, tol=1e-3, full_return=False, verbose=False, linsearch=True, regularise=True):
         
         self.last_model = model
         self.full_return = full_return
@@ -1520,7 +1520,7 @@ class DirectedGraph:
         self._initialize_problem(model, method)
         x0 = self.x0 
 
-        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=regularise, full_return = full_return, linsearch=linsearch)
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, tol=tol, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=regularise, full_return = full_return, linsearch=linsearch)
 
         self._set_solved_problem(sol)
 
