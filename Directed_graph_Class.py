@@ -1897,10 +1897,10 @@ class DirectedGraph:
         self.args_lins = (self.step_fun,)
 
         lins_fun = {
-                    'dcm': linsearch_fun_DCM(x,self.args_lins),
-                    'CReAMa': linsearch_fun_CReAMa(x,self.args_lins),
-                    'CReAMa-sparse': linsearch_fun_CReAMa(x,self.args_lins),
-                    'decm': linsearch_fun_DECM(x,self.args_lins),
+                    'dcm': lambda x: linsearch_fun_DCM(x,self.args_lins),
+                    'CReAMa': lambda x: linsearch_fun_CReAMa(x,self.args_lins),
+                    'CReAMa-sparse': lambda x: linsearch_fun_CReAMa(x,self.args_lins),
+                    'decm': lambda x: linsearch_fun_DECM(x,self.args_lins),
                     }
 
         self.fun_linsearch = lins_fun[model]
