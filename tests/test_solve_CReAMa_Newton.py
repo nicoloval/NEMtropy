@@ -2,6 +2,7 @@ import sys
 import os
 sys.path.append('../')
 import Directed_graph_Class as sample
+import Matrix_Generator as mg
 import numpy as np
 import unittest
 
@@ -61,7 +62,7 @@ class MyTest(unittest.TestCase):
         and no zero degrees
         """
 
-        network = sample.random_weighted_matrix_generator_dense(n=20, sup_ext = 10, sym=False, seed=None)
+        network = mg.random_weighted_matrix_generator_dense(n=20, sup_ext = 10, sym=False, seed=None)
         network_bin = (network>0).astype(int)
     
         g = sample.DirectedGraph(adjacency=network)
@@ -82,7 +83,7 @@ class MyTest(unittest.TestCase):
         and no zero degrees
         """
 
-        network = sample.random_weighted_matrix_generator_dense(n=20, sup_ext = 10, sym=False, seed=None)
+        network = mg.random_weighted_matrix_generator_dense(n=20, sup_ext = 10, sym=False, seed=None)
         network_bin = (network>0).astype(int)
     
         g = sample.DirectedGraph(adjacency=network)
@@ -100,7 +101,7 @@ class MyTest(unittest.TestCase):
     """
     def test_CReAMa_dcm_Newton_random_dense_100(self):
 
-        network = sample.random_weighted_matrix_generator_dense(n=100, sup_ext = 10, sym=False, seed=None)
+        network = mg.random_weighted_matrix_generator_dense(n=100, sup_ext = 10, sym=False, seed=None)
         network_bin = (network>0).astype(int)
     
         g = sample.DirectedGraph(adjacency=network)
@@ -119,7 +120,7 @@ class MyTest(unittest.TestCase):
 
     def test_CReAMa_dcm_Newton_random_dense_1000(self):
 
-        network = sample.random_weighted_matrix_generator_dense(n=1000, sup_ext = 100, sym=False, seed=None)
+        network = mg.random_weighted_matrix_generator_dense(n=1000, sup_ext = 100, sym=False, seed=None)
         network_bin = (network>0).astype(int)
     
         g = sample.DirectedGraph(adjacency=network)
@@ -138,7 +139,7 @@ class MyTest(unittest.TestCase):
 
     def test_CReAMa_dcm_Newton_random_20(self):
 
-        network = sample.random_weighted_matrix_generator_dense(n=20, sup_ext = 100, sym=False, seed=None)
+        network = mg.random_weighted_matrix_generator_dense(n=20, sup_ext = 100, sym=False, seed=None)
         network_bin = (network>0).astype(int)
     
         g = sample.DirectedGraph(adjacency=network)
@@ -157,7 +158,7 @@ class MyTest(unittest.TestCase):
 
     def test_CReAMa_dcm_Newton_random_100(self):
 
-        network = sample.random_weighted_matrix_generator_dense(n=100, sup_ext = 100, sym=False, seed=None)
+        network = mg.random_weighted_matrix_generator_dense(n=100, sup_ext = 100, sym=False, seed=None)
         network_bin = (network>0).astype(int)
     
         g = sample.DirectedGraph(adjacency=network)
@@ -177,7 +178,7 @@ class MyTest(unittest.TestCase):
 
     def test_CReAMa_dcm_Newton_random_1000(self):
 
-        network = sample.random_weighted_matrix_generator_dense(n=1000, sup_ext = 100, sym=False, seed=None)
+        network = mg.random_weighted_matrix_generator_dense(n=1000, sup_ext = 100, sym=False, seed=None)
         network_bin = (network>0).astype(int)
     
         g = sample.DirectedGraph(adjacency=network)

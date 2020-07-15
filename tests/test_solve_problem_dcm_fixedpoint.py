@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 import Directed_graph_Class as sample
+import Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
 
@@ -43,7 +44,7 @@ class MyTest(unittest.TestCase):
         """classes with cardinality > 1, no zero degree
         """
         n, seed = (4, 22)
-        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
+        A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
 
@@ -68,7 +69,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (5, 22)
-        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
+        A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
@@ -94,7 +95,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (4, 22)
-        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
+        A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
@@ -120,7 +121,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (100, 22)
-        A = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
+        A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
 

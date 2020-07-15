@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 import Directed_graph_Class as sample
+import Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
 
@@ -19,7 +20,7 @@ class MyTest(unittest.TestCase):
                       [0, 1, 0]])
         """
         n, seed = (3, 42)
-        a = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
+        a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(a)
         g.degree_reduction()
@@ -46,7 +47,7 @@ class MyTest(unittest.TestCase):
                       [0, 1, 0]])
         """
         n, seed = (3, 42)
-        a = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
+        a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         # rd
         g = sample.DirectedGraph(a)
@@ -95,7 +96,7 @@ class MyTest(unittest.TestCase):
     def test_iterative_dcm(self):
 
         n, seed = (3, 42)
-        a = sample.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
+        a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         # rd
         g = sample.DirectedGraph(a)

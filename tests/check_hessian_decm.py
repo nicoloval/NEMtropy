@@ -4,6 +4,7 @@ import sys
 from casadi import *
 sys.path.append('../')
 import Directed_graph_Class as sample
+import Matrix_Generator as mg
 
 def casadi_loglikelihood_decm(A):
     """loglikelihood function for decm as a casadi MX object
@@ -43,7 +44,7 @@ class MyTest(unittest.TestCase):
 
     def test_loglikelihood(self):
         # problem initialisation 
-        A = sample.random_weighted_matrix_generator_dense(n=10, sym=False)
+        A = mg.random_weighted_matrix_generator_dense(n=10, sym=False)
         prova = sample.DirectedGraph(A)
         prova.initial_guess='random'
         prova._initialize_problem('decm', 'quasinewton')
@@ -62,7 +63,7 @@ class MyTest(unittest.TestCase):
 
     def test_loglikelihood_prime(self):
         # problem initialisation 
-        A = sample.random_weighted_matrix_generator_dense(n=10, sym=False)
+        A = mg.random_weighted_matrix_generator_dense(n=10, sym=False)
         prova = sample.DirectedGraph(A)
         prova.initial_guess='random'
         prova._initialize_problem('decm', 'quasinewton')
@@ -86,7 +87,7 @@ class MyTest(unittest.TestCase):
 
     def test_loglikelihood_second(self):
         # problem initialisation 
-        A = sample.random_weighted_matrix_generator_dense(n=2, sym=False)
+        A = mg.random_weighted_matrix_generator_dense(n=2, sym=False)
         prova = sample.DirectedGraph(A)
         prova.initial_guess='random'
         prova._initialize_problem('decm', 'quasinewton')
