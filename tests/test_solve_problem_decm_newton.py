@@ -28,8 +28,8 @@ class MyTest(unittest.TestCase):
         g.solution_error()
 
         # debug
-        print('\n test 1, no zeros, dimension n = {} error = {}'.format(n, g.error))
-        # print(g.error_dseq)
+        # print('\n test 1, no zeros, dimension n = {} error = {}'.format(n, g.error))
+        # # print(g.error_dseq)
 
         # test result
         self.assertTrue(g.error < 1)
@@ -55,7 +55,7 @@ class MyTest(unittest.TestCase):
         # print(g.dseq_out,g.dseq_in)
         # print(g.error)
         # print(g.error_dseq)
-        print('\n test 2, zeros, dimension n = {} error = {}'.format(n, g.error))
+        # print('\n test 2, zeros, dimension n = {} error = {}'.format(n, g.error))
 
         # test result
         self.assertTrue(g.error < 1)
@@ -77,7 +77,7 @@ class MyTest(unittest.TestCase):
 
         # print(g.expected_dseq)
         # print(g.dseq_out,g.dseq_in)
-        print('\n test 3, no zeros, dimension n = {} error = {}'.format(n, g.error))
+        # print('\n test 3, no zeros, dimension n = {} error = {}'.format(n, g.error))
         # print(g.error_dseq)
 
         # test result
@@ -104,7 +104,7 @@ class MyTest(unittest.TestCase):
 
         # print(g.expected_dseq)
         # print(g.dseq_out,g.dseq_in)
-        print('\n test 4, zeros, dimension n = {} error = {}'.format(n, g.error))
+        # print('\n test 4, zeros, dimension n = {} error = {}'.format(n, g.error))
         # print(g.error_dseq)
 
         # test result
