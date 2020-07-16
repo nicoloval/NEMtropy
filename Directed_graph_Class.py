@@ -1276,9 +1276,7 @@ def linsearch_fun_DCM(X,args):
     step_fun = args[0]
 
     eps2=1e-2
-    print(dx)
     alfa0 = ((eps2-1)*x)[np.nonzero(dx)[0]]/dx[np.nonzero(dx)[0]]
-    print(alfa0)
     for a in alfa0:
         if a>=0:
             alfa = min(alfa, a)
