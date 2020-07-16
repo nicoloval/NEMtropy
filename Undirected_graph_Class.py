@@ -992,7 +992,7 @@ class UndirectedGraph:
         self.is_initialized = False
 
 
-    def _solve_problem(self, initial_guess=None, model='cm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True):
+    def _solve_problem(self, initial_guess=None, model='cm', method='quasinewton', max_steps=100, full_return=False, verbose=False, linsearch=True, tol=1e-8):
         
         self.last_model = model
         self.full_return = full_return
@@ -1000,7 +1000,7 @@ class UndirectedGraph:
         self._initialize_problem(model, method)
         x0 = self.x0 
 
-        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, linsearch_fun = self.fun_linsearch, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
+        sol =  solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, linsearch_fun = self.fun_linsearch, tol=tol, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return, linsearch=linsearch)
 
         self._set_solved_problem(sol)
 
@@ -1224,7 +1224,7 @@ class UndirectedGraph:
         self.fun_linsearch = lins_fun[model]
     
     
-    def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='cm', method='quasinewton', max_steps=100, full_return=False, verbose=False):
+    def _solve_problem_CReAMa(self, initial_guess=None, model='CReAMa', adjacency='cm', method='quasinewton', max_steps=100, full_return=False, verbose=False, tol=1e-8):
         if not isinstance(adjacency,(list,np.ndarray,str)) and (not scipy.sparse.isspmatrix(adjacency)):
             raise ValueError('adjacency must be a matrix or a method')
         elif isinstance(adjacency,str):
@@ -1272,7 +1272,7 @@ class UndirectedGraph:
         self._initialize_problem(self.last_model,method)
         x0 = self.x0 
             
-        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, linsearch_fun = self.fun_linsearch, tol=1e-6, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
+        sol = solver(x0, fun=self.fun, fun_jac=self.fun_jac, step_fun=self.step_fun, linsearch_fun = self.fun_linsearch, tol=tol, eps=1e-10, max_steps=max_steps, method=method, verbose=verbose, regularise=True, full_return = full_return)
             
         self._set_solved_problem_CReAMa(sol)
 
@@ -1301,12 +1301,12 @@ class UndirectedGraph:
         self.y = self.r_xy[self.n_nodes:]
 
 
-    def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False):
+    def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False, tol=1e-8):
         """ function to switch around the various problems
         """
         # TODO: aggiungere tutti i metodi
         if model in ['cm', 'ecm']:
-            self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
+            self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
         elif model in ['CReAMa']:
-            self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose)
+            self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
 
