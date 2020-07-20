@@ -18,7 +18,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         # n, seed = (5, 22)  # caso divergente senza regolarizazione
-        n, seed = (200,22)
+        n, seed = (100,22)
         A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext=100, intweights=True)
         # A[0,:] = 0
 

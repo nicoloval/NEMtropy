@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 import Directed_graph_Class as sample
+import Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
 
@@ -16,7 +17,8 @@ class MyTest(unittest.TestCase):
         """classes with cardinality > 1, no zero degree
         """
         n, seed = (4, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext=100, dtype=np.int64)
+        A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
+
 
         g = sample.DirectedGraph(A)
 
@@ -35,7 +37,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (4, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext=100, dtype=np.int64)
+        A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
@@ -55,7 +57,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (50, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext=100, dtype=np.int64)
+        A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
 
         g = sample.DirectedGraph(A)
 
@@ -74,7 +76,7 @@ class MyTest(unittest.TestCase):
         """
         # test Matrix 1
         n, seed = (50, 22)
-        A = sample.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext=100, dtype=np.int64)
+        A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
         A[0, :]=0
 
         g = sample.DirectedGraph(A)
