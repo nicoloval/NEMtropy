@@ -1319,7 +1319,7 @@ class UndirectedGraph:
         """ function to switch around the various problems
         """
         # TODO: aggiungere tutti i metodi
-        if model in ['cm', 'ecm']:
+        if model in ['cm', 'cm-new', 'ecm']:
             self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
         elif model in ['CReAMa']:
             self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
