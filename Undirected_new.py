@@ -81,23 +81,3 @@ def loglikelihood_hessian_cm_new(x, args):
             f[i, j] = aux_f
             f[j, i] = aux_f
     return f
-
-@jit(forceobj=True)
-def linsearch_fun_CM_new(X,args):
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
-    step_fun = args[0]
-    
-    i=0
-    s_old = step_fun(x)
-    while sufficient_decrease_condition(s_old, \
-        step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
-        alfa *= beta
-        i +=1
-    #print(alfa)
-    return alfa
-
-
