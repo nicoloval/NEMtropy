@@ -2,6 +2,7 @@ import numpy as np
 import scipy.sparse
 from numba import jit
 import time
+from Undirected_new import *
 
 
 def degree(a):
@@ -1161,6 +1162,10 @@ class UndirectedGraph:
                 'CReAMa-sparse-newton': lambda x: -loglikelihood_prime_CReAMa_sparse(x,self.args),
                 'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_prime_CReAMa_sparse(x,self.args),
                 'CReAMa-sparse-fixed-point': lambda x: -iterative_CReAMa_sparse(x,self.args),
+
+                'cm-new-newton': lambda x: -loglikelihood_prime_cm_new(x,self.args),
+                'cm-new-quasinewton': lambda x: -loglikelihood_prime_cm_new(x,self.args),
+                'cm-new-fixed-point': lambda x: iterative_cm_new(x,self.args),
                 }
 
         d_fun_jac = {
@@ -1179,6 +1184,10 @@ class UndirectedGraph:
                     'CReAMa-sparse-newton': lambda x: -loglikelihood_hessian_CReAMa_sparse(x,self.args),
                     'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa_sparse(x,self.args),
                     'CReAMa-sparse-fixed-point': None,
+
+                    'cm-new-newton': lambda x: -loglikelihood_hessian_cm_new(x,self.args),
+                    'cm-new-quasinewton': lambda x: -loglikelihood_hessian_diag_cm_new(x,self.args),
+                    'cm-new-fixed-point': None,
                     }
         d_fun_stop = {
                      'cm-newton': lambda x: -loglikelihood_cm(x,self.args),
@@ -1196,6 +1205,10 @@ class UndirectedGraph:
                      'CReAMa-sparse-newton': lambda x: -loglikelihood_CReAMa_sparse(x,self.args),
                      'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_CReAMa_sparse(x,self.args),
                      'CReAMa-sparse-fixed-point': lambda x: -loglikelihood_CReAMa_sparse(x,self.args),
+
+                     'cm-new-newton': lambda x: -loglikelihood_cm_new(x,self.args),
+                     'cm-new-quasinewton': lambda x: -loglikelihood_cm_new(x,self.args),
+                     'cm-new-fixed-point': lambda x: -loglikelihood_cm_new(x,self.args),
                      }
         try:
             self.fun = d_fun[mod_met]
@@ -1219,6 +1232,7 @@ class UndirectedGraph:
                     'CReAMa': lambda x: linsearch_fun_CReAMa(x,self.args_lins),
                     'CReAMa-sparse': lambda x: linsearch_fun_CReAMa(x,self.args_lins),
                     'ecm': lambda x: linsearch_fun_ECM(x,self.args_lins),
+                    'cm-new': lambda x: linsearch_fun_CM_new(x,self.args_lins),
                    }
         
         self.fun_linsearch = lins_fun[model]
