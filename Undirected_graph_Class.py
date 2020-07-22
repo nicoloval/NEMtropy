@@ -1022,7 +1022,7 @@ class UndirectedGraph:
 
     def _set_solved_problem(self, solution):
         model = self.last_model
-        if model == 'cm':
+        if model in ['cm','cm-new']:
             self._set_solved_problem_cm(solution)
         elif model == 'ecm':
             self._set_solved_problem_ecm(solution)
@@ -1038,7 +1038,7 @@ class UndirectedGraph:
 
     def _set_initial_guess(self, model):
 
-        if model == 'cm':
+        if model in ['cm','cm-new']:
             self._set_initial_guess_cm()
         elif model == 'ecm':
             self._set_initial_guess_ecm()
@@ -1130,7 +1130,7 @@ class UndirectedGraph:
 
         if model in ['CReAMa','CReAMa-sparse']:
             self.args = (self.strength_sequence, self.adjacency_CReAMa, self.nz_index)
-        elif model == 'cm':
+        elif model in ['cm','cm-new']:
             self.args = (self.r_dseq, self.r_multiplicity)
         elif model == 'ecm':
             self.args = (self.dseq, self.strength_sequence) 
