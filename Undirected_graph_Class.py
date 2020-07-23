@@ -136,7 +136,7 @@ def loglikelihood_hessian_diag_cm(x, args):
             else:
                 aux = 1 + x[i]*x[j]
                 f[i] += ((x[j]*x[j])/(aux*aux))*c[j]
-    return i
+    return f
 
 
 @jit(nopython=True)
