@@ -1121,7 +1121,7 @@ class UndirectedGraph:
 
     # DA SISTEMARE
     def solution_error(self):
-        if self.last_model in ['cm','CReAMa','CReAMa-sparse']:
+        if self.last_model in ['cm', 'cm-new', 'CReAMa', 'CReAMa-sparse']:
             if (self.x is not None):
                 ex_k = expected_degree_cm(self.x)
                 # print(k, ex_k)
