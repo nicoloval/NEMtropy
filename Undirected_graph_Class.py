@@ -1035,8 +1035,10 @@ class UndirectedGraph:
             self.r_xy = solution 
             
         self.r_x = self.r_xy
-
-        self.x = self.r_x[self.r_invert_dseq]
+        if self.last_model == 'cm':
+            self.x = self.r_x[self.r_invert_dseq]
+        elif self.last_model == 'cm-new':
+            self.x = np.exp(-self.r_x[self.r_invert_dseq])
  
 
     def _set_solved_problem(self, solution):
@@ -1121,11 +1123,7 @@ class UndirectedGraph:
 
     # DA SISTEMARE
     def solution_error(self):
-        if self.last_model == 'cm-new':
-            ex_k = expected_degree_cm_new(self.x)
-            self.expected_dseq = ex_k
-            self.error = np.linalg.norm(ex_k - self.dseq, ord = np.inf)
-        if self.last_model in ['cm', 'CReAMa', 'CReAMa-sparse']:
+        if self.last_model in ['cm', 'cm-new','CReAMa', 'CReAMa-sparse']:
             if (self.x is not None):
                 ex_k = expected_degree_cm(self.x)
                 # print(k, ex_k)

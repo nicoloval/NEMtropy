@@ -93,3 +93,21 @@ def expected_degree_cm_new(sol):
                 aux = np.exp(-sol[i])*np.exp(-sol[j])
                 ex_k[i] += aux/(1+aux)
     return ex_k
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_cm_new(x, args):
+    k = args[0]
+    c = args[1]
+    n = len(k)
+    f = np.zeros(n, dtype=np.float64)
+    for i in np.arange(n):
+        f[i] - k[i]/(x[i]*x[i])
+        for j in np.arange(n):
+            if i == j:
+                aux = 1 + x[j]*x[j]
+                f[i] += ((x[j]*x[j])/(aux*aux))*(c[j]-1)
+            else:
+                aux = 1 + x[i]*x[j]
+                f[i] += ((x[j]*x[j])/(aux*aux))*c[j]
+    return i
