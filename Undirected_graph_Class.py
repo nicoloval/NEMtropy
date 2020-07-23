@@ -1122,7 +1122,7 @@ class UndirectedGraph:
     # DA SISTEMARE
     def solution_error(self):
         if self.last_model == 'cm-new':
-            ex_k = expected_degree_cm(self.x)
+            ex_k = expected_degree_cm_new(self.x)
             self.expected_dseq = ex_k
             self.error = np.linalg.norm(ex_k - self.dseq, ord = np.inf)
         if self.last_model in ['cm', 'CReAMa', 'CReAMa-sparse']:
