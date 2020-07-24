@@ -673,6 +673,32 @@ def linsearch_fun_CM(X,args):
 
 
 @jit(forceobj=True)
+def linsearch_fun_ECM_new(X,args):
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    
+    nnn = int(len(x)/2)
+    eps2=1e-2
+    alfa0 = (eps2-1)*x[nnn:]/dx[nnn:]
+    for a in alfa0:
+        if a>=0:
+            alfa = min(alfa, a)
+    
+    i=0
+    s_old = step_fun(x)
+    while sufficient_decrease_condition(s_old, \
+        step_fun(x + alfa*dx), alfa, f, dx) == False and i<50:
+        alfa *= beta
+        i +=1
+    
+    return alfa
+
+
+@jit(forceobj=True)
 def linsearch_fun_ECM(X,args):
     x = X[0]
     dx = X[1]
@@ -1045,7 +1071,7 @@ class UndirectedGraph:
         model = self.last_model
         if model in ['cm','cm-new']:
             self._set_solved_problem_cm(solution)
-        elif model == 'ecm':
+        elif model in ['ecm', 'ecm-new']:
             self._set_solved_problem_ecm(solution)
         elif model in ['CReAMa','CReAMA-sparse']:
             self._set_solved_problem_CReAMa(solution)
@@ -1061,7 +1087,7 @@ class UndirectedGraph:
 
         if model in ['cm','cm-new']:
             self._set_initial_guess_cm()
-        elif model == 'ecm':
+        elif model in ['ecm', 'ecm-new']:
             self._set_initial_guess_ecm()
         elif model in ['CReAMa','CReAMa-sparse']:
             self._set_initial_guess_CReAMa()
@@ -1138,7 +1164,7 @@ class UndirectedGraph:
                 self.error_strength = np.linalg.norm(ex_s - self.strength_sequence, ord = np.inf)
                 self.relative_error_strength = self.error_strength/self.strength_sequence.sum()
         # potremmo strutturarlo così per evitare ridondanze
-        elif self.last_model in ['ecm']:
+        elif self.last_model in ['ecm', 'ecm-new']:
                 sol = np.concatenate((self.x, self.y))
                 ex = expected_ecm(sol)
                 k = np.concatenate((self.dseq, self.strength_sequence))
@@ -1153,7 +1179,7 @@ class UndirectedGraph:
             self.args = (self.strength_sequence, self.adjacency_CReAMa, self.nz_index)
         elif model in ['cm','cm-new']:
             self.args = (self.r_dseq, self.r_multiplicity)
-        elif model == 'ecm':
+        elif model in ['ecm', 'ecm-new']:
             self.args = (self.dseq, self.strength_sequence) 
 
 
@@ -1171,7 +1197,6 @@ class UndirectedGraph:
                 'cm-quasinewton': lambda x: -loglikelihood_prime_cm(x,self.args),
                 'cm-fixed-point': lambda x: iterative_cm(x,self.args),
 
-
                 'CReAMa-newton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
                 'CReAMa-quasinewton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
                 'CReAMa-fixed-point': lambda x: -iterative_CReAMa(x,self.args),
@@ -1187,6 +1212,10 @@ class UndirectedGraph:
                 'cm-new-newton': lambda x: -loglikelihood_prime_cm_new(x,self.args),
                 'cm-new-quasinewton': lambda x: -loglikelihood_prime_cm_new(x,self.args),
                 'cm-new-fixed-point': lambda x: iterative_cm_new(x,self.args),
+
+                'ecm-new-newton': lambda x: -loglikelihood_prime_ecm_new(x,self.args),
+                'ecm-new-quasinewton': lambda x: -loglikelihood_prime_ecm_new(x,self.args),
+                'ecm-new-fixed-point': lambda x: iterative_ecm_new(x,self.args),
                 }
 
         d_fun_jac = {
@@ -1209,7 +1238,12 @@ class UndirectedGraph:
                     'cm-new-newton': lambda x: -loglikelihood_hessian_cm_new(x,self.args),
                     'cm-new-quasinewton': lambda x: -loglikelihood_hessian_diag_cm_new(x,self.args),
                     'cm-new-fixed-point': None,
+
+                    'ecm-new-newton': lambda x: -loglikelihood_hessian_ecm_new(x,self.args),
+                    'ecm-new-quasinewton': lambda x: -loglikelihood_hessian_diag_ecm_new(x,self.args),
+                    'ecm-new-fixed-point': None,
                     }
+
         d_fun_stop = {
                      'cm-newton': lambda x: -loglikelihood_cm(x,self.args),
                      'cm-quasinewton': lambda x: -loglikelihood_cm(x,self.args),
@@ -1230,6 +1264,10 @@ class UndirectedGraph:
                      'cm-new-newton': lambda x: -loglikelihood_cm_new(x,self.args),
                      'cm-new-quasinewton': lambda x: -loglikelihood_cm_new(x,self.args),
                      'cm-new-fixed-point': lambda x: -loglikelihood_cm_new(x,self.args),
+
+                     'ecm-new-newton': lambda x: -loglikelihood_ecm_new(x,self.args),
+                     'ecm-new-quasinewton': lambda x: -loglikelihood_ecm_new(x,self.args),
+                     'ecm-new-fixed-point': lambda x: -loglikelihood_ecm_new(x,self.args),
                      }
         try:
             self.fun = d_fun[mod_met]
@@ -1254,6 +1292,7 @@ class UndirectedGraph:
                     'CReAMa-sparse': lambda x: linsearch_fun_CReAMa(x,self.args_lins),
                     'ecm': lambda x: linsearch_fun_ECM(x,self.args_lins),
                     'cm-new': lambda x: linsearch_fun_CM_new(x,self.args_lins),
+                    'ecm-new': lambda x: linsearch_fun_ECM_new(x,self.args_lins)
                    }
         
         self.fun_linsearch = lins_fun[model]
@@ -1332,15 +1371,19 @@ class UndirectedGraph:
         else:
             self.r_xy = solution 
 
-        self.x = self.r_xy[:self.n_nodes]
-        self.y = self.r_xy[self.n_nodes:]
+        if self.last_model == 'ecm':
+            self.x = self.r_xy[:self.n_nodes]
+            self.y = self.r_xy[self.n_nodes:]
+        elif self.last_model == 'ecm-new':
+            self.x = np.exp(-self.r_xy[:self.n_nodes])
+            self.y = np.exp(-self.r_xy[self.n_nodes:])
 
 
     def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False, tol=1e-8):
         """ function to switch around the various problems
         """
         # TODO: aggiungere tutti i metodi
-        if model in ['cm', 'cm-new', 'ecm']:
+        if model in ['cm', 'cm-new', 'ecm', 'ecm-new']:
             self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
         elif model in ['CReAMa']:
             self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
