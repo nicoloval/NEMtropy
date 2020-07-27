@@ -682,11 +682,12 @@ def linsearch_fun_ECM_new(X,args):
     step_fun = args[0]
     
     nnn = int(len(x)/2)
-    eps2=1e-2
-    alfa0 = (eps2-1)*x[nnn:]/dx[nnn:]
-    for a in alfa0:
-        if a>=0:
-            alfa = min(alfa, a)
+    while True:
+        ind_min_beta = (x[nnn:] + alfa*dx[nnn:]).argsort()[:2]
+        if (np.sum(x[nnn:][ind_min_beta] + alfa*dx[nnn:][ind_min_beta])>0):
+            break
+        else:
+            alfa *= beta
     
     i=0
     s_old = step_fun(x)
