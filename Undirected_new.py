@@ -244,7 +244,7 @@ def loglikelihood_hessian_diag_ecm_new(sol,args):
                 aux1 = np.exp(-x[i])*np.exp(-x[j])
                 aux2 = np.exp(-y[i])*np.exp(-y[j])
                 aux3 = aux1*aux2
-                f[i] -= ((aux3)*(1-aux2))/(1-aux2+aux3)
+                f[i] -= ((aux3)*(1-aux2))/((1-aux2+aux3)**2)
                 f[i+n] -= (aux1*aux2*(1-(aux2**2)+aux1*(aux2**2)))/(((1-aux2)**2)*((1-aux2+aux3)**2))
     return f
 
