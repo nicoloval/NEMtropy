@@ -196,7 +196,7 @@ def loglikelihood_hessian_ecm_new(sol,args):
                         aux3 = aux1*aux2
                         f1 -= ((aux3)*(1-aux2))/((1-aux2+aux3)**2)
                         f2 -= (aux3*(1-(aux2**2)+aux1*(aux2**2)))/(((1-aux2)**2)*((1-aux2+aux3)**2))
-                        f3 -= aux3/(1-aux2+aux3)
+                        f3 -= aux3/((1-aux2+aux3)**2)
                 f[i,i] = f1
                 f[i+n,i+n] = f2
                 f[i+n,i] = f3
