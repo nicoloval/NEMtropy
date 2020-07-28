@@ -202,8 +202,8 @@ def loglikelihood_hessian_ecm_new(sol,args):
                 f[i+n,i] = f3
                 f[i,i+n] = f3
             else:
-                aux1 = np.exp(-x[i])*np.exp(-x[h])
-                aux2 = np.exp(-y[i])*np.exp(-y[h])
+                aux1 = np.exp(-x[i])*np.exp(-x[j])
+                aux2 = np.exp(-y[i])*np.exp(-y[j])
                 aux3 = aux1*aux2
                 aux4 = ((1-aux2+aux3)**2)
 
