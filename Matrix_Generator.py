@@ -358,6 +358,7 @@ def barabasi_albert_graph_nx(n, m, sup_ext, alpha, seed = None, is_weighted = No
     largest_cc = max(nx.connected_components(nx_graph), key=len)
     nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
 
+    np.random.seed(seed=seed)
     if is_weighted == 'uniform':
         for e in nx_graph_lcc.edges:
             nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.randint(0,sup_ext)
