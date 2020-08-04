@@ -4,6 +4,7 @@ import scipy
 from numba import jit
 import time
 import networkx as nx
+import powerlaw as plw
 
 @jit(forceobj=True)
 def random_binary_matrix_generator_dense(n, sym=False, seed=None):
@@ -321,3 +322,52 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(n, mean, sig
 
         return adj_sparse
 
+
+jit(forceobj=True)
+def random_graph_nx(n, p, is_weighted = None, is_sparse = False, seed, sup_ext, alpha):
+    seed = np.random.randint(0, n**2)
+    nx_graph = nx.fast_gnp_random_graph(n=n, p=p, seed=seed)
+    largest_cc = max(nx.connected_components(nx_graph), key=len)
+    nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
+
+    if is_weighted == 'uniform':
+        for e in nx_graph_lcc.edges:
+            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.randint(0,sup_ext)
+    elif is_weighted == 'gaussian':
+        for e in nx_graph_lcc.edges:
+            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.normal(loc = sup_ext, scale = sup_ext/5.5)
+    elif is_weighted == 'powerlaw':
+        for e in nx_graph_lcc.edges:
+            nx_graph_lcc[e[0]][e[1]]['weight'] = plw.Power_Law(xmin=1,xmax=None, parameters=[alpha],discrete=True).generate_random(1)
+
+    if is_sparse:
+        adjacency = nx.to_scipy_sparse_matrix(nx_graph_lcc)
+    else:
+        adjacency = nx.to_numpy_array(nx_graph_lcc)
+
+    return adjacency
+
+
+jit(forceobj=True)
+def barabasi_albert_graph_nx(n, m, is_weighted = None):
+    seed = np.random.randint(0, n**2)
+    nx_graph = nx.barabasi_albert_graph(n, m, seed=seed)
+    largest_cc = max(nx.connected_components(nx_graph), key=len)
+    nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
+
+    if is_weighted == 'uniform':
+        for e in nx_graph_lcc.edges:
+            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.randint(0,sup_ext)
+    elif is_weighted == 'gaussian':
+        for e in nx_graph_lcc.edges:
+            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.normal(loc = sup_ext, scale = sup_ext/5.5)
+    elif is_weighted == 'powerlaw':
+        for e in nx_graph_lcc.edges:
+            nx_graph_lcc[e[0]][e[1]]['weight'] = plw.Power_Law(xmin=1,xmax=None, parameters=[alpha],discrete=True).generate_random(1)
+
+    if is_sparse:
+        adjacency = nx.to_scipy_sparse_matrix(nx_graph_lcc)
+    else:
+        adjacency = nx.to_numpy_array(nx_graph_lcc)
+
+    return adjacency
