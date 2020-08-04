@@ -747,7 +747,7 @@ def hessian_regulariser_function(B, eps):
     """
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = scipy.linalg.eigh(B)
-    eps = 1e-8 #* np.max(l)
+    eps = 1e-4 #* np.max(l)
     ll = np.array([0 if li>eps else eps-li for li in l])
     Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
     # lll, eee = np.linalg.eigh(Bf)
