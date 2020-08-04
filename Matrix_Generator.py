@@ -324,8 +324,9 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(n, mean, sig
 
 
 jit(forceobj=True)
-def random_graph_nx(n, p, seed, sup_ext, alpha, is_weighted = None, is_sparse = False):
-    seed = np.random.randint(0, n**2)
+def random_graph_nx(n, p, sup_ext, alpha, seed = None, is_weighted = None, is_sparse = False):
+    if seed is None:
+        seed = np.random.randint(0, n**2)
     nx_graph = nx.fast_gnp_random_graph(n=n, p=p, seed=seed)
     largest_cc = max(nx.connected_components(nx_graph), key=len)
     nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
@@ -349,8 +350,9 @@ def random_graph_nx(n, p, seed, sup_ext, alpha, is_weighted = None, is_sparse = 
 
 
 jit(forceobj=True)
-def barabasi_albert_graph_nx(n, m, seed, sup_ext, alpha, is_weighted = None, is_sparse = False):
-    seed = np.random.randint(0, n**2)
+def barabasi_albert_graph_nx(n, m, sup_ext, alpha, seed = None, is_weighted = None, is_sparse = False):
+    if seed is None:
+        seed = np.random.randint(0, n**2)
     nx_graph = nx.barabasi_albert_graph(n, m, seed=seed)
     largest_cc = max(nx.connected_components(nx_graph), key=len)
     nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
