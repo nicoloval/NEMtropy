@@ -322,9 +322,9 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(n, mean, sig
 
         return adj_sparse
 
-
+b
 jit(forceobj=True)
-def random_graph_nx(n, p, is_weighted = None, is_sparse = False, seed, sup_ext, alpha):
+def random_graph_nx(n, p, seed, sup_ext, alpha, is_weighted = None, is_sparse = False):
     seed = np.random.randint(0, n**2)
     nx_graph = nx.fast_gnp_random_graph(n=n, p=p, seed=seed)
     largest_cc = max(nx.connected_components(nx_graph), key=len)
