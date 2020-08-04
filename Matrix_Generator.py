@@ -331,12 +331,13 @@ def random_graph_nx(n, p, sup_ext, alpha, seed = None, is_weighted = None, is_sp
     largest_cc = max(nx.connected_components(nx_graph), key=len)
     nx_graph_lcc = nx_graph.subgraph(largest_cc).copy()
 
+    np.random.seed(seed=seed)
     if is_weighted == 'uniform':
         for e in nx_graph_lcc.edges:
-            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.randint(0,sup_ext, seed=seed)
+            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.randint(0,sup_ext)
     elif is_weighted == 'gaussian':
         for e in nx_graph_lcc.edges:
-            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.normal(loc = sup_ext, scale = sup_ext/5.5, seed=seed)
+            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.normal(loc = sup_ext, scale = sup_ext/5.5)
     elif is_weighted == 'powerlaw':
         for e in nx_graph_lcc.edges:
             nx_graph_lcc[e[0]][e[1]]['weight'] = plw.Power_Law(xmin=1,xmax=sup_ext, parameters=[alpha],discrete=True).generate_random(1)
@@ -359,10 +360,10 @@ def barabasi_albert_graph_nx(n, m, sup_ext, alpha, seed = None, is_weighted = No
 
     if is_weighted == 'uniform':
         for e in nx_graph_lcc.edges:
-            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.randint(0,sup_ext, seed=seed)
+            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.randint(0,sup_ext)
     elif is_weighted == 'gaussian':
         for e in nx_graph_lcc.edges:
-            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.normal(loc = sup_ext, scale = sup_ext/5.5, seed=seed)
+            nx_graph_lcc[e[0]][e[1]]['weight'] = np.random.normal(loc = sup_ext, scale = sup_ext/5.5)
     elif is_weighted == 'powerlaw':
         for e in nx_graph_lcc.edges:
             nx_graph_lcc[e[0]][e[1]]['weight'] = plw.Power_Law(xmin=1,xmax=sup_ext, parameters=[alpha],discrete=True).generate_random(1)
