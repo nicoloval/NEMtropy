@@ -349,7 +349,7 @@ def random_graph_nx(n, p, seed, sup_ext, alpha, is_weighted = None, is_sparse = 
 
 
 jit(forceobj=True)
-def barabasi_albert_graph_nx(n, m, is_weighted = None):
+def barabasi_albert_graph_nx(n, m, is_weighted = None, is_sparse = False):
     seed = np.random.randint(0, n**2)
     nx_graph = nx.barabasi_albert_graph(n, m, seed=seed)
     largest_cc = max(nx.connected_components(nx_graph), key=len)
