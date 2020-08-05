@@ -684,7 +684,7 @@ def linsearch_fun_ECM_new(X,args):
     nnn = int(len(x)/2)
     while True:
         ind_min_beta = (x[nnn:] + alfa*dx[nnn:]).argsort()[:2]
-        if (np.sum(x[nnn:][ind_min_beta] + alfa*dx[nnn:][ind_min_beta])>0):
+        if (np.sum(x[nnn:][ind_min_beta] + alfa*dx[nnn:][ind_min_beta])>1e-10):
             break
         else:
             alfa *= beta
