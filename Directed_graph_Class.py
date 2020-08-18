@@ -3,6 +3,7 @@ import scipy.sparse
 import scipy
 from numba import jit
 import time
+from Directed_new import *
 
 
 def out_degree(a):
