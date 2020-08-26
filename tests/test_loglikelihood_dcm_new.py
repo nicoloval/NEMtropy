@@ -38,11 +38,9 @@ class MyTest(unittest.TestCase):
         f_new_full = np.concatenate((g.x, g.y))
 
 
-        f_new_bis = iterative_dcm_new_bis(theta, g.args)
-        print(a)
-        print(g.args)
-        print('normale ',f_new)
-        print('bis',f_new_bis)
+        # f_new_bis = iterative_dcm_new_bis(theta, g.args)
+        # print('normale ',f_new)
+        # print('bis',f_new_bis)
 
         # debug
         # print(a)

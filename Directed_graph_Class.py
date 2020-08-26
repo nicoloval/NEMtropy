@@ -1147,7 +1147,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
 
     tic_loop = time.time()
 
-    while norm > tol and diff > tol and n_steps < max_steps:  # stopping condition
+    while norm > tol and n_steps < max_steps:  # stopping condition
 
         x_old = x  # save previous iteration
 
@@ -1183,7 +1183,10 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
         elif method == 'quasinewton':
             dx = - f/B
         elif method == 'fixed-point':
+            # print('f',type(f))
+            # print('x',type(x))
             dx = f - x
+            # print('dx',dx)
         toc_dx += time.time() - tic
 
         # backtraking line search
@@ -1202,7 +1205,15 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
         tic = time.time()
         # solution update
         # direction= dx@fun(x).T
-        x = x + alfa*dx
+        if method == 'fixed-point':
+            # print('x = {}'.format(x))
+            # print('f = {}'.format(f))
+            ##  print(alfa)
+            # x = (1-alfa)*x + alfa*f
+            x = f
+        else:
+            x = x + alfa*dx
+
         toc_update += time.time() - tic
 
         f = fun(x)
@@ -1220,9 +1231,9 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
         if verbose == True:
             print('\nstep {}'.format(n_steps))
             print('alpha = {}'.format(alfa))
-            # print('fun = {}'.format(f))
-            # print('dx = {}'.format(dx))
-            # print('x = {}'.format(x))
+            print('fun = {}'.format(f))
+            print('dx = {}'.format(dx))
+            print('x = {}'.format(x))
             print('|f(x)| = {}'.format(norm))
             print('F(x) = {}'.format(step_fun(x)))
             print('diff = {}'.format(diff))
