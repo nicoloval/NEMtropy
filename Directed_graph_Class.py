@@ -1009,17 +1009,20 @@ def expected_decm(x):
     return f
 
 
-def hessian_regulariser_function(B, eps):
+def hessian_regulariser_function_old(B, eps):
     """Trasform input matrix in a positive defined matrix
     input matrix should be numpy.array
     """
-    eps = 1e-4
+    # eps = 1e-4
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = np.linalg.eigh(B)
-    # lmax = max(l)
+    lmax = max(l)
     # eps = 1e-8*lmax
-    ll = np.array([0 if li>eps else eps-li for li in l])
-    Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    # ll = np.array([eps if li>eps else eps-li for li in l])
+    # Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    print('max = ',lmax)
+    ll = np.array([li if li>eps else lmax/10 for li in l])
+    Bf = e @ np.diag(ll) @ e.transpose()
     # lll, eee = np.linalg.eigh(Bf)
     # debug check
     # print('B regularised eigenvalues =\n {}'.format(lll))
@@ -1105,9 +1108,16 @@ def hessian_regulariser_function(B, eps):
     """
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = scipy.linalg.eigh(B)
-    eps = 1e-8 * np.max(l)
+    # eps = 1e-8 * np.max(l)
+    l_max = np.max(l)
+    eps = eps * np.max(l)
     ll = np.array([0 if li>eps else eps-li for li in l])
     Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    """
+    eps = l_max*eps
+    ll = np.array([0 if li/l_max>eps else eps-li for li in l])
+    Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    """
     # lll, eee = np.linalg.eigh(Bf)
     # debug check
     # print('B regularised eigenvalues =\n {}'.format(lll))
@@ -1148,6 +1158,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
     tic_loop = time.time()
 
     while norm > tol and n_steps < max_steps:  # stopping condition
+    #TODO: reintroduce diff in stopping condition
 
         x_old = x  # save previous iteration
 
@@ -1159,6 +1170,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
             # check the hessian is positive definite
             l, e = scipy.linalg.eigh(H)
             ml = np.min(l)
+            Ml = np.max(l)
             #TODO: check this regularity condition
             # if it's not positive definite -> regularise
             # regularisation
@@ -1167,19 +1179,23 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
                 B = hessian_regulariser_function(H, eps)
                 l, e = scipy.linalg.eigh(B)
                 new_ml = np.min(l)
+                new_Ml = np.max(l)
             else:
                 B = H.__array__()
         elif method == 'quasinewton':
             # quasinewton hessian approximation
             B = fun_jac(x)  # Jacobian diagonal
             if regularise == True:
-                B = np.maximum(B, B*0 + 1e-8)
+                # B = np.maximum(B, B*0 + 1e-8)
+                B = np.maximum(B, B*0 + max(B)*eps)
+
         toc_jacfun += time.time() - tic
 
         # discending direction computation
         tic = time.time()
         if method == 'newton':
             dx = np.linalg.solve(B, - f)
+            # dx = dx/np.linalg.norm(dx)
         elif method == 'quasinewton':
             dx = - f/B
         elif method == 'fixed-point':
@@ -1238,7 +1254,12 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
             print('F(x) = {}'.format(step_fun(x)))
             print('diff = {}'.format(diff))
             if method =='newton':
-                print('ml = {}'.format(ml))
+                print('min eig = {}'.format(ml))
+                print('new mim eig = {}'.format(new_ml))
+                print('max eig = {}'.format(Ml))
+                print('new max eig = {}'.format(new_Ml))
+                print('condition number max_eig/min_eig = {}'.format(Ml/ml))
+                print('new condition number max_eig/min_eig = {}'.format(new_Ml/new_ml))
                 # print('\neig = {}'.format(l))
 
     toc_loop = time.time() - tic_loop
