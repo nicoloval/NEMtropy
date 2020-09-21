@@ -22,7 +22,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = True) 
+        g._solve_problem(model='decm', method='fixed-point', max_steps=2000, verbose=False, initial_guess='uniform', linsearch = True) 
 
         g.solution_error()
         # debug
@@ -42,7 +42,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = True)
+        g._solve_problem(model='decm', method='fixed-point', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         # debug
@@ -61,11 +61,11 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = True)
+        g._solve_problem(model='decm', method='fixed-point', max_steps=15000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         # debug
-        # print("\n test 3, no zeros, dimension n = {}, error = {}".format(n, g.error))
+        print("\n test 3, no zeros, dimension n = {}, error = {}".format(n, g.error))
 
         # test result
         self.assertTrue(g.error < 1)
@@ -75,17 +75,17 @@ class MyTest(unittest.TestCase):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
-        n, seed = (50, 22)
+        n, seed = (50, 215)
         A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
         A[0, :]=0
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = True)
+        g._solve_problem(model='decm', method='fixed-point', max_steps=12000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         # debug
-        # print("\n test 4, zeros, dimension n = {}, error = {}".format(n, g.error))
+        print("\n test 4, zeros, dimension n = {}, error = {}".format(n, g.error))
 
         # test result
         self.assertTrue(g.error < 1)
