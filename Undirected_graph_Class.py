@@ -528,7 +528,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
                 regularise = True
             # regularisation
             if regularise == True:
-                B = hessian_regulariser_function(H, eps)
+                B = hessian_regulariser_function(H, np.max(np.abs(fun(x)))*1e-3)
                 l, e = scipy.linalg.eigh(B)
                 new_ml = np.min(l)
             else:
@@ -537,7 +537,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
             # quasinewton hessian approximation
             B = fun_jac(x)  # Jacobian diagonal
             if regularise == True:
-                B = np.maximum(B, B*0 + 1e-8)
+                B = np.maximum(B, B*0 + np.max(np.abs(fun(x)))*1e-3)
         toc_jacfun += time.time() - tic
 
         # discending direction computation
@@ -743,16 +743,41 @@ def sufficient_decrease_condition(f_old, f_new, alpha, grad_f, p, c1=1e-04 , c2=
 
 def hessian_regulariser_function(B, eps):
     """Trasform input matrix in a positive defined matrix
-    input matrix should be numpy.array
+    by adding positive quantites to the main diagonal.
+
+    input:
+    B: np.ndarray, Hessian matrix
+    eps: float, positive quantity to add
+
+    output:
+    Bf: np.ndarray, Regularised Hessian
+
     """
+
+    B = (B + B.transpose())*0.5  # symmetrization
+    Bf = B + np.identity(B.shape[0])*eps
+    
+    return Bf
+
+
+def hessian_regulariser_function_eigen_based(B, eps):
+    """Trasform input matrix in a positive defined matrix
+    by regularising eigenvalues.
+
+    input:
+    B: np.ndarray, Hessian matrix
+    eps: float, positive quantity to add
+
+    output:
+    Bf: np.ndarray, Regularised Hessian
+
+    """
+
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = scipy.linalg.eigh(B)
-    eps = 1e-8 #* np.max(l)
     ll = np.array([0 if li>eps else eps-li for li in l])
     Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
-    # lll, eee = np.linalg.eigh(Bf)
-    # debug check
-    # print('B regularised eigenvalues =\n {}'.format(lll))
+
     return Bf
 
 
