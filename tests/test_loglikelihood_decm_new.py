@@ -231,7 +231,7 @@ class MyTest(unittest.TestCase):
         g._initialize_problem('decm', 'newton')
         # theta = np.random.rand(6)
         theta = 0.5*np.ones(n*4)
-        theta[np.concatenate((k_out,k_in,s_out,s_in)) == 0] = 1e3 
+        theta[np.concatenate((k_out,k_in,s_out,s_in)) == 0] = 1e4 
 
         x0 = np.exp(-theta)
 
@@ -246,8 +246,8 @@ class MyTest(unittest.TestCase):
         # print(a)
         # print(theta, x0)
         # print(g.args)
-        # print('approx',f_sample)
-        # print('my',f_new)
+        print('approx',f_sample)
+        print('my',f_new)
         # print('gradient', loglikelihood_prime_decm_new(theta, g.args))
         # print('diff',f_sample - f_new)
         # print('max',np.max(np.abs(f_sample - f_new)))
