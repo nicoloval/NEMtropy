@@ -209,83 +209,51 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(np.allclose(f_sample,f_new))
 
-    """
-    def test_loglikelihood_hessian_diag_dcm_new(self):
 
-        n, seed = (3, 42)
-        # a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        a = np.array([[0, 0, 0],
-                     [1, 0, 0],
-                     [1, 1, 0]])
+    def test_loglikelihood_hessian_diag_dcm_new_zeros(self):
 
-        g = sample.DirectedGraph(a)
-        g.degree_reduction()
+        # convergence relies heavily on x0
+        n, s = (10, 35)
+        # n, s = (5, 35)
+        A = mg.random_weighted_matrix_generator_dense(n, sup_ext = 100, sym=False, seed=s, intweights = True)
+        A[0,:] = 0
+        A[:,5] = 0
+
+        bA = np.array([ [1 if aa != 0 else 0 for aa in a] for a in A])
+
+        k_out = np.sum(bA, axis = 1)
+        k_in = np.sum(bA, axis = 0)
+        s_out = np.sum(A, axis = 1)
+        s_in = np.sum(A, axis = 0)
+
+        g = sample.DirectedGraph(A)
         g.initial_guess='uniform'
-        g._initialize_problem('dcm', 'newton')
-        theta = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5]) 
+        g._initialize_problem('decm', 'newton')
+        # theta = np.random.rand(6)
+        theta = 0.5*np.ones(n*4)
+        theta[np.concatenate((k_out,k_in,s_out,s_in)) == 0] = 1e3 
+
         x0 = np.exp(-theta)
 
-        k_out = g.args[0]
-        k_in = g.args[1]
-        nz_index_out = g.args[2]
-        nz_index_in = g.args[3]
+        f_sample = np.zeros(n*4)
+        for i in range(n*4):
+            f = lambda x: loglikelihood_prime_decm_new(x, g.args)[i]
+            f_sample[i] = approx_fprime(theta, f, epsilon=1e-6)[i]
 
-        f_sample = np.zeros(6)
-        for i in range(6):
-            f = lambda x: loglikelihood_prime_dcm_new(x, g.args)[i]
-            f_sample[i] = approx_fprime(theta, f, epsilon=1e-6)[i]  
-        g.last_model = 'dcm'
-        f_new = loglikelihood_hessian_diag_dcm_new(theta, g.args)
-
+        f_new = loglikelihood_hessian_diag_decm_new(theta, g.args)
 
         # debug
         # print(a)
         # print(theta, x0)
         # print(g.args)
-        # print(f_sample)
-        # print(f_new)
+        # print('approx',f_sample)
+        # print('my',f_new)
+        # print('gradient', loglikelihood_prime_decm_new(theta, g.args))
+        # print('diff',f_sample - f_new)
+        # print('max',np.max(np.abs(f_sample - f_new)))
 
         # test result
         self.assertTrue(np.allclose(f_sample,f_new))
-
-
-    def test_loglikelihood_hessian_diag_vs_normal_dcm_new(self):
-
-        n, seed = (3, 42)
-        # a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        a = np.array([[0, 0, 0],
-                     [1, 0, 0],
-                     [1, 1, 0]])
-
-        g = sample.DirectedGraph(a)
-        g.degree_reduction()
-        g.initial_guess='uniform'
-        g._initialize_problem('dcm', 'newton')
-        theta = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5]) 
-        x0 = np.exp(-theta)
-
-        k_out = g.args[0]
-        k_in = g.args[1]
-        nz_index_out = g.args[2]
-        nz_index_in = g.args[3]
-
-        g.last_model = 'dcm'
-        f_diag = loglikelihood_hessian_diag_dcm_new(theta, g.args)
-        f_full = loglikelihood_hessian_dcm_new(theta, g.args)
-        f_full_d = np.diag(f_full)
-
-
-        # debug
-        # print(a)
-        # print(theta, x0)
-        # print(g.args)
-        # print(f_sample)
-        # print(f_new)
-
-        # test result
-        self.assertTrue(np.allclose(f_diag, f_full_d))
-    """
-
 
 
 if __name__ == '__main__':

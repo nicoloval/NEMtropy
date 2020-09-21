@@ -1,3 +1,26 @@
+"""
+
+# WORKING TESTS
+
+* test_quasinewton_0:
+    40x40 matrix with no zeros row
+* test_quasinewton_1:
+    40x40 matrix with 1 zeros row
+* test_newton_2:
+    4x4 matrix with no zeros row
+* test_newton_3:
+    40x40 matrix with no zeros row
+
+# NOT WORKING TESTS
+
+* test_newton_4:
+    40x40 matrix with 1 zeros row
+* test_iterative_5:
+    4x4 matrix with no zeros row
+
+
+"""
+
 import sys
 sys.path.append('../')
 import Directed_graph_Class as sample
@@ -11,7 +34,7 @@ class MyTest(unittest.TestCase):
 
     def setUp(self):
         pass
-
+    @unittest.skip("works")
     def test_quasinewton_0(self):
         n,s = (40,25)
 
@@ -48,6 +71,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(err< 1e-1)
 
 
+    @unittest.skip("works")
     def test_quasinewton_1(self):
 
         n,s = (40,25)
@@ -86,6 +110,7 @@ class MyTest(unittest.TestCase):
         print('method = {}, matrix {}x{} with zeros'.format('quasinewton', n, n))
 
 
+    @unittest.skip("works")
     def test_newton_2(self):
         # x0 relies heavily on x0
         A = np.array([[0, 2, 3, 0],
@@ -124,6 +149,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(err< 1e-1)
 
 
+    @unittest.skip("works")
     def test_newton_3(self):
         # convergence relies heavily on x0
         # n, s = (4, 35)
@@ -166,7 +192,7 @@ class MyTest(unittest.TestCase):
 
     def test_newton_4(self):
         # convergence relies heavily on x0
-        n, s = (40, 35)
+        n, s = (4, 35)
         # n, s = (5, 35)
         A = mg.random_weighted_matrix_generator_dense(n, sup_ext = 100, sym=False, seed=s, intweights = True)
         A[0,:] = 0
@@ -181,14 +207,14 @@ class MyTest(unittest.TestCase):
         x0 = 0.1*np.ones(4*n)
         # x0 = np.concatenate((-1*np.ones(2*n), np.ones(2*n)))
         args = (k_out, k_in, s_out, s_in)
-        x0[ np.concatenate(args) == 0] = 1e3 
+        x0[ np.concatenate(args) == 0] = 10 
 
         fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
         fun_jac = lambda x: -sample.loglikelihood_hessian_decm_new(x, args)
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
         lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun, ))
 
-        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=30, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-2, max_steps=30, method='newton', verbose=True, regularise=True, full_return = False, linsearch = True)
         sol = np.exp(-sol)
 
         ek = sample.expected_decm(sol)

@@ -1,3 +1,23 @@
+"""
+* test_iterative_0:
+    4x4 matrix with 1 zeros row
+* test_iterative_1:
+    30x30matrix with no zeros row
+* test_iterative_2:
+    30x30matrix with 1 zeros row
+* test_newton_3:
+    4x4 matrix with no zeros row
+* test_newton_4:
+    40x40matrix with no zeros row
+* test_newton_5:
+    40x40matrix with 1 zeros row
+* test_quasinewton_6:
+    50x50matrix with no zeros row
+* test_quasinewton_7:
+    50x50matrix with 1 zeros row
+
+# all tests works
+"""
 import sys
 sys.path.append('../')
 import Directed_graph_Class as sample
