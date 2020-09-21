@@ -1226,7 +1226,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
             # print('f = {}'.format(f))
             ##  print(alfa)
             # x = (1-alfa)*x + alfa*f
-            x = f
+            x = alfa*f
         else:
             x = x + alfa*dx
 
