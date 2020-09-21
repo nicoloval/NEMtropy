@@ -3,6 +3,7 @@ import scipy.sparse
 import scipy
 from numba import jit
 import time
+from Directed_new import *
 
 
 def out_degree(a):
@@ -1008,17 +1009,20 @@ def expected_decm(x):
     return f
 
 
-def hessian_regulariser_function(B, eps):
+def hessian_regulariser_function_old(B, eps):
     """Trasform input matrix in a positive defined matrix
     input matrix should be numpy.array
     """
-    eps = 1e-4
+    # eps = 1e-4
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = np.linalg.eigh(B)
-    # lmax = max(l)
+    lmax = max(l)
     # eps = 1e-8*lmax
-    ll = np.array([0 if li>eps else eps-li for li in l])
-    Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    # ll = np.array([eps if li>eps else eps-li for li in l])
+    # Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    print('max = ',lmax)
+    ll = np.array([li if li>eps else lmax/10 for li in l])
+    Bf = e @ np.diag(ll) @ e.transpose()
     # lll, eee = np.linalg.eigh(Bf)
     # debug check
     # print('B regularised eigenvalues =\n {}'.format(lll))
@@ -1104,9 +1108,16 @@ def hessian_regulariser_function(B, eps):
     """
     B = (B + B.transpose())*0.5  # symmetrization
     l, e = scipy.linalg.eigh(B)
-    eps = 1e-8 * np.max(l)
+    # eps = 1e-8 * np.max(l)
+    l_max = np.max(l)
+    eps = eps * np.max(l)
     ll = np.array([0 if li>eps else eps-li for li in l])
     Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    """
+    eps = l_max*eps
+    ll = np.array([0 if li/l_max>eps else eps-li for li in l])
+    Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+    """
     # lll, eee = np.linalg.eigh(Bf)
     # debug check
     # print('B regularised eigenvalues =\n {}'.format(lll))
@@ -1146,7 +1157,8 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
 
     tic_loop = time.time()
 
-    while norm > tol and diff > tol and n_steps < max_steps:  # stopping condition
+    while norm > tol and n_steps < max_steps:  # stopping condition
+    #TODO: reintroduce diff in stopping condition
 
         x_old = x  # save previous iteration
 
@@ -1158,6 +1170,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
             # check the hessian is positive definite
             l, e = scipy.linalg.eigh(H)
             ml = np.min(l)
+            Ml = np.max(l)
             #TODO: check this regularity condition
             # if it's not positive definite -> regularise
             # regularisation
@@ -1166,23 +1179,34 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
                 B = hessian_regulariser_function(H, eps)
                 l, e = scipy.linalg.eigh(B)
                 new_ml = np.min(l)
+                new_Ml = np.max(l)
             else:
                 B = H.__array__()
         elif method == 'quasinewton':
             # quasinewton hessian approximation
             B = fun_jac(x)  # Jacobian diagonal
             if regularise == True:
-                B = np.maximum(B, B*0 + 1e-8)
+                # B = np.maximum(B, B*0 + 1e-8)
+                B = np.maximum(B, B*0 + max(B)*eps)
+
         toc_jacfun += time.time() - tic
 
         # discending direction computation
         tic = time.time()
         if method == 'newton':
             dx = np.linalg.solve(B, - f)
+            # dx = dx/np.linalg.norm(dx)
         elif method == 'quasinewton':
             dx = - f/B
         elif method == 'fixed-point':
+            # print('f',type(f))
+            # print('x',type(x))
             dx = f - x
+            # TODO: hotfix to compute dx in infty cases
+            for i in range(len(x)):
+                if x[i] == np.infty:
+                    dx[i] = np.infty
+            # print('dx',dx)
         toc_dx += time.time() - tic
 
         # backtraking line search
@@ -1201,7 +1225,19 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
         tic = time.time()
         # solution update
         # direction= dx@fun(x).T
+        """
+        if method == 'fixed-point':
+            # print('x = {}'.format(x))
+            # print('f = {}'.format(f))
+            ##  print(alfa)
+            # x = (1-alfa)*x + alfa*f
+            x = alfa*f
+        else:
+            x = x + alfa*dx
+        """
+
         x = x + alfa*dx
+
         toc_update += time.time() - tic
 
         f = fun(x)
@@ -1219,14 +1255,19 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
         if verbose == True:
             print('\nstep {}'.format(n_steps))
             print('alpha = {}'.format(alfa))
-            # print('fun = {}'.format(f))
-            # print('dx = {}'.format(dx))
-            # print('x = {}'.format(x))
+            print('fun = {}'.format(f))
+            print('dx = {}'.format(dx))
+            print('x = {}'.format(x))
             print('|f(x)| = {}'.format(norm))
             print('F(x) = {}'.format(step_fun(x)))
             print('diff = {}'.format(diff))
             if method =='newton':
-                print('ml = {}'.format(ml))
+                print('min eig = {}'.format(ml))
+                print('new mim eig = {}'.format(new_ml))
+                print('max eig = {}'.format(Ml))
+                print('new max eig = {}'.format(new_Ml))
+                print('condition number max_eig/min_eig = {}'.format(Ml/ml))
+                print('new condition number max_eig/min_eig = {}'.format(new_Ml/new_ml))
                 # print('\neig = {}'.format(l))
 
     toc_loop = time.time() - tic_loop
@@ -1656,9 +1697,9 @@ class DirectedGraph:
 
     def _set_solved_problem(self, solution):
         model = self.last_model
-        if model == 'dcm':
+        if model in ['dcm', 'dcm_new']:
             self._set_solved_problem_dcm(solution)
-        elif model == 'decm':
+        elif model in ['decm', 'decm_new']:
             self._set_solved_problem_decm(solution)
         elif model in ['CReAMa', 'CReAMa-sparse']:
             self._set_solved_problem_CReAMa(solution)
@@ -1683,10 +1724,14 @@ class DirectedGraph:
 
     def _set_initial_guess(self, model):
 
-        if model == 'dcm':
+        if model in ['dcm']:
             self._set_initial_guess_dcm()
-        elif model == 'decm':
+        if model in ['dcm_new']:
+            self._set_initial_guess_dcm_new()
+        elif model in ['decm']:
             self._set_initial_guess_decm()
+        elif model in ['decm_new']:
+            self._set_initial_guess_decm_new()
         elif model in ['CReAMa','CReAMa-sparse']:
             self._set_initial_guess_CReAMa()
 
@@ -1715,6 +1760,33 @@ class DirectedGraph:
         self.r_y[self.rnz_dseq_in == 0] = 0
 
         self.x0 = np.concatenate((self.r_x, self.r_y))
+
+
+    def _set_initial_guess_dcm_new(self):
+        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+
+        if ~self.is_reduced:
+            self.degree_reduction()
+
+        if self.initial_guess is None:
+            self.r_x = self.rnz_dseq_out / (np.sqrt(self.n_edges) + 1)  # This +1 increases the stability of the solutions.
+            self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
+        elif self.initial_guess == 'random':
+            self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
+            self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
+        elif self.initial_guess == 'uniform':
+            self.r_x = 0.5*np.ones(self.rnz_n_out, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.r_y = 0.5*np.ones(self.rnz_n_in, dtype=np.float64)
+        elif self.initial_guess == 'degrees':
+            self.r_x = self.rnz_dseq_out.astype(np.float64)
+            self.r_y = self.rnz_dseq_in.astype(np.float64)
+
+        self.r_x[self.rnz_dseq_out == 0] = 1e3
+        self.r_y[self.rnz_dseq_in == 0] = 1e3
+
+        self.x0 = np.concatenate((self.r_x, self.r_y))
+
 
 
     def _set_initial_guess_CReAMa(self):
@@ -1764,8 +1836,53 @@ class DirectedGraph:
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
 
 
+    def _set_initial_guess_decm_new(self):
+        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        if self.initial_guess is None:
+            self.x = self.dseq_out.astype(float) / (self.n_edges + 1)
+            self.y = self.dseq_in.astype(float) / (self.n_edges + 1)
+            self.b_out = self.out_strength.astype(float) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
+            self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
+        elif self.initial_guess == 'strengths':
+            self.x = self.dseq_out.astype(float) / (self.dseq_out + 1)
+            self.y = self.dseq_in.astype(float) / (self.dseq_in + 1)
+            self.b_out = self.out_strength.astype(float) / (self.out_strength + 1)
+            self.b_in = self.in_strength.astype(float) / (self.in_strength + 1)
+        elif self.initial_guess == 'random':
+            self.x = np.random.rand(self.n_nodes).astype(np.float64)
+            self.y = np.random.rand(self.n_nodes).astype(np.float64)
+            self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
+            self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
+        elif self.initial_guess == 'uniform':
+            self.x = 0.9*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.y = 0.9*np.ones(self.n_nodes, dtype=np.float64)
+            self.b_out = 0.9*np.ones(self.n_nodes, dtype=np.float64) 
+            self.b_in = 0.9*np.ones(self.n_nodes, dtype=np.float64)
+ 
+        
+        self.x[self.dseq_out == 0] = 1e3 
+        self.y[self.dseq_in == 0] = 1e3
+        self.b_out[self.out_strength == 0] = 1e3
+        self.b_in[self.in_strength == 0] = 1e3
+
+        self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
+
+
+
     def solution_error(self):
-        if self.last_model in ['dcm','CReAMa','CReAMa-sparse']:
+        if self.last_model in ['dcm_new']:
+            if (self.x is not None) and (self.y is not None):
+                sol = np.concatenate((self.x, self.y))
+                ex_k_out = expected_out_degree_dcm_new(sol)
+                ex_k_in = expected_in_degree_dcm_new(sol)
+                ex_k = np.concatenate((ex_k_out, ex_k_in))
+                k = np.concatenate((self.dseq_out, self.dseq_in))
+                # print(k, ex_k)
+                self.expected_dseq = ex_k
+                self.error = np.linalg.norm(ex_k - k, ord = np.inf)
+
+        elif self.last_model in ['dcm','CReAMa','CReAMa-sparse']:
             if (self.x is not None) and (self.y is not None):
                 sol = np.concatenate((self.x, self.y))
                 ex_k_out = expected_out_degree_dcm(sol)
@@ -1804,14 +1921,28 @@ class DirectedGraph:
                 self.error_sseq = max(abs(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq))
                 self.relative_error_strength = self.error/self.out_strength.sum()
     
+        elif self.last_model in ['decm_new']:
+                sol = np.concatenate((self.x, self.y, self.b_out, self.b_in))
+                ex = expected_decm_new(sol)
+                k = np.concatenate((self.dseq_out, self.dseq_in, self.out_strength, self.in_strength))
+                self.expected_dseq = ex[:2*self.n_nodes]
+
+                self.expected_strength_seq = ex[2*self.n_nodes:]
+                self.error = np.linalg.norm(ex - k, ord = np.inf)
+                # self.error_dseq = np.linalg.norm(np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)
+                self.error_dseq = max(abs((np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)))
+                # self.error_sseq = np.linalg.norm(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq)
+                self.error_sseq = max(abs(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq))
+                self.relative_error_strength = self.error/self.out_strength.sum()
+ 
 
     def _set_args(self, model):
 
         if model in ['CReAMa', 'CReAMa-sparse']:
             self.args = (self.out_strength, self.in_strength, self.adjacency_CReAMa, self.nz_index_sout, self.nz_index_sin)
-        elif model == 'dcm':
+        elif model in ['dcm', 'dcm_new']:
             self.args = (self.rnz_dseq_out, self.rnz_dseq_in, self.nz_index_out, self.nz_index_in, self.r_multiplicity)
-        elif model == 'decm':
+        elif model in ['decm', 'decm_new']:
             self.args = (self.dseq_out, self.dseq_in, self.out_strength, self.in_strength) 
 
 
@@ -1829,6 +1960,9 @@ class DirectedGraph:
                 'dcm-quasinewton': lambda x: -loglikelihood_prime_dcm(x,self.args),
                 'dcm-fixed-point': lambda x: iterative_dcm(x,self.args),
 
+                'dcm_new-newton': lambda x: -loglikelihood_prime_dcm_new(x,self.args),
+                'dcm_new-quasinewton': lambda x: -loglikelihood_prime_dcm_new(x,self.args),
+                'dcm_new-fixed-point': lambda x: iterative_dcm_new(x,self.args),
 
                 'CReAMa-newton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
                 'CReAMa-quasinewton': lambda x: -loglikelihood_prime_CReAMa(x,self.args),
@@ -1837,6 +1971,10 @@ class DirectedGraph:
                 'decm-newton': lambda x: -loglikelihood_prime_decm(x,self.args),
                 'decm-quasinewton': lambda x: -loglikelihood_prime_decm(x,self.args),
                 'decm-fixed-point': lambda x: iterative_decm(x,self.args),
+
+                'decm_new-newton': lambda x: -loglikelihood_prime_decm_new(x,self.args),
+                'decm_new-quasinewton': lambda x: -loglikelihood_prime_decm_new(x,self.args),
+                'decm_new-fixed-point': lambda x: iterative_decm_new(x,self.args),
 
                 'CReAMa-sparse-newton': lambda x: -loglikelihood_prime_CReAMa_Sparse(x,self.args),
                 'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_prime_CReAMa_Sparse(x,self.args),
@@ -1848,6 +1986,10 @@ class DirectedGraph:
                     'dcm-quasinewton': lambda x: -loglikelihood_hessian_diag_dcm(x,self.args),
                     'dcm-fixed-point': None,
 
+                    'dcm_new-newton': lambda x: -loglikelihood_hessian_dcm_new(x,self.args),
+                    'dcm_new-quasinewton': lambda x: -loglikelihood_hessian_diag_dcm_new(x,self.args),
+                    'dcm_new-fixed-point': None,
+
                     'CReAMa-newton': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),
                     'CReAMa-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa(x,self.args),
                     'CReAMa-fixed-point': None,
@@ -1855,6 +1997,10 @@ class DirectedGraph:
                     'decm-newton': lambda x: -loglikelihood_hessian_decm(x,self.args),
                     'decm-quasinewton': lambda x: -loglikelihood_hessian_diag_decm(x,self.args),
                     'decm-fixed-point': None,
+
+                    'decm_new-newton': lambda x: -loglikelihood_hessian_decm_new(x,self.args),
+                    'decm_new-quasinewton': lambda x: -loglikelihood_hessian_diag_decm_new(x,self.args),
+                    'decm_new-fixed-point': None,
 
                     'CReAMa-sparse-newton': lambda x: -loglikelihood_hessian_CReAMa(x,self.args),
                     'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_hessian_diag_CReAMa_Sparse(x,self.args),
@@ -1865,6 +2011,10 @@ class DirectedGraph:
                      'dcm-quasinewton': lambda x: -loglikelihood_dcm(x,self.args),
                      'dcm-fixed-point': lambda x: -loglikelihood_dcm(x,self.args),
 
+                     'dcm_new-newton': lambda x: -loglikelihood_dcm_new(x,self.args),
+                     'dcm_new-quasinewton': lambda x: -loglikelihood_dcm_new(x,self.args),
+                     'dcm_new-fixed-point': lambda x: -loglikelihood_dcm_new(x,self.args),
+
                      'CReAMa-newton': lambda x: -loglikelihood_CReAMa(x,self.args),
                      'CReAMa-quasinewton': lambda x: -loglikelihood_CReAMa(x,self.args),
                      'CReAMa-fixed-point': lambda x: -loglikelihood_CReAMa(x,self.args),
@@ -1872,6 +2022,10 @@ class DirectedGraph:
                      'decm-newton': lambda x: -loglikelihood_decm(x,self.args),
                      'decm-quasinewton': lambda x: -loglikelihood_decm(x,self.args),
                      'decm-fixed-point': lambda x: -loglikelihood_decm(x,self.args),
+
+                     'decm_new-newton': lambda x: -loglikelihood_decm_new(x,self.args),
+                     'decm_new-quasinewton': lambda x: -loglikelihood_decm_new(x,self.args),
+                     'decm_new-fixed-point': lambda x: -loglikelihood_decm_new(x,self.args),
 
                      'CReAMa-sparse-newton': lambda x: -loglikelihood_CReAMa_Sparse(x,self.args),
                      'CReAMa-sparse-quasinewton': lambda x: -loglikelihood_CReAMa_Sparse(x,self.args),
@@ -1898,9 +2052,11 @@ class DirectedGraph:
 
         lins_fun = {
                     'dcm': lambda x: linsearch_fun_DCM(x,self.args_lins),
+                    'dcm_new': lambda x: linsearch_fun_DCM_new(x,self.args_lins),
                     'CReAMa': lambda x: linsearch_fun_CReAMa(x,self.args_lins),
                     'CReAMa-sparse': lambda x: linsearch_fun_CReAMa(x,self.args_lins),
                     'decm': lambda x: linsearch_fun_DECM(x,self.args_lins),
+                    'decm_new': lambda x: linsearch_fun_DECM_new(x,self.args_lins),
                     }
 
         self.fun_linsearch = lins_fun[model]
@@ -1976,7 +2132,7 @@ class DirectedGraph:
         """ function to switch around the various problems
         """
         #TODO: aggiungere tutti i metodi
-        if model in ['dcm', 'decm']:
+        if model in ['dcm', 'dcm_new', 'decm', 'decm_new']:
             self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
         elif model in ['CReAMa']:
             self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
