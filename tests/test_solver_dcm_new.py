@@ -56,7 +56,7 @@ class MyTest(unittest.TestCase):
         g._set_args('dcm')
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = 100 
         args = g.args 
 
         fun = lambda x: iterative_dcm_new(x, args)
@@ -66,7 +66,7 @@ class MyTest(unittest.TestCase):
         f= fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=700, method='fixed-point', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=700, method='fixed-point', verbose=True, regularise=True, full_return = False, linsearch=False)
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -78,9 +78,9 @@ class MyTest(unittest.TestCase):
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
-        # print(ek)
-        # print(k)
-        # print('\ntest 0: error = {}'.format(err))
+        print(ek)
+        print(k)
+        print('\ntest 0: error = {}'.format(err))
 
         # test result
         self.assertTrue(err< 1e-2)
@@ -107,7 +107,7 @@ class MyTest(unittest.TestCase):
         g._set_args('dcm')
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = 1e3
         args = g.args 
 
         fun = lambda x: iterative_dcm_new(x, args)
@@ -158,7 +158,7 @@ class MyTest(unittest.TestCase):
         g._set_args('dcm')
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = 1e3
         args = g.args 
 
         fun = lambda x: iterative_dcm_new(x, args)

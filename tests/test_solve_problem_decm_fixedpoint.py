@@ -22,7 +22,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=300, verbose=True, initial_guess='uniform', linsearch = True) 
+        g._solve_problem(model='decm', method='fixed-point', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True) 
 
         g.solution_error()
         # debug
@@ -42,7 +42,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = True)
+        g._solve_problem(model='decm', method='fixed-point', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         # debug
@@ -81,7 +81,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=300, verbose=False, initial_guess='uniform', linsearch = True)
+        g._solve_problem(model='decm', method='fixed-point', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         # debug

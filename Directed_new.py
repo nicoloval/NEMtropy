@@ -259,8 +259,8 @@ def loglikelihood_hessian_diag_dcm_new(theta, args):
 
 @jit(nopython=True)
 def expected_out_degree_dcm_new(sol):
-    ex_k = np.zeros_like(sol, dtype=np.float64)
     n = int(len(sol)/2)
+    ex_k = np.zeros(n, dtype=np.float64)
 
     for i in np.arange(n):
         for j in np.arange(n):
@@ -268,6 +268,49 @@ def expected_out_degree_dcm_new(sol):
                 aux = np.exp(-sol[i])*np.exp(-sol[j])
                 ex_k[i] += aux/(1+aux)
     return ex_k
+
+
+@jit(nopython=True)
+def expected_in_degree_dcm_new(theta):
+    sol = np.exp(-theta)
+    n = int(len(sol)/2)
+    a_out = sol[:n]
+    a_in = sol[n:]
+    k = np.zeros(n)  # allocate k
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                k[i] += a_in[i]*a_out[j]/(1 + a_in[i]*a_out[j])
+
+    return k
+
+
+@jit(nopython=True)
+def expected_decm_new(theta):
+    """
+    """
+    # casadi MX function calculation
+    x = np.exp(-theta)
+    n = int(len(x)/4)
+    f = np.zeros_like(x, np.float64)
+
+    for i in range(n):
+        fa_out = 0
+        fa_in = 0
+        fb_out = 0
+        fb_in = 0
+        for j in range(n):
+            if i != j:
+                fa_out += x[j+n]*x[i+2*n]*x[j+3*n]/(1 - x[i+2*n]*x[j+3*n] + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fa_in += x[j]*x[j+2*n]*x[i+3*n]/(1 - x[j+2*n]*x[i+3*n] + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+                fb_out += x[j +3*n]/(1 - x[j+3*n]*x[i+2*n]) + (x[j+n]*x[i] - 1)*x[j+3*n]/(1 - x[i+2*n]*x[j+3*n] + x[i]*x[j+n]*x[i+2*n]*x[j+3*n])
+                fb_in += x[j +2*n]/(1 - x[i+3*n]*x[j+2*n]) + (x[i+n]*x[j] - 1)*x[j+2*n]/(1 - x[j+2*n]*x[i+3*n] + x[j]*x[i+n]*x[j+2*n]*x[i+3*n])
+        f[i] = x[i]*fa_out
+        f[i+n] = x[i+n]*fa_in
+        f[i+2*n] = x[i+2*n]*fb_out
+        f[i+3*n] = x[i+3*n]*fb_in
+
+    return f
 
 
 @jit(forceobj=True)
@@ -319,7 +362,7 @@ def loglikelihood_decm_new(x, args):
     return f
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def loglikelihood_prime_decm_new(theta, args):
     """not reduced
     """
