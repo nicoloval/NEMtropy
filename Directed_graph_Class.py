@@ -1121,7 +1121,7 @@ def expected_in_stregth_CReAMa_Sparse(sol,adj):
     return s
 
 
-def hessian_regulariser_function(B, eps):
+def hessian_regulariser_function_old(B, eps):
     """Trasform input matrix in a positive defined matrix
     input matrix should be numpy.array
     """
