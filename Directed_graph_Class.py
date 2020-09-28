@@ -1187,6 +1187,15 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
             # regularise
             H = fun_jac(x)  # original jacobian
             # check the hessian is positive definite
+            """
+            n = H.shape[0]
+            for i in range(n):
+                for j in range(n):
+                    if np.isnan(H[i,j]):
+                        print(i,j)
+                        e = np.exp(-x)
+                        print(e)
+            """
             l, e = scipy.linalg.eigh(H)
             ml = np.min(l)
             Ml = np.max(l)
@@ -1195,7 +1204,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
             # regularisation
             #TODO: check regulirise for decm, it's not working
             if regularise:
-                B = hessian_regulariser_function(H, np.max(np.abs(fun(x)))*1e-3)
+                B = hessian_regulariser_function(H, np.max(np.abs(fun(x)))*1e-5)
                 l, e = scipy.linalg.eigh(B)
                 new_ml = np.min(l)
                 new_Ml = np.max(l)

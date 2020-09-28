@@ -34,6 +34,7 @@ class MyTest(unittest.TestCase):
 
     def setUp(self):
         pass
+
     @unittest.skip("works")
     def test_quasinewton_0(self):
         n,s = (40,25)
@@ -125,7 +126,7 @@ class MyTest(unittest.TestCase):
         s_out = np.sum(A, axis = 1)
         s_in = np.sum(A, axis = 0)
 
-        x0 = np.ones(16)
+        x0 = .1*np.ones(16)
         args = (k_out, k_in, s_out, s_in)
 
         fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
@@ -133,7 +134,7 @@ class MyTest(unittest.TestCase):
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
         lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun, ))
 
-        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=300, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=300, method='newton', verbose=True, regularise=True, full_return = False, linsearch = True)
         sol = np.exp(-sol)
 
         ek = sample.expected_decm(sol)
@@ -190,10 +191,10 @@ class MyTest(unittest.TestCase):
         self.assertTrue(err< 1e-1)
 
 
-    # @unittest.skip("doesnt work")
+    @unittest.skip("doesnt work")
     def test_newton_4(self):
         # convergence relies heavily on x0
-        n, s = (4, 35)
+        n, s = (40, 35)
         # n, s = (5, 35)
         A = mg.random_weighted_matrix_generator_dense(n, sup_ext = 100, sym=False, seed=s, intweights = True)
         A[0,:] = 0
@@ -205,7 +206,7 @@ class MyTest(unittest.TestCase):
         s_out = np.sum(A, axis = 1)
         s_in = np.sum(A, axis = 0)
 
-        x0 = 0.2*np.ones(4*n)
+        x0 = 0.1*np.ones(4*n)
         # x0 = np.concatenate((-1*np.ones(2*n), np.ones(2*n)))
         args = (k_out, k_in, s_out, s_in)
         x0[ np.concatenate(args) == 0] = 1e3 
@@ -215,7 +216,7 @@ class MyTest(unittest.TestCase):
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
         lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun, ))
 
-        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-5, max_steps=10, method='newton', verbose=True, regularise=True, full_return = False, linsearch = True)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-5, max_steps=100, method='newton', verbose=True, regularise=True, full_return = False, linsearch = True)
         sol = np.exp(-sol)
 
         ek = sample.expected_decm(sol)
@@ -231,7 +232,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(err< 1e-1)
 
 
-    @unittest.skip("doesnt work")
+    # @unittest.skip("doesnt work")
     def test_iterative_5(self):
         
         n, s = (4, 35)
@@ -246,14 +247,14 @@ class MyTest(unittest.TestCase):
         s_out = np.sum(A, axis = 1)
         s_in = np.sum(A, axis = 0)
 
-        x0 = 0.3*np.ones(16)
+        x0 = 0.1*np.ones(16)
         args = (k_out, k_in, s_out, s_in)
 
         fun = lambda x: sample.iterative_decm_new(x, args)
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
         lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun, ))
 
-        sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=3000, method='fixed-point', verbose=True, regularise=True, full_return = False, linsearch=False)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=30, method='fixed-point', verbose=True, regularise=True, full_return = False, linsearch=True)
 
         sol = np.exp(-sol)
         ek = sample.expected_decm(sol)

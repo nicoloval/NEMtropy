@@ -449,7 +449,12 @@ def loglikelihood_hessian_decm_new(theta, args):
                 f[i+3*n, i+n] = f[i+n, i+3*n]
 
     f = f 
+    for i in range(4*n):
+        for j in range(4*n):
+            if np.isnan(f[i,j]):
+                f[i,j] = 0
 
+    # print(np.isnan(f))
     return f
 
 
@@ -549,10 +554,13 @@ def linsearch_fun_DECM_new(X,args):
 
     # Mettere il check sulle y
     nnn = int(len(x)/4)
+    ind_yout = np.argmin(x[2*nnn:3*nnn])
+    ind_yin = np.argmin(x[3*nnn:])
+    tmp = x[2*nnn:3*nnn][ind_yout] + x[3*nnn:][ind_yin]
     while True:
-        ind_yout = np.argmax(x[2*nnn:3*nnn])
-        ind_yin = np.argmax(x[3*nnn:])
-        if ((x[2*nnn:3*nnn][ind_yout] + alfa*dx[2*nnn:3*nnn][ind_yout]) + (x[3*nnn:][ind_yin] + alfa*dx[3*nnn:][ind_yin])) > 0:
+        ind_yout = np.argmin(x[2*nnn:3*nnn] + alfa*dx[2*nnn:3*nnn])
+        ind_yin = np.argmin(x[3*nnn:] + alfa*dx[3*nnn:])
+        if ((x[2*nnn:3*nnn][ind_yout] + alfa*dx[2*nnn:3*nnn][ind_yout]) + (x[3*nnn:][ind_yin] + alfa*dx[3*nnn:][ind_yin])) > tmp*.01 :
             break
         else:
             alfa *= beta
