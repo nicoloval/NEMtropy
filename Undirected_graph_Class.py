@@ -1303,10 +1303,11 @@ class UndirectedGraph:
             raise ValueError('Method must be "newton","quasi-newton", or "fixed-point".')
         
         d_pmatrix = {
-                    'cm': pmatrix_cm
+                    'cm': pmatrix_cm ,
+                    'cm-new': pmatrix_cm ,
                     }
 
-        if model in ['cm']:
+        if model in ['cm','cm-new']:
             self.args_p = (self.n_nodes, np.nonzero(self.dseq)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x,self.args_p)
 
