@@ -1011,21 +1011,40 @@ def expected_decm(x):
 
 def hessian_regulariser_function_old(B, eps):
     """Trasform input matrix in a positive defined matrix
-    input matrix should be numpy.array
+    by adding positive quantites to the main diagonal.
+
+    input:
+    B: np.ndarray, Hessian matrix
+    eps: float, positive quantity to add
+
+    output:
+    Bf: np.ndarray, Regularised Hessian
+
     """
-    # eps = 1e-4
+
     B = (B + B.transpose())*0.5  # symmetrization
-    l, e = np.linalg.eigh(B)
-    lmax = max(l)
-    # eps = 1e-8*lmax
-    # ll = np.array([eps if li>eps else eps-li for li in l])
-    # Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
-    print('max = ',lmax)
-    ll = np.array([li if li>eps else lmax/10 for li in l])
-    Bf = e @ np.diag(ll) @ e.transpose()
-    # lll, eee = np.linalg.eigh(Bf)
-    # debug check
-    # print('B regularised eigenvalues =\n {}'.format(lll))
+    Bf = B + np.identity(B.shape[0])*eps
+    
+    return Bf
+
+
+def hessian_regulariser_function_eigen_based(B, eps):
+    """Trasform input matrix in a positive defined matrix
+    by regularising eigenvalues.
+
+    input:
+    B: np.ndarray, Hessian matrix
+    eps: float, positive quantity to add
+
+    output:
+    Bf: np.ndarray, Regularised Hessian
+
+    """
+    B = (B + B.transpose())*0.5  # symmetrization
+    l, e = scipy.linalg.eigh(B)
+    ll = np.array([0 if li>eps else eps-li for li in l])
+    Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
+
     return Bf
 
 
@@ -1102,7 +1121,7 @@ def expected_in_stregth_CReAMa_Sparse(sol,adj):
     return s
 
 
-def hessian_regulariser_function(B, eps):
+def hessian_regulariser_function_old(B, eps):
     """Trasform input matrix in a positive defined matrix
     input matrix should be numpy.array
     """
@@ -1176,7 +1195,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
             # regularisation
             #TODO: check regulirise for decm, it's not working
             if regularise:
-                B = hessian_regulariser_function(H, eps)
+                B = hessian_regulariser_function(H, np.max(np.abs(fun(x)))*1e-3)
                 l, e = scipy.linalg.eigh(B)
                 new_ml = np.min(l)
                 new_Ml = np.max(l)
@@ -1186,9 +1205,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
             # quasinewton hessian approximation
             B = fun_jac(x)  # Jacobian diagonal
             if regularise == True:
-                # B = np.maximum(B, B*0 + 1e-8)
-                B = np.maximum(B, B*0 + max(B)*eps)
-
+                B = np.maximum(B, B*0 + np.max(np.abs(fun(x)))*1e-3)
         toc_jacfun += time.time() - tic
 
         # discending direction computation
