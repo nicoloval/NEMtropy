@@ -1009,7 +1009,7 @@ def expected_decm(x):
     return f
 
 
-def hessian_regulariser_function_old(B, eps):
+def hessian_regulariser_function(B, eps):
     """Trasform input matrix in a positive defined matrix
     by adding positive quantites to the main diagonal.
 
