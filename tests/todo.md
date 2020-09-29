@@ -1,6 +1,7 @@
-# TODO:
+* scorporare tutti i test sui solver
 
-## `test_loglikelihood_dcm.py`
+* cancellare roba inutile
 
-* fixare alcuni test in cui manca il valore corretto della loglikelihood
+* skippare test grandi
 
+* controllare di avere tutti i test necessari 
