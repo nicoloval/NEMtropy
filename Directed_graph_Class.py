@@ -1196,18 +1196,20 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
                         e = np.exp(-x)
                         print(e)
             """
-            l, e = scipy.linalg.eigh(H)
-            ml = np.min(l)
-            Ml = np.max(l)
+            if verbose:
+                l, e = scipy.linalg.eigh(H)
+                ml = np.min(l)
+                Ml = np.max(l)
             #TODO: check this regularity condition
             # if it's not positive definite -> regularise
             # regularisation
             #TODO: check regulirise for decm, it's not working
             if regularise:
                 B = hessian_regulariser_function(H, np.max(np.abs(fun(x)))*1e-5)
-                l, e = scipy.linalg.eigh(B)
-                new_ml = np.min(l)
-                new_Ml = np.max(l)
+                if verbose:
+                    l, e = scipy.linalg.eigh(B)
+                    new_ml = np.min(l)
+                    new_Ml = np.max(l)
             else:
                 B = H.__array__()
         elif method == 'quasinewton':
