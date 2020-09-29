@@ -1176,7 +1176,7 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
 
     tic_loop = time.time()
 
-    while norm > tol and n_steps < max_steps:  # stopping condition
+    while norm > tol and n_steps < max_steps and diff > eps:  # stopping condition
     #TODO: reintroduce diff in stopping condition
 
         x_old = x  # save previous iteration

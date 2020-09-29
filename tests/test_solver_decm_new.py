@@ -35,7 +35,6 @@ class MyTest(unittest.TestCase):
     def setUp(self):
         pass
 
-    @unittest.skip("works")
     def test_quasinewton_0(self):
         n,s = (40,25)
 
@@ -65,14 +64,13 @@ class MyTest(unittest.TestCase):
         # debug
         # print(ek)
         # print(k)
-        print('\ntest 0: error = {}'.format(err))
-        print('method = {}, matrix {}x{}'.format('quasinewton', n, n))
+        # print('\ntest 0: error = {}'.format(err))
+        # print('method = {}, matrix {}x{}'.format('quasinewton', n, n))
 
         # test result
         self.assertTrue(err< 1e-1)
 
 
-    @unittest.skip("works")
     def test_quasinewton_1(self):
 
         n,s = (40,25)
@@ -104,14 +102,13 @@ class MyTest(unittest.TestCase):
         # debug
         # print(ek)
         # print(k)
-        print('\ntest 1: error = {}'.format(err))
+        # print('\ntest 1: error = {}'.format(err))
 
         # test result
         self.assertTrue(err< 1e-1)
-        print('method = {}, matrix {}x{} with zeros'.format('quasinewton', n, n))
+        # print('method = {}, matrix {}x{} with zeros'.format('quasinewton', n, n))
 
 
-    @unittest.skip("works")
     def test_newton_2(self):
         # x0 relies heavily on x0
         A = np.array([[0, 2, 3, 0],
@@ -134,7 +131,7 @@ class MyTest(unittest.TestCase):
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
         lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun, ))
 
-        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=300, method='newton', verbose=True, regularise=True, full_return = False, linsearch = True)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=300, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True)
         sol = np.exp(-sol)
 
         ek = sample.expected_decm(sol)
@@ -143,14 +140,13 @@ class MyTest(unittest.TestCase):
         # debug
         # print(ek)
         # print(k)
-        print('\ntest 2: error = {}'.format(err))
-        print('method = {}, matrix {}x{} '.format('newton', 4, 4))
+        # print('\ntest 2: error = {}'.format(err))
+        # print('method = {}, matrix {}x{} '.format('newton', 4, 4))
 
         # test result
         self.assertTrue(err< 1e-1)
 
 
-    @unittest.skip("works")
     def test_newton_3(self):
         # convergence relies heavily on x0
         # n, s = (4, 35)
@@ -184,14 +180,13 @@ class MyTest(unittest.TestCase):
         # debug
         # print(ek)
         # print(k)
-        print('\ntest 3: error = {}'.format(err))
-        print('method: {}, matrix {}x{}'.format('newton', n,n))
+        # print('\ntest 3: error = {}'.format(err))
+        # print('method: {}, matrix {}x{}'.format('newton', n,n))
 
         # test result
         self.assertTrue(err< 1e-1)
 
 
-    @unittest.skip("doesnt work")
     def test_newton_4(self):
         # convergence relies heavily on x0
         n, s = (40, 35)
@@ -216,7 +211,7 @@ class MyTest(unittest.TestCase):
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
         lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun, ))
 
-        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-5, max_steps=100, method='newton', verbose=True, regularise=True, full_return = False, linsearch = True)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac=fun_jac,linsearch_fun = lin_fun, tol=1e-6, eps=1e-5, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch = True)
         sol = np.exp(-sol)
 
         ek = sample.expected_decm(sol)
@@ -225,8 +220,8 @@ class MyTest(unittest.TestCase):
         # debug
         # print(ek)
         # print(k)
-        print('\ntest 4: error = {}'.format(err))
-        print('method: {}, matrix {}x{} with zeros'.format('newton', n,n))
+        # print('\ntest 4: error = {}'.format(err))
+        # print('method: {}, matrix {}x{} with zeros'.format('newton', n,n))
 
         # test result
         self.assertTrue(err< 1e-1)
@@ -235,7 +230,7 @@ class MyTest(unittest.TestCase):
     # @unittest.skip("doesnt work")
     def test_iterative_5(self):
         
-        n, s = (4, 35)
+        n, s = (40, 35)
         # n, s = (5, 35)
         A = mg.random_weighted_matrix_generator_dense(n, sup_ext = 100, sym=False, seed=s, intweights = True)
         # A[0,:] = 0
@@ -247,14 +242,15 @@ class MyTest(unittest.TestCase):
         s_out = np.sum(A, axis = 1)
         s_in = np.sum(A, axis = 0)
 
-        x0 = 0.1*np.ones(16)
+        x0 = 0.1*np.ones(n*4)
         args = (k_out, k_in, s_out, s_in)
+        x0[ np.concatenate(args) == 0] = 1e3 
 
         fun = lambda x: sample.iterative_decm_new(x, args)
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
         lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun, ))
 
-        sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=30, method='fixed-point', verbose=True, regularise=True, full_return = False, linsearch=True)
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=7000, method='fixed-point', verbose=False, regularise=True, full_return = False, linsearch=True)
 
         sol = np.exp(-sol)
         ek = sample.expected_decm(sol)
@@ -263,11 +259,51 @@ class MyTest(unittest.TestCase):
         # debug
         # print(ek)
         # print(k)
-        print('\ntest 5: error = {}'.format(err))
-        print('method: {}, matrix {}x{} '.format('iterative', n,n))
+        # print('\ntest 5: error = {}'.format(err))
+        # print('method: {}, matrix {}x{} '.format('iterative', n,n))
 
         # test result
         self.assertTrue(err< 1)
+
+
+    # @unittest.skip("doesnt work")
+    def test_iterative_6(self):
+        
+        n, s = (40, 35)
+        # n, s = (5, 35)
+        A = mg.random_weighted_matrix_generator_dense(n, sup_ext = 100, sym=False, seed=s, intweights = True)
+        A[0,:] = 0
+
+        bA = np.array([ [1 if aa != 0 else 0 for aa in a] for a in A])
+
+        k_out = np.sum(bA, axis = 1)
+        k_in = np.sum(bA, axis = 0)
+        s_out = np.sum(A, axis = 1)
+        s_in = np.sum(A, axis = 0)
+
+        x0 = 0.1*np.ones(n*4)
+        args = (k_out, k_in, s_out, s_in)
+        x0[ np.concatenate(args) == 0] = 1e3 
+
+        fun = lambda x: sample.iterative_decm_new(x, args)
+        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
+        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun, ))
+
+        sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=7000, method='fixed-point', verbose=False, regularise=True, full_return = False, linsearch=True)
+
+        sol = np.exp(-sol)
+        ek = sample.expected_decm(sol)
+        k = np.concatenate((k_out, k_in, s_out, s_in))
+        err = np.max(np.abs(ek-k))
+        # debug
+        # print(ek)
+        # print(k)
+        # print('\ntest 6: error = {}'.format(err))
+        # print('method: {}, matrix {}x{} '.format('iterative', n,n))
+
+        # test result
+        self.assertTrue(err< 1)
+
 
         
 if __name__ == '__main__':

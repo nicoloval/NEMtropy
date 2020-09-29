@@ -516,6 +516,65 @@ def iterative_decm_new(theta, args):
         fb_in = 0
         for j in range(n):
             if i != j:
+                tmp0 = x[i]*x[j+n]
+                tmp1 = x[i+2*n]*x[j+3*n]
+
+                fa_out += x[j+n]*tmp1/(1 - tmp1 + tmp0*tmp1)
+
+                fb_out += tmp0*x[j+3*n]/((1 - tmp1)*(1 - tmp1 + tmp0*tmp1)) 
+
+                tmp0 = x[j]*x[i+n]
+                tmp1 = x[j+2*n]*x[i+3*n]
+
+                fa_in += x[j+n]*tmp1/(1 - tmp1 + tmp0*tmp1)
+
+                fb_in += tmp0*x[j+3*n]/((1 - tmp1)*(1 - tmp1 + tmp0*tmp1)) 
+
+        if k_out[i]:
+            f[i] = -np.log(k_out[i]/fa_out)
+        else:
+            f[i] = 1e3
+
+        if s_out[i]:
+            f[i+2*n] = -np.log(s_out[i]/fb_out)
+        else:
+            f[i+2*n] = 1e3
+
+        if k_in[i]:
+            f[i+n] = -np.log(k_in[i]/fa_in)
+        else:
+            f[i+n] = 1e3
+
+        if s_in[i]:
+            f[i+3*n] = -np.log(s_in[i]/fb_in)
+        else:
+            f[i+3*n] = 1e3
+
+
+    return f
+
+
+@jit(nopython=True)
+def iterative_decm_new_old(theta, args):
+    """not reduced
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    s_out = args[2]
+    s_in = args[3]
+    n = len(k_out)
+
+    x = np.exp(-theta)
+
+    f = np.zeros(4*n)
+    for i in range(n):
+        fa_out = 0
+        fb_out = 0
+        fa_in = 0
+        fb_in = 0
+        for j in range(n):
+            if i != j:
                 tmp0 = x[i+2*n]*x[j+3*n]
                 tmp1 = tmp0/(1 - tmp0)
                 tmp2 = x[i]*x[j+n]

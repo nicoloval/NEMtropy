@@ -49,13 +49,12 @@ class MyTest(unittest.TestCase):
         # print(a)
         # print(theta, x0)
         # print(g.args)
-        # print(f_full)
-        # print(f_new)
-        # print(f_full)
+        print(f_new)
+        print(f_full)
 
         # test result
         # first halves are same, second not
-        self.assertTrue(np.allclose(f_full[:6], f_new[:6]))
+        self.assertTrue(np.allclose(f_full, f_new))
 
 
     def test_loglikelihood_dcm_new(self):
@@ -246,8 +245,8 @@ class MyTest(unittest.TestCase):
         # print(a)
         # print(theta, x0)
         # print(g.args)
-        print('approx',f_sample)
-        print('my',f_new)
+        # print('approx',f_sample)
+        # print('my',f_new)
         # print('gradient', loglikelihood_prime_decm_new(theta, g.args))
         # print('diff',f_sample - f_new)
         # print('max',np.max(np.abs(f_sample - f_new)))
