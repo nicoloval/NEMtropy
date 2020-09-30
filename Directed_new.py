@@ -134,31 +134,29 @@ def loglikelihood_prime_dcm_new(theta, args):
         fx = 0
         for j in nz_index_in:
             if i!= j:
-                # const = c[i]*c[j]
-                const = c[j]
+                const = c[i]*c[j]
+                # const = c[j]
             else:
-                # const = c[i]*(c[j] - 1)
-                const = (c[j] - 1)
+                const = c[i]*(c[j] - 1)
+                # const = (c[j] - 1)
 
             fx += const*x[j+n]/(1 + x[i]*x[j+n])
-        # original prime
-        f[i] = x[i]*fx - k_out[i]
-        # f[i] = x[i]*fx - c[i]*k_out[i]
+        # f[i] = x[i]*fx - k_out[i]
+        f[i] = x[i]*fx - c[i]*k_out[i]
 
     for j in nz_index_in:
         fy = 0
         for i in nz_index_out:
             if i!= j:
-                # const = c[i]*c[j]
-                const = c[i]
+                const = c[i]*c[j]
+                # const = c[i]
             else:
-                # const = c[i]*(c[j] - 1)
-                const = (c[j] - 1)
+                const = c[i]*(c[j] - 1)
+                # const = (c[j] - 1)
 
             fy += const*x[i]/(1 + x[j+n]*x[i])
-        # original prime
-        f[j+n] = fy*x[j+n] - k_in[j]
-        # f[j+n] = fy*x[j+n] - c[j]*k_in[j]
+        # f[j+n] = fy*x[j+n] - k_in[j]
+        f[j+n] = fy*x[j+n] - c[j]*k_in[j]
 
     return f
 
@@ -179,11 +177,11 @@ def loglikelihood_hessian_dcm_new(theta, args):
         tmp_sum = 0
         for i in nz_in_index:
             if i == h:
-                # const = c[h]*(c[h] - 1)
-               const = (c[h] - 1)
+                const = c[h]*(c[h] - 1)
+                # const = (c[h] - 1)
             else:
-                # const = c[h]*c[i]
-                const = c[i]
+                const = c[h]*c[i]
+                # const = c[i]
 
             tmp = x[i+n]*x[h]
             tmp_sum += const*(tmp)/(1 + tmp)**2
@@ -195,11 +193,11 @@ def loglikelihood_hessian_dcm_new(theta, args):
         tmp_sum = 0
         for h in nz_out_index:
             if i == h:
-                # const = c[h]*(c[h] - 1)
-                const = (c[i] - 1)
+                const = c[h]*(c[h] - 1)
+                # const = (c[i] - 1)
             else:
-                # const = c[h]*c[i]
-                const = c[h]
+                const = c[h]*c[i]
+                # const = c[h]
 
             tmp = x[h]*x[i+n]
             tmp_sum += const*(tmp)/(1 + tmp)**2
@@ -225,11 +223,11 @@ def loglikelihood_hessian_diag_dcm_new(theta, args):
         fx = 0
         for j in nz_index_in:
             if i!= j:
-                # const = c[i]*c[j]
-                const = c[j]
+                const = c[i]*c[j]
+                # const = c[j]
             else:
-                # const = c[i]*(c[j] - 1)
-                const = (c[i] - 1)
+                const = c[i]*(c[j] - 1)
+                # const = (c[i] - 1)
 
             tmp = x[j+n]*x[i]
             fx += const*(tmp)/(1 + tmp)**2
@@ -240,11 +238,11 @@ def loglikelihood_hessian_diag_dcm_new(theta, args):
         fy = 0
         for i in nz_index_out:
             if i!= j:
-                # const = c[i]*c[j]
-                const = c[i]
+                const = c[i]*c[j]
+                # const = c[i]
             else:
-                # const = c[i]*(c[j] - 1)
-                const = (c[j] - 1)
+                const = c[i]*(c[j] - 1)
+                # const = (c[j] - 1)
 
 
             tmp = x[i]*x[j+n]

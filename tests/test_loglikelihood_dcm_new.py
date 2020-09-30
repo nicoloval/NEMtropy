@@ -200,8 +200,8 @@ class MyTest(unittest.TestCase):
 
     def test_loglikelihood_hessian_dcm_new_emi_simmetry(self):
 
-        # n,s =(50, 1)
-        n,s =(2, 1)
+        n,s =(50, 1)
+        # n,s =(2, 1)
         a = mg.random_binary_matrix_generator_custom_density(n=n, p=0.15, sym=False, seed=s)
 
         g = sample.DirectedGraph(a)
@@ -215,7 +215,7 @@ class MyTest(unittest.TestCase):
         nz_index_in = g.args[3]
 
         n_rd = len(k_out)
-        print(n_rd/n)
+        # print(n_rd/n)
         theta = np.random.rand(2*n_rd) 
 
         f_new = loglikelihood_hessian_dcm_new(theta, g.args)
@@ -233,8 +233,6 @@ class MyTest(unittest.TestCase):
 
         # test result
         self.assertTrue(np.allclose(f_new - f_new.T, np.zeros((2*n_rd, 2*n_rd))))
-
-
 
 
     def test_loglikelihood_hessian_dcm_new_simmetry(self):
