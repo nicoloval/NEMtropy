@@ -17,7 +17,7 @@ class MyTest(unittest.TestCase):
         pass
 
 
-    def test_iterative_0(self):
+    def test_0(self):
 
         n, seed = (4, 22)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -31,13 +31,13 @@ class MyTest(unittest.TestCase):
         g.solution_error()
         err = g.error
         # debug
-        # print('\ntest 1: error = {}'.format(err))
+        # print('\ntest 0: error = {}'.format(err))
 
         # test result
         self.assertTrue(err< 1)
 
 
-    def test_iterative_1(self):
+    def test_1(self):
 
         n, seed = (4, 22)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -59,7 +59,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(err< 1)
 
     @unittest.skip("skip large graph")
-    def test_iterative_2(self):
+    def test_2(self):
 
         n, seed = (40, 22)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -80,7 +80,7 @@ class MyTest(unittest.TestCase):
 
 
     @unittest.skip("skip large graph")
-    def test_iterative_3(self):
+    def test_3(self):
 
         n, seed = (40, 22)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -117,7 +117,7 @@ class MyTest(unittest.TestCase):
         g.solution_error()
         err = g.error
         # debug
-        # print('\ntest emi: error = {}'.format(err))
+        print('\ntest emi: error = {}'.format(err))
 
         # test result
         self.assertTrue(err< 1)

@@ -1710,6 +1710,24 @@ class DirectedGraph:
         self.y = self.r_y[self.r_invert_dseq]
         
 
+    def _set_solved_problem_dcm_new(self, solution):
+        if self.full_return:
+            # conversion from theta to x
+            self.r_xy = np.exp(-solution[0])
+            self.comput_time = solution[1]
+            self.n_steps = solution[2]
+            self.norm_seq = solution[3]
+        else:
+            # conversion from theta to x
+            self.r_xy = np.exp(-solution) 
+            
+        self.r_x = self.r_xy[:self.rnz_n_out]
+        self.r_y = self.r_xy[self.rnz_n_out:]
+
+        self.x = self.r_x[self.r_invert_dseq]
+        self.y = self.r_y[self.r_invert_dseq]
+ 
+
     def _set_solved_problem_decm(self, solution):
         if self.full_return:
             self.r_xy = solution[0]
@@ -1725,12 +1743,33 @@ class DirectedGraph:
         self.b_in = self.r_xy[3*self.n_nodes:]
  
 
+    def _set_solved_problem_decm_new(self, solution):
+        if self.full_return:
+            # conversion from theta to x
+            self.r_xy = np.exp(-solution[0])  
+            self.comput_time = solution[1]
+            self.n_steps = solution[2]
+            self.norm_seq = solution[3]
+        else:
+            # conversion from theta to x
+            self.r_xy = np.exp(-solution)  
+
+        self.x = self.r_xy[:self.n_nodes]
+        self.y = self.r_xy[self.n_nodes: 2*self.n_nodes]
+        self.b_out = self.r_xy[2*self.n_nodes:3*self.n_nodes]
+        self.b_in = self.r_xy[3*self.n_nodes:]
+ 
+
     def _set_solved_problem(self, solution):
         model = self.last_model
-        if model in ['dcm', 'dcm_new']:
+        if model in ['dcm']:
             self._set_solved_problem_dcm(solution)
-        elif model in ['decm', 'decm_new']:
+        if model in ['dcm_new']:
+            self._set_solved_problem_dcm_new(solution)
+        elif model in ['decm']:
             self._set_solved_problem_decm(solution)
+        elif model in ['decm_new']:
+            self._set_solved_problem_decm_new(solution)
         elif model in ['CReAMa', 'CReAMa-sparse']:
             self._set_solved_problem_CReAMa(solution)
 
@@ -1901,18 +1940,8 @@ class DirectedGraph:
 
 
     def solution_error(self):
-        if self.last_model in ['dcm_new']:
-            if (self.x is not None) and (self.y is not None):
-                sol = np.concatenate((self.x, self.y))
-                ex_k_out = expected_out_degree_dcm_new(sol)
-                ex_k_in = expected_in_degree_dcm_new(sol)
-                ex_k = np.concatenate((ex_k_out, ex_k_in))
-                k = np.concatenate((self.dseq_out, self.dseq_in))
-                # print(k, ex_k)
-                self.expected_dseq = ex_k
-                self.error = np.linalg.norm(ex_k - k, ord = np.inf)
 
-        elif self.last_model in ['dcm','CReAMa','CReAMa-sparse']:
+        if self.last_model in ['dcm_new', 'dcm','CReAMa','CReAMa-sparse']:
             if (self.x is not None) and (self.y is not None):
                 sol = np.concatenate((self.x, self.y))
                 ex_k_out = expected_out_degree_dcm(sol)
@@ -1937,23 +1966,9 @@ class DirectedGraph:
                 self.error_strength = np.linalg.norm(ex_s - s, ord = np.inf)
                 self.relative_error_strength = self.error_strength/self.out_strength.sum()
         # potremmo strutturarlo così per evitare ridondanze
-        elif self.last_model in ['decm']:
+        elif self.last_model in ['decm', 'decm_new']:
                 sol = np.concatenate((self.x, self.y, self.b_out, self.b_in))
                 ex = expected_decm(sol)
-                k = np.concatenate((self.dseq_out, self.dseq_in, self.out_strength, self.in_strength))
-                self.expected_dseq = ex[:2*self.n_nodes]
-
-                self.expected_strength_seq = ex[2*self.n_nodes:]
-                self.error = np.linalg.norm(ex - k, ord = np.inf)
-                # self.error_dseq = np.linalg.norm(np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)
-                self.error_dseq = max(abs((np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)))
-                # self.error_sseq = np.linalg.norm(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq)
-                self.error_sseq = max(abs(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq))
-                self.relative_error_strength = self.error/self.out_strength.sum()
-    
-        elif self.last_model in ['decm_new']:
-                sol = np.concatenate((self.x, self.y, self.b_out, self.b_in))
-                ex = expected_decm_new(sol)
                 k = np.concatenate((self.dseq_out, self.dseq_in, self.out_strength, self.in_strength))
                 self.expected_dseq = ex[:2*self.n_nodes]
 
