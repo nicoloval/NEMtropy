@@ -231,7 +231,7 @@ def loglikelihood_hessian_diag_dcm_new(theta, args):
                 # const = c[i]*(c[j] - 1)
                 const = (c[i] - 1)
 
-            tmp = x[i+n]*x[j]
+            tmp = x[j+n]*x[i]
             fx += const*(tmp)/(1 + tmp)**2
         # original prime
         f[i] = - fx
@@ -247,7 +247,7 @@ def loglikelihood_hessian_diag_dcm_new(theta, args):
                 const = (c[j] - 1)
 
 
-            tmp = x[j]*x[i+n]
+            tmp = x[i]*x[j+n]
             fy += const*(tmp)/(1 + tmp)**2
         # original prime
         f[j+n] = - fy

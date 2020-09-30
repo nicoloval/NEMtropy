@@ -26,12 +26,12 @@ class MyTest(unittest.TestCase):
         k_in = np.sum(a, 0)
 
         g = sample.DirectedGraph(a)
-        g._solve_problem(model='dcm_new', method='quasinewton', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = 'False')
+        g._solve_problem(model='dcm_new', method='quasinewton', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         err = g.error
         # debug
-        # print('\ntest 1: error = {}'.format(err))
+        print('\ntest 0: error = {}'.format(err))
 
         # test result
         self.assertTrue(err< 1)
@@ -48,7 +48,7 @@ class MyTest(unittest.TestCase):
         k_in = np.sum(a, 0)
 
         g = sample.DirectedGraph(a)
-        g._solve_problem(model='dcm_new', method='quasinewton', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = 'False')
+        g._solve_problem(model='dcm_new', method='quasinewton', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         err = g.error
@@ -56,7 +56,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 1: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1)
+        self.assertTrue(err< 1e-1)
 
     @unittest.skip("skip large graph")
     def test_iterative_2(self):
@@ -76,7 +76,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 1: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1)
+        self.assertTrue(err< 1e-1)
 
 
     @unittest.skip("skip large graph")

@@ -129,7 +129,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(np.allclose(f_sample,f_new))
 
 
-    def test_loglikelihood_hessian_dcm_new(self):
+    def test_loglikelihood_hessian_decm_new(self):
 
         A = np.array([[0, 2, 2],
                       [2, 0, 2],
@@ -169,7 +169,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(np.allclose(f_sample,f_new))
 
 
-    def test_loglikelihood_hessian_diag_dcm_new(self):
+    def test_loglikelihood_hessian_diag_decm_new(self):
 
         A = np.array([[0, 2, 2],
                       [2, 0, 2],

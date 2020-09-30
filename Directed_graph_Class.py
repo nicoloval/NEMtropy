@@ -432,29 +432,29 @@ def loglikelihood_prime_dcm(x, args):
         fx = 0
         for j in nz_index_in:
             if i!= j:
-                # const = c[i]*c[j]
-                const = c[j]
+                const = c[i]*c[j]
+                # const = c[j]
             else:
-                # const = c[i]*(c[j] - 1)
-                const = (c[j] - 1)
+                const = c[i]*(c[j] - 1)
+                # const = (c[j] - 1)
                 
             fx += const*x[j+n]/(1 + x[i]*x[j+n])
         # original prime
-        f[i] = -fx + k_out[i]/x[i]
+        f[i] = -fx + c[i]*k_out[i]/x[i]
 
     for j in nz_index_in:
         fy = 0
         for i in nz_index_out:
             if i!= j:
-                # const = c[i]*c[j]
-                const = c[i]
+                const = c[i]*c[j]
+                # const = c[i]
             else:
-                # const = c[i]*(c[j] - 1)
-                const = (c[j] - 1)
+                const = c[i]*(c[j] - 1)
+                # const = (c[j] - 1)
 
             fy += const*x[i]/(1 + x[j+n]*x[i])
         # original prime
-        f[j+n] = -fy + k_in[j]/x[j+n]
+        f[j+n] = -fy + c[j]*k_in[j]/x[j+n]
 
     return f
 
@@ -487,11 +487,11 @@ def loglikelihood_hessian_dcm(x, args):
         out[h, h] = -c[h]*k_out[h]/(x[h])**2
         for i in nz_in_index:
             if i == h:
-                # const = c[h]*(c[h] - 1)
-                const = (c[h] - 1)
+                const = c[h]*(c[h] - 1)
+                # const = (c[h] - 1)
             else:
-                # const = c[h]*c[i]
-                const = c[i]
+                const = c[h]*c[i]
+                # const = c[i]
 
             out[h, h] += const*(x[i+n]/(1 + x[h]*x[i+n]))**2
             out[h, i+n] = -const/(1 + x[i+n]*x[h])**2
@@ -500,11 +500,11 @@ def loglikelihood_hessian_dcm(x, args):
         out[i+n, i+n] = -c[i]*k_in[i]/(x[i+n]*x[i+n])
         for h in nz_out_index:
             if i == h:
-                # const = c[h]*(c[h] - 1)
-                const = (c[i] - 1)
+                const = c[h]*(c[h] - 1)
+                # const = (c[i] - 1)
             else:
-                # const = c[h]*c[i]
-                const = c[h]
+                const = c[h]*c[i]
+                # const = c[h]
 
             out[i+n, i+n] += const*(x[h]**2)/(1 + x[i+n]*x[h])**2
             out[i+n, h] = -const/(1 + x[i+n]*x[h])**2

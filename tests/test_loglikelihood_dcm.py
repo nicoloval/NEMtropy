@@ -4,6 +4,7 @@ import Directed_graph_Class as sample
 import Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
+from scipy.optimize import approx_fprime
 
 
 class MyTest(unittest.TestCase):
@@ -46,29 +47,84 @@ class MyTest(unittest.TestCase):
                       [1, 0, 1],
                       [0, 1, 0]])
         """
-        n, seed = (3, 42)
+        n, seed = (30, 42)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         # rd
         g = sample.DirectedGraph(a)
         g.degree_reduction()
         g.initial_guess='uniform'
-        g._initialize_problem('dcm', 'quasinewton')
-        x0 = g.x0 
+        g._initialize_problem('dcm', 'newton')
 
-        f_sample = -g.fun(x0)
-        g.last_model = 'dcm'
-        g._set_solved_problem(f_sample)
-        f_full = np.concatenate((g.x, g.y))
-        # f_correct = np.array([3.2, 1.2, 3.2, 1.2])
+        k_out = g.args[0]
+        k_in = g.args[1]
+        nz_index_out = g.args[2]
+        nz_index_in = g.args[3]
+
+        n_rd = len(k_out)
+        theta = np.random.rand(2*n_rd)
+        f_sample = np.zeros(n_rd*2)
+        f = lambda x: sample.loglikelihood_dcm(x, g.args)
+        f_sample = approx_fprime(theta, f, epsilon=1e-6)
+        f_new = sample.loglikelihood_prime_dcm(theta, g.args)
 
         # debug
         # print(a)
         # print(x0, x)
-        # print('f_sample, f_correct', f_full, f_notrd)
+        # print(f_sample)
+        # print(f_new)
+        # for i in range(2*n_rd):
+        #         if not np.allclose(f_new[i], f_sample[i],atol=1e-1):
+        #             print(i)
 
         # test result
-        # self.assertTrue(np.allclose(f_full, f_notrd))
+        self.assertTrue(np.allclose(f_sample, f_new, atol=1e-1))
+
+
+    def test_loglikelihood_hessian_dcm(self):
+
+        # n,s =(3, 1)
+        n,s =(30, 1)
+        a = mg.random_binary_matrix_generator_custom_density(n=n, p=0.15, sym=False, seed=s)
+
+        g = sample.DirectedGraph(a)
+        g.degree_reduction()
+        g.initial_guess='uniform'
+        g._initialize_problem('dcm', 'newton')
+
+        k_out = g.args[0]
+        k_in = g.args[1]
+        nz_index_out = g.args[2]
+        nz_index_in = g.args[3]
+
+        n_rd = len(k_out)
+        theta = np.random.rand(2*n_rd)
+        f_sample = np.zeros((n_rd*2, n_rd*2))
+        for i in range(n_rd*2):
+            f = lambda x: sample.loglikelihood_prime_dcm(x, g.args)[i]
+            f_sample[i, :] = approx_fprime(theta, f, epsilon=1e-6)
+
+        f_new = sample.loglikelihood_hessian_dcm(theta, g.args)
+
+        """
+        for i in range(2*n_rd):
+            for j in range(2*n_rd):
+                if np.allclose(f_new[i,j], f_sample[i,j], atol=1e-1) == False:
+                    print(i,j)
+                    print(f_new[i,j])
+                    print(f_sample[i,j])
+                    print(f_sample[i,j]/f_new[i,j])
+        """
+
+        # debug
+        # print(theta, x0)
+        # print(g.args)
+        # print(n_rd/n)
+        # print(f_sample)
+        # print(f_new)
+
+        # test result
+        self.assertTrue(np.allclose(f_sample,f_new, atol=1))
 
 
     def test_loglikelihood_hessian_diag_dcm(self):
