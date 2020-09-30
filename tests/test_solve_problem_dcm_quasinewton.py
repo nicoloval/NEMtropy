@@ -13,14 +13,9 @@ class MyTest(unittest.TestCase):
         pass
 
 
-    def test_qn_dcm_0(self):
-        """test with 3 classes of cardinality 1
-        and no zero degrees
-        """
-        A = np.array([[0, 1, 1],
-                      [1, 0, 0],
-                      [0, 1, 0],
-			])
+    def test_qn_0(self):
+        n, seed = (4, 22)
+        A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
 
@@ -35,13 +30,10 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-1)
 
 
-    def test_qn_dcm_1(self):
-        """classes with cardinality > 1, no zero degree
-        """
-        # test Matrix 1
+    def test_qn_1(self):
         n, seed = (4, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        # print(A)
+        A[0,:] = 0
 
         g = sample.DirectedGraph(A)
 
@@ -67,13 +59,13 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-2)
 
 
-    def test_qn_dcm_2(self):
+    @unittest.skip("skip large graph")
+    def test_qn_2(self):
         """classes with cardinality 1 and zero degrees
         """
         # test Matrix 1
-        n, seed = (10, 22)
+        n, seed = (40, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        A[0,:] = 0
         # print(A)
 
         g = sample.DirectedGraph(A)
@@ -100,11 +92,12 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-2)
 
 
-    def test_qn_dcm_3(self):
+    @unittest.skip("skip large graph")
+    def test_qn_3(self):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
-        n, seed = (100, 22)
+        n, seed = (40, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         A[0,:] = 0
 

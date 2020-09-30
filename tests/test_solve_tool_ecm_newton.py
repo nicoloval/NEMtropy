@@ -34,8 +34,6 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-2)
 
 
-
-
 if __name__ == '__main__':
     
     unittest.main()

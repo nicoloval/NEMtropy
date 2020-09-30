@@ -13,9 +13,6 @@ class MyTest(unittest.TestCase):
 
 
     def test_iterative_0(self):
-        """test with 3 classes of cardinality 1
-        and no zero degrees
-        """
         
         A = np.array([[0, 2, 3, 0],
                       [1, 0, 1, 0],

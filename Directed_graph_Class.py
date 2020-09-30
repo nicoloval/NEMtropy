@@ -1270,7 +1270,9 @@ def solver(x0, fun, step_fun, linsearch_fun, fun_jac=None, tol=1e-6, eps=1e-3, m
 
         # stopping condition computation
         norm = np.linalg.norm(f)
-        diff = np.linalg.norm(x - x_old)
+        diff_v = x - x_old 
+        diff_v[np.isnan(diff_v)] = 0  # to avoid nans given by inf-inf
+        diff = np.linalg.norm(diff_v)
 
         if full_return:
             norm_seq.append(norm)
@@ -1881,10 +1883,10 @@ class DirectedGraph:
             self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
             self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
         elif self.initial_guess == 'uniform':
-            self.x = 0.9*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
-            self.y = 0.9*np.ones(self.n_nodes, dtype=np.float64)
-            self.b_out = 0.9*np.ones(self.n_nodes, dtype=np.float64) 
-            self.b_in = 0.9*np.ones(self.n_nodes, dtype=np.float64)
+            self.x = 0.1*np.ones(self.n_nodes, dtype=np.float64)  # All probabilities will be 1/2 initially
+            self.y = 0.1*np.ones(self.n_nodes, dtype=np.float64)
+            self.b_out = 0.1*np.ones(self.n_nodes, dtype=np.float64) 
+            self.b_in = 0.1*np.ones(self.n_nodes, dtype=np.float64)
  
         
         self.x[self.dseq_out == 0] = 1e3 

@@ -49,8 +49,8 @@ class MyTest(unittest.TestCase):
         # print(a)
         # print(theta, x0)
         # print(g.args)
-        print(f_new)
-        print(f_full)
+        # print(f_new)
+        # print(f_full)
 
         # test result
         # first halves are same, second not

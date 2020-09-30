@@ -13,14 +13,14 @@ class MyTest(unittest.TestCase):
         pass
 
 
-    def test_fixedpoint_0(self):
+    def test_fixedpoint_6(self):
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
 
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True) 
+        g._solve_problem(model='decm_new', method='fixed-point', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True) 
 
         g.solution_error()
         # debug
@@ -30,7 +30,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1)
 
 
-    def test_fixedpoint_1(self):
+    def test_fixedpoint_dcm_7(self):
         # test Matrix 1
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
@@ -38,7 +38,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True)
+        g._solve_problem(model='decm_new', method='fixed-point', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         # debug
@@ -49,14 +49,14 @@ class MyTest(unittest.TestCase):
 
 
     @unittest.skip("skip large graph")
-    def test_fixedpoint_dcm_2(self):
+    def test_fixedpoint_dcm_9(self):
         # test Matrix 1
         n, seed = (40, 35)
         A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=25000, verbose=False, initial_guess='uniform', linsearch = True)
+        g._solve_problem(model='decm_new', method='fixed-point', max_steps=25000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         # debug
@@ -75,7 +75,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='fixed-point', max_steps=20000, verbose=False, initial_guess='uniform', linsearch = True)
+        g._solve_problem(model='decm_new', method='fixed-point', max_steps=20000, verbose=False, initial_guess='uniform', linsearch = True)
 
         g.solution_error()
         # debug

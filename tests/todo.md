@@ -1,7 +1,7 @@
-* scorporare tutti i test sui solver
+* ~~scorporare tutti i test sui solver~~
 
-* cancellare roba inutile
+* ~~cancellare roba inutile~~
 
-* skippare test grandi
+* ~~skippare test grandi~~
 
 * controllare di avere tutti i test necessari 

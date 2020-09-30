@@ -64,6 +64,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-1)
 
 
+    @unittest.skip('skip large graph')
     def test_fixedpoint_cm_9(self):
         """classes with cardinality more than 1 and zero degrees
         """

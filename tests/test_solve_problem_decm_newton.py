@@ -13,10 +13,7 @@ class MyTest(unittest.TestCase):
         pass
 
 
-    def test_newton_decm_1(self):
-        """ 
-        * no zeros
-        """
+    def test_newton_1(self):
         # test Matrix 1
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
@@ -35,11 +32,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1)
 
 
-    def test_newton_decm_2(self):
-        """
-        * zeros
-        * works only with regularise=False
-        """
+    def test_newton_2(self):
         # test Matrix 1
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
@@ -47,7 +40,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform', regularise=False)
+        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform', regularise=True)
 
         g.solution_error()
 
@@ -61,12 +54,9 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1)
 
 
-    def test_newton_decm_3(self):
-        """
-        * no zeros
-        """
-        # test Matrix 1
-        n, seed = (50, 22)
+    @unittest.skip("skip large graph")
+    def test_newton_3(self):
+        n, seed = (40, 22)
         A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
 
         g = sample.DirectedGraph(A)
@@ -84,21 +74,15 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1)
 
 
-
-
+    @unittest.skip("skip large graph")
     def test_newton_decm_4(self):
-        """
-        * zeros
-        * works only with regularise=False
-        """
-        # test Matrix 1
-        n, seed = (50, 22)
+        n, seed = (40, 22)
         A = mg.random_weighted_matrix_generator_dense(n, sym=False, seed=seed, sup_ext = 100, intweights=True)
         A[0,:] = 0
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform', regularise=False)
+        g._solve_problem(model='decm', method='newton', max_steps=300, verbose=False, initial_guess='uniform', regularise=True)
 
         g.solution_error()
 

@@ -13,15 +13,9 @@ class MyTest(unittest.TestCase):
         pass
 
 
-    def test_newton_dcm_0(self):
-        """classes with cardinality more than 1 and zero degrees
-        """
-        # test Matrix 1
-        A = np.array([[0, 1, 1],
-              [1, 0, 0],
-              [0, 1, 0],
-                ])
-
+    def test_newton_0(self):
+        n, seed = (4, 22)
+        A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
 
@@ -38,13 +32,13 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1)
 
 
-
-    def test_newton_dcm_1(self):
+    def test_newton_1(self):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
-        n, seed = (80, 22)
+        n, seed = (4, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
+        A[0,:] = 0
 
         g = sample.DirectedGraph(A)
 
@@ -61,11 +55,12 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1)
 
 
-    def test_newton_dcm_2(self):
+    @unittest.skip("skip large graph")
+    def test_newton_2(self):
         """classes with cardinality more than 1 and zero degrees
         """
         # test Matrix 1
-        n, seed = (100, 22)
+        n, seed = (40, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
@@ -83,11 +78,10 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1)
 
 
-    def test_newton_dcm_3(self):
-        """classes with cardinality more than 1 and zero degrees
-        """
+    @unittest.skip("skip large graph")
+    def test_newton_3(self):
         # test Matrix 1
-        n, seed = (150, 22)
+        n, seed = (40, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
