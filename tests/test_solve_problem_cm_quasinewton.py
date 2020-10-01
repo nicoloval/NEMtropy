@@ -1,5 +1,6 @@
 import sys
-sys.path.append('../')
+
+sys.path.append("../")
 import Undirected_graph_Class as sample
 import Matrix_Generator as mg
 import numpy as np
@@ -7,24 +8,30 @@ import unittest  # test tool
 
 
 class MyTest(unittest.TestCase):
-
-
     def setUp(self):
         pass
-
 
     def test_fixedpoint_cm_5(self):
         """test with 3 classes of cardinality 1
         and no zero degrees
         """
-        A = np.array([[0, 0, 1],
-                      [0, 0, 1],
-                      [1, 1, 0],
-			])
+        A = np.array(
+            [
+                [0, 0, 1],
+                [0, 0, 1],
+                [1, 1, 0],
+            ]
+        )
 
         g = sample.UndirectedGraph(A)
 
-        g._solve_problem(model='cm-new', method='quasinewton', max_steps=100, verbose=False, linsearch = True)
+        g._solve_problem(
+            model="cm-new",
+            method="quasinewton",
+            max_steps=100,
+            verbose=False,
+            linsearch=True,
+        )
 
         g.solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
@@ -39,16 +46,20 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(g.error < 1e-1)
 
-
     def test_fixedpoint_cm_6(self):
-        """classes with cardinality > 1, no zero degree
-        """
+        """classes with cardinality > 1, no zero degree"""
         n, seed = (20, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=True, seed=seed)
 
         g = sample.UndirectedGraph(A)
 
-        g._solve_problem(model='cm-new', method='quasinewton', max_steps=300, verbose=False, linsearch = 'True')
+        g._solve_problem(
+            model="cm-new",
+            method="quasinewton",
+            max_steps=300,
+            verbose=False,
+            linsearch="True",
+        )
 
         g.solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
@@ -63,18 +74,22 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(g.error < 1e-1)
 
-
-    @unittest.skip('skip large graph') 
+    @unittest.skip("skip large graph")
     def test_fixedpoint_cm_9(self):
-        """classes with cardinality more than 1 and zero degrees
-        """
+        """classes with cardinality more than 1 and zero degrees"""
         # test Matrix 1
         n, seed = (100, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=True, seed=seed)
 
         g = sample.UndirectedGraph(A)
 
-        g._solve_problem(model='cm-new', method='quasinewton', max_steps=300, verbose=False, linsearch = 'True')
+        g._solve_problem(
+            model="cm-new",
+            method="quasinewton",
+            max_steps=300,
+            verbose=False,
+            linsearch="True",
+        )
 
         g.solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
@@ -90,6 +105,5 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1e-1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-

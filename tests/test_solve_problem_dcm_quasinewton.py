@@ -1,5 +1,6 @@
 import sys
-sys.path.append('../')
+
+sys.path.append("../")
 import Directed_graph_Class as sample
 import Matrix_Generator as mg
 import numpy as np
@@ -7,11 +8,8 @@ import unittest  # test tool
 
 
 class MyTest(unittest.TestCase):
-
-
     def setUp(self):
         pass
-
 
     def test_0(self):
         n, seed = (4, 22)
@@ -19,8 +17,13 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-
-        g._solve_problem(model='dcm', method='quasinewton', max_steps=400, verbose=False, initial_guess='uniform')
+        g._solve_problem(
+            model="dcm",
+            method="quasinewton",
+            max_steps=400,
+            verbose=False,
+            initial_guess="uniform",
+        )
 
         g.solution_error()
         # debug
@@ -29,15 +32,20 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(g.error < 1e-1)
 
-
     def test_1(self):
         n, seed = (4, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        A[0,:] = 0
+        A[0, :] = 0
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='dcm', method='quasinewton', max_steps=100, verbose=False, initial_guess='uniform')
+        g._solve_problem(
+            model="dcm",
+            method="quasinewton",
+            max_steps=100,
+            verbose=False,
+            initial_guess="uniform",
+        )
 
         g.solution_error()
         # debug
@@ -50,7 +58,6 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(g.error < 1e-2)
 
-
     @unittest.skip("skip large graph")
     def test_2(self):
         # test Matrix 1
@@ -60,7 +67,13 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='dcm', method='quasinewton', max_steps=100, verbose=False, initial_guess='uniform')
+        g._solve_problem(
+            model="dcm",
+            method="quasinewton",
+            max_steps=100,
+            verbose=False,
+            initial_guess="uniform",
+        )
 
         g.solution_error()
         # debug
@@ -73,17 +86,22 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(g.error < 1e-2)
 
-
     @unittest.skip("skip large graph")
     def test_3(self):
         # test Matrix 1
         n, seed = (40, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        A[0,:] = 0
+        A[0, :] = 0
 
         g = sample.DirectedGraph(A)
 
-        g._solve_problem(model='dcm', method='quasinewton', max_steps=100, verbose=False, initial_guess='uniform')
+        g._solve_problem(
+            model="dcm",
+            method="quasinewton",
+            max_steps=100,
+            verbose=False,
+            initial_guess="uniform",
+        )
 
         g.solution_error()
         # debug
@@ -96,28 +114,33 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(g.error < 1e-2)
 
-
     @unittest.skip("skip large graph")
     def test_emi(self):
 
-        n, seed = (50,1)
+        n, seed = (50, 1)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         k_out = np.sum(a, 1)
         k_in = np.sum(a, 0)
 
         g = sample.DirectedGraph(a)
-        g._solve_problem(model='dcm', method='quasinewton', max_steps=3000, verbose=False, initial_guess='uniform', linsearch = 'False')
+        g._solve_problem(
+            model="dcm",
+            method="quasinewton",
+            max_steps=3000,
+            verbose=False,
+            initial_guess="uniform",
+            linsearch="False",
+        )
 
         g.solution_error()
         err = g.error
         # debug
-        print('\ntest emi: error = {}'.format(err))
+        print("\ntest emi: error = {}".format(err))
 
         # test result
-        self.assertTrue(err< 1)
+        self.assertTrue(err < 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-
