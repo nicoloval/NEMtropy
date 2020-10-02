@@ -2164,7 +2164,7 @@ class DirectedGraph:
         #TODO: aggiungere tutti i metodi
         if model in ['dcm', 'dcm_new', 'decm', 'decm_new']:
             self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
-        elif model in ['CReAMa']:
+        elif model in ['CReAMa','CReAMa-sparse']:
             self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
 
 
