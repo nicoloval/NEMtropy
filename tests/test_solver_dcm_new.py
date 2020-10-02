@@ -2,7 +2,8 @@
 # all tests works
 """
 import sys
-sys.path.append('../')
+
+sys.path.append("../")
 import Directed_graph_Class as sample
 from Directed_new import *
 import Matrix_Generator as mg
@@ -11,14 +12,11 @@ import unittest  # test tool
 
 
 class MyTest(unittest.TestCase):
-
-
     def setUp(self):
         pass
 
-
     def test_iterative_0(self):
-        
+
         n, seed = (4, 22)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
@@ -27,23 +25,36 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = 100 
-        args = g.args 
+        x0[x0 == 0] = 100
+        args = g.args
 
         fun = lambda x: iterative_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
-        f= fun(x0)
+        f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=700, method='fixed-point', verbose=False, regularise=True, full_return = False, linsearch=False)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-10,
+            max_steps=700,
+            method="fixed-point",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=False,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -51,7 +62,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -60,37 +76,49 @@ class MyTest(unittest.TestCase):
         # print('\ntest 0: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     def test_iterative_1(self):
-        
+
         n, seed = (4, 22)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        a[0,:] = 0
+        a[0, :] = 0
 
         k_out = np.sum(a, 1)
         k_in = np.sum(a, 0)
 
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = 100 
-        args = g.args 
+        x0[x0 == 0] = 100
+        args = g.args
 
         fun = lambda x: iterative_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
-        f= fun(x0)
+        f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=700, method='fixed-point', verbose=False, regularise=True, full_return = False, linsearch=False)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-10,
+            max_steps=700,
+            method="fixed-point",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=False,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -98,7 +126,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -107,8 +140,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 0: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     @unittest.skip("skip large graph")
     def test_iterative_2(self):
@@ -125,23 +157,36 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = 1e3
-        args = g.args 
+        args = g.args
 
         fun = lambda x: iterative_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
-        f= fun(x0)
+        f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=700, method='fixed-point', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-10,
+            max_steps=700,
+            method="fixed-point",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -149,7 +194,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -158,15 +208,14 @@ class MyTest(unittest.TestCase):
         # print('\ntest 1: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     @unittest.skip("skip large graph")
     def test_iterative_3(self):
 
         n, seed = (40, 22)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        a[0,:] = 0
+        a[0, :] = 0
 
         k_out = np.sum(a, 1)
         k_in = np.sum(a, 0)
@@ -177,23 +226,36 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = 1e3
-        args = g.args 
+        args = g.args
 
         fun = lambda x: iterative_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
-        f= fun(x0)
+        f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun,  linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=700, method='fixed-point', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-10,
+            max_steps=700,
+            method="fixed-point",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -201,7 +263,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -210,8 +277,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 2: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     def test_newton_0(self):
 
@@ -227,24 +293,38 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = np.infty
-        args = g.args 
+        args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
-        f= fun(x0)
+        f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac = fun_jac, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            fun_jac=fun_jac,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-10,
+            max_steps=100,
+            method="newton",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -252,7 +332,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -261,14 +346,13 @@ class MyTest(unittest.TestCase):
         # print('\ntest 3: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     def test_newton_1(self):
 
         n, seed = (4, 26)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        a[0,:] = 0
+        a[0, :] = 0
 
         k_out = np.sum(a, 1)
         k_in = np.sum(a, 0)
@@ -279,24 +363,38 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = np.infty
-        args = g.args 
+        args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
-        f= fun(x0)
+        f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac = fun_jac, linsearch_fun = lin_fun, tol=1e-6, eps=1e-10, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            fun_jac=fun_jac,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-10,
+            max_steps=100,
+            method="newton",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -304,7 +402,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -313,8 +416,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 3: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     @unittest.skip("skip large graph")
     def test_newton_1(self):
@@ -334,24 +436,38 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = np.infty
-        args = g.args 
+        args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
-        f= fun(x0)
+        f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac = fun_jac, linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            fun_jac=fun_jac,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-1,
+            max_steps=100,
+            method="newton",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -359,7 +475,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -368,8 +489,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 4: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     @unittest.skip("skip large graph")
     def test_newton_2(self):
@@ -379,7 +499,7 @@ class MyTest(unittest.TestCase):
         # n, seed = (4, 26)
         # n, seed = (5, 26)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
-        a[0,:] = 0
+        a[0, :] = 0
 
         k_out = np.sum(a, 1)
         k_in = np.sum(a, 0)
@@ -390,24 +510,38 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = np.infty
-        args = g.args 
+        args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
-        f= fun(x0)
+        f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac = fun_jac, linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=100, method='newton', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            fun_jac=fun_jac,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-1,
+            max_steps=100,
+            method="newton",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -415,7 +549,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -424,8 +563,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 5: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     def test_quasinewton_0(self):
 
@@ -441,24 +579,38 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = np.infty
-        args = g.args 
+        args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac = fun_jac, linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=100, method='quasinewton', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            fun_jac=fun_jac,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-1,
+            max_steps=100,
+            method="quasinewton",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -466,7 +618,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -475,8 +632,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 6: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
         # debug
         # print(ek)
@@ -484,8 +640,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 7: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     def test_quasinewton_1(self):
 
@@ -502,24 +657,38 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = np.infty
-        args = g.args 
+        args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac = fun_jac, linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=100, method='quasinewton', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            fun_jac=fun_jac,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-1,
+            max_steps=100,
+            method="quasinewton",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -527,7 +696,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -536,8 +710,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 6: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
         # debug
         # print(ek)
@@ -545,9 +718,8 @@ class MyTest(unittest.TestCase):
         # print('\ntest 7: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
+        self.assertTrue(err < 1e-2)
 
-        
     @unittest.skip("skip large graph")
     def test_quasinewton_2(self):
 
@@ -563,24 +735,38 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = np.infty
-        args = g.args 
+        args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac = fun_jac, linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=100, method='quasinewton', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            fun_jac=fun_jac,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-1,
+            max_steps=100,
+            method="quasinewton",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -588,7 +774,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -597,8 +788,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 6: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
         # debug
         # print(ek)
@@ -606,8 +796,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 7: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
     @unittest.skip("skip large graph")
     def test_quasinewton_3(self):
@@ -625,24 +814,38 @@ class MyTest(unittest.TestCase):
         """
         g = sample.DirectedGraph(a)
         g.degree_reduction()
-        g.initial_guess='random'
+        g.initial_guess = "random"
         g.full_return = False
-        g._set_initial_guess('dcm')
-        g._set_args('dcm')
+        g._set_initial_guess("dcm")
+        g._set_args("dcm")
 
         x0 = g.x0
         x0[x0 == 0] = np.infty
-        args = g.args 
+        args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun, ))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(x0, fun=fun, step_fun=step_fun, fun_jac = fun_jac, linsearch_fun = lin_fun, tol=1e-6, eps=1e-1, max_steps=100, method='quasinewton', verbose=False, regularise=True, full_return = False, linsearch=True)
+        theta_sol = sample.solver(
+            x0,
+            fun=fun,
+            step_fun=step_fun,
+            fun_jac=fun_jac,
+            linsearch_fun=lin_fun,
+            tol=1e-6,
+            eps=1e-1,
+            max_steps=100,
+            method="quasinewton",
+            verbose=False,
+            regularise=True,
+            full_return=False,
+            linsearch=True,
+        )
 
         g._set_solved_problem_dcm(theta_sol)
         theta_sol_full = np.concatenate((g.x, g.y))
@@ -650,7 +853,12 @@ class MyTest(unittest.TestCase):
         sol = np.exp(-theta_sol_full)
         sol[np.isnan(sol)] = 0
 
-        ek = np.concatenate((sample.expected_out_degree_dcm(sol), sample.expected_in_degree_dcm(sol)))
+        ek = np.concatenate(
+            (
+                sample.expected_out_degree_dcm(sol),
+                sample.expected_in_degree_dcm(sol),
+            )
+        )
         k = np.concatenate((k_out, k_in))
         err = np.max(abs(ek - k))
         # debug
@@ -659,8 +867,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 6: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
-
+        self.assertTrue(err < 1e-2)
 
         # debug
         # print(ek)
@@ -668,9 +875,8 @@ class MyTest(unittest.TestCase):
         # print('\ntest 7: error = {}'.format(err))
 
         # test result
-        self.assertTrue(err< 1e-2)
+        self.assertTrue(err < 1e-2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-
