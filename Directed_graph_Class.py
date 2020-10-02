@@ -2492,7 +2492,7 @@ class DirectedGraph:
         d_pmatrix = {"dcm": pmatrix_dcm}
 
         # Così basta aggiungere il decm e funziona tutto
-        if model in ["dcm"]:
+        if model in ["dcm","dcm_new"]:
             self.args_p = (
                 self.n_nodes,
                 np.nonzero(self.dseq_out)[0],
