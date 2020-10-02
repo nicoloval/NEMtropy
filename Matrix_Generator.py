@@ -130,9 +130,8 @@ def random_weighted_matrix_generator_dense(
                 while np.sum(A[:, ind]) == 0:
                     indices = np.random.randint(A.shape[0])
                     if indices != ind:
-                        aux_ind = np.random.randint(A.shape[0])
-                        A[aux_ind, indices] = np.random.random() * sup_ext
-                        A[indices, aux_ind] = A[aux_ind, indices]
+                        A[ind, indices] = np.random.random() * sup_ext
+                        A[indices, ind] = A[ind, indices]
         if intweights:
             return np.ceil(A)
         else:
@@ -186,9 +185,8 @@ def random_weighted_matrix_generator_uniform_custom_density(
                 while np.sum(A[:, ind]) == 0:
                     indices = np.random.randint(A.shape[0])
                     if indices != ind:
-                        aux_ind = np.random.randint(A.shape[0])
-                        A[aux_ind, indices] = np.random.random() * sup_ext
-                        A[indices, aux_ind] = A[aux_ind, indices]
+                        A[ind, indices] = np.random.random() * sup_ext
+                        A[indices, ind] = A[ind, indices]
         if intweights:
             return np.ceil(A)
         else:
@@ -237,17 +235,17 @@ def random_weighted_matrix_generator_gaussian_custom_density(
                     A[i, j] = np.random.normal(loc=mean, scale=sigma)
                     A[j, i] = A[i, j]
         np.fill_diagonal(A, 0)
+        print(A)
         degree = np.sum(A, axis=0)
         for ind, k in enumerate(degree):
             if k == 0:
                 while np.sum(A[:, ind]) == 0:
                     indices = np.random.randint(A.shape[0])
                     if indices != ind:
-                        aux_ind = np.random.randint(A.shape[0])
-                        A[aux_ind, indices] = np.random.normal(
+                        A[indices, ind] = np.random.normal(
                             loc=mean, scale=sigma
                         )
-                        A[indices, aux_ind] = A[aux_ind, indices]
+                        A[ind, indices] = A[indices, ind]
         if intweights:
             return np.ceil(A)
         else:
