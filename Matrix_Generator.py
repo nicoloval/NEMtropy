@@ -13,8 +13,7 @@ def random_binary_matrix_generator_dense(n, sym=False, seed=None):
         np.random.seed(seed=seed)
         A = np.random.randint(0, 2, size=(n, n))
         # zeros on the diagonal
-        for i in range(n):
-            A[i, i] = 0
+        np.fill_diagonal(A, 0)
         k_in = np.sum(A, axis=0)
         k_out = np.sum(A, axis=1)
         for ind, ki, ko in zip(np.arange(k_in.shape[0]), k_in, k_out):
@@ -32,8 +31,7 @@ def random_binary_matrix_generator_dense(n, sym=False, seed=None):
         A = np.random.randint(0, 2, size=(n, n))
         A = ((A + A.T) / 2).astype(int)
         # zeros on the diagonal
-        for i in range(n):
-            A[i, i] = 0
+        np.fill_diagonal(A, 0)
         k = np.sum(A, axis=0)
         for ind, kk in zip(np.arange(k.shape[0]), k):
             if kk == 0:
@@ -79,6 +77,7 @@ def random_binary_matrix_generator_custom_density(
                 if np.random.random() <= p:
                     A[i, j] = 1
                     A[j, i] = A[i, j]
+        np.fill_diagonal(A, 0)
         degree = np.sum(A, axis=0)
         for ind, k in enumerate(degree):
             if k == 0:
@@ -237,6 +236,7 @@ def random_weighted_matrix_generator_gaussian_custom_density(
                 if np.random.random() <= p:
                     A[i, j] = np.random.normal(loc=mean, scale=sigma)
                     A[j, i] = A[i, j]
+        np.fill_diagonal(A, 0)
         degree = np.sum(A, axis=0)
         for ind, k in enumerate(degree):
             if k == 0:
