@@ -2489,7 +2489,7 @@ class DirectedGraph:
             )
 
         # TODO: mancano metodi
-        d_pmatrix = {"dcm": pmatrix_dcm}
+        d_pmatrix = {"dcm": pmatrix_dcm, "dcm_new": pmatrix_dcm}
 
         # Così basta aggiungere il decm e funziona tutto
         if model in ["dcm","dcm_new"]:
@@ -2500,7 +2500,7 @@ class DirectedGraph:
             )
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
-        self.args_lins = (self.step_fun,)
+        self.args_lins = (self.step_fun,)ß
 
         lins_fun = {
             "dcm": lambda x: linsearch_fun_DCM(x, self.args_lins),
