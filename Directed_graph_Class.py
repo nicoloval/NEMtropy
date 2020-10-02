@@ -2606,24 +2606,6 @@ class DirectedGraph:
             self.comput_time_creama = solution[1]
             self.n_steps_creama = solution[2]
             self.norm_seq_creama = solution[3]
-<<<<<<< HEAD
-        
-        else:
-            self.b_out = solution[:self.n_nodes]
-            self.b_in = solution[self.n_nodes:]
-
-
-    def solve_tool(self, model, method, initial_guess=None, adjacency=None, max_steps=100, full_return=False, verbose=False, tol=1e-8):
-        """ function to switch around the various problems
-        """
-        #TODO: aggiungere tutti i metodi
-        if model in ['dcm', 'dcm_new', 'decm', 'decm_new']:
-            self._solve_problem(initial_guess=initial_guess, model=model, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
-        elif model in ['CReAMa','CReAMa-sparse']:
-            self._solve_problem_CReAMa(initial_guess=initial_guess, model=model, adjacency=adjacency, method=method, max_steps=max_steps, full_return=full_return, verbose=verbose, tol=tol)
-=======
->>>>>>> bc90414ea8c9af70607b284c5fd70b4879b6ca34
-
         else:
             self.b_out = solution[: self.n_nodes]
             self.b_in = solution[self.n_nodes :]
@@ -2651,7 +2633,7 @@ class DirectedGraph:
                 verbose=verbose,
                 tol=tol,
             )
-        elif model in ["CReAMa"]:
+        elif model in ["CReAMa",'CReAMa-sparse']:
             self._solve_problem_CReAMa(
                 initial_guess=initial_guess,
                 model=model,
