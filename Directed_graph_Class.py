@@ -2500,7 +2500,7 @@ class DirectedGraph:
             )
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
-        self.args_lins = (self.step_fun,)ß
+        self.args_lins = (self.step_fun,)
 
         lins_fun = {
             "dcm": lambda x: linsearch_fun_DCM(x, self.args_lins),
