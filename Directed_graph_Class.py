@@ -151,20 +151,17 @@ def iterative_CReAMa_Sparse(beta, args):
 
     x = adj[0]
     y = adj[1]
-
-    for i in np.arange(aux_n):
-        for j in np.arange(aux_n):
-            if i != j:
+    
+    for i in x.nonzero()[0]:
+        for j in y.nonzero()[0]:
+            if i!=j:
                 aux = x[i] * y[j]
                 aux_entry = aux / (1 + aux)
                 if aux_entry > 0:
                     aux = aux_entry / (1 + beta_in[j] / beta_out[i])
                     xd[i] -= aux / s_out[i]
-                aux = x[j] * y[i]
-                aux_entry = aux / (1 + aux)
-                if aux_entry > 0:
-                    aux = aux_entry / (1 + beta_out[j] / beta_in[i])
-                    yd[i] -= aux / s_in[i]
+                    aux = aux_entry / (1 + beta_out[i] / beta_in[j])
+                    yd[j] -= aux / s_in[j]
 
     return np.concatenate((xd, yd))
 
@@ -281,19 +278,18 @@ def loglikelihood_prime_CReAMa_Sparse(beta, args):
     x = adj[0]
     y = adj[1]
 
-    for i in np.arange(aux_n):
+    for i in x.nonzero()[0]:
         aux_F_out[i] -= s_out[i]
-        aux_F_in[i] -= s_in[i]
-        for j in np.arange(aux_n):
+        for j in y.nonzero()[0]:
             if i != j:
                 aux = x[i] * y[j]
                 aux_value = aux / (1 + aux)
                 if aux_value > 0:
                     aux_F_out[i] += aux_value / (beta_out[i] + beta_in[j])
-                aux = x[j] * y[i]
-                aux_value = aux / (1 + aux)
-                if aux_value > 0:
-                    aux_F_in[i] += aux_value / (beta_out[j] + beta_in[i])
+                    aux_F_in[j] += aux_value / (beta_out[i] + beta_in[j])
+    
+    for j in y.nonzero()[0]:
+        aux_F_in[j] -= s_in[j]
 
     return np.concatenate((aux_F_out, aux_F_in))
 
@@ -2462,10 +2458,10 @@ class DirectedGraph:
             )
 
         # TODO: mancano metodi
-        d_pmatrix = {"dcm": pmatrix_dcm}
+        d_pmatrix = {"dcm": pmatrix_dcm, "dcm_new": pmatrix_dcm}
 
         # Così basta aggiungere il decm e funziona tutto
-        if model in ["dcm"]:
+        if model in ["dcm","dcm_new"]:
             self.args_p = (
                 self.n_nodes,
                 np.nonzero(self.dseq_out)[0],
@@ -2579,7 +2575,6 @@ class DirectedGraph:
             self.comput_time_creama = solution[1]
             self.n_steps_creama = solution[2]
             self.norm_seq_creama = solution[3]
-
         else:
             self.b_out = solution[: self.n_nodes]
             self.b_in = solution[self.n_nodes :]
@@ -2607,7 +2602,7 @@ class DirectedGraph:
                 verbose=verbose,
                 tol=tol,
             )
-        elif model in ["CReAMa"]:
+        elif model in ["CReAMa",'CReAMa-sparse']:
             self._solve_problem_CReAMa(
                 initial_guess=initial_guess,
                 model=model,

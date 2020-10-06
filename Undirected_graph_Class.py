@@ -1707,7 +1707,7 @@ class UndirectedGraph:
                 verbose=verbose,
                 tol=tol,
             )
-        elif model in ["CReAMa"]:
+        elif model in ["CReAMa","CReAMa-sparse"]:
             self._solve_problem_CReAMa(
                 initial_guess=initial_guess,
                 model=model,
