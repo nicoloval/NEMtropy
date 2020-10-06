@@ -502,7 +502,7 @@ def solver(
     linsearch_fun,
     fun_jac=None,
     tol=1e-6,
-    eps=1e-3,
+    eps=1e-16,
     max_steps=100,
     method="newton",
     verbose=False,
@@ -542,7 +542,7 @@ def solver(
     tic_loop = time.time()
 
     while (
-        norm > tol and diff > tol and n_steps < max_steps
+        norm > tol and diff > eps and n_steps < max_steps
     ):  # stopping condition
 
         x_old = x  # save previous iteration
@@ -551,19 +551,20 @@ def solver(
         tic = time.time()
         if method == "newton":
             H = fun_jac(x)  # original jacobian
-            # check the hessian is positive definite
-            l, e = scipy.linalg.eigh(H)
-            ml = np.min(l)
-            # if it's not positive definite -> regularise
-            if ml < eps:
-                regularise = True
-            # regularisation
-            if regularise == True:
+            # TODO: levare i verbose sugli eigenvalues
+            if verbose:
+                l, e = scipy.linalg.eigh(H)
+                ml = np.min(l)
+                Ml = np.max(l)
+            if regularise:
                 B = hessian_regulariser_function(
                     H, np.max(np.abs(fun(x))) * 1e-3
                 )
-                l, e = scipy.linalg.eigh(B)
-                new_ml = np.min(l)
+                # TODO: levare i verbose sugli eigenvalues
+                if verbose:
+                    l, e = scipy.linalg.eigh(B)
+                    new_ml = np.min(l)
+                    new_Ml = np.max(l)
             else:
                 B = H.__array__()
         elif method == "quasinewton":
@@ -598,7 +599,9 @@ def solver(
         tic = time.time()
         # solution update
         # direction= dx@fun(x).T
+
         x = x + alfa * dx
+
         toc_update += time.time() - tic
 
         f = fun(x)
@@ -1217,10 +1220,11 @@ class UndirectedGraph:
         model="cm",
         method="quasinewton",
         max_steps=100,
+        tol=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
-        tol=1e-8,
+        regularise=True,
     ):
 
         self.last_model = model
@@ -1236,11 +1240,10 @@ class UndirectedGraph:
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
             tol=tol,
-            eps=1e-10,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
-            regularise=True,
+            regularise=regularise,
             full_return=full_return,
             linsearch=linsearch,
         )
@@ -1572,9 +1575,11 @@ class UndirectedGraph:
         adjacency="cm",
         method="quasinewton",
         max_steps=100,
+        tol=1e-8,
         full_return=False,
         verbose=False,
-        tol=1e-8,
+        linsearch=True,
+        regularise=True,
     ):
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
             not scipy.sparse.isspmatrix(adjacency)
@@ -1588,6 +1593,8 @@ class UndirectedGraph:
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
+                linsearch=linsearch,
+                regularise=regularise
             )
             if self.is_sparse:
                 self.adjacency_CReAMa = (self.x,)
@@ -1627,6 +1634,8 @@ class UndirectedGraph:
             self.last_model = "CReAMa-sparse"
         else:
             self.last_model = model
+            linsearch=linsearch,
+            regularise=regularise
         self.full_return = full_return
         self.initial_guess = "strengths"
         self._initialize_problem(self.last_model, method)
@@ -1639,11 +1648,11 @@ class UndirectedGraph:
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
             tol=tol,
-            eps=1e-10,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
-            regularise=True,
+            regularise=regularise,
+            linsearch=linsearch,
             full_return=full_return,
         )
 

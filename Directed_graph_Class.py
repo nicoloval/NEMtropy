@@ -1276,7 +1276,7 @@ def solver(
     linsearch_fun,
     fun_jac=None,
     tol=1e-6,
-    eps=1e-3,
+    eps=1e-16,
     max_steps=100,
     method="newton",
     verbose=False,
@@ -1318,7 +1318,6 @@ def solver(
     while (
         norm > tol and n_steps < max_steps and diff > eps
     ):  # stopping condition
-        # TODO: reintroduce diff in stopping condition
 
         x_old = x  # save previous iteration
 
@@ -1327,28 +1326,16 @@ def solver(
         if method == "newton":
             # regularise
             H = fun_jac(x)  # original jacobian
-            # check the hessian is positive definite
-            """
-            n = H.shape[0]
-            for i in range(n):
-                for j in range(n):
-                    if np.isnan(H[i,j]):
-                        print(i,j)
-                        e = np.exp(-x)
-                        print(e)
-            """
+            # TODO: levare i verbose sugli eigenvalues
             if verbose:
                 l, e = scipy.linalg.eigh(H)
                 ml = np.min(l)
                 Ml = np.max(l)
-            # TODO: check this regularity condition
-            # if it's not positive definite -> regularise
-            # regularisation
-            # TODO: check regulirise for decm, it's not working
             if regularise:
                 B = hessian_regulariser_function(
                     H, np.max(np.abs(fun(x))) * 1e-5
                 )
+                # TODO: levare i verbose sugli eigenvalues
                 if verbose:
                     l, e = scipy.linalg.eigh(B)
                     new_ml = np.min(l)
@@ -1358,7 +1345,7 @@ def solver(
         elif method == "quasinewton":
             # quasinewton hessian approximation
             B = fun_jac(x)  # Jacobian diagonal
-            if regularise == True:
+            if regularise:
                 B = np.maximum(B, B * 0 + np.max(np.abs(fun(x))) * 1e-3)
         toc_jacfun += time.time() - tic
 
@@ -1370,14 +1357,11 @@ def solver(
         elif method == "quasinewton":
             dx = -f / B
         elif method == "fixed-point":
-            # print('f',type(f))
-            # print('x',type(x))
             dx = f - x
             # TODO: hotfix to compute dx in infty cases
             for i in range(len(x)):
                 if x[i] == np.infty:
                     dx[i] = np.infty
-            # print('dx',dx)
         toc_dx += time.time() - tic
 
         # backtraking line search
@@ -1396,16 +1380,6 @@ def solver(
         tic = time.time()
         # solution update
         # direction= dx@fun(x).T
-        """
-        if method == 'fixed-point':
-            # print('x = {}'.format(x))
-            # print('f = {}'.format(f))
-            ##  print(alfa)
-            # x = (1-alfa)*x + alfa*f
-            x = alfa*f
-        else:
-            x = x + alfa*dx
-        """
 
         x = x + alfa * dx
 
@@ -1979,7 +1953,6 @@ class DirectedGraph:
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
             tol=tol,
-            eps=1e-10,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
@@ -2519,11 +2492,12 @@ class DirectedGraph:
         model="CReAMa",
         adjacency="dcm",
         method="quasinewton",
-        tol=1e-8,
         max_steps=100,
+        tol=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
+        regularise=True,
     ):
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
             not scipy.sparse.isspmatrix(adjacency)
@@ -2588,13 +2562,12 @@ class DirectedGraph:
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
             tol=tol,
-            eps=1e-10,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
-            regularise=True,
-            full_return=full_return,
+            regularise=regularise,
             linsearch=linsearch,
+            full_return=full_return,
         )
 
         self._set_solved_problem_CReAMa(sol)
