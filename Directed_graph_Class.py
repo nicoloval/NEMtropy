@@ -2255,7 +2255,7 @@ class DirectedGraph:
                 s = np.concatenate([self.out_strength, self.in_strength])
                 self.expected_stregth_seq = ex_s
                 self.error_strength = np.linalg.norm(ex_s - s, ord=np.inf)
-                self.relative_error_strength = (
+                self.relative_error_strength = np.max(
                     (ex_s - s)[s!=0] / s[s!=0]
                 )
         # potremmo strutturarlo così per evitare ridondanze

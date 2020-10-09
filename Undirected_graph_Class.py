@@ -1383,7 +1383,7 @@ class UndirectedGraph:
                 self.error_strength = np.linalg.norm(
                     ex_s - self.strength_sequence, ord=np.inf
                 )
-                self.relative_error_strength = (
+                self.relative_error_strength = np.max(
                      (ex_s - self.strength_sequence)[self.strength_sequence!=0] / self.strength_sequence[self.strength_sequence!=0]
                 )
         # potremmo strutturarlo così per evitare ridondanze
