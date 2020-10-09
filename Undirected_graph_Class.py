@@ -1384,7 +1384,7 @@ class UndirectedGraph:
                     ex_s - self.strength_sequence, ord=np.inf
                 )
                 self.relative_error_strength = (
-                    self.error_strength / self.strength_sequence.sum()
+                     (ex_s - self.strength_sequence)[self.strength_sequence!=0] / self.strength_sequence[self.strength_sequence!=0]
                 )
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["ecm", "ecm-new"]:

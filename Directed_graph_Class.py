@@ -2256,7 +2256,7 @@ class DirectedGraph:
                 self.expected_stregth_seq = ex_s
                 self.error_strength = np.linalg.norm(ex_s - s, ord=np.inf)
                 self.relative_error_strength = (
-                    self.error_strength / self.out_strength.sum()
+                    (ex_s - s)[s!=0] / s[s!=0]
                 )
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["decm", "decm_new"]:
