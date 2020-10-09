@@ -13,6 +13,10 @@ Razionalizazione
 
 * scrivere funzioni per generare l'ensemble
 
+* migliorare l'errore relativo per reti pesate
+
+* migliorare l'errore relativo per reti pesate
+
 
 DONE
 ----
