@@ -235,7 +235,6 @@ def random_weighted_matrix_generator_gaussian_custom_density(
                     A[i, j] = np.random.normal(loc=mean, scale=sigma)
                     A[j, i] = A[i, j]
         np.fill_diagonal(A, 0)
-        print(A)
         degree = np.sum(A, axis=0)
         for ind, k in enumerate(degree):
             if k == 0:
