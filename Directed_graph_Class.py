@@ -1297,6 +1297,8 @@ def solver(
 
     if full_return:
         norm_seq = [norm]
+        diff_seq = [diff]
+        alfa_seq = []
 
     if verbose:
         print("\nx0 = {}".format(x))
@@ -1368,6 +1370,7 @@ def solver(
             alfa1 = 1
             X = (x, dx, beta, alfa1, f)
             alfa = linsearch_fun(X)
+            alfa_seq.append(alfa)
         else:
             alfa = 1
 
@@ -1391,6 +1394,7 @@ def solver(
 
         if full_return:
             norm_seq.append(norm)
+            diff_seq.append(diff)
 
         # step update
         n_steps += 1
@@ -1431,7 +1435,8 @@ def solver(
         print("toc_all = {}".format(toc_all))
 
     if full_return:
-        return (x, toc_all, n_steps, np.array(norm_seq))
+        return (x, toc_all, n_steps, np.array(norm_seq),
+                np.array(diff_seq), np.array(alfa_seq))
     else:
         return x
 
@@ -1965,6 +1970,8 @@ class DirectedGraph:
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
+            self.diff_seq = solution[4]
+            self.alfa_seq = solution[5]
         else:
             self.r_xy = solution
 
@@ -1981,6 +1988,8 @@ class DirectedGraph:
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
+            self.diff_seq = solution[4]
+            self.alfa_seq = solution[5]
         else:
             # conversion from theta to x
             self.r_xy = np.exp(-solution)
@@ -1997,6 +2006,8 @@ class DirectedGraph:
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
+            self.diff_seq = solution[4]
+            self.alfa_seq = solution[5]
         else:
             self.r_xy = solution
 
@@ -2012,6 +2023,8 @@ class DirectedGraph:
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
+            self.diff_seq = solution[4]
+            self.alfa_seq = solution[5]
         else:
             # conversion from theta to x
             self.r_xy = np.exp(-solution)
@@ -2256,7 +2269,9 @@ class DirectedGraph:
                 self.expected_stregth_seq = ex_s
                 self.error_strength = np.linalg.norm(ex_s - s, ord=np.inf)
                 self.relative_error_strength = np.max(
+                    abs(
                     (ex_s - s)[s!=0] / s[s!=0]
+                    )
                 )
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["decm", "decm_new"]:
@@ -2290,8 +2305,18 @@ class DirectedGraph:
                     - self.expected_strength_seq
                 )
             )
-            self.relative_error_strength = self.error / self.out_strength.sum()
-
+            self.relative_error_strength = max(
+                abs(
+                    (np.concatenate((self.out_strength, self.in_strength))
+                                        - self.expected_strength_seq)/np.concatenate((self.out_strength, self.in_strength) + np.exp(-100)
+                )
+            )
+            self.relative_error_degree = max(
+                abs(
+                    (np.concatenate((self.dseq_out, self.dseq_in))
+                                            - self.expected_dseq)/np.concatenate((self.dseq_out, self.dseq_in) + np.exp(-100)
+                )
+            )
     def _set_args(self, model):
 
         if model in ["CReAMa", "CReAMa-sparse"]:
@@ -2575,6 +2600,8 @@ class DirectedGraph:
             self.comput_time_creama = solution[1]
             self.n_steps_creama = solution[2]
             self.norm_seq_creama = solution[3]
+            self.diff_seq_creama = solution[4]
+            self.alfa_seq_creama = solution[5]
         else:
             self.b_out = solution[: self.n_nodes]
             self.b_in = solution[self.n_nodes :]

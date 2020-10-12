@@ -527,6 +527,8 @@ def solver(
 
     if full_return:
         norm_seq = [norm]
+        diff_seq = [diff]
+        alfa_seq = []
 
     if verbose:
         print("\nx0 = {}".format(x))
@@ -591,6 +593,7 @@ def solver(
             alfa1 = 1
             X = (x, dx, beta, alfa1, f)
             alfa = linsearch_fun(X)
+            alfa_seq.append(alfa)
         else:
             alfa = 1
 
@@ -612,6 +615,7 @@ def solver(
 
         if full_return:
             norm_seq.append(norm)
+            diff_seq.append(diff)
 
         # step update
         n_steps += 1
@@ -638,7 +642,8 @@ def solver(
         print("toc_all = {}".format(toc_all))
 
     if full_return:
-        return (x, toc_all, n_steps, np.array(norm_seq))
+        return (x, toc_all, n_steps, np.array(norm_seq),
+                np.array(diff_seq), np.array(alfa_seq))
     else:
         return x
 
@@ -1256,6 +1261,8 @@ class UndirectedGraph:
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
+            self.diff_seq = solution[4]
+            self.alfa_seq = solution[5]
         else:
             self.r_xy = solution
 
@@ -1394,6 +1401,17 @@ class UndirectedGraph:
             self.expected_dseq = ex[: self.n_nodes]
             self.expected_stregth_seq = ex[self.n_nodes :]
             self.error = np.linalg.norm(ex - k, ord=np.inf)
+            self.relative_error_strength = max(
+                abs(
+                    (self.strength_sequence - self.expected_stregth_seq)/ self.strength_sequence
+                    )
+                )
+
+            self.relative_error_degree = max(
+                abs(
+                    (self.dseq - self.expected_dseq)/ self.dseq
+                    )
+                )
 
     def _set_args(self, model):
 
@@ -1664,6 +1682,8 @@ class UndirectedGraph:
             self.comput_time_creama = solution[1]
             self.n_steps_creama = solution[2]
             self.norm_seq_creama = solution[3]
+            self.diff_seq_creama = solution[4]
+            self.alfa_seq_creama = solution[5]
 
         else:
             self.beta = solution
@@ -1674,6 +1694,8 @@ class UndirectedGraph:
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
+            self.diff_seq = solution[4]
+            self.alfa_seq = solution[5]
         else:
             self.r_xy = solution
 
