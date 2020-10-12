@@ -2049,9 +2049,9 @@ class DirectedGraph:
 
     def degree_reduction(self):
         self.dseq = np.array(list(zip(self.dseq_out, self.dseq_in)))
-        self.r_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
+        self.r_dseq, self.r_index_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
             self.dseq,
-            return_index=False,
+            return_index=True,
             return_inverse=True,
             return_counts=True,
             axis=0,
@@ -2069,47 +2069,58 @@ class DirectedGraph:
 
         self.is_reduced = True
 
+
     def _set_initial_guess(self, model):
 
-        if model in ["dcm"]:
-            self._set_initial_guess_dcm()
-        if model in ["dcm_new"]:
-            self._set_initial_guess_dcm_new()
-        elif model in ["decm"]:
-            self._set_initial_guess_decm()
-        elif model in ["decm_new"]:
-            self._set_initial_guess_decm_new()
-        elif model in ["CReAMa", "CReAMa-sparse"]:
-            self._set_initial_guess_CReAMa()
+            if model in ["dcm"]:
+                self._set_initial_guess_dcm()
+            if model in ["dcm_new"]:
+                self._set_initial_guess_dcm_new()
+            elif model in ["decm"]:
+                self._set_initial_guess_decm()
+            elif model in ["decm_new"]:
+                self._set_initial_guess_decm_new()
+            elif model in ["CReAMa", "CReAMa-sparse"]:
+                self._set_initial_guess_CReAMa()
 
     def _set_initial_guess_dcm(self):
-        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
-        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+            # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
+            # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+            # remember if you insert your choice as initial choice, it should be numpy.ndarray
 
-        if ~self.is_reduced:
-            self.degree_reduction()
+            if ~self.is_reduced:
+                self.degree_reduction()
 
-        if self.initial_guess is None:
-            self.r_x = self.rnz_dseq_out / (
-                np.sqrt(self.n_edges) + 1
-            )  # This +1 increases the stability of the solutions.
-            self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
-        elif self.initial_guess == "random":
-            self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
-            self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
-        elif self.initial_guess == "uniform":
-            self.r_x = 0.5 * np.ones(
-                self.rnz_n_out, dtype=np.float64
-            )  # All probabilities will be 1/2 initially
-            self.r_y = 0.5 * np.ones(self.rnz_n_in, dtype=np.float64)
-        elif self.initial_guess == "degrees":
-            self.r_x = self.rnz_dseq_out.astype(np.float64)
-            self.r_y = self.rnz_dseq_in.astype(np.float64)
+            if isinstance(self.initial_guess, np.ndarray):
+                # we reduce the full x0, it's not very honest
+                # but it's better to ask to provide an already reduced x0
+                self.r_x = self.initial_guess[:self.n_nodes][self.r_index_dseq]
+                self.r_y = self.initial_guess[self.n_nodes:][self.r_index_dseq]
+            elif isinstance(self.initial_guess, str):
+                if self.initial_guess == 'degrees_minor':
+                    self.r_x = self.rnz_dseq_out / (
+                        np.sqrt(self.n_edges) + 1
+                    )  # This +1 increases the stability of the solutions.
+                    self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
+                elif self.initial_guess == "random":
+                    self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
+                    self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
+                elif self.initial_guess == "uniform":
+                    self.r_x = 0.5 * np.ones(
+                        self.rnz_n_out, dtype=np.float64
+                    )  # All probabilities will be 1/2 initially
+                    self.r_y = 0.5 * np.ones(self.rnz_n_in, dtype=np.float64)
+                elif self.initial_guess == "degrees":
+                    self.r_x = self.rnz_dseq_out.astype(np.float64)
+                    self.r_y = self.rnz_dseq_in.astype(np.float64)
+            else:
+                raise TypeError('initial_guess wrong type')
 
-        self.r_x[self.rnz_dseq_out == 0] = 0
-        self.r_y[self.rnz_dseq_in == 0] = 0
+            self.r_x[self.rnz_dseq_out == 0] = 0
+            self.r_y[self.rnz_dseq_in == 0] = 0
 
-        self.x0 = np.concatenate((self.r_x, self.r_y))
+            self.x0 = np.concatenate((self.r_x, self.r_y))
+
 
     def _set_initial_guess_dcm_new(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
@@ -2118,22 +2129,29 @@ class DirectedGraph:
         if ~self.is_reduced:
             self.degree_reduction()
 
-        if self.initial_guess is None:
-            self.r_x = self.rnz_dseq_out / (
-                np.sqrt(self.n_edges) + 1
-            )  # This +1 increases the stability of the solutions.
-            self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
-        elif self.initial_guess == "random":
-            self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
-            self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
-        elif self.initial_guess == "uniform":
-            self.r_x = 0.5 * np.ones(
-                self.rnz_n_out, dtype=np.float64
-            )  # All probabilities will be 1/2 initially
-            self.r_y = 0.5 * np.ones(self.rnz_n_in, dtype=np.float64)
-        elif self.initial_guess == "degrees":
-            self.r_x = self.rnz_dseq_out.astype(np.float64)
-            self.r_y = self.rnz_dseq_in.astype(np.float64)
+
+        if isinstance(self.initial_guess, np.ndarray):
+            # we reduce the full x0, it's not very honest
+            # but it's better to ask to provide an already reduced x0
+            self.r_x = self.initial_guess[:self.n_nodes][self.r_index_dseq]
+            self.r_y = self.initial_guess[self.n_nodes:][self.r_index_dseq]
+        elif isinstance(self.initial_guess, str):
+                if self.initial_guess == 'degrees_minor':
+                    self.r_x = self.rnz_dseq_out / (
+                        np.sqrt(self.n_edges) + 1
+                    )  # This +1 increases the stability of the solutions.
+                    self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
+                elif self.initial_guess == "random":
+                    self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
+                    self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
+                elif self.initial_guess == "uniform":
+                    self.r_x = 0.5 * np.ones(
+                        self.rnz_n_out, dtype=np.float64
+                    )  # All probabilities will be 1/2 initially
+                    self.r_y = 0.5 * np.ones(self.rnz_n_in, dtype=np.float64)
+                elif self.initial_guess == "degrees":
+                    self.r_x = self.rnz_dseq_out.astype(np.float64)
+                    self.r_y = self.rnz_dseq_in.astype(np.float64)
 
         self.r_x[self.rnz_dseq_out == 0] = 1e3
         self.r_y[self.rnz_dseq_in == 0] = 1e3
@@ -2144,52 +2162,63 @@ class DirectedGraph:
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         # TODO: mettere un self.is_weighted bool
-        if self.initial_guess is None:
-            self.b_out = (self.out_strength > 0).astype(
-                float
-            ) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
-            self.b_in = (self.in_strength > 0).astype(
-                float
-            ) / self.in_strength.sum()
-        elif self.initial_guess == "strengths":
-            self.b_out = (self.out_strength > 0).astype(float) / (
-                self.out_strength + 1
-            )
-            self.b_in = (self.in_strength > 0).astype(float) / (
-                self.in_strength + 1
-            )
+        if isinstance(self.initial_guess, np.ndarray):
+            self.b_out = self.initial_guess[:self.n_nodes]
+            self.b_in = self.initial_guess[self.n_nodes:]
+        elif isinstance(self.initial_guess, str):
+            if self.initial_guess == "strengths":
+                self.b_out = (self.out_strength > 0).astype(
+                    float
+                ) / self.out_strength.sum()  # This +1 increases the stability of the solutions.
+                self.b_in = (self.in_strength > 0).astype(
+                    float
+                ) / self.in_strength.sum()
+            elif self.initial_guess == "strengths_minor":
+                self.b_out = (self.out_strength > 0).astype(float) / (
+                    self.out_strength + 1
+                )
+                self.b_in = (self.in_strength > 0).astype(float) / (
+                    self.in_strength + 1
+                )
 
         self.x0 = np.concatenate((self.b_out, self.b_in))
+
 
     def _set_initial_guess_decm(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
-        if self.initial_guess is None:
-            self.x = self.dseq_out.astype(float) / (self.n_edges + 1)
-            self.y = self.dseq_in.astype(float) / (self.n_edges + 1)
-            self.b_out = (
-                self.out_strength.astype(float) / self.out_strength.sum()
-            )  # This +1 increases the stability of the solutions.
-            self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
-        elif self.initial_guess == "strengths":
-            self.x = self.dseq_out.astype(float) / (self.dseq_out + 1)
-            self.y = self.dseq_in.astype(float) / (self.dseq_in + 1)
-            self.b_out = self.out_strength.astype(float) / (
-                self.out_strength + 1
-            )
-            self.b_in = self.in_strength.astype(float) / (self.in_strength + 1)
-        elif self.initial_guess == "random":
-            self.x = np.random.rand(self.n_nodes).astype(np.float64)
-            self.y = np.random.rand(self.n_nodes).astype(np.float64)
-            self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
-            self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
-        elif self.initial_guess == "uniform":
-            self.x = 0.9 * np.ones(
-                self.n_nodes, dtype=np.float64
-            )  # All probabilities will be 1/2 initially
-            self.y = 0.9 * np.ones(self.n_nodes, dtype=np.float64)
-            self.b_out = 0.9 * np.ones(self.n_nodes, dtype=np.float64)
-            self.b_in = 0.9 * np.ones(self.n_nodes, dtype=np.float64)
+        if isinstance(self.initial_guess, np.ndarray):
+            self.x = self.initial_guess[:self.n_nodes]
+            self.y = self.initial_guess[self.n_nodes:2*self.n_nodes]
+            self.b_out = self.initial_guess[2*self.n_nodes:3*self.n_nodes]
+            self.b_in = self.initial_guess[3*self.n_nodes:]
+        elif isinstance(self.initial_guess, str):
+            if self.initial_guess == 'strengths':
+                self.x = self.dseq_out.astype(float) / (self.n_edges + 1)
+                self.y = self.dseq_in.astype(float) / (self.n_edges + 1)
+                self.b_out = (
+                    self.out_strength.astype(float) / self.out_strength.sum()
+                )  # This +1 increases the stability of the solutions.
+                self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
+            elif self.initial_guess == "strengths_minor":
+                self.x = self.dseq_out.astype(float) / (self.dseq_out + 1)
+                self.y = self.dseq_in.astype(float) / (self.dseq_in + 1)
+                self.b_out = self.out_strength.astype(float) / (
+                    self.out_strength + 1
+                )
+                self.b_in = self.in_strength.astype(float) / (self.in_strength + 1)
+            elif self.initial_guess == "random":
+                self.x = np.random.rand(self.n_nodes).astype(np.float64)
+                self.y = np.random.rand(self.n_nodes).astype(np.float64)
+                self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
+                self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
+            elif self.initial_guess == "uniform":
+                self.x = 0.9 * np.ones(
+                    self.n_nodes, dtype=np.float64
+                )  # All probabilities will be 1/2 initially
+                self.y = 0.9 * np.ones(self.n_nodes, dtype=np.float64)
+                self.b_out = 0.9 * np.ones(self.n_nodes, dtype=np.float64)
+                self.b_in = 0.9 * np.ones(self.n_nodes, dtype=np.float64)
 
         self.x[self.dseq_out == 0] = 0
         self.y[self.dseq_in == 0] = 0
@@ -2201,32 +2230,38 @@ class DirectedGraph:
     def _set_initial_guess_decm_new(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
-        if self.initial_guess is None:
-            self.x = self.dseq_out.astype(float) / (self.n_edges + 1)
-            self.y = self.dseq_in.astype(float) / (self.n_edges + 1)
-            self.b_out = (
-                self.out_strength.astype(float) / self.out_strength.sum()
-            )  # This +1 increases the stability of the solutions.
-            self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
-        elif self.initial_guess == "strengths":
-            self.x = self.dseq_out.astype(float) / (self.dseq_out + 1)
-            self.y = self.dseq_in.astype(float) / (self.dseq_in + 1)
-            self.b_out = self.out_strength.astype(float) / (
-                self.out_strength + 1
-            )
-            self.b_in = self.in_strength.astype(float) / (self.in_strength + 1)
-        elif self.initial_guess == "random":
-            self.x = np.random.rand(self.n_nodes).astype(np.float64)
-            self.y = np.random.rand(self.n_nodes).astype(np.float64)
-            self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
-            self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
-        elif self.initial_guess == "uniform":
-            self.x = 0.1 * np.ones(
-                self.n_nodes, dtype=np.float64
-            )  # All probabilities will be 1/2 initially
-            self.y = 0.1 * np.ones(self.n_nodes, dtype=np.float64)
-            self.b_out = 0.1 * np.ones(self.n_nodes, dtype=np.float64)
-            self.b_in = 0.1 * np.ones(self.n_nodes, dtype=np.float64)
+        if isinstance(self.initial_guess, np.ndarray):
+            self.x = self.initial_guess[:self.n_nodes]
+            self.y = self.initial_guess[self.n_nodes:2*self.n_nodes]
+            self.b_out = self.initial_guess[2*self.n_nodes:3*self.n_nodes]
+            self.b_in = self.initial_guess[3*self.n_nodes:]
+        elif isinstance(self.initial_guess, str):
+            if self.initial_guess == "strengths":
+                self.x = self.dseq_out.astype(float) / (self.n_edges + 1)
+                self.y = self.dseq_in.astype(float) / (self.n_edges + 1)
+                self.b_out = (
+                    self.out_strength.astype(float) / self.out_strength.sum()
+                )  # This +1 increases the stability of the solutions.
+                self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
+            elif self.initial_guess == "strengths_minor":
+                self.x = self.dseq_out.astype(float) / (self.dseq_out + 1)
+                self.y = self.dseq_in.astype(float) / (self.dseq_in + 1)
+                self.b_out = self.out_strength.astype(float) / (
+                    self.out_strength + 1
+                )
+                self.b_in = self.in_strength.astype(float) / (self.in_strength + 1)
+            elif self.initial_guess == "random":
+                self.x = np.random.rand(self.n_nodes).astype(np.float64)
+                self.y = np.random.rand(self.n_nodes).astype(np.float64)
+                self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
+                self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
+            elif self.initial_guess == "uniform":
+                self.x = 0.1 * np.ones(
+                    self.n_nodes, dtype=np.float64
+                )  # All probabilities will be 1/2 initially
+                self.y = 0.1 * np.ones(self.n_nodes, dtype=np.float64)
+                self.b_out = 0.1 * np.ones(self.n_nodes, dtype=np.float64)
+                self.b_in = 0.1 * np.ones(self.n_nodes, dtype=np.float64)
 
         self.x[self.dseq_out == 0] = 1e3
         self.y[self.dseq_in == 0] = 1e3
@@ -2234,6 +2269,7 @@ class DirectedGraph:
         self.b_in[self.in_strength == 0] = 1e3
 
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
+
 
     def solution_error(self):
 
@@ -2308,14 +2344,14 @@ class DirectedGraph:
             self.relative_error_strength = max(
                 abs(
                     (np.concatenate((self.out_strength, self.in_strength))
-                                        - self.expected_strength_seq)/np.concatenate((self.out_strength, self.in_strength) + np.exp(-100)
+                                        - self.expected_strength_seq)/np.concatenate((self.out_strength, self.in_strength) + np.exp(-100))
                 )
             )
             self.relative_error_degree = max(
                 abs(
                     (np.concatenate((self.dseq_out, self.dseq_in))
-                                            - self.expected_dseq)/np.concatenate((self.dseq_out, self.dseq_in) + np.exp(-100)
-                )
+                                            - self.expected_dseq)/np.concatenate((self.dseq_out, self.dseq_in) + np.exp(-100))
+                 )
             )
     def _set_args(self, model):
 
