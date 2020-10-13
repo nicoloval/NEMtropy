@@ -2,6 +2,7 @@ import sys
 
 sys.path.append("../")
 import Directed_graph_Class as sample
+import Undirected_graph_Class as sample_u
 import Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
@@ -10,6 +11,93 @@ import unittest  # test tool
 class MyTest(unittest.TestCase):
     def setUp(self):
         pass
+
+
+    def test_cm_uniform(self):
+        n, seed = (4, 22)
+        A = mg.random_binary_matrix_generator_dense(n, sym=True, seed=seed)
+
+        g = sample_u.UndirectedGraph(A)
+        g.initial_guess = 'uniform'
+        g._set_initial_guess('cm')
+
+        self.assertTrue(g.x0.all() == np.array([0.5,  0.5]).all())
+
+
+    def test_cm(self):
+        n, seed = (4, 22)
+        A = mg.random_binary_matrix_generator_dense(n, sym=True, seed=seed)
+
+        x0 = np.random.rand(n)
+        g = sample_u.UndirectedGraph(A)
+        g.initial_guess = x0
+        g._set_initial_guess_cm()
+        g.full_return = False
+        g.last_model = "cm"
+        g._set_solved_problem_cm(g.x0)
+        self.assertTrue(g.x.all() == x0.all())
+
+
+    def test_CREAMA_uniform(self):
+        n, seed = (4, 22)
+        A = mg.random_weighted_matrix_generator_dense(
+            n, sym=False, seed=seed, sup_ext=100, intweights=True
+        )
+
+        g = sample_u.UndirectedGraph(A)
+        g.initial_guess = 'strengths_minor'
+        g._set_initial_guess('CReAMa')
+
+        x = (g.strength_sequence > 0).astype(float) / (
+                    g.strength_sequence + 1
+                )
+        self.assertTrue(g.x0.all() == x.all())
+
+
+    def test_CREAMA(self):
+        n, seed = (4, 22)
+        A = mg.random_weighted_matrix_generator_dense(
+            n, sym=False, seed=seed, sup_ext=100, intweights=True
+        )
+
+        x0 = np.random.rand(n)
+        g = sample_u.UndirectedGraph(A)
+        g.initial_guess = x0
+        g._set_initial_guess_CReAMa()
+        g.full_return = False
+        g._set_solved_problem_CReAMa(g.x0)
+        self.assertTrue(g.beta.all() == x0.all())
+
+
+    def test_ecm_uniform(self):
+        n, seed = (4, 22)
+        A = mg.random_weighted_matrix_generator_dense(
+            n, sym=False, seed=seed, sup_ext=100, intweights=True
+        )
+
+        g = sample_u.UndirectedGraph(A)
+        g.initial_guess = 'strengths_minor'
+        g._set_initial_guess('ecm')
+
+        x = (g.strength_sequence > 0).astype(float) / (
+                    g.strength_sequence + 1
+                )
+        self.assertTrue(g.x0.all() == x.all())
+
+
+    def test_ecm(self):
+        n, seed = (4, 22)
+        A = mg.random_weighted_matrix_generator_dense(
+            n, sym=False, seed=seed, sup_ext=100, intweights=True
+        )
+
+        x0 = np.random.rand(n)
+        g = sample_u.UndirectedGraph(A)
+        g.initial_guess = x0
+        g._set_initial_guess_CReAMa()
+        self.assertTrue(g.x0.all() == x0.all())
+
+
 
     def test_dcm_uniform(self):
         n, seed = (4, 22)

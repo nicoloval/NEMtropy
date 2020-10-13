@@ -1255,6 +1255,7 @@ class UndirectedGraph:
 
         self._set_solved_problem(sol)
 
+
     def _set_solved_problem_cm(self, solution):
         if self.full_return:
             self.r_xy = solution[0]
@@ -1272,6 +1273,7 @@ class UndirectedGraph:
         elif self.last_model == "cm-new":
             self.x = np.exp(-self.r_x[self.r_invert_dseq])
 
+
     def _set_solved_problem(self, solution):
         model = self.last_model
         if model in ["cm", "cm-new"]:
@@ -1282,15 +1284,18 @@ class UndirectedGraph:
             self._set_solved_problem_CReAMa(solution)
 
     def degree_reduction(self):
-        self.r_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
+        self.r_dseq, self.r_index_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
             self.dseq,
-            return_index=False,
+            return_index=True,
             return_inverse=True,
             return_counts=True,
             axis=0,
         )
+
         self.rnz_n = self.r_dseq.size
+
         self.is_reduced = True
+
 
     def _set_initial_guess(self, model):
 
@@ -1301,6 +1306,7 @@ class UndirectedGraph:
         elif model in ["CReAMa", "CReAMa-sparse"]:
             self._set_initial_guess_CReAMa()
 
+
     def _set_initial_guess_cm(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
@@ -1308,61 +1314,80 @@ class UndirectedGraph:
         if ~self.is_reduced:
             self.degree_reduction()
 
-        if self.initial_guess is None:
-            self.r_x = self.r_dseq / (
-                np.sqrt(self.n_edges) + 1
-            )  # This +1 increases the stability of the solutions.
-        elif self.initial_guess == "random":
-            self.r_x = np.random.rand(self.rnz_n).astype(np.float64)
-        elif self.initial_guess == "uniform":
-            self.r_x = 0.5 * np.ones(
-                self.rnz_n, dtype=np.float64
-            )  # All probabilities will be 1/2 initially
-        elif self.initial_guess == "degrees":
-            self.r_x = self.r_dseq.astype(np.float64)
+        if isinstance(self.initial_guess, np.ndarray):
+            self.r_x = self.initial_guess[self.r_index_dseq] 
+        elif isinstance(self.initial_guess, str):
+            if self.initial_guess == "degrees_minor":
+                self.r_x = self.r_dseq / (
+                    np.sqrt(self.n_edges) + 1
+                )  # This +1 increases the stability of the solutions.
+            elif self.initial_guess == "random":
+                self.r_x = np.random.rand(self.rnz_n).astype(np.float64)
+            elif self.initial_guess == "uniform":
+                self.r_x = 0.5 * np.ones(
+                    self.rnz_n, dtype=np.float64
+                )  # All probabilities will be 1/2 initially
+            elif self.initial_guess == "degrees":
+                self.r_x = self.r_dseq.astype(np.float64)
+        else:
+            raise TypeError('initial_guess must be str or numpy.ndarray')
 
         self.r_x[self.r_dseq == 0] = 0
 
         self.x0 = self.r_x
 
+
     def _set_initial_guess_CReAMa(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
-        if self.initial_guess is None:
-            self.beta = (self.strength_sequence > 0).astype(
-                float
-            ) / self.strength_sequence.sum()
-        elif self.initial_guess == "strengths":
-            self.beta = (self.strength_sequence > 0).astype(float) / (
-                self.strength_sequence + 1
-            )
+
+        if isinstance(self.initial_guess, np.ndarray):
+            self.beta = self.initial_guess
+        elif isinstance(self.initial_guess, str):
+            if self.initial_guess == "strengths":
+                self.beta = (self.strength_sequence > 0).astype(
+                    float
+                ) / self.strength_sequence.sum()
+            elif self.initial_guess == "strengths_minor":
+                self.beta = (self.strength_sequence > 0).astype(float) / (
+                    self.strength_sequence + 1
+                )
+        else:
+            raise TypeError('initial_guess must be str or numpy.ndarray')
 
         self.x0 = self.beta
+
 
     def _set_initial_guess_ecm(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
-        if self.initial_guess is None:
-            self.x = self.dseq.astype(float) / (
-                self.n_edges + 1
-            )  # This +1 increases the stability of the solutions.
-            self.y = (
-                self.strength_sequence.astype(float)
-                / self.strength_sequence.sum()
-            )
-        elif self.initial_guess == "strengths":
-            self.x = np.ones_like(self.dseq, dtype=np.float64) / (
-                self.dseq + 1
-            )
-            self.y = np.ones_like(self.strength_sequence, dtype=np.float64) / (
-                self.strength_sequence + 1
-            )
-        elif self.initial_guess == "random":
-            self.x = np.random.rand(self.n_nodes).astype(np.float64)
-            self.y = np.random.rand(self.n_nodes).astype(np.float64)
-        elif self.initial_guess == "uniform":
-            self.x = 0.001 * np.ones(self.n_nodes, dtype=np.float64)
-            self.y = 0.001 * np.ones(self.n_nodes, dtype=np.float64)
+        if isinstance(self.initial_guess, np.ndarray):
+            self.x = self.initial_guess[:self.n_nodes] 
+            self.y = self.initial_guess[self.n_nodes:] 
+        elif isinstance(self.initial_guess, str):
+            if self.initial_guess == "strengths_minor":
+                self.x = self.dseq.astype(float) / (
+                    self.n_edges + 1
+                )  # This +1 increases the stability of the solutions.
+                self.y = (
+                    self.strength_sequence.astype(float)
+                    / self.strength_sequence.sum()
+                )
+            elif self.initial_guess == "strengths":
+                self.x = np.ones_like(self.dseq, dtype=np.float64) / (
+                    self.dseq + 1
+                )
+                self.y = np.ones_like(self.strength_sequence, dtype=np.float64) / (
+                    self.strength_sequence + 1
+                )
+            elif self.initial_guess == "random":
+                self.x = np.random.rand(self.n_nodes).astype(np.float64)
+                self.y = np.random.rand(self.n_nodes).astype(np.float64)
+            elif self.initial_guess == "uniform":
+                self.x = 0.001 * np.ones(self.n_nodes, dtype=np.float64)
+                self.y = 0.001 * np.ones(self.n_nodes, dtype=np.float64)
+        else:
+            raise TypeError('initial_guess must be str or numpy.ndarray')
 
         self.x[self.dseq == 0] = 0
         self.y[self.strength_sequence == 0] = 0
