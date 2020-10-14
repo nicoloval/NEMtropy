@@ -7,15 +7,13 @@
 Razionalizazione
 ----------------
 
-* opzione per mettere la propria condizione iniziale
+* ~~opzione per mettere la propria condizione iniziale~~
 
 * inserire errore in `solve_tool`
 
 * scrivere funzioni per generare l'ensemble
 
-* migliorare l'errore relativo per reti pesate
-
-* migliorare l'errore relativo per reti pesate
+* uniformare gli errori tra diretti e indiretti
 
 
 DONE

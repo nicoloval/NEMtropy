@@ -1031,6 +1031,8 @@ class UndirectedGraph:
         # model
         self.x0 = None
         self.error = None
+        self.error_degree = None
+        self.relative_error_degree = None
         self.error_strength = None
         self.relative_error_strength = None
         self.full_return = False
@@ -1401,7 +1403,8 @@ class UndirectedGraph:
                 ex_k = expected_degree_cm(self.x)
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
-                self.error = np.linalg.norm(ex_k - self.dseq, ord=np.inf)
+                self.error_degree = np.linalg.norm(ex_k - self.dseq, ord=np.inf)
+                self.error = self.error_degree
             if self.beta is not None:
                 if self.is_sparse:
                     ex_s = expected_strength_CReAMa_sparse(
@@ -1418,6 +1421,7 @@ class UndirectedGraph:
                 self.relative_error_strength = np.max(
                      (ex_s - self.strength_sequence)[self.strength_sequence!=0] / self.strength_sequence[self.strength_sequence!=0]
                 )
+                self.error = self.error_strength
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["ecm", "ecm-new"]:
             sol = np.concatenate((self.x, self.y))

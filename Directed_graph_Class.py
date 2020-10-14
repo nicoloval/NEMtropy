@@ -1716,6 +1716,8 @@ class DirectedGraph:
         # model
         self.x0 = None
         self.error = None
+        self.error_degree = None
+        self.relative_error_degree = None
         self.error_strength = None
         self.relative_error_strength = None
         self.full_return = False
@@ -1723,6 +1725,7 @@ class DirectedGraph:
 
         # functen
         self.args = None
+
 
     def _initialize_graph(
         self,
@@ -1898,6 +1901,7 @@ class DirectedGraph:
                     if self.n_nodes > 2000:
                         self.is_sparse = True
 
+
     def set_adjacency_matrix(self, adjacency):
         if self.is_initialized:
             print(
@@ -1905,6 +1909,7 @@ class DirectedGraph:
             )
         else:
             self._initialize_graph(adjacency=adjacency)
+
 
     def set_edgelist(self, edgelist):
         if self.is_initialized:
@@ -1914,6 +1919,7 @@ class DirectedGraph:
         else:
             self._initialize_graph(edgelist=edgelist)
 
+
     def set_degree_sequences(self, degree_sequence):
         if self.is_initialized:
             print(
@@ -1922,11 +1928,13 @@ class DirectedGraph:
         else:
             self._initialize_graph(degree_sequence=degree_sequence)
 
+
     def clean_edges(self):
         self.adjacency = None
         self.edgelist = None
         self.deg_seq = None
         self.is_initialized = False
+
 
     def _solve_problem(
         self,
@@ -2098,21 +2106,25 @@ class DirectedGraph:
             self.r_y = self.initial_guess[self.n_nodes:][self.r_index_dseq]
         elif isinstance(self.initial_guess, str):
             if self.initial_guess == 'degrees_minor':
-                self.r_x = self.rnz_dseq_out / (
-                    np.sqrt(self.n_edges) + 1
-                )  # This +1 increases the stability of the solutions.
+                # This +1 increases the stability of the solutions.
+                self.r_x = self.rnz_dseq_out / (np.sqrt(self.n_edges) + 1)  
                 self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
             elif self.initial_guess == "random":
                 self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
                 self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
             elif self.initial_guess == "uniform":
-                self.r_x = 0.5 * np.ones(
-                    self.rnz_n_out, dtype=np.float64
-                )  # All probabilities will be 1/2 initially
+                # All probabilities will be 1/2 initially
+                self.r_x = 0.5 * np.ones(self.rnz_n_out, dtype=np.float64)  
                 self.r_y = 0.5 * np.ones(self.rnz_n_in, dtype=np.float64)
             elif self.initial_guess == "degrees":
                 self.r_x = self.rnz_dseq_out.astype(np.float64)
                 self.r_y = self.rnz_dseq_in.astype(np.float64)
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
@@ -2129,29 +2141,34 @@ class DirectedGraph:
         if ~self.is_reduced:
             self.degree_reduction()
 
-
         if isinstance(self.initial_guess, np.ndarray):
             # we reduce the full x0, it's not very honest
             # but it's better to ask to provide an already reduced x0
             self.r_x = self.initial_guess[:self.n_nodes][self.r_index_dseq]
             self.r_y = self.initial_guess[self.n_nodes:][self.r_index_dseq]
         elif isinstance(self.initial_guess, str):
-                if self.initial_guess == 'degrees_minor':
-                    self.r_x = self.rnz_dseq_out / (
-                        np.sqrt(self.n_edges) + 1
-                    )  # This +1 increases the stability of the solutions.
-                    self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
-                elif self.initial_guess == "random":
-                    self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
-                    self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
-                elif self.initial_guess == "uniform":
-                    self.r_x = 0.5 * np.ones(
-                        self.rnz_n_out, dtype=np.float64
-                    )  # All probabilities will be 1/2 initially
-                    self.r_y = 0.5 * np.ones(self.rnz_n_in, dtype=np.float64)
-                elif self.initial_guess == "degrees":
-                    self.r_x = self.rnz_dseq_out.astype(np.float64)
-                    self.r_y = self.rnz_dseq_in.astype(np.float64)
+            if self.initial_guess == 'degrees_minor':
+                self.r_x = self.rnz_dseq_out / (
+                    np.sqrt(self.n_edges) + 1
+                )  # This +1 increases the stability of the solutions.
+                self.r_y = self.rnz_dseq_in / (np.sqrt(self.n_edges) + 1)
+            elif self.initial_guess == "random":
+                self.r_x = np.random.rand(self.rnz_n_out).astype(np.float64)
+                self.r_y = np.random.rand(self.rnz_n_in).astype(np.float64)
+            elif self.initial_guess == "uniform":
+                self.r_x = 0.5 * np.ones(
+                    self.rnz_n_out, dtype=np.float64
+                )  # All probabilities will be 1/2 initially
+                self.r_y = 0.5 * np.ones(self.rnz_n_in, dtype=np.float64)
+            elif self.initial_guess == "degrees":
+                self.r_x = self.rnz_dseq_out.astype(np.float64)
+                self.r_y = self.rnz_dseq_in.astype(np.float64)
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
@@ -2159,6 +2176,7 @@ class DirectedGraph:
         self.r_y[self.rnz_dseq_in == 0] = 1e3
 
         self.x0 = np.concatenate((self.r_x, self.r_y))
+
 
     def _set_initial_guess_CReAMa(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
@@ -2182,6 +2200,12 @@ class DirectedGraph:
                 self.b_in = (self.in_strength > 0).astype(float) / (
                     self.in_strength + 1
                 )
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
@@ -2217,12 +2241,17 @@ class DirectedGraph:
                 self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
                 self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
             elif self.initial_guess == "uniform":
-                self.x = 0.9 * np.ones(
-                    self.n_nodes, dtype=np.float64
-                )  # All probabilities will be 1/2 initially
+                # All probabilities will be 0.9 initially
+                self.x = 0.9 * np.ones(self.n_nodes, dtype=np.float64)  
                 self.y = 0.9 * np.ones(self.n_nodes, dtype=np.float64)
                 self.b_out = 0.9 * np.ones(self.n_nodes, dtype=np.float64)
                 self.b_in = 0.9 * np.ones(self.n_nodes, dtype=np.float64)
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
@@ -2232,6 +2261,7 @@ class DirectedGraph:
         self.b_in[self.in_strength == 0] = 0
 
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
+
 
     def _set_initial_guess_decm_new(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
@@ -2268,6 +2298,12 @@ class DirectedGraph:
                 self.y = 0.1 * np.ones(self.n_nodes, dtype=np.float64)
                 self.b_out = 0.1 * np.ones(self.n_nodes, dtype=np.float64)
                 self.b_in = 0.1 * np.ones(self.n_nodes, dtype=np.float64)
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
@@ -2290,7 +2326,9 @@ class DirectedGraph:
                 k = np.concatenate((self.dseq_out, self.dseq_in))
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
-                self.error = np.linalg.norm(ex_k - k, ord=np.inf)
+                self.error_degree = np.linalg.norm(ex_k - k, ord=np.inf)
+
+                self.error = self.error_degree
 
             if (self.b_out is not None) and (self.b_in is not None):
                 sol = np.concatenate([self.b_out, self.b_in])
@@ -2317,6 +2355,7 @@ class DirectedGraph:
                     (ex_s - s)[s!=0] / s[s!=0]
                     )
                 )
+                self.error = self.error_strength
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["decm", "decm_new"]:
             sol = np.concatenate((self.x, self.y, self.b_out, self.b_in))
@@ -2332,9 +2371,8 @@ class DirectedGraph:
             self.expected_dseq = ex[: 2 * self.n_nodes]
 
             self.expected_strength_seq = ex[2 * self.n_nodes :]
-            self.error = np.linalg.norm(ex - k, ord=np.inf)
             # self.error_dseq = np.linalg.norm(np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)
-            self.error_dseq = max(
+            self.error_degree = max(
                 abs(
                     (
                         np.concatenate((self.dseq_out, self.dseq_in))
@@ -2343,7 +2381,7 @@ class DirectedGraph:
                 )
             )
             # self.error_sseq = np.linalg.norm(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq)
-            self.error_sseq = max(
+            self.error_strength = max(
                 abs(
                     np.concatenate((self.out_strength, self.in_strength))
                     - self.expected_strength_seq
@@ -2361,6 +2399,10 @@ class DirectedGraph:
                                             - self.expected_dseq)/np.concatenate((self.dseq_out, self.dseq_in) + np.exp(-100))
                  )
             )
+
+            self.error = np.linalg.norm(ex - k, ord=np.inf)
+
+
     def _set_args(self, model):
 
         if model in ["CReAMa", "CReAMa-sparse"]:
