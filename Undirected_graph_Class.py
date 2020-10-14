@@ -500,6 +500,7 @@ def solver(
     fun,
     step_fun,
     linsearch_fun,
+    hessian_regulariser,
     fun_jac=None,
     tol=1e-6,
     eps=1e-16,
@@ -559,7 +560,7 @@ def solver(
                 ml = np.min(l)
                 Ml = np.max(l)
             if regularise:
-                B = hessian_regulariser_function(
+                B = hessian_regulariser(
                     H, np.max(np.abs(fun(x))) * 1e-3
                 )
                 # TODO: levare i verbose sugli eigenvalues
@@ -628,6 +629,17 @@ def solver(
             print("dx = {}".format(dx))
             print("x = {}".format(x))
             print("|f(x)| = {}".format(norm))
+            if method == "newton":
+                print("min eig = {}".format(ml))
+                print("new mim eig = {}".format(new_ml))
+                print("max eig = {}".format(Ml))
+                print("new max eig = {}".format(new_Ml))
+                print("condition number max_eig/min_eig = {}".format(Ml / ml))
+                print(
+                    "new condition number max_eig/min_eig = {}".format(
+                        new_Ml / new_ml
+                    )
+                )
 
     toc_loop = time.time() - tic_loop
     toc_all = time.time() - tic_all
@@ -641,6 +653,7 @@ def solver(
         print("toc_update = {}".format(toc_update))
         print("toc_loop = {}".format(toc_loop))
         print("toc_all = {}".format(toc_all))
+        
 
     if full_return:
         return (x, toc_all, n_steps, np.array(norm_seq),
@@ -1247,6 +1260,7 @@ class UndirectedGraph:
             fun_jac=self.fun_jac,
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
+            hessian_regulariser = self.hessian_regulariser,
             tol=tol,
             max_steps=max_steps,
             method=method,
@@ -1624,6 +1638,17 @@ class UndirectedGraph:
         }
 
         self.fun_linsearch = lins_fun[model]
+        
+        hess_reg = {
+            "cm" : hessian_regulariser_function_eigen_based,
+            "cm-new" : hessian_regulariser_function,
+            "ecm" : hessian_regulariser_function_eigen_based,
+            "ecm-new" : hessian_regulariser_function,
+            "CReAMa" : hessian_regulariser_function,
+            "CReAMa-sparse" : hessian_regulariser_function,
+        }
+        
+        self.hessian_regulariser = hess_reg[model]
 
     def _solve_problem_CReAMa(
         self,
@@ -1704,6 +1729,7 @@ class UndirectedGraph:
             fun_jac=self.fun_jac,
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
+            hessian_regulariser = self.hessian_regulariser,
             tol=tol,
             max_steps=max_steps,
             method=method,
