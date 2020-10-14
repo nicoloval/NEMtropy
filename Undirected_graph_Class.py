@@ -593,7 +593,8 @@ def solver(
             alfa1 = 1
             X = (x, dx, beta, alfa1, f)
             alfa = linsearch_fun(X)
-            alfa_seq.append(alfa)
+            if full_return:
+                alfa_seq.append(alfa)
         else:
             alfa = 1
 
