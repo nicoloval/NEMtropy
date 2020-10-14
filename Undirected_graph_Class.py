@@ -1404,8 +1404,11 @@ class UndirectedGraph:
                 ex_k = expected_degree_cm(self.x)
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
+                # error output
                 self.error_degree = np.linalg.norm(ex_k - self.dseq, ord=np.inf)
+                self.relative_error_degree = np.linalg.norm((ex_k - self.dseq)/(self.dseq + np.exp(-100)), ord=np.inf)
                 self.error = self.error_degree
+
             if self.beta is not None:
                 if self.is_sparse:
                     ex_s = expected_strength_CReAMa_sparse(
@@ -1416,11 +1419,12 @@ class UndirectedGraph:
                         self.beta, self.adjacency_CReAMa
                     )
                 self.expected_stregth_seq = ex_s
+                # error output
                 self.error_strength = np.linalg.norm(
                     ex_s - self.strength_sequence, ord=np.inf
                 )
                 self.relative_error_strength = np.max(
-                     (ex_s - self.strength_sequence)[self.strength_sequence!=0] / self.strength_sequence[self.strength_sequence!=0]
+                     (ex_s - self.strength_sequence) / (self.strength_sequence + np.exp(-100))
                 )
                 self.error = self.error_strength
         # potremmo strutturarlo così per evitare ridondanze
@@ -1429,11 +1433,14 @@ class UndirectedGraph:
             ex = expected_ecm(sol)
             k = np.concatenate((self.dseq, self.strength_sequence))
             self.expected_dseq = ex[: self.n_nodes]
-            self.expected_stregth_seq = ex[self.n_nodes :]
-            self.error = np.linalg.norm(ex - k, ord=np.inf)
+            self.expected_strength_seq = ex[self.n_nodes :]
+
+            # error output
+            self.error_degree = np.linalg.norm(self.expected_dseq - self.dseq,ord=np.inf)
+            self.error_strength = np.linalg.norm(self.expected_strength_seq - self.strength_sequence,ord=np.inf)
             self.relative_error_strength = max(
                 abs(
-                    (self.strength_sequence - self.expected_stregth_seq)/ self.strength_sequence
+                    (self.strength_sequence - self.expected_strength_seq)/ self.strength_sequence
                     )
                 )
 
@@ -1442,6 +1449,8 @@ class UndirectedGraph:
                     (self.dseq - self.expected_dseq)/ self.dseq
                     )
                 )
+            self.error = max(self.error_strength, self.error_degree) 
+
 
     def _set_args(self, model):
 

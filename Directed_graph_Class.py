@@ -2327,8 +2327,9 @@ class DirectedGraph:
                 k = np.concatenate((self.dseq_out, self.dseq_in))
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
+                # error output
                 self.error_degree = np.linalg.norm(ex_k - k, ord=np.inf)
-
+                self.relative_error_degree = np.linalg.norm((ex_k - k)/(k + + np.exp(-100)), ord=np.inf)
                 self.error = self.error_degree
 
             if (self.b_out is not None) and (self.b_in is not None):
@@ -2350,13 +2351,15 @@ class DirectedGraph:
                 ex_s = np.concatenate([ex_s_out, ex_s_in])
                 s = np.concatenate([self.out_strength, self.in_strength])
                 self.expected_stregth_seq = ex_s
+                # error output
                 self.error_strength = np.linalg.norm(ex_s - s, ord=np.inf)
                 self.relative_error_strength = np.max(
                     abs(
-                    (ex_s - s)[s!=0] / s[s!=0]
+                    (ex_s - s) / (s + np.exp(-100))
                     )
                 )
-                self.error = self.error_strength
+                self.error = max(self.error_strength, self.error_degree)
+
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["decm", "decm_new"]:
             sol = np.concatenate((self.x, self.y, self.b_out, self.b_in))
@@ -2372,7 +2375,8 @@ class DirectedGraph:
             self.expected_dseq = ex[: 2 * self.n_nodes]
 
             self.expected_strength_seq = ex[2 * self.n_nodes :]
-            # self.error_dseq = np.linalg.norm(np.concatenate((self.dseq_out, self.dseq_in))- self.expected_dseq)
+
+            # error putput
             self.error_degree = max(
                 abs(
                     (
@@ -2381,7 +2385,6 @@ class DirectedGraph:
                     )
                 )
             )
-            # self.error_sseq = np.linalg.norm(np.concatenate((self.out_strength, self.in_strength)) - self.expected_strength_seq)
             self.error_strength = max(
                 abs(
                     np.concatenate((self.out_strength, self.in_strength))
@@ -2400,7 +2403,6 @@ class DirectedGraph:
                                             - self.expected_dseq)/np.concatenate((self.dseq_out, self.dseq_in) + np.exp(-100))
                  )
             )
-
             self.error = np.linalg.norm(ex - k, ord=np.inf)
 
 
