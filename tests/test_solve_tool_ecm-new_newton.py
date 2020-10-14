@@ -23,8 +23,8 @@ class MyTest(unittest.TestCase):
         g = sample_und.UndirectedGraph(adjacency=network)
 
         g.solve_tool(
-            model="ecm",
-            method="quasinewton",
+            model="ecm-new",
+            method="newton",
             max_steps=1000,
             verbose=False,
             initial_guess="uniform",
@@ -33,7 +33,9 @@ class MyTest(unittest.TestCase):
         g.solution_error()
 
         # test result
+
         self.assertTrue(g.error < 1e-1)
+        self.assertTrue(g.error < 1e-2)
 
 
 if __name__ == "__main__":

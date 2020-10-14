@@ -8,8 +8,11 @@ import unittest  # test tool
 
 
 class MyTest(unittest.TestCase):
+
+
     def setUp(self):
         pass
+
 
     def test_fixedpoint_cm_5(self):
         """test with 3 classes of cardinality 1
@@ -26,11 +29,12 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm-new",
+            model="cm",
             method="fixed-point",
             max_steps=100,
             verbose=False,
             linsearch=True,
+            initial_guess="uniform",
         )
 
         g.solution_error()
@@ -46,6 +50,7 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(g.error < 1e-1)
 
+
     def test_fixedpoint_cm_6(self):
         """classes with cardinality > 1, no zero degree"""
         n, seed = (20, 22)
@@ -54,11 +59,12 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm-new",
+            model="cm",
             method="fixed-point",
             max_steps=300,
             verbose=False,
             linsearch="True",
+            initial_guess="uniform",
         )
 
         g.solution_error()
@@ -74,6 +80,7 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(g.error < 1e-1)
 
+
     @unittest.skip("skip large graph")
     def test_fixedpoint_cm_9(self):
         """classes with cardinality more than 1 and zero degrees"""
@@ -84,11 +91,12 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm-new",
+            model="cm",
             method="fixed-point",
             max_steps=300,
             verbose=False,
             linsearch="True",
+            initial_guess="uniform",
         )
 
         g.solution_error()

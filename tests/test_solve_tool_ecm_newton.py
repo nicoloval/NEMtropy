@@ -23,7 +23,11 @@ class MyTest(unittest.TestCase):
         g = sample_und.UndirectedGraph(adjacency=network)
 
         g.solve_tool(
-            model="ecm", method="newton", max_steps=1000, verbose=False
+            model="ecm",
+            method="newton",
+            max_steps=1000,
+            verbose=False,
+            initial_guess="uniform",
         )
 
         g.solution_error()

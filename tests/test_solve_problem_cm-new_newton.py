@@ -26,7 +26,7 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm",
+            model="cm-new",
             method="newton",
             max_steps=100,
             verbose=False,
@@ -56,7 +56,7 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm",
+            model="cm-new",
             method="newton",
             max_steps=300,
             verbose=False,
@@ -88,7 +88,7 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm",
+            model="cm-new",
             method="newton",
             max_steps=300,
             verbose=False,

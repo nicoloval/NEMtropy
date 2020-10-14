@@ -23,7 +23,7 @@ class MyTest(unittest.TestCase):
         g = sample_und.UndirectedGraph(adjacency=network)
 
         g.solve_tool(
-            model="ecm",
+            model="ecm-new",
             method="quasinewton",
             max_steps=1000,
             verbose=False,
