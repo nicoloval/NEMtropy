@@ -1278,6 +1278,7 @@ def solver(
     method="newton",
     verbose=False,
     regularise=True,
+    regularise_eps=1e-3,
     full_return=False,
     linsearch=True,
 ):
@@ -1297,6 +1298,7 @@ def solver(
     diff = 1
 
     if full_return:
+        #TODO: norm,diff and alfa seqs have different lengths 
         norm_seq = [norm]
         diff_seq = [diff]
         alfa_seq = []
@@ -1332,7 +1334,7 @@ def solver(
                 Ml = np.max(l)
             if regularise:
                 B = hessian_regulariser(
-                    H, np.max(np.abs(fun(x))) * 1e-5
+                    H, np.max(np.abs(fun(x))) * regularise_eps, 
                 )
                 # TODO: levare i verbose sugli eigenvalues
                 if verbose:
@@ -1345,7 +1347,7 @@ def solver(
             # quasinewton hessian approximation
             B = fun_jac(x)  # Jacobian diagonal
             if regularise:
-                B = np.maximum(B, B * 0 + np.max(np.abs(fun(x))) * 1e-3)
+                B = np.maximum(B, B * 0 + np.max(np.abs(fun(x))) * regularise_eps)
         toc_jacfun += time.time() - tic
 
         # discending direction computation
@@ -1403,10 +1405,10 @@ def solver(
 
         if verbose == True:
             print("\nstep {}".format(n_steps))
-            print("alpha = {}".format(alfa))
             print("fun = {}".format(f))
             print("dx = {}".format(dx))
             print("x = {}".format(x))
+            print("alpha = {}".format(alfa))
             print("|f(x)| = {}".format(norm))
             print("F(x) = {}".format(step_fun(x)))
             print("diff = {}".format(diff))
@@ -1949,11 +1951,13 @@ class DirectedGraph:
         verbose=False,
         linsearch=True,
         regularise=True,
+        regularise_eps=1e-3,
     ):
 
         self.last_model = model
         self.full_return = full_return
         self.initial_guess = initial_guess
+        self.regularise = regularise
         self._initialize_problem(model, method)
         x0 = self.x0
 
@@ -1968,12 +1972,14 @@ class DirectedGraph:
             max_steps=max_steps,
             method=method,
             verbose=verbose,
-            regularise=regularise,
+            regularise=self.regularise,
+            regularise_eps=regularise_eps,
             full_return=full_return,
             linsearch=linsearch,
         )
 
         self._set_solved_problem(sol)
+
 
     def _set_solved_problem_dcm(self, solution):
         if self.full_return:
@@ -2045,6 +2051,7 @@ class DirectedGraph:
         self.b_out = self.r_xy[2 * self.n_nodes : 3 * self.n_nodes]
         self.b_in = self.r_xy[3 * self.n_nodes :]
 
+
     def _set_solved_problem(self, solution):
         model = self.last_model
         if model in ["dcm"]:
@@ -2057,6 +2064,7 @@ class DirectedGraph:
             self._set_solved_problem_decm_new(solution)
         elif model in ["CReAMa", "CReAMa-sparse"]:
             self._set_solved_problem_CReAMa(solution)
+
 
     def degree_reduction(self):
         self.dseq = np.array(list(zip(self.dseq_out, self.dseq_in)))
@@ -2526,6 +2534,7 @@ class DirectedGraph:
             ),
             "CReAMa-sparse-fixed-point": None,
         }
+
         d_fun_step = {
             "dcm-newton": lambda x: -loglikelihood_dcm(x, self.args),
             "dcm-quasinewton": lambda x: -loglikelihood_dcm(x, self.args),
@@ -2564,6 +2573,7 @@ class DirectedGraph:
                 x, self.args
             ),
         }
+
         try:
             self.fun = d_fun[mod_met]
             self.fun_jac = d_fun_jac[mod_met]
@@ -2609,6 +2619,13 @@ class DirectedGraph:
         
         self.hessian_regulariser = hess_reg[model]
 
+        if isinstance(self.regularise, str):
+            if self.regularise == "eigenvalues": 
+                self.hessian_regulariser = hessian_regulariser_function_eigen_based
+            elif self.regularise == "identity":
+                self.hessian_regulariser = hessian_regulariser_function
+
+
     def _solve_problem_CReAMa(
         self,
         initial_guess=None,
@@ -2621,6 +2638,7 @@ class DirectedGraph:
         verbose=False,
         linsearch=True,
         regularise=True,
+        regularise_eps=1e-3,
     ):
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
             not scipy.sparse.isspmatrix(adjacency)
@@ -2690,6 +2708,7 @@ class DirectedGraph:
             method=method,
             verbose=verbose,
             regularise=regularise,
+            regularise_eps=regularise_eps,
             linsearch=linsearch,
             full_return=full_return,
         )
@@ -2708,6 +2727,7 @@ class DirectedGraph:
         else:
             self.b_out = solution[: self.n_nodes]
             self.b_in = solution[self.n_nodes :]
+
 
     def solve_tool(
         self,
@@ -2743,6 +2763,7 @@ class DirectedGraph:
                 verbose=verbose,
                 tol=tol,
             )
+
 
     def _weighted_realisation(self):
         weighted_realisation = weighted_adjacency(
