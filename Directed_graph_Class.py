@@ -1270,6 +1270,7 @@ def solver(
     fun,
     step_fun,
     linsearch_fun,
+    hessian_regulariser,
     fun_jac=None,
     tol=1e-6,
     eps=1e-16,
@@ -1330,7 +1331,7 @@ def solver(
                 ml = np.min(l)
                 Ml = np.max(l)
             if regularise:
-                B = hessian_regulariser_function(
+                B = hessian_regulariser(
                     H, np.max(np.abs(fun(x))) * 1e-5
                 )
                 # TODO: levare i verbose sugli eigenvalues
@@ -1962,6 +1963,7 @@ class DirectedGraph:
             fun_jac=self.fun_jac,
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
+            hessian_regulariser = self.hessian_regulariser,
             tol=tol,
             max_steps=max_steps,
             method=method,
@@ -2595,6 +2597,17 @@ class DirectedGraph:
         }
 
         self.fun_linsearch = lins_fun[model]
+        
+        hess_reg = {
+            "dcm": hessian_regulariser_function_eigen_based,
+            "dcm_new": hessian_regulariser_function,
+            "decm": hessian_regulariser_function_eigen_based,
+            "decm_new": hessian_regulariser_function,
+            "CReAMa": hessian_regulariser_function,
+            "CReAMa-sparse": hessian_regulariser_function,
+        }
+        
+        self.hessian_regulariser = hess_reg[model]
 
     def _solve_problem_CReAMa(
         self,
@@ -2671,6 +2684,7 @@ class DirectedGraph:
             fun_jac=self.fun_jac,
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
+            hessian_regulariser = self.hessian_regulariser,
             tol=tol,
             max_steps=max_steps,
             method=method,
