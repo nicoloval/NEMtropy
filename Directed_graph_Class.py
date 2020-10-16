@@ -1405,9 +1405,9 @@ def solver(
 
         if verbose == True:
             print("\nstep {}".format(n_steps))
-            print("fun = {}".format(f))
-            print("dx = {}".format(dx))
-            print("x = {}".format(x))
+            # print("fun = {}".format(f))
+            # print("dx = {}".format(dx))
+            # print("x = {}".format(x))
             print("alpha = {}".format(alfa))
             print("|f(x)| = {}".format(norm))
             print("F(x) = {}".format(step_fun(x)))
@@ -1476,7 +1476,7 @@ def linsearch_fun_DCM(X, args):
     eps2 = 1e-2
     alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
     for a in alfa0:
-        if a >= 0:
+        if a > 0:
             alfa = min(alfa, a)
 
     i = 0
@@ -1527,10 +1527,12 @@ def linsearch_fun_DECM(X, args):
 
     eps2 = 1e-2
     alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
+    print(alfa0)
     for a in alfa0:
-        if a >= 0:
+        if a > 0:
             alfa = min(alfa, a)
 
+    print(alfa)
     # Mettere il check sulle y
     nnn = int(len(x) / 4)
     while True:
@@ -1547,6 +1549,7 @@ def linsearch_fun_DECM(X, args):
         else:
             alfa *= beta
 
+    print(alfa)
     i = 0
     s_old = step_fun(x)
     while (
