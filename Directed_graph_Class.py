@@ -1945,7 +1945,7 @@ class DirectedGraph:
 
     def _solve_problem(
         self,
-        initial_guess=None,
+        initial_guess=None,  #TODO:aggiungere un default a initial guess
         model="dcm",
         method="quasinewton",
         max_steps=100,
@@ -2583,7 +2583,7 @@ class DirectedGraph:
             self.step_fun = d_fun_step[mod_met]
         except:
             raise ValueError(
-                'Method must be "newton","quasi-newton", or "fixed-point".'
+                'Method must be "newton","quasinewton", or "fixed-point".'
             )
 
         # TODO: mancano metodi
