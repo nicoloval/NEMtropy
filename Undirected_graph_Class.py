@@ -926,7 +926,11 @@ def expected_ecm(sol):
     return ex_ks
 
 
-def expected
+def expected_ecm_two_steps(sol):
+    
+    
+    
+    return ex_ks
 
 def edgelist_from_edgelist(edgelist):
     """
@@ -1851,7 +1855,7 @@ class UndirectedGraph:
         
         self.chi = self.x.copy()
     
-        self.b_CReM = self.beta
+        self.b_CReM = self.beta.copy()
         
         
         
