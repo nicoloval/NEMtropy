@@ -926,6 +926,8 @@ def expected_ecm(sol):
     return ex_ks
 
 
+def expected
+
 def edgelist_from_edgelist(edgelist):
     """
     Creates a new edgelist with the indexes of the nodes instead of the names.
@@ -1668,6 +1670,9 @@ class UndirectedGraph:
         ):
             raise ValueError("adjacency must be a matrix or a method")
         elif isinstance(adjacency, str):
+            
+            # aggiungere check sul modello passato per l'adjacency matrix
+            
             self._solve_problem(
                 initial_guess=initial_guess,
                 model=adjacency,
@@ -1710,7 +1715,7 @@ class UndirectedGraph:
             col_ind = col_ind.astype(np.int64)
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
-            self.is_sparse = False
+            self.is_sparse = True
 
         if self.is_sparse:
             self.last_model = "CReAMa-sparse"
@@ -1805,3 +1810,48 @@ class UndirectedGraph:
                 verbose=verbose,
                 tol=tol,
             )
+        elif model in ["ecm-two-steps"]:
+            self._solve_problem_ECM(
+                initial_guess=initial_guess,
+                model="CReAMa",
+                adjacency=adjacency,
+                method=method,
+                max_steps=max_steps,
+                full_return=full_return,
+                verbose=verbose,
+                tol=tol,
+            )
+
+
+    def _solve_problem_ECM(
+        self,
+        initial_guess=None,
+        model="CReAMa",
+        adjacency="cm",
+        method="quasinewton",
+        max_steps=100,
+        tol=1e-8,
+        full_return=False,
+        verbose=False,
+        linsearch=True,
+        regularise=True,
+    ):      
+        self._solve_problem_CReAMa(
+            initial_guess=initial_guess,
+            model="CReAMa",
+            adjacency=adjacency,
+            method=method,
+            max_steps=max_steps,
+            tol=tol,
+            full_return=full_return,
+            verbose=verbose,
+            linsearch=linsearch,
+            regularise=regularise,
+        )
+        
+        self.chi = self.x.copy()
+    
+        self.b_CReM = self.beta
+        
+        
+        
