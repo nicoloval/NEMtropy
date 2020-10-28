@@ -926,11 +926,34 @@ def expected_ecm(sol):
     return ex_ks
 
 
+@jit(nopython=True)
 def expected_ecm_two_steps(sol):
-    
-    
-    
+    n = int(len(sol)/2)
+    chi = sol[:n]
+    b_crem = sol[n:]
+    ex_ks = np.zeros(2*n, dtype = np.float64)
+    for i in np.arange(n):
+        for j in np.arange(n):
+            if i!=j :
+                b_UECM = -beta_ecm(b_crem[i]+b_crem[j])
+                aux1 = alfa_ecm(chi[i]+chi[j], b_UECM)
+                aux2 = np.exp(-b_UECM)
+                ex_ks[i] += (aux1 * aux2) / (1 - aux2 + aux1 * aux2)
+                ex_ks[i + n] += (aux1 * aux2) / (
+                    (1 - aux2 + aux1 * aux2) * (1 - aux2)
+                )
     return ex_ks
+
+
+@jit(nopython=True)
+def beta_ecm(b):
+    return(np.log(1-(b)))
+
+
+@jit(nopython=True)
+def alfa_ecm( chi, b):
+    return((np.exp(-chi)*(1.0 - np.exp(-b)))/(np.exp(-b)))
+
 
 def edgelist_from_edgelist(edgelist):
     """
@@ -1305,6 +1328,8 @@ class UndirectedGraph:
             self._set_solved_problem_ecm(solution)
         elif model in ["CReAMa", "CReAMA-sparse"]:
             self._set_solved_problem_CReAMa(solution)
+        elif moodel in ["ecm-two-steps"]:
+            self._set_solved_problem_ecm_two_steps(solution)
 
     def degree_reduction(self):
         self.r_dseq, self.r_index_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
@@ -1448,9 +1473,13 @@ class UndirectedGraph:
                 )
                 self.error = self.error_strength
         # potremmo strutturarlo così per evitare ridondanze
-        elif self.last_model in ["ecm", "ecm-new"]:
-            sol = np.concatenate((self.x, self.y))
-            ex = expected_ecm(sol)
+        elif self.last_model in ["ecm", "ecm-new", "ecm-two-steps"]:
+            if self.last_model in ["ecm", "ecm-new"]:
+                sol = np.concatenate((self.x, self.y))
+                ex = expected_ecm(sol)
+            elif self.last_model in ["ecm-two-steps"]:
+                sol = np.concatenate((self.chi, self.b_CReM))
+                ex = expected_ecm_two_steps(sol)
             k = np.concatenate((self.dseq, self.strength_sequence))
             self.expected_dseq = ex[: self.n_nodes]
             self.expected_strength_seq = ex[self.n_nodes :]
@@ -1469,8 +1498,7 @@ class UndirectedGraph:
                     (self.dseq - self.expected_dseq)/ self.dseq
                     )
                 )
-            self.error = max(self.error_strength, self.error_degree) 
-
+            self.error = max(self.error_strength, self.error_degree)
 
     def _set_args(self, model):
 
@@ -1748,7 +1776,7 @@ class UndirectedGraph:
             full_return=full_return,
         )
 
-        self._set_solved_problem_CReAMa(sol)
+        self._set_solved_problem(sol)
 
     def _set_solved_problem_CReAMa(self, solution):
         if self.full_return:
@@ -1779,7 +1807,14 @@ class UndirectedGraph:
         elif self.last_model == "ecm-new":
             self.x = np.exp(-self.r_xy[: self.n_nodes])
             self.y = np.exp(-self.r_xy[self.n_nodes :])
-
+        elif self.last_model == "ecm-two-steps":
+            self.chi = - np.log(self.r_xy[:self.n_nodes])
+            self.b_CReM = self.r_xy[self.n_nodes:]
+            
+            
+        
+    
+    
     def solve_tool(
         self,
         model,
@@ -1840,22 +1875,33 @@ class UndirectedGraph:
         linsearch=True,
         regularise=True,
     ):      
-        self._solve_problem_CReAMa(
-            initial_guess=initial_guess,
-            model="CReAMa",
-            adjacency=adjacency,
-            method=method,
-            max_steps=max_steps,
-            tol=tol,
-            full_return=full_return,
-            verbose=verbose,
-            linsearch=linsearch,
-            regularise=regularise,
-        )
+        if adjacency in ["cm", "cm-new"]:
+            self._solve_problem_CReAMa(
+                initial_guess=initial_guess,
+                model="CReAMa",
+                adjacency=adjacency,
+                method=method,
+                max_steps=max_steps,
+                tol=tol,
+                full_return=full_return,
+                verbose=verbose,
+                linsearch=linsearch,
+                regularise=regularise,
+            )
+        else:
+            raise ValueError("Adjacency value can be 'cm' or 'cm-new'.")
         
-        self.chi = self.x.copy()
-    
-        self.b_CReM = self.beta.copy()
+        if full_return:
+            sol = (np.concatenate([self.x, self.beta]),
+                   (self.comput_time, self.comput_time_creama),
+                   (self.n_steps, self.n_steps_creama),
+                   (self.norm_seq, self.norm_seq_creama),
+                   (self.diff_seq, self.diff_seq_creama),
+                   (self.alfa_seq, self.alfa_seq_creama))
+        else:
+            sol = np.concatenate(self.x, self.beta)
         
+        self.last_model = "ecm-two-steps"
+        self._set_solved_problem_ecm(sol)
         
         
