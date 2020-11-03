@@ -3,6 +3,7 @@ import scipy.sparse
 from numba import jit
 import time
 from Undirected_new import *
+import random
 
 
 def degree(a):
@@ -1328,6 +1329,7 @@ class UndirectedGraph:
             self._set_solved_problem_ecm(solution)
         elif model in ["CReAMa", "CReAMA-sparse"]:
             self._set_solved_problem_CReAMa(solution)
+        #TODO: eliminare o modificare, al momento non esiste la funzione a cui rimanda
         elif moodel in ["ecm-two-steps"]:
             self._set_solved_problem_ecm_two_steps(solution)
 
@@ -1904,4 +1906,61 @@ class UndirectedGraph:
         self.last_model = "ecm-two-steps"
         self._set_solved_problem_ecm(sol)
         
+    
+    def ensemble_sampler(n=1, output_dir="./", seed=10):
+        # al momento funziona solo sull'ultimo problema risolto
+        # unico input possibile e' la cartella dove salvare i samples
+        # ed il numero di samples
+
+
+        if self.last_model in ["cm", "cm_new"]:
+            # self.x
+            self.p_ij = lambda inds : p_ij_cm(inds, self.x),
+        elif self.last_model in ["ecm", "ecm_new"]:
+            # self.x
+            # self.y
+            self.p_ij = lambda inds : p_ij_ecm(inds, self.xi, self.y),
+            self.q_ij = lambda inds : q_ij_ecm(inds, self.xi, self.y),
+        elif self.last_model in ["ecm-two-steps"]:
+            # self.chi
+            # self.b_CReM
+        elif self.last_model in ["CReAMa", "CReAMa-sparse"]:
+            # self.beta
+
+        # compute the sample
+        if self.last_model in ["cm", "cm_new"]:
+            self.ensemble_sampler_binary(n=n, output_dir=output_dir, seed)
+        elif self.last_model in ["ecm", "ecm_new", "ecm-two-steps", "CReAMa", "CReAMa-sparse"]:
+            self.ensemble_sampler_weighted(n=n, output_dir=output_dir, seed)
+
+
+    def ensemble_sampler_binary(n, output_dir, seed):
+
+    
+    def is_a_link(ind, pfun=self.p_ij, seed):
+        random.seed(seed)
+        p = random.random()
+        p_ensemble = p_ij(ind)
+        return p < p_ensemble
+
+
+    @jit(nopython=True)
+    def ensemble_sampler_binary_graph(seed):
+        random.seed(seed)
+        for i in range(self.rnz_n):
+            for j in range(self.rnz_n):
+
+        return None
+                
+
+    @jit(nopython=True)
+    def ensemble_sampler_weighted(n, output_dir, seed):
+        return None
+
+
+    @jit(nopython=True)
+    def p_ij_cm(inds, x):
+        i, j = inds
+        xij = x[i]*x[j]
+        return xij/(1 + xij)
         
