@@ -1,9 +1,13 @@
 import numpy as np
+import os
 import scipy.sparse
 from numba import jit
 import time
 from Undirected_new import *
 import random
+import itertools
+# import pathos.multiprocessing as mp
+import multiprocessing as mp
 
 
 def degree(a):
@@ -1907,60 +1911,112 @@ class UndirectedGraph:
         self._set_solved_problem_ecm(sol)
         
     
-    def ensemble_sampler(n=1, output_dir="./", seed=10):
+    def ensemble_sampler(self, n, output_dir="sample/", seed=10):
         # al momento funziona solo sull'ultimo problema risolto
         # unico input possibile e' la cartella dove salvare i samples
         # ed il numero di samples
 
-
         if self.last_model in ["cm", "cm_new"]:
             # self.x
-            self.p_ij = lambda inds : p_ij_cm(inds, self.x),
+            # joblib 
+            self.p_ij = lambda inds : p_ij_cm(inds, (self.x)),
+            # multiprocessing
+            # self.is_a_link = self.is_a_link_cm
         elif self.last_model in ["ecm", "ecm_new"]:
             # self.x
             # self.y
-            self.p_ij = lambda inds : p_ij_ecm(inds, self.xi, self.y),
-            self.q_ij = lambda inds : q_ij_ecm(inds, self.xi, self.y),
+            self.p_ij = lambda inds : p_ij_ecm(inds, (self.x, self.y)),
+            self.q_ij = lambda inds : q_ij_ecm(inds, (self.x, self.y)),
         elif self.last_model in ["ecm-two-steps"]:
-            # self.chi
+            self.chi = None
             # self.b_CReM
         elif self.last_model in ["CReAMa", "CReAMa-sparse"]:
-            # self.beta
+            self.beta = None
+        else: 
+            raise ValueError("insert a model")
+
+        # create the output directory
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
         # compute the sample
-        if self.last_model in ["cm", "cm_new"]:
-            self.ensemble_sampler_binary(n=n, output_dir=output_dir, seed)
-        elif self.last_model in ["ecm", "ecm_new", "ecm-two-steps", "CReAMa", "CReAMa-sparse"]:
-            self.ensemble_sampler_weighted(n=n, output_dir=output_dir, seed)
-
-
-    def ensemble_sampler_binary(n, output_dir, seed):
-
-    
-    def is_a_link(ind, pfun=self.p_ij, seed):
         random.seed(seed)
+
+        if self.last_model in ["cm", "cm_new"]:
+            iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
+            # itertools.starmap(self.ensemble_sampler_binary_single_graph, iter_files)
+            for item in iter_files:
+                self.ensemble_sampler_binary_single_graph(item)
+
+        elif self.last_model in ["ecm", "ecm_new", "ecm-two-steps", "CReAMa", "CReAMa-sparse"]:
+            place_holder=None
+            # self.ensemble_sampler_weighted(n=n, output_dir=output_dir, seed)
+        else: 
+            raise ValueError("insert a model")
+
+
+    @jit(nopython=True)
+    def is_a_link(self, ind):
         p = random.random()
-        p_ensemble = p_ij(ind)
+        p_ensemble = self.p_ij(ind)
         return p < p_ensemble
 
 
-    @jit(nopython=True)
-    def ensemble_sampler_binary_graph(seed):
-        random.seed(seed)
-        for i in range(self.rnz_n):
-            for j in range(self.rnz_n):
-
-        return None
-                
 
     @jit(nopython=True)
-    def ensemble_sampler_weighted(n, output_dir, seed):
-        return None
-
-
-    @jit(nopython=True)
-    def p_ij_cm(inds, x):
+    def p_ij_cm(inds, args):
         i, j = inds
+        x = args[0]
         xij = x[i]*x[j]
         return xij/(1 + xij)
-        
+
+
+
+    def ensemble_sampler_binary_single_graph(self, outfile_name):
+        # produce and write a single undirected binary graph
+
+        cpu_n = 2  #TODO: deve essere in input
+        x = self.x
+        inds = range(len(x))
+
+        # put together inputs for pool 
+        # iter_ = itertools.product(zip(inds,x), zip(inds,x))
+        c = zip(inds, x)
+        # print(list(zip(inds, x)))
+        iter_ = iter(((i, x),(j, y)) for i,x in c for j,y in c if i<j) 
+
+        # compute existing edges
+        with mp.Pool(processes=cpu_n) as pool:
+            edges_list = pool.starmap(is_a_link_cm, iter_)
+
+        # removing None
+        edges_list[:] = (value for value in edges_list if value is not None)
+
+
+        # edgelist writing
+        with open(outfile_name, "w") as outfile:
+            outfile.write(
+                "".join(
+                    "{} {}\n".format(str(i),str(j)) for (i,j) in edges_list
+                    )
+                )
+
+        return outfile_name 
+                
+
+    def ensemble_sampler_weighted(self, output_name):
+        return None
+
+
+def is_a_link_cm(args_1, args_2):
+    (i, xi) = args_1
+    (j, xj) = args_2
+    p = random.random()
+    xij = xi*xj
+    p_ensemble =  xij/(1 + xij)
+    if p < p_ensemble:
+        return (i, j)
+    else:
+        return None
+
+
