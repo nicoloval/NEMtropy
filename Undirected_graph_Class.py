@@ -965,7 +965,7 @@ def edgelist_from_edgelist(edgelist):
     Creates a new edgelist with the indexes of the nodes instead of the names.
     Returns also two dictionaries that keep track of the nodes.
     """
-    # edgelist = list(zip(*edgelist))
+    edgelist = [tuple(item) for item in edgelist]
     if len(edgelist[0]) == 2:
         nodetype = type(edgelist[0][0])
         edgelist = np.array(
@@ -1911,6 +1911,7 @@ class UndirectedGraph:
         self.last_model = "ecm-two-steps"
         self._set_solved_problem_ecm(sol)
         
+<<<<<<< HEAD
     
     def ensemble_sampler(self, n, output_dir="sample/", seed=10):
         # al momento funziona solo sull'ultimo problema risolto
@@ -2021,3 +2022,6 @@ def is_a_link_cm(args_1, args_2):
         return None
 
 
+=======
+        
+>>>>>>> master
