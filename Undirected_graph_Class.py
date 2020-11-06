@@ -960,7 +960,8 @@ def edgelist_from_edgelist(edgelist):
     Creates a new edgelist with the indexes of the nodes instead of the names.
     Returns also two dictionaries that keep track of the nodes.
     """
-    edgelist = list(zip(*edgelist))
+    # edgelist = list(zip(*edgelist))
+    edgelist = [tuple(item) for item in edgelist]
     if len(edgelist[0]) == 2:
         nodetype = type(edgelist[0][0])
         edgelist = np.array(
