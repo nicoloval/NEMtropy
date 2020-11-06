@@ -1911,7 +1911,6 @@ class UndirectedGraph:
         self.last_model = "ecm-two-steps"
         self._set_solved_problem_ecm(sol)
         
-<<<<<<< HEAD
     
     def ensemble_sampler(self, n, output_dir="sample/", seed=10):
         # al momento funziona solo sull'ultimo problema risolto
@@ -2021,7 +2020,3 @@ def is_a_link_cm(args_1, args_2):
     else:
         return None
 
-
-=======
-        
->>>>>>> master

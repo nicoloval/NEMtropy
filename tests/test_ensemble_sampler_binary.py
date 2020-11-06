@@ -1,5 +1,5 @@
 import sys
-
+import os
 sys.path.append("../")
 import Undirected_graph_Class as sample
 import Matrix_Generator as mg
@@ -27,7 +27,6 @@ class MyTest(unittest.TestCase):
             ]
         )
         # number of copies to generate
-        n = 10
 
         g = sample.UndirectedGraph(A)
 
@@ -44,7 +43,9 @@ class MyTest(unittest.TestCase):
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        g.ensemble_sampler(n=n, output_dir="sample_cm/", seed=100)
+        n = 1000
+        output_dir = "sample_cm/"
+        g.ensemble_sampler(n=n, output_dir=output_dir, seed=100)
 
         gdseq = g.dseq
         gdseq_sort = np.sort(gdseq) 
@@ -54,23 +55,29 @@ class MyTest(unittest.TestCase):
         gdseq_sort_av = np.zeros(N) 
 
         for g in range(n):
-            f = "sample_cm/{}.txt".format(g)
-            print(f)
-            edges_list = np.loadtxt(fname=f, dtype=int, delimiter=" ")
-            if type(edges_list[0]) == np.int64:
-                # if True, there s only one link and it's not in the right format
-                edges_list = [(edges_list[0], edges_list[1])]
-            else:
-                edges_list = [tuple(item) for item in edges_list]
-            print(edges_list)
+            f = output_dir + "{}.txt".format(g)
+            if not os.stat(f).st_size == 0:
+                edges_list = np.loadtxt(fname=f, dtype=int, delimiter=" ")
+                if type(edges_list[0]) == np.int64:
+                    # if True, there s only one link and it's not in the right format
+                    edges_list = [(edges_list[0], edges_list[1])]
+                else:
+                    edges_list = [tuple(item) for item in edges_list]
 
-            G = sample.UndirectedGraph()
-            G._initialize_graph(edgelist=edges_list)
-            tmp = np.zeros(N)
-            tmp[:N] = gdseq_sort_av
-            gdseq_sort_av = gdseq_sort_av
+                G = sample.UndirectedGraph()
+                G._initialize_graph(edgelist=edges_list)
+                tmp = np.zeros(N)
+                tmp[-len(G.dseq):] = np.sort(G.dseq) 
+                gdseq_sort_av = gdseq_sort_av + tmp
 
-        print(gdseq_sort_av)
+        ensemble_error = np.linalg.norm(gdseq_sort - gdseq_sort_av/n, np.inf)
+        print(ensemble_error)
+        print(err)
+
+        l = os.listdir(output_dir)
+        for f in l:
+            os.remove(output_dir + f)
+        os.rmdir(output_dir)
 
         # test result
         self.assertTrue(err < 1e-1)
