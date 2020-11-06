@@ -41,6 +41,7 @@ class MyTest(unittest.TestCase):
         )
 
         g.solution_error()
+        err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
         g.ensemble_sampler(n=n, output_dir="sample_cm/", seed=100)
@@ -50,26 +51,29 @@ class MyTest(unittest.TestCase):
 
         # read all sampled graphs and check the average degree distribution is close enough
         N = len(gdseq)
-        gdseq_av = np.zeros(N) 
         gdseq_sort_av = np.zeros(N) 
+
         for g in range(n):
             f = "sample_cm/{}.txt".format(g)
+            print(f)
             edges_list = np.loadtxt(fname=f, dtype=int, delimiter=" ")
+            if type(edges_list[0]) == np.int64:
+                # if True, there s only one link and it's not in the right format
+                edges_list = [(edges_list[0], edges_list[1])]
+            else:
+                edges_list = [tuple(item) for item in edges_list]
             print(edges_list)
-            edgelist = list(zip(*edges_list))
-            print(edgelist)
-            sys.exit()
 
             G = sample.UndirectedGraph()
             G._initialize_graph(edgelist=edges_list)
-            print(G.dseq)
-            sys.exit()
+            tmp = np.zeros(N)
+            tmp[:N] = gdseq_sort_av
+            gdseq_sort_av = gdseq_sort_av
 
-
-
+        print(gdseq_sort_av)
 
         # test result
-        self.assertTrue(g.error < 1e-1)
+        self.assertTrue(err < 1e-1)
 
 
 if __name__ == "__main__":
