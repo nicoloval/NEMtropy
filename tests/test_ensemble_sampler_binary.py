@@ -18,6 +18,7 @@ class MyTest(unittest.TestCase):
         """test with 3 classes of cardinality 1
         and no zero degrees
         """
+        """
         A = np.array(
             [
                 [0, 1, 1, 0],
@@ -26,6 +27,13 @@ class MyTest(unittest.TestCase):
                 [0, 1, 0, 0],
             ]
         )
+        e = [(0,1), (0,2), (1,3)]
+        d = [1,1,2,2]
+        print(e)
+        print(d)
+        """
+        N, seed = (20, 22)
+        A = mg.random_binary_matrix_generator_dense(N, sym=True, seed=seed)
         # number of copies to generate
 
         g = sample.UndirectedGraph(A)
@@ -43,7 +51,7 @@ class MyTest(unittest.TestCase):
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        n = 1000
+        n = 10000
         output_dir = "sample_cm/"
         g.ensemble_sampler(n=n, output_dir=output_dir, seed=100)
 
@@ -51,7 +59,6 @@ class MyTest(unittest.TestCase):
         gdseq_sort = np.sort(gdseq) 
 
         # read all sampled graphs and check the average degree distribution is close enough
-        N = len(gdseq)
         gdseq_sort_av = np.zeros(N) 
 
         for g in range(n):
@@ -70,9 +77,17 @@ class MyTest(unittest.TestCase):
                 tmp[-len(G.dseq):] = np.sort(G.dseq) 
                 gdseq_sort_av = gdseq_sort_av + tmp
 
-        ensemble_error = np.linalg.norm(gdseq_sort - gdseq_sort_av/n, np.inf)
-        print(ensemble_error)
-        print(err)
+        gdseq_sort_av = gdseq_sort_av/n
+        ensemble_error = np.linalg.norm(gdseq_sort - gdseq_sort_av, np.inf)
+
+        # debug
+        print('original dseq',gdseq_sort)
+        print('original dseq sum ',gdseq_sort.sum())
+        print('ensemble dseq',gdseq_sort_av)
+        print('ensemble dseq sum ',gdseq_sort_av.sum())
+        print('error', ensemble_error)
+        print('solution error', err)
+
 
         l = os.listdir(output_dir)
         for f in l:

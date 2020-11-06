@@ -1963,14 +1963,12 @@ class UndirectedGraph:
         return p < p_ensemble
 
 
-
     @jit(nopython=True)
     def p_ij_cm(inds, args):
         i, j = inds
         x = args[0]
         xij = x[i]*x[j]
         return xij/(1 + xij)
-
 
 
     def ensemble_sampler_binary_single_graph(self, outfile_name):
@@ -1982,9 +1980,8 @@ class UndirectedGraph:
 
         # put together inputs for pool 
         # iter_ = itertools.product(zip(inds,x), zip(inds,x))
-        c = zip(inds, x)
         # print(list(zip(inds, x)))
-        iter_ = iter(((i, x),(j, y)) for i,x in c for j,y in c if i<j) 
+        iter_ = iter(((i, xi),(j, xj)) for i,xi in zip(inds,x) for j,xj in zip(inds,x) if i<j) 
 
         # compute existing edges
         with mp.Pool(processes=cpu_n) as pool:
@@ -1993,6 +1990,8 @@ class UndirectedGraph:
         # removing None
         edges_list[:] = (value for value in edges_list if value is not None)
 
+        # debug
+        # print(edges_list)
 
         # edgelist writing
         with open(outfile_name, "w") as outfile:
