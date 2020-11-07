@@ -5,6 +5,7 @@ import Undirected_graph_Class as sample
 import Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
+import random
 
 
 class MyTest(unittest.TestCase):
@@ -32,7 +33,7 @@ class MyTest(unittest.TestCase):
         print(e)
         print(d)
         """
-        N, seed = (20, 22)
+        N, seed = (4, 22)
         A = mg.random_binary_matrix_generator_dense(N, sym=True, seed=seed)
         # number of copies to generate
 
@@ -47,13 +48,15 @@ class MyTest(unittest.TestCase):
             initial_guess="uniform",
         )
 
+        x = g.x
         g.solution_error()
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        n = 10000
+        n = 10
         output_dir = "sample_cm/"
-        g.ensemble_sampler(n=n, output_dir=output_dir, seed=100)
+        # random.seed(100)
+        g.ensemble_sampler(n=n, output_dir=output_dir, seed=42)
 
         gdseq = g.dseq
         gdseq_sort = np.sort(gdseq) 
@@ -79,6 +82,16 @@ class MyTest(unittest.TestCase):
 
         gdseq_sort_av = gdseq_sort_av/n
         ensemble_error = np.linalg.norm(gdseq_sort - gdseq_sort_av, np.inf)
+
+        #debug
+        """
+        for i in range(N):
+            for j in range(N):
+                if i!=j:
+                    aux = x[i]*x[j]
+                    # print("({},{}) p = {}".format(i,j,aux/(1+aux)))
+        """
+
 
         # debug
         print('original dseq',gdseq_sort)

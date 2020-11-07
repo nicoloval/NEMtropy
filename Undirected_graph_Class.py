@@ -878,6 +878,7 @@ def expected_degree_cm(sol):
         for j in np.arange(n):
             if i != j:
                 aux = sol[i] * sol[j]
+                # print("({},{}) p = {}".format(i,j,aux/(1+aux)))
                 ex_k[i] += aux / (1 + aux)
     return ex_k
 
@@ -1941,13 +1942,16 @@ class UndirectedGraph:
             os.makedirs(output_dir)
 
         # compute the sample
-        random.seed(seed)
+        np.random.seed(seed)
+        s = [np.random.randint(0,1000000) for i in range(n)]
 
         if self.last_model in ["cm", "cm_new"]:
             iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
             # itertools.starmap(self.ensemble_sampler_binary_single_graph, iter_files)
+            i = 0
             for item in iter_files:
-                self.ensemble_sampler_binary_single_graph(item)
+                self.ensemble_sampler_binary_single_graph(item, seed=s[i])
+                i += 1
 
         elif self.last_model in ["ecm", "ecm_new", "ecm-two-steps", "CReAMa", "CReAMa-sparse"]:
             place_holder=None
@@ -1971,8 +1975,10 @@ class UndirectedGraph:
         return xij/(1 + xij)
 
 
-    def ensemble_sampler_binary_single_graph(self, outfile_name):
+    def ensemble_sampler_binary_single_graph(self, outfile_name,seed=None):
         # produce and write a single undirected binary graph
+        if seed is not None:
+            np.random.seed(seed)
 
         cpu_n = 2  #TODO: deve essere in input
         x = self.x
@@ -1981,7 +1987,7 @@ class UndirectedGraph:
         # put together inputs for pool 
         # iter_ = itertools.product(zip(inds,x), zip(inds,x))
         # print(list(zip(inds, x)))
-        iter_ = iter(((i, xi),(j, xj)) for i,xi in zip(inds,x) for j,xj in zip(inds,x) if i<j) 
+        iter_ = iter(((i, xi),(j, xj), np.random.randint(0,1000000)) for i,xi in zip(inds,x) for j,xj in zip(inds,x) if i<j) 
 
         # compute existing edges
         with mp.Pool(processes=cpu_n) as pool:
@@ -2008,10 +2014,12 @@ class UndirectedGraph:
         return None
 
 
-def is_a_link_cm(args_1, args_2):
+def is_a_link_cm(args_1, args_2, seed=None):
+    if seed is not None:
+        np.random.seed(seed)
     (i, xi) = args_1
     (j, xj) = args_2
-    p = random.random()
+    p = np.random.random()
     xij = xi*xj
     p_ensemble =  xij/(1 + xij)
     if p < p_ensemble:
