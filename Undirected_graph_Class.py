@@ -86,12 +86,12 @@ def loglikelihood_prime_cm(x, args):
     n = len(k)
     f = np.zeros_like(k, dtype=np.float64)
     for i in np.arange(n):
-        f[i] += k[i] / x[i]
+        f[i] += c[i] * k[i] / x[i]
         for j in np.arange(n):
             if i == j:
-                f[i] -= (c[j] - 1) * (x[j] / (1 + (x[j] ** 2)))
+                f[i] -= c[i] * (c[j] - 1) * (x[j] / (1 + (x[j] ** 2)))
             else:
-                f[i] -= c[j] * (x[j] / (1 + x[i] * x[j]))
+                f[i] -=  c[i] * c[j] * (x[j] / (1 + x[i] * x[j]))
     return f
 
 
@@ -104,17 +104,17 @@ def loglikelihood_hessian_cm(x, args):
     for i in np.arange(n):
         for j in np.arange(i, n):
             if i == j:
-                aux_f = -k[i] / (x[i] * x[i])
+                aux_f = -k[i] / (x[i] * x[i]) * c[i]
                 for h in range(n):
                     if i == h:
                         aux = 1 + x[h] * x[h]
-                        aux_f += ((x[h] * x[h]) / (aux * aux)) * (c[h] - 1)
+                        aux_f += ((x[h] * x[h]) / (aux * aux)) * c[i] * (c[h] - 1)
                     else:
                         aux = 1 + x[i] * x[h]
-                        aux_f += ((x[h] * x[h]) / (aux * aux)) * c[h]
+                        aux_f += ((x[h] * x[h]) / (aux * aux)) * c[i] * c[h]
             else:
                 aux = 1 + x[i] * x[j]
-                aux_f = ((x[j] * x[j] - aux) / (aux * aux)) * c[j]
+                aux_f = ((x[j] * x[j] - aux) / (aux * aux)) * c[i] * c[j]
 
             f[i, j] = aux_f
             f[j, i] = aux_f
@@ -128,14 +128,14 @@ def loglikelihood_hessian_diag_cm(x, args):
     n = len(k)
     f = np.zeros(n, dtype=np.float64)
     for i in np.arange(n):
-        f[i] - k[i] / (x[i] * x[i])
+        f[i] - k[i] / (x[i] * x[i]) * c[i]
         for j in np.arange(n):
             if i == j:
                 aux = 1 + x[j] * x[j]
-                f[i] += ((x[j] * x[j]) / (aux * aux)) * (c[j] - 1)
+                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[i] * (c[j] - 1)
             else:
                 aux = 1 + x[i] * x[j]
-                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[j]
+                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[i] * c[j]
     return f
 
 
