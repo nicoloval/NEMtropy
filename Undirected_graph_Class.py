@@ -1263,7 +1263,8 @@ class UndirectedGraph:
         self.last_model = model
         self.full_return = full_return
         self.initial_guess = initial_guess
-        self._initialize_problem(model, method)
+        self.regularise = regularise
+        self._initialize_problem(self.last_model, method)
         x0 = self.x0
 
         sol = solver(
@@ -1362,8 +1363,15 @@ class UndirectedGraph:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
         self.r_x[self.r_dseq == 0] = 0
-
-        self.x0 = self.r_x
+        
+        if isinstance(self.initial_guess, str):
+            if self.last_model == "cm":
+                self.x0 = self.r_x
+            elif self.last_model == "cm-new":
+                self.r_x[self.r_x!=0] = -np.log(self.r_x[self.r_x!=0])
+                self.x0 = self.r_x
+        elif isinstance(self.initial_guess, np.ndarray):
+            self.x0 = self.r_x
 
 
     def _set_initial_guess_CReAMa(self):
@@ -1420,8 +1428,17 @@ class UndirectedGraph:
 
         self.x[self.dseq == 0] = 0
         self.y[self.strength_sequence == 0] = 0
-
-        self.x0 = np.concatenate((self.x, self.y))
+        
+        if isinstance(self.initial_guess, str):
+            if self.last_model == "ecm":
+                self.x0 = np.concatenate((self.x, self.y))
+            elif self.last_model == "ecm-new":
+                self.x[self.x!=0] = -np.log(self.x[self.x!=0])
+                self.y[self.y!=0] = -np.log(self.y[self.y!=0])
+                self.x0 = np.concatenate((self.x, self.y))
+        elif isinstance(self.initial_guess, np.ndarray):
+            self.x0 = np.concatenate((self.x, self.y))
+        
 
     # DA SISTEMARE
     def solution_error(self):
@@ -1665,6 +1682,12 @@ class UndirectedGraph:
         }
         
         self.hessian_regulariser = hess_reg[model]
+        
+        if isinstance(self.regularise, str):
+            if self.regularise == "eigenvalues": 
+                self.hessian_regulariser = hessian_regulariser_function_eigen_based
+            elif self.regularise == "identity":
+                self.hessian_regulariser = hessian_regulariser_function
 
     def _solve_problem_CReAMa(
         self,

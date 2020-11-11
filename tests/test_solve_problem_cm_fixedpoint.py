@@ -48,7 +48,6 @@ class MyTest(unittest.TestCase):
         # print('\ntest 5: error = {}'.format(g.error))
 
         # test result
-        print(g.error)
         self.assertTrue(g.error < 1e-1)
         
 
