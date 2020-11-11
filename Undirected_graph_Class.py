@@ -1359,6 +1359,12 @@ class UndirectedGraph:
                 )  # All probabilities will be 1/2 initially
             elif self.initial_guess == "degrees":
                 self.r_x = self.r_dseq.astype(np.float64)
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
@@ -1389,6 +1395,12 @@ class UndirectedGraph:
                 self.beta = (self.strength_sequence > 0).astype(float) / (
                     self.strength_sequence + 1
                 )
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
@@ -1423,6 +1435,12 @@ class UndirectedGraph:
             elif self.initial_guess == "uniform":
                 self.x = 0.001 * np.ones(self.n_nodes, dtype=np.float64)
                 self.y = 0.001 * np.ones(self.n_nodes, dtype=np.float64)
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
