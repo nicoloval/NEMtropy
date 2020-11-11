@@ -1452,7 +1452,11 @@ class UndirectedGraph:
                 self.relative_error_strength = np.max(
                      (ex_s - self.strength_sequence) / (self.strength_sequence + np.exp(-100))
                 )
-                self.error = self.error_strength
+                
+                if self.adjacency_given:
+                    self.error = self.error_strength
+                else:
+                    self.error = max(self.error_strength, self.error_degree)
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["ecm", "ecm-new"]:
             sol = np.concatenate((self.x, self.y))
@@ -1695,6 +1699,7 @@ class UndirectedGraph:
             )
             if self.is_sparse:
                 self.adjacency_CReAMa = (self.x,)
+                self.adjacency_given = False
             else:
                 pmatrix = self.fun_pmatrix(self.x)
                 raw_ind, col_ind = np.nonzero(np.triu(pmatrix))
@@ -1703,6 +1708,7 @@ class UndirectedGraph:
                 weigths_value = pmatrix[raw_ind, col_ind]
                 self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
                 self.is_sparse = False
+                self.adjacency_given = False
         elif isinstance(adjacency, list):
             adjacency = np.array(adjacency).astype(np.float64)
             raw_ind, col_ind = np.nonzero(np.triu(adjacency))
@@ -1711,6 +1717,7 @@ class UndirectedGraph:
             weigths_value = adjacency[raw_ind, col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
         elif isinstance(adjacency, np.ndarray):
             adjacency = adjacency.astype(np.float64)
             raw_ind, col_ind = np.nonzero(np.triu(adjacency))
@@ -1719,6 +1726,7 @@ class UndirectedGraph:
             weigths_value = adjacency[raw_ind, col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
         elif scipy.sparse.isspmatrix(adjacency):
             raw_ind, col_ind = scipy.sparse.triu(adjacency).nonzero()
             raw_ind = raw_ind.astype(np.int64)
@@ -1726,6 +1734,7 @@ class UndirectedGraph:
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = True
+            self.adjacency_given = True
 
         if self.is_sparse:
             self.last_model = "CReAMa-sparse"
@@ -1733,6 +1742,8 @@ class UndirectedGraph:
             self.last_model = model
             linsearch=linsearch,
             regularise=regularise
+        
+        self.regularise = regularise
         self.full_return = full_return
         self.initial_guess = "strengths"
         self._initialize_problem(self.last_model, method)
