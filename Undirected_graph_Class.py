@@ -1330,8 +1330,6 @@ class UndirectedGraph:
             self._set_solved_problem_ecm(solution)
         elif model in ["CReAMa", "CReAMA-sparse"]:
             self._set_solved_problem_CReAMa(solution)
-        elif moodel in ["ecm-two-steps"]:
-            self._set_solved_problem_ecm_two_steps(solution)
 
     def degree_reduction(self):
         self.r_dseq, self.r_index_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
@@ -1475,13 +1473,10 @@ class UndirectedGraph:
                 )
                 self.error = self.error_strength
         # potremmo strutturarlo così per evitare ridondanze
-        elif self.last_model in ["ecm", "ecm-new", "ecm-two-steps"]:
-            if self.last_model in ["ecm", "ecm-new"]:
-                sol = np.concatenate((self.x, self.y))
-                ex = expected_ecm(sol)
-            elif self.last_model in ["ecm-two-steps"]:
-                sol = np.concatenate((self.chi, self.b_CReM))
-                ex = expected_ecm_two_steps(sol)
+        elif self.last_model in ["ecm", "ecm-new"]:
+            sol = np.concatenate((self.x, self.y))
+            ex = expected_ecm(sol)
+            
             k = np.concatenate((self.dseq, self.strength_sequence))
             self.expected_dseq = ex[: self.n_nodes]
             self.expected_strength_seq = ex[self.n_nodes :]
@@ -1809,14 +1804,7 @@ class UndirectedGraph:
         elif self.last_model == "ecm-new":
             self.x = np.exp(-self.r_xy[: self.n_nodes])
             self.y = np.exp(-self.r_xy[self.n_nodes :])
-        elif self.last_model == "ecm-two-steps":
-            self.chi = - np.log(self.r_xy[:self.n_nodes])
-            self.b_CReM = self.r_xy[self.n_nodes:]
             
-            
-        
-    
-    
     def solve_tool(
         self,
         model,
