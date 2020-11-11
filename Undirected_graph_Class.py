@@ -128,7 +128,7 @@ def loglikelihood_hessian_diag_cm(x, args):
     n = len(k)
     f = np.zeros(n, dtype=np.float64)
     for i in np.arange(n):
-        f[i] - k[i] / (x[i] * x[i]) * c[i]
+        f[i] -= k[i] / (x[i] * x[i]) * c[i]
         for j in np.arange(n):
             if i == j:
                 aux = 1 + x[j] * x[j]
