@@ -1527,12 +1527,10 @@ def linsearch_fun_DECM(X, args):
 
     eps2 = 1e-2
     alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
-    print(alfa0)
     for a in alfa0:
         if a > 0:
             alfa = min(alfa, a)
 
-    print(alfa)
     # Mettere il check sulle y
     nnn = int(len(x) / 4)
     while True:
@@ -1549,7 +1547,6 @@ def linsearch_fun_DECM(X, args):
         else:
             alfa *= beta
 
-    print(alfa)
     i = 0
     s_old = step_fun(x)
     while (
@@ -2372,7 +2369,10 @@ class DirectedGraph:
                     (ex_s - s) / (s + np.exp(-100))
                     )
                 )
-                self.error = max(self.error_strength, self.error_degree)
+                if self.adjacency_given:
+                    self.error = self.error_strength
+                else:
+                    self.error = max(self.error_strength, self.error_degree)
 
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["decm", "decm_new"]:
@@ -2644,6 +2644,7 @@ class DirectedGraph:
         regularise=True,
         regularise_eps=1e-3,
     ):
+        
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
             not scipy.sparse.isspmatrix(adjacency)
         ):
@@ -2659,6 +2660,7 @@ class DirectedGraph:
             )
             if self.is_sparse:
                 self.adjacency_CReAMa = (self.x, self.y)
+                self.adjacency_given = False
             else:
                 pmatrix = self.fun_pmatrix(np.concatenate([self.x, self.y]))
                 raw_ind, col_ind = np.nonzero(pmatrix)
@@ -2667,6 +2669,7 @@ class DirectedGraph:
                 weigths_value = pmatrix[raw_ind, col_ind]
                 self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
                 self.is_sparse = False
+                self.adjacency_given = False
         elif isinstance(adjacency, list):
             adjacency = np.array(adjacency).astype(np.float64)
             raw_ind, col_ind = np.nonzero(adjacency)
@@ -2675,6 +2678,7 @@ class DirectedGraph:
             weigths_value = adjacency[raw_ind, col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
         elif isinstance(adjacency, np.ndarray):
             adjacency = adjacency.astype(np.float64)
             raw_ind, col_ind = np.nonzero(adjacency)
@@ -2683,6 +2687,7 @@ class DirectedGraph:
             weigths_value = adjacency[raw_ind, col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
         elif scipy.sparse.isspmatrix(adjacency):
             raw_ind, col_ind = adjacency.nonzero()
             raw_ind = raw_ind.astype(np.int64)
@@ -2690,11 +2695,14 @@ class DirectedGraph:
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
 
         if self.is_sparse:
             self.last_model = "CReAMa-sparse"
         else:
             self.last_model = model
+        
+        self.regularise = regularise
         self.full_return = full_return
         self.initial_guess = "strengths"
         self._initialize_problem(self.last_model, method)
