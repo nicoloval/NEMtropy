@@ -1851,59 +1851,7 @@ class UndirectedGraph:
                 verbose=verbose,
                 tol=tol,
             )
-        elif model in ["ecm-two-steps"]:
-            self._solve_problem_ECM(
-                initial_guess=initial_guess,
-                model="CReAMa",
-                adjacency=adjacency,
-                method=method,
-                max_steps=max_steps,
-                full_return=full_return,
-                verbose=verbose,
-                tol=tol,
-            )
+        
 
 
-    def _solve_problem_ECM(
-        self,
-        initial_guess=None,
-        model="CReAMa",
-        adjacency="cm",
-        method="quasinewton",
-        max_steps=100,
-        tol=1e-8,
-        full_return=False,
-        verbose=False,
-        linsearch=True,
-        regularise=True,
-    ):      
-        if adjacency in ["cm", "cm-new"]:
-            self._solve_problem_CReAMa(
-                initial_guess=initial_guess,
-                model="CReAMa",
-                adjacency=adjacency,
-                method=method,
-                max_steps=max_steps,
-                tol=tol,
-                full_return=full_return,
-                verbose=verbose,
-                linsearch=linsearch,
-                regularise=regularise,
-            )
-        else:
-            raise ValueError("Adjacency value can be 'cm' or 'cm-new'.")
-        
-        if full_return:
-            sol = (np.concatenate([self.x, self.beta]),
-                   (self.comput_time, self.comput_time_creama),
-                   (self.n_steps, self.n_steps_creama),
-                   (self.norm_seq, self.norm_seq_creama),
-                   (self.diff_seq, self.diff_seq_creama),
-                   (self.alfa_seq, self.alfa_seq_creama))
-        else:
-            sol = np.concatenate(self.x, self.beta)
-        
-        self.last_model = "ecm-two-steps"
-        self._set_solved_problem_ecm(sol)
-        
-        
+    
