@@ -927,25 +927,6 @@ def expected_ecm(sol):
 
 
 @jit(nopython=True)
-def expected_ecm_two_steps(sol):
-    n = int(len(sol)/2)
-    chi = sol[:n]
-    b_crem = sol[n:]
-    ex_ks = np.zeros(2*n, dtype = np.float64)
-    for i in np.arange(n):
-        for j in np.arange(n):
-            if i!=j :
-                b_UECM = -beta_ecm(b_crem[i]+b_crem[j])
-                aux1 = alfa_ecm(chi[i]+chi[j], b_UECM)
-                aux2 = np.exp(-b_UECM)
-                ex_ks[i] += (aux1 * aux2) / (1 - aux2 + aux1 * aux2)
-                ex_ks[i + n] += (aux1 * aux2) / (
-                    (1 - aux2 + aux1 * aux2) * (1 - aux2)
-                )
-    return ex_ks
-
-
-@jit(nopython=True)
 def beta_ecm(b):
     return(np.log(1-(b)))
 
