@@ -91,12 +91,12 @@ def loglikelihood_prime_cm(x, args):
     n = len(k)
     f = np.zeros_like(k, dtype=np.float64)
     for i in np.arange(n):
-        f[i] += k[i] / x[i]
+        f[i] += c[i] * k[i] / x[i]
         for j in np.arange(n):
             if i == j:
-                f[i] -= (c[j] - 1) * (x[j] / (1 + (x[j] ** 2)))
+                f[i] -= c[i] * (c[j] - 1) * (x[j] / (1 + (x[j] ** 2)))
             else:
-                f[i] -= c[j] * (x[j] / (1 + x[i] * x[j]))
+                f[i] -=  c[i] * c[j] * (x[j] / (1 + x[i] * x[j]))
     return f
 
 
@@ -109,17 +109,17 @@ def loglikelihood_hessian_cm(x, args):
     for i in np.arange(n):
         for j in np.arange(i, n):
             if i == j:
-                aux_f = -k[i] / (x[i] * x[i])
+                aux_f = -k[i] / (x[i] * x[i]) * c[i]
                 for h in range(n):
                     if i == h:
                         aux = 1 + x[h] * x[h]
-                        aux_f += ((x[h] * x[h]) / (aux * aux)) * (c[h] - 1)
+                        aux_f += ((x[h] * x[h]) / (aux * aux)) * c[i] * (c[h] - 1)
                     else:
                         aux = 1 + x[i] * x[h]
-                        aux_f += ((x[h] * x[h]) / (aux * aux)) * c[h]
+                        aux_f += ((x[h] * x[h]) / (aux * aux)) * c[i] * c[h]
             else:
                 aux = 1 + x[i] * x[j]
-                aux_f = ((x[j] * x[j] - aux) / (aux * aux)) * c[j]
+                aux_f = ((x[j] * x[j] - aux) / (aux * aux)) * c[i] * c[j]
 
             f[i, j] = aux_f
             f[j, i] = aux_f
@@ -133,14 +133,14 @@ def loglikelihood_hessian_diag_cm(x, args):
     n = len(k)
     f = np.zeros(n, dtype=np.float64)
     for i in np.arange(n):
-        f[i] - k[i] / (x[i] * x[i])
+        f[i] -= k[i] / (x[i] * x[i]) * c[i]
         for j in np.arange(n):
             if i == j:
                 aux = 1 + x[j] * x[j]
-                f[i] += ((x[j] * x[j]) / (aux * aux)) * (c[j] - 1)
+                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[i] * (c[j] - 1)
             else:
                 aux = 1 + x[i] * x[j]
-                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[j]
+                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[i] * c[j]
     return f
 
 
@@ -933,25 +933,6 @@ def expected_ecm(sol):
 
 
 @jit(nopython=True)
-def expected_ecm_two_steps(sol):
-    n = int(len(sol)/2)
-    chi = sol[:n]
-    b_crem = sol[n:]
-    ex_ks = np.zeros(2*n, dtype = np.float64)
-    for i in np.arange(n):
-        for j in np.arange(n):
-            if i!=j :
-                b_UECM = -beta_ecm(b_crem[i]+b_crem[j])
-                aux1 = alfa_ecm(chi[i]+chi[j], b_UECM)
-                aux2 = np.exp(-b_UECM)
-                ex_ks[i] += (aux1 * aux2) / (1 - aux2 + aux1 * aux2)
-                ex_ks[i + n] += (aux1 * aux2) / (
-                    (1 - aux2 + aux1 * aux2) * (1 - aux2)
-                )
-    return ex_ks
-
-
-@jit(nopython=True)
 def beta_ecm(b):
     return(np.log(1-(b)))
 
@@ -1335,9 +1316,6 @@ class UndirectedGraph:
             self._set_solved_problem_ecm(solution)
         elif model in ["CReAMa", "CReAMA-sparse"]:
             self._set_solved_problem_CReAMa(solution)
-        #TODO: eliminare o modificare, al momento non esiste la funzione a cui rimanda
-        elif moodel in ["ecm-two-steps"]:
-            self._set_solved_problem_ecm_two_steps(solution)
 
     def degree_reduction(self):
         self.r_dseq, self.r_index_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
@@ -1479,15 +1457,16 @@ class UndirectedGraph:
                 self.relative_error_strength = np.max(
                      (ex_s - self.strength_sequence) / (self.strength_sequence + np.exp(-100))
                 )
-                self.error = self.error_strength
+                
+                if self.adjacency_given:
+                    self.error = self.error_strength
+                else:
+                    self.error = max(self.error_strength, self.error_degree)
         # potremmo strutturarlo così per evitare ridondanze
-        elif self.last_model in ["ecm", "ecm-new", "ecm-two-steps"]:
-            if self.last_model in ["ecm", "ecm-new"]:
-                sol = np.concatenate((self.x, self.y))
-                ex = expected_ecm(sol)
-            elif self.last_model in ["ecm-two-steps"]:
-                sol = np.concatenate((self.chi, self.b_CReM))
-                ex = expected_ecm_two_steps(sol)
+        elif self.last_model in ["ecm", "ecm-new"]:
+            sol = np.concatenate((self.x, self.y))
+            ex = expected_ecm(sol)
+            
             k = np.concatenate((self.dseq, self.strength_sequence))
             self.expected_dseq = ex[: self.n_nodes]
             self.expected_strength_seq = ex[self.n_nodes :]
@@ -1725,6 +1704,7 @@ class UndirectedGraph:
             )
             if self.is_sparse:
                 self.adjacency_CReAMa = (self.x,)
+                self.adjacency_given = False
             else:
                 pmatrix = self.fun_pmatrix(self.x)
                 raw_ind, col_ind = np.nonzero(np.triu(pmatrix))
@@ -1733,6 +1713,7 @@ class UndirectedGraph:
                 weigths_value = pmatrix[raw_ind, col_ind]
                 self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
                 self.is_sparse = False
+                self.adjacency_given = False
         elif isinstance(adjacency, list):
             adjacency = np.array(adjacency).astype(np.float64)
             raw_ind, col_ind = np.nonzero(np.triu(adjacency))
@@ -1741,6 +1722,7 @@ class UndirectedGraph:
             weigths_value = adjacency[raw_ind, col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
         elif isinstance(adjacency, np.ndarray):
             adjacency = adjacency.astype(np.float64)
             raw_ind, col_ind = np.nonzero(np.triu(adjacency))
@@ -1749,6 +1731,7 @@ class UndirectedGraph:
             weigths_value = adjacency[raw_ind, col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
         elif scipy.sparse.isspmatrix(adjacency):
             raw_ind, col_ind = scipy.sparse.triu(adjacency).nonzero()
             raw_ind = raw_ind.astype(np.int64)
@@ -1756,6 +1739,7 @@ class UndirectedGraph:
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = True
+            self.adjacency_given = True
 
         if self.is_sparse:
             self.last_model = "CReAMa-sparse"
@@ -1763,6 +1747,8 @@ class UndirectedGraph:
             self.last_model = model
             linsearch=linsearch,
             regularise=regularise
+        
+        self.regularise = regularise
         self.full_return = full_return
         self.initial_guess = "strengths"
         self._initialize_problem(self.last_model, method)
@@ -1815,14 +1801,7 @@ class UndirectedGraph:
         elif self.last_model == "ecm-new":
             self.x = np.exp(-self.r_xy[: self.n_nodes])
             self.y = np.exp(-self.r_xy[self.n_nodes :])
-        elif self.last_model == "ecm-two-steps":
-            self.chi = - np.log(self.r_xy[:self.n_nodes])
-            self.b_CReM = self.r_xy[self.n_nodes:]
             
-            
-        
-    
-    
     def solve_tool(
         self,
         model,
@@ -1857,18 +1836,7 @@ class UndirectedGraph:
                 verbose=verbose,
                 tol=tol,
             )
-        elif model in ["ecm-two-steps"]:
-            self._solve_problem_ECM(
-                initial_guess=initial_guess,
-                model="CReAMa",
-                adjacency=adjacency,
-                method=method,
-                max_steps=max_steps,
-                full_return=full_return,
-                verbose=verbose,
-                tol=tol,
-            )
-
+        
 
     def _solve_problem_ECM(
         self,

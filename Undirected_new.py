@@ -49,14 +49,14 @@ def loglikelihood_prime_cm_new(x, args):
     x1 = np.exp(-x)
     f = np.zeros_like(k, dtype=np.float64)
     for i in np.arange(n):
-        f[i] -= k[i]
+        f[i] -= c[i] *  k[i]
         for j in np.arange(n):
             if i == j:
                 aux = x1[i] ** 2
-                f[i] += (c[i] - 1) * (aux / (1 + aux))
+                f[i] += c[i] *  (c[i] - 1) * (aux / (1 + aux))
             else:
                 aux = x1[i] * x1[j]
-                f[i] += c[j] * (aux / (1 + aux))
+                f[i] += c[i] *  c[j] * (aux / (1 + aux))
     return f
 
 
@@ -74,13 +74,13 @@ def loglikelihood_hessian_cm_new(x, args):
                 for h in range(n):
                     if i == h:
                         aux = x1[h] ** 2
-                        aux_f -= (aux / (1 + aux) ** 2) * (c[h] - 1)
+                        aux_f -= (aux / (1 + aux) ** 2) * c[i] *  (c[h] - 1)
                     else:
                         aux = x1[i] * x1[h]
-                        aux_f -= ((aux) / (1 + aux) ** 2) * c[h]
+                        aux_f -= ((aux) / (1 + aux) ** 2) * c[i] *  c[h]
             else:
                 aux = x1[i] * x1[j]
-                aux_f = -((aux) / (1 + aux) ** 2) * c[j]
+                aux_f = -((aux) / (1 + aux) ** 2) * c[i] *  c[j]
 
             f[i, j] = aux_f
             f[j, i] = aux_f
@@ -98,10 +98,10 @@ def loglikelihood_hessian_diag_cm_new(x, args):
         for j in np.arange(n):
             if i == j:
                 aux = x1[j] ** 2
-                f[i] -= (aux / (1 + aux)) * (c[j] - 1)
+                f[i] -= (aux / (1 + aux)) * c[i] *  (c[j] - 1)
             else:
                 aux = x1[i] * x1[j]
-                f[i] -= (aux / (1 + aux)) * c[j]
+                f[i] -= (aux / (1 + aux)) * c[i] *  c[j]
     return f
 
 
