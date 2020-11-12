@@ -6,6 +6,7 @@ import Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
 import random
+import networkx as nx
 
 
 class MyTest(unittest.TestCase):
@@ -33,7 +34,7 @@ class MyTest(unittest.TestCase):
         print(e)
         print(d)
         """
-        N, seed = (4, 22)
+        N, seed = (50, 22)
         A = mg.random_binary_matrix_generator_dense(N, sym=True, seed=seed)
         # number of copies to generate
 
@@ -53,35 +54,33 @@ class MyTest(unittest.TestCase):
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        n = 10
+        n = 500
         output_dir = "sample_cm/"
         # random.seed(100)
         g.ensemble_sampler(n=n, output_dir=output_dir, seed=42)
 
-        gdseq = g.dseq
-        gdseq_sort = np.sort(gdseq) 
+        d = {'{}'.format(i):g.dseq[i] for i in range(N)}
+
 
         # read all sampled graphs and check the average degree distribution is close enough
-        gdseq_sort_av = np.zeros(N) 
+        d_emp = {'{}'.format(i):0 for i in range(N)}
 
-        for g in range(n):
-            f = output_dir + "{}.txt".format(g)
+        for l in range(n):
+            f = output_dir + "{}.txt".format(l)
             if not os.stat(f).st_size == 0:
-                edges_list = np.loadtxt(fname=f, dtype=int, delimiter=" ")
-                if type(edges_list[0]) == np.int64:
-                    # if True, there s only one link and it's not in the right format
-                    edges_list = [(edges_list[0], edges_list[1])]
-                else:
-                    edges_list = [tuple(item) for item in edges_list]
+                g_tmp = nx.read_edgelist(f)
+                d_tmp = dict(g_tmp.degree)
+                for item in d_tmp.keys(): 
+                    d_emp[item] += d_tmp[item]
 
-                G = sample.UndirectedGraph()
-                G._initialize_graph(edgelist=edges_list)
-                tmp = np.zeros(N)
-                tmp[-len(G.dseq):] = np.sort(G.dseq) 
-                gdseq_sort_av = gdseq_sort_av + tmp
 
-        gdseq_sort_av = gdseq_sort_av/n
-        ensemble_error = np.linalg.norm(gdseq_sort - gdseq_sort_av, np.inf)
+        for item in d_emp.keys(): 
+            d_emp[item] = d_emp[item]/n
+
+        a_diff = np.array([d[item] - d_emp[item] for item in d.keys()])
+        d_diff = {item:d[item] - d_emp[item] for item in d.keys()}
+
+        ensemble_error = np.linalg.norm(a_diff, np.inf)
 
         #debug
         """
@@ -94,12 +93,15 @@ class MyTest(unittest.TestCase):
 
 
         # debug
-        print('original dseq',gdseq_sort)
-        print('original dseq sum ',gdseq_sort.sum())
-        print('ensemble dseq',gdseq_sort_av)
-        print('ensemble dseq sum ',gdseq_sort_av.sum())
-        print('error', ensemble_error)
-        print('solution error', err)
+        """
+        print('original dseq',d)
+        print('original dseq sum ',g.dseq.sum())
+        print('ensemble average dseq', d_emp)
+        print('ensemble dseq sum ',np.array([d_emp[key] for key in d_emp.keys()]).sum())
+        """
+        print(d_diff)
+        print('empirical error', ensemble_error)
+        print('theoretical error', err)
 
 
         l = os.listdir(output_dir)
