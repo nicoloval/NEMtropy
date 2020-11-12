@@ -1466,7 +1466,6 @@ class UndirectedGraph:
         elif self.last_model in ["ecm", "ecm-new"]:
             sol = np.concatenate((self.x, self.y))
             ex = expected_ecm(sol)
-            
             k = np.concatenate((self.dseq, self.strength_sequence))
             self.expected_dseq = ex[: self.n_nodes]
             self.expected_strength_seq = ex[self.n_nodes :]
@@ -1801,7 +1800,8 @@ class UndirectedGraph:
         elif self.last_model == "ecm-new":
             self.x = np.exp(-self.r_xy[: self.n_nodes])
             self.y = np.exp(-self.r_xy[self.n_nodes :])
-            
+
+
     def solve_tool(
         self,
         model,
