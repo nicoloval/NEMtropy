@@ -1492,7 +1492,7 @@ class UndirectedGraph:
                     self.error = self.error_strength
                 else:
                     self.error = max(self.error_strength, self.error_degree)
-                
+                    
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["ecm", "ecm-new"]:
             sol = np.concatenate((self.x, self.y))
@@ -1783,7 +1783,7 @@ class UndirectedGraph:
             self.last_model = model
             linsearch=linsearch,
             regularise=regularise
-            
+
         self.regularise = regularise
         self.full_return = full_return
         self.initial_guess = "strengths"
@@ -1837,7 +1837,7 @@ class UndirectedGraph:
         elif self.last_model == "ecm-new":
             self.x = np.exp(-self.r_xy[: self.n_nodes])
             self.y = np.exp(-self.r_xy[self.n_nodes :])
-    
+
     def solve_tool(
         self,
         model,
@@ -1872,5 +1872,4 @@ class UndirectedGraph:
                 verbose=verbose,
                 tol=tol,
             )
-        
-        
+
