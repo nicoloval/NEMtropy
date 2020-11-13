@@ -2184,7 +2184,11 @@ class DirectedGraph:
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
+        not_zero_ind_x = self.r_x != 0
+        self.r_x[not_zero_ind_x] = -np.log(self.r_x[not_zero_ind_x])
         self.r_x[self.rnz_dseq_out == 0] = 1e3
+        not_zero_ind_y = self.r_y != 0
+        self.r_y[not_zero_ind_y] = -np.log(self.r_y[not_zero_ind_y])
         self.r_y[self.rnz_dseq_in == 0] = 1e3
 
         self.x0 = np.concatenate((self.r_x, self.r_y))
@@ -2318,6 +2322,19 @@ class DirectedGraph:
                     )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
+
+
+        not_zero_ind_x = self.x != 0
+        self.x[not_zero_ind_x] = -np.log(self.x[not_zero_ind_x])
+
+        not_zero_ind_y = self.y != 0
+        self.y[not_zero_ind_y] = -np.log(self.y[not_zero_ind_y])
+
+        not_zero_ind_b_out = self.b_out != 0
+        self.b_out[not_zero_ind_b_out] = -np.log(self.b_out[not_zero_ind_b_out])
+
+        not_zero_ind_b_in = self.b_in != 0
+        self.b_in[not_zero_ind_b_in] = -np.log(self.b_in[not_zero_ind_b_in])
 
         self.x[self.dseq_out == 0] = 1e3
         self.y[self.dseq_in == 0] = 1e3
