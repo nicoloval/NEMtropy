@@ -2214,6 +2214,9 @@ class DirectedGraph:
                 self.b_in = (self.in_strength > 0).astype(float) / (
                     self.in_strength + 1
                 )
+            elif self.initial_guess == "random":
+                self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
+                self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
             else:
                 raise ValueError(
                     '{} is not an available initial guess'.format(
@@ -2723,7 +2726,10 @@ class DirectedGraph:
         
         self.regularise = regularise
         self.full_return = full_return
-        self.initial_guess = "strengths"
+        if initial_guess!="random":
+            self.initial_guess = "strengths"
+        else:
+            self.initial_guess = initial_guess
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
 

@@ -1395,7 +1395,7 @@ class UndirectedGraph:
                 self.beta = (self.strength_sequence > 0).astype(float) / (
                     self.strength_sequence + 1
                 )
-            if self.initial_guess == "random":
+            elif self.initial_guess == "random":
                 self.beta = np.random.rand(self.n_nodes).astype(np.float64)
             else:
                 raise ValueError(
