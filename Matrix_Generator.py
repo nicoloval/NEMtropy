@@ -7,7 +7,7 @@ import networkx as nx
 import powerlaw as plw
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def random_binary_matrix_generator_dense(n, sym=False, seed=None):
     if sym == False:
         np.random.seed(seed=seed)
@@ -43,9 +43,7 @@ def random_binary_matrix_generator_dense(n, sym=False, seed=None):
         return A
 
 
-jit(forceobj=True)
-
-
+#@jit(forceobj=True)
 def random_binary_matrix_generator_custom_density(
     n, p=0.1, sym=False, seed=None
 ):
@@ -90,7 +88,7 @@ def random_binary_matrix_generator_custom_density(
         return A
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def random_weighted_matrix_generator_dense(
     n, sup_ext=10, sym=False, seed=None, intweights=False
 ):
@@ -138,9 +136,7 @@ def random_weighted_matrix_generator_dense(
             return A
 
 
-jit(forceobj=True)
-
-
+#@jit(forceobj=True)
 def random_weighted_matrix_generator_uniform_custom_density(
     n, p=0.1, sup_ext=10, sym=False, seed=None, intweights=False
 ):
@@ -193,9 +189,7 @@ def random_weighted_matrix_generator_uniform_custom_density(
             return A
 
 
-jit(forceobj=True)
-
-
+#@jit(forceobj=True)
 def random_weighted_matrix_generator_gaussian_custom_density(
     n, mean, sigma, p=0.1, sym=False, seed=None, intweights=False
 ):
@@ -269,9 +263,7 @@ def random_binary_matrix_generator_custom_density_sparse(
         return adj_sparse
 
 
-jit(forceobj=True)
-
-
+#@jit(forceobj=True)
 def random_uniform_weighted_matrix_generator_custom_density_sparse(
     n, sup_ext, p=0.1, sym=False, seed=None, intweights=False
 ):
@@ -314,9 +306,7 @@ def random_uniform_weighted_matrix_generator_custom_density_sparse(
         return adj_sparse
 
 
-jit(forceobj=True)
-
-
+#@jit(forceobj=True)
 def random_gaussian_weighted_matrix_generator_custom_density_sparse(
     n, mean, sigma, p=0.1, sym=False, seed=None, intweights=False
 ):
@@ -363,9 +353,7 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(
         return adj_sparse
 
 
-jit(forceobj=True)
-
-
+#@jit(forceobj=True)
 def random_graph_nx(
     n, p, sup_ext, alpha, seed=None, is_weighted=None, is_sparse=False
 ):
@@ -398,9 +386,7 @@ def random_graph_nx(
     return adjacency
 
 
-jit(forceobj=True)
-
-
+#@jit(forceobj=True)
 def barabasi_albert_graph_nx(
     n, m, sup_ext, alpha, seed=None, is_weighted=None, is_sparse=False
 ):

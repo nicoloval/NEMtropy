@@ -1395,6 +1395,8 @@ class UndirectedGraph:
                 self.beta = (self.strength_sequence > 0).astype(float) / (
                     self.strength_sequence + 1
                 )
+            elif self.initial_guess == "random":
+                self.beta = np.random.rand(self.n_nodes).astype(np.float64)
             else:
                 raise ValueError(
                     '{} is not an available initial guess'.format(
@@ -1403,7 +1405,9 @@ class UndirectedGraph:
                     )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
-
+        
+        self.beta[self.strength_sequence == 0] = 0
+        
         self.x0 = self.beta
 
 
@@ -1713,6 +1717,7 @@ class UndirectedGraph:
         model="CReAMa",
         adjacency="cm",
         method="quasinewton",
+        method_adjacency = "newton",
         max_steps=100,
         tol=1e-8,
         full_return=False,
@@ -1731,7 +1736,7 @@ class UndirectedGraph:
             self._solve_problem(
                 initial_guess=initial_guess,
                 model=adjacency,
-                method=method,
+                method=method_adjacency,
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
@@ -1776,20 +1781,23 @@ class UndirectedGraph:
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = True
             self.adjacency_given = True
-
+        
         if self.is_sparse:
             self.last_model = "CReAMa-sparse"
         else:
             self.last_model = model
-            linsearch=linsearch,
+            linsearch=linsearch
             regularise=regularise
 
         self.regularise = regularise
         self.full_return = full_return
-        self.initial_guess = "strengths"
+        if initial_guess!="random":
+            self.initial_guess = "strengths"
+        else:
+            self.initial_guess = initial_guess
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
-
+        
         sol = solver(
             x0,
             fun=self.fun,
@@ -1844,9 +1852,11 @@ class UndirectedGraph:
         method,
         initial_guess=None,
         adjacency=None,
+        method_adjacency = "newton",
         max_steps=100,
         full_return=False,
         verbose=False,
+        linsearch = True,
         tol=1e-8,
     ):
         """function to switch around the various problems"""
@@ -1859,6 +1869,7 @@ class UndirectedGraph:
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
+                linsearch = linsearch,
                 tol=tol,
             )
         elif model in ["CReAMa","CReAMa-sparse"]:
@@ -1867,9 +1878,11 @@ class UndirectedGraph:
                 model=model,
                 adjacency=adjacency,
                 method=method,
+                method_adjacency = method_adjacency,
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
+                linsearch = linsearch,
                 tol=tol,
             )
 

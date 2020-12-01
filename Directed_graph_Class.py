@@ -158,10 +158,14 @@ def iterative_CReAMa_Sparse(beta, args):
                 aux = x[i] * y[j]
                 aux_entry = aux / (1 + aux)
                 if aux_entry > 0:
-                    aux = aux_entry / (1 + beta_in[j] / beta_out[i])
-                    xd[i] -= aux / s_out[i]
-                    aux = aux_entry / (1 + beta_out[i] / beta_in[j])
-                    yd[j] -= aux / s_in[j]
+                    aux = aux_entry / (1 + (beta_in[j] / beta_out[i]))
+                    xd[i] -= aux
+                    aux = aux_entry / (1 + (beta_out[i] / beta_in[j]))
+                    yd[j] -= aux
+    for i in nz_index_out:
+        xd[i] = xd[i] / s_out[i]
+    for i in nz_index_in:
+        yd[i] = yd[i] / s_in[i]
 
     return np.concatenate((xd, yd))
 
@@ -1814,8 +1818,6 @@ class DirectedGraph:
                 self.n_nodes = len(self.dseq_out)
                 self.n_edges = np.sum(self.dseq_out)
                 self.is_initialized = True
-                if self.n_nodes > 2000:
-                    self.is_sparse = True
 
         elif degree_sequence is not None:
             if not isinstance(degree_sequence, (list, np.ndarray)):
@@ -1841,8 +1843,6 @@ class DirectedGraph:
                     self.dseq_in = degree_sequence[self.n_nodes :]
                     self.n_edges = np.sum(self.dseq_out)
                     self.is_initialized = True
-                    if self.n_nodes > 2000:
-                        self.is_sparse = True
 
                 if strength_sequence is not None:
                     if not isinstance(strength_sequence, (list, np.ndarray)):
@@ -1903,8 +1903,6 @@ class DirectedGraph:
                     self.nz_index_sin = np.nonzero(self.in_strength)[0]
                     self.is_weighted = True
                     self.is_initialized = True
-                    if self.n_nodes > 2000:
-                        self.is_sparse = True
 
 
     def set_adjacency_matrix(self, adjacency):
@@ -2216,6 +2214,9 @@ class DirectedGraph:
                 self.b_in = (self.in_strength > 0).astype(float) / (
                     self.in_strength + 1
                 )
+            elif self.initial_guess == "random":
+                self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
+                self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
             else:
                 raise ValueError(
                     '{} is not an available initial guess'.format(
@@ -2224,7 +2225,10 @@ class DirectedGraph:
                     )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
-
+        
+        self.b_out[self.out_strength == 0] = 0
+        self.b_in[self.in_strength == 0] = 0
+        
         self.x0 = np.concatenate((self.b_out, self.b_in))
 
 
@@ -2653,6 +2657,7 @@ class DirectedGraph:
         model="CReAMa",
         adjacency="dcm",
         method="quasinewton",
+        method_adjacency = "newton",
         max_steps=100,
         tol=1e-8,
         full_return=False,
@@ -2670,7 +2675,7 @@ class DirectedGraph:
             self._solve_problem(
                 initial_guess=initial_guess,
                 model=adjacency,
-                method=method,
+                method=method_adjacency,
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
@@ -2711,7 +2716,7 @@ class DirectedGraph:
             col_ind = col_ind.astype(np.int64)
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
-            self.is_sparse = False
+            self.is_sparse = True
             self.adjacency_given = True
 
         if self.is_sparse:
@@ -2721,7 +2726,10 @@ class DirectedGraph:
         
         self.regularise = regularise
         self.full_return = full_return
-        self.initial_guess = "strengths"
+        if initial_guess!="random":
+            self.initial_guess = "strengths"
+        else:
+            self.initial_guess = initial_guess
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
 
@@ -2764,9 +2772,11 @@ class DirectedGraph:
         method,
         initial_guess=None,
         adjacency=None,
+        method_adjacency = 'newton',
         max_steps=100,
         full_return=False,
         verbose=False,
+        linsearch=True,
         tol=1e-8,
     ):
         """function to switch around the various problems"""
@@ -2779,6 +2789,7 @@ class DirectedGraph:
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
+                linsearch=linsearch,
                 tol=tol,
             )
         elif model in ["CReAMa",'CReAMa-sparse']:
@@ -2787,9 +2798,11 @@ class DirectedGraph:
                 model=model,
                 adjacency=adjacency,
                 method=method,
+                method_adjacency = method_adjacency,
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
+                linsearch=linsearch,
                 tol=tol,
             )
 
