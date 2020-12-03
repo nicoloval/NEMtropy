@@ -44,7 +44,7 @@ class MyTest(unittest.TestCase):
 
     def test_fixedpoint_1(self):
         """classes with cardinality > 1, no zero degree"""
-        n, seed = (4, 22)
+        n, seed = (5, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
         A[0, :] = 0
 

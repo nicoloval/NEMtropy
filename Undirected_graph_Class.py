@@ -670,7 +670,7 @@ def solver(
         return x
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def linsearch_fun_CReAMa(X, args):
     x = X[0]
     dx = X[1]
@@ -716,7 +716,7 @@ def linsearch_fun_CReAMa_fixed(X):
     return alfa
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def linsearch_fun_CM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -762,7 +762,7 @@ def linsearch_fun_CM_new_fixed(X):
     return alfa
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def linsearch_fun_CM(X, args):
     x = X[0]
     dx = X[1]
@@ -816,11 +816,10 @@ def linsearch_fun_CM_fixed(X):
             alfa *= beta
             kk +=1
             cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
-    
     return alfa
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def linsearch_fun_ECM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -891,7 +890,7 @@ def linsearch_fun_ECM_new_fixed(X):
     return alfa
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def linsearch_fun_ECM(X, args):
     x = X[0]
     dx = X[1]
@@ -968,7 +967,7 @@ def linsearch_fun_ECM_fixed(X):
     return alfa
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):

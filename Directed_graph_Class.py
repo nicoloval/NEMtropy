@@ -1277,7 +1277,7 @@ def solver(
     hessian_regulariser,
     fun_jac=None,
     tol=1e-6,
-    eps=1e-16,
+    eps=1e-10,
     max_steps=100,
     method="newton",
     verbose=False,
@@ -1300,6 +1300,7 @@ def solver(
     f = fun(x)
     norm = np.linalg.norm(f)
     diff = 1
+    dx_old = np.zeros_like(x)
 
     if full_return:
         #TODO: norm,diff and alfa seqs have different lengths 
@@ -1373,9 +1374,15 @@ def solver(
         tic = time.time()
 
         # Linsearch
-        if linsearch:
+        if linsearch and (method in ["newton", "quasinewton"]):
             alfa1 = 1
             X = (x, dx, beta, alfa1, f)
+            alfa = linsearch_fun(X)
+            if full_return:
+                alfa_seq.append(alfa)
+        elif linsearch and (method in ["fixed-point"]):
+            alfa1 = 1
+            X = (x, dx, dx_old, alfa1, beta, n_steps)
             alfa = linsearch_fun(X)
             if full_return:
                 alfa_seq.append(alfa)
@@ -1389,6 +1396,8 @@ def solver(
         # direction= dx@fun(x).T
 
         x = x + alfa * dx
+
+        dx_old = alfa * dx.copy()
 
         toc_update += time.time() - tic
 
@@ -1449,7 +1458,7 @@ def solver(
         return x
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):
@@ -1468,7 +1477,7 @@ def sufficient_decrease_condition(
     return bool(f_new < sup)
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def linsearch_fun_DCM(X, args):
     x = X[0]
     dx = X[1]
@@ -1497,7 +1506,36 @@ def linsearch_fun_DCM(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_DCM_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    eps2 = 1e-2
+    alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
+    for a in alfa0:
+        if a > 0:
+            alfa = min(alfa, a)
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        #print(np.linalg.norm(alfa*dx, ord = 2), np.linalg.norm(dx_old, ord = 2))
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+    return alfa
+
+
+#@jit(forceobj=True)
 def linsearch_fun_CReAMa(X, args):
     x = X[0]
     dx = X[1]
@@ -1520,7 +1558,28 @@ def linsearch_fun_CReAMa(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+#@jit(nopython=True)
+def linsearch_fun_CReAMa_fixed(X):
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+    return alfa
+
+
+#@jit(forceobj=True)
 def linsearch_fun_DECM(X, args):
     x = X[0]
     dx = X[1]
@@ -1538,19 +1597,14 @@ def linsearch_fun_DECM(X, args):
     # Mettere il check sulle y
     nnn = int(len(x) / 4)
     while True:
-        ind_yout = np.argmax(x[2 * nnn : 3 * nnn])
-        ind_yin = np.argmax(x[3 * nnn :])
-        if (
-            (
-                x[2 * nnn : 3 * nnn][ind_yout]
-                + alfa * dx[2 * nnn : 3 * nnn][ind_yout]
-            )
-            * (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
-        ) < 1:
+        ind_yout = np.argmax(x[2 * nnn : 3 * nnn] + alfa * dx[2 * nnn : 3 * nnn])
+        ind_yin = np.argmax(x[3 * nnn :] + alfa * dx[3 * nnn :])
+        cond =  (x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout]) * (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
+        if (cond) < 1:
             break
         else:
             alfa *= beta
-
+    
     i = 0
     s_old = step_fun(x)
     while (
@@ -1562,6 +1616,56 @@ def linsearch_fun_DECM(X, args):
     ):
         alfa *= beta
         i += 1
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_DECM_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    eps2 = 1e-2
+    alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
+    for a in alfa0:
+        if a > 0:
+            alfa = min(alfa, a)
+
+    # Mettere il check sulle y
+    nnn = int(len(x) / 4)
+    
+    while True:
+        ind_yout = np.argmax(x[2 * nnn : 3 * nnn] + alfa * dx[2 * nnn : 3 * nnn])
+        ind_yin = np.argmax(x[3 * nnn :] + alfa * dx[3 * nnn :])
+        cond =  (x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout]) * (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
+        #print(cond)
+        #print(cond < 1)
+        
+        if cond < 1:
+            break
+        else:
+            alfa *= beta
+            #print(alfa)
+            #print("max b_out ",x[2 * nnn : 3 * nnn][ind_yout])
+            #print("max_b_in ", x[3 * nnn :][ind_yin])
+            #print("max b_out +alfa dx",x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout])
+            #print("max_b_in +alfa dx", x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
+            #print(cond)
+            #print(cond<1)
+    
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
     return alfa
 
 
@@ -1946,6 +2050,7 @@ class DirectedGraph:
         method="quasinewton",
         max_steps=100,
         tol=1e-8,
+        eps=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
@@ -1968,6 +2073,7 @@ class DirectedGraph:
             linsearch_fun=self.fun_linsearch,
             hessian_regulariser = self.hessian_regulariser,
             tol=tol,
+            eps=eps,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
@@ -2623,15 +2729,27 @@ class DirectedGraph:
         self.args_lins = (self.step_fun,)
 
         lins_fun = {
-            "dcm": lambda x: linsearch_fun_DCM(x, self.args_lins),
-            "dcm_new": lambda x: linsearch_fun_DCM_new(x, self.args_lins),
-            "CReAMa": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-sparse": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "decm": lambda x: linsearch_fun_DECM(x, self.args_lins),
-            "decm_new": lambda x: linsearch_fun_DECM_new(x, self.args_lins),
+            "dcm-newton": lambda x: linsearch_fun_DCM(x, self.args_lins),
+            "dcm-quasinewton": lambda x: linsearch_fun_DCM(x, self.args_lins),
+            "dcm-fixed-point": lambda x: linsearch_fun_DCM_fixed(x),
+            "dcm_new-newton": lambda x: linsearch_fun_DCM_new(x, self.args_lins),
+            "dcm_new-quasinewton": lambda x: linsearch_fun_DCM_new(x, self.args_lins),
+            "dcm_new-fixed-point": lambda x: linsearch_fun_DCM_new_fixed(x),
+            "CReAMa-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "CReAMa-sparse-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-sparse-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-sparse-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "decm-newton": lambda x: linsearch_fun_DECM(x, self.args_lins),
+            "decm-quasinewton": lambda x: linsearch_fun_DECM(x, self.args_lins),
+            "decm-fixed-point": lambda x: linsearch_fun_DECM_fixed(x),
+            "decm_new-newton": lambda x: linsearch_fun_DECM_new(x, self.args_lins),
+            "decm_new-quasinewton": lambda x: linsearch_fun_DECM_new(x, self.args_lins),
+            "decm_new-fixed-point": lambda x: linsearch_fun_DECM_new_fixed(x),
         }
 
-        self.fun_linsearch = lins_fun[model]
+        self.fun_linsearch = lins_fun[mod_met]
         
         hess_reg = {
             "dcm": hessian_regulariser_function_eigen_based,
@@ -2660,6 +2778,7 @@ class DirectedGraph:
         method_adjacency = "newton",
         max_steps=100,
         tol=1e-8,
+        eps=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
@@ -2677,6 +2796,8 @@ class DirectedGraph:
                 model=adjacency,
                 method=method_adjacency,
                 max_steps=max_steps,
+                tol=tol,
+                eps=eps,
                 full_return=full_return,
                 verbose=verbose,
             )
@@ -2741,6 +2862,7 @@ class DirectedGraph:
             linsearch_fun=self.fun_linsearch,
             hessian_regulariser = self.hessian_regulariser,
             tol=tol,
+            eps=eps,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
@@ -2778,6 +2900,7 @@ class DirectedGraph:
         verbose=False,
         linsearch=True,
         tol=1e-8,
+        eps=1e-8,
     ):
         """function to switch around the various problems"""
         # TODO: aggiungere tutti i metodi
@@ -2791,6 +2914,7 @@ class DirectedGraph:
                 verbose=verbose,
                 linsearch=linsearch,
                 tol=tol,
+                eps=eps,
             )
         elif model in ["CReAMa",'CReAMa-sparse']:
             self._solve_problem_CReAMa(
@@ -2804,6 +2928,7 @@ class DirectedGraph:
                 verbose=verbose,
                 linsearch=linsearch,
                 tol=tol,
+                eps=eps,
             )
 
 
