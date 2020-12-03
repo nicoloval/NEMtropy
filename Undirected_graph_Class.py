@@ -1950,12 +1950,23 @@ class UndirectedGraph:
 
         cpu_n = 2  #TODO: deve essere in input
         x = self.x
-        inds = range(len(x))
+        inds = np.arange(len(x))
 
         # put together inputs for pool 
         # iter_ = itertools.product(zip(inds,x), zip(inds,x))
         # print(list(zip(inds, x)))
         iter_ = iter(((i, xi),(j, xj), np.random.randint(0,1000000)) for i,xi in zip(inds,x) for j,xj in zip(inds,x) if i<j) 
+
+        # debug
+        """
+        s=0
+        for c in iter_:
+            i=c[0][0]
+            j=c[1][0]
+            print(i,j)
+            s += 1
+        print(s)
+        """
 
         # compute existing edges
         with mp.Pool(processes=cpu_n) as pool:

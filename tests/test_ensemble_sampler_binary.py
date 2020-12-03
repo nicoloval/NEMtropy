@@ -34,7 +34,7 @@ class MyTest(unittest.TestCase):
         print(e)
         print(d)
         """
-        N, seed = (50, 22)
+        N, seed = (49, 42)
         A = mg.random_binary_matrix_generator_dense(N, sym=True, seed=seed)
         # number of copies to generate
 
@@ -54,7 +54,7 @@ class MyTest(unittest.TestCase):
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        n = 500
+        n = 1000
         output_dir = "sample_cm/"
         # random.seed(100)
         g.ensemble_sampler(n=n, output_dir=output_dir, seed=42)
@@ -77,7 +77,7 @@ class MyTest(unittest.TestCase):
         for item in d_emp.keys(): 
             d_emp[item] = d_emp[item]/n
 
-        a_diff = np.array([d[item] - d_emp[item] for item in d.keys()])
+        a_diff = np.array([abs(d[item] - d_emp[item]) for item in d.keys()])
         d_diff = {item:d[item] - d_emp[item] for item in d.keys()}
 
         ensemble_error = np.linalg.norm(a_diff, np.inf)
