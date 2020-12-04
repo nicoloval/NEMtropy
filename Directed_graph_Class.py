@@ -1477,7 +1477,7 @@ def sufficient_decrease_condition(
     return bool(f_new < sup)
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_DCM(X, args):
     x = X[0]
     dx = X[1]
@@ -1536,7 +1536,7 @@ def linsearch_fun_DCM_fixed(X):
     return alfa
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_CReAMa(X, args):
     x = X[0]
     dx = X[1]
@@ -1581,7 +1581,7 @@ def linsearch_fun_CReAMa_fixed(X):
     return alfa
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_DECM(X, args):
     x = X[0]
     dx = X[1]

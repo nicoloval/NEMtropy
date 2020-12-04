@@ -703,7 +703,7 @@ def iterative_decm_new_old(theta, args):
     return f
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_DECM_new(X, args):
     x = X[0]
     dx = X[1]
