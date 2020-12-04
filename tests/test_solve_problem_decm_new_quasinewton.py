@@ -12,7 +12,7 @@ class MyTest(unittest.TestCase):
         pass
 
     def test_0(self):
-        n, seed = (4, 22)
+        n, seed = (14, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
         )
@@ -37,7 +37,7 @@ class MyTest(unittest.TestCase):
 
     def test_1(self):
         # test Matrix 1
-        n, seed = (4, 22)
+        n, seed = (14, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
         )

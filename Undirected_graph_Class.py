@@ -503,7 +503,7 @@ def solver(
     hessian_regulariser,
     fun_jac=None,
     tol=1e-6,
-    eps=1e-16,
+    eps=1e-10,
     max_steps=100,
     method="newton",
     verbose=False,
@@ -525,6 +525,7 @@ def solver(
     f = fun(x)
     norm = np.linalg.norm(f)
     diff = 1
+    dx_old = np.zeros_like(x0)
 
     if full_return:
         norm_seq = [norm]
@@ -590,9 +591,15 @@ def solver(
         # backtraking line search
         tic = time.time()
 
-        if linsearch:
+        if linsearch and (method in ["newton", "quasinewton"]):
             alfa1 = 1
             X = (x, dx, beta, alfa1, f)
+            alfa = linsearch_fun(X)
+            if full_return:
+                alfa_seq.append(alfa)
+        elif linsearch and (method in ["fixed-point"]):
+            alfa1 = 1
+            X = (x, dx, dx_old, alfa1, beta, n_steps)
             alfa = linsearch_fun(X)
             if full_return:
                 alfa_seq.append(alfa)
@@ -606,6 +613,8 @@ def solver(
         # direction= dx@fun(x).T
 
         x = x + alfa * dx
+
+        dx_old = alfa * dx.copy()
 
         toc_update += time.time() - tic
 
@@ -625,10 +634,9 @@ def solver(
         if verbose == True:
             print("step {}".format(n_steps))
             print("alpha = {}".format(alfa))
-            print("fun = {}".format(f))
-            print("dx = {}".format(dx))
-            print("x = {}".format(x))
             print("|f(x)| = {}".format(norm))
+            print("F(x) = {}".format(step_fun(x)))
+            print("diff = {}".format(diff))
             if method == "newton":
                 print("min eig = {}".format(ml))
                 print("new mim eig = {}".format(new_ml))
@@ -662,7 +670,7 @@ def solver(
         return x
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def linsearch_fun_CReAMa(X, args):
     x = X[0]
     dx = X[1]
@@ -686,7 +694,29 @@ def linsearch_fun_CReAMa(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_CReAMa_fixed(X):
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        while(
+            ( cond == False)
+            and (kk<50)
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+
+    return alfa
+
+
+#@jit(forceobj=True)
 def linsearch_fun_CM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -710,7 +740,29 @@ def linsearch_fun_CM_new(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_CM_new_fixed(X):
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+    # print(alfa)
+    return alfa
+
+
+#@jit(forceobj=True)
 def linsearch_fun_CM(X, args):
     x = X[0]
     dx = X[1]
@@ -719,14 +771,12 @@ def linsearch_fun_CM(X, args):
     f = X[4]
     step_fun = args[0]
 
-    # print(alfa)
-
     eps2 = 1e-2
     alfa0 = (eps2 - 1) * x / dx
     for a in alfa0:
         if a >= 0:
             alfa = min(alfa, a)
-    # print(alfa)
+
     i = 0
     s_old = step_fun(x)
     while (
@@ -738,11 +788,38 @@ def linsearch_fun_CM(X, args):
     ):
         alfa *= beta
         i += 1
-    # print(alfa)
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_CM_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    eps2 = 1e-2
+    alfa0 = (eps2 - 1) * x / dx
+    for a in alfa0:
+        if a >= 0:
+            alfa = min(alfa, a)
+    
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+    return alfa
+
+
+#@jit(forceobj=True)
 def linsearch_fun_ECM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -754,9 +831,9 @@ def linsearch_fun_ECM_new(X, args):
     nnn = int(len(x) / 2)
     while True:
         ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
+        cond = np.sum(x[nnn:][ind_min_beta] + alfa * dx[nnn:][ind_min_beta]) > 1e-14
         if (
-            np.sum(x[nnn:][ind_min_beta] + alfa * dx[nnn:][ind_min_beta])
-            > 1e-14
+            cond
         ):
             break
         else:
@@ -777,7 +854,43 @@ def linsearch_fun_ECM_new(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_ECM_new_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    nnn = int(len(x) / 2)
+    while True:
+        ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
+        cond = np.sum(x[nnn:][ind_min_beta] + alfa * dx[nnn:][ind_min_beta]) > 1e-14
+        if (
+            cond
+        ):
+            break
+        else:
+            alfa *= beta
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        while(
+            (cond == False)
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+
+    #print(alfa)
+
+    return alfa
+
+
+#@jit(forceobj=True)
 def linsearch_fun_ECM(X, args):
     x = X[0]
     dx = X[1]
@@ -795,7 +908,8 @@ def linsearch_fun_ECM(X, args):
     nnn = int(len(x) / 2)
     while True:
         ind_max_y = (x[nnn:] + alfa * dx[nnn:]).argsort()[-2:][::-1]
-        if np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1:
+        cond = np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1
+        if cond:
             break
         else:
             alfa *= beta
@@ -815,7 +929,45 @@ def linsearch_fun_ECM(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_ECM_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    eps2 = 1e-2
+    alfa0 = (eps2 - 1) * x / dx
+    for a in alfa0:
+        if a >= 0:
+            alfa = min(alfa, a)
+
+    nnn = int(len(x) / 2)
+    while True:
+        ind_max_y = (x[nnn:] + alfa * dx[nnn:]).argsort()[-2:][::-1]
+        cond = np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1
+        if cond:
+            break
+        else:
+            alfa *= beta
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+
+    return alfa
+
+
+#@jit(forceobj=True)
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):
@@ -1254,6 +1406,7 @@ class UndirectedGraph:
         method="quasinewton",
         max_steps=100,
         tol=1e-8,
+        eps=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
@@ -1275,6 +1428,7 @@ class UndirectedGraph:
             linsearch_fun=self.fun_linsearch,
             hessian_regulariser = self.hessian_regulariser,
             tol=tol,
+            eps=eps,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
@@ -1489,7 +1643,9 @@ class UndirectedGraph:
                     ex_s - self.strength_sequence, ord=np.inf
                 )
                 self.relative_error_strength = np.max(
+                    abs(
                      (ex_s - self.strength_sequence) / (self.strength_sequence + np.exp(-100))
+                    )
                 )
                 
                 if self.adjacency_given:
@@ -1684,15 +1840,27 @@ class UndirectedGraph:
         self.args_lins = (self.step_fun,)
 
         lins_fun = {
-            "cm": lambda x: linsearch_fun_CM(x, self.args_lins),
-            "CReAMa": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-sparse": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "ecm": lambda x: linsearch_fun_ECM(x, self.args_lins),
-            "cm-new": lambda x: linsearch_fun_CM_new(x, self.args_lins),
-            "ecm-new": lambda x: linsearch_fun_ECM_new(x, self.args_lins),
+            "cm-newton": lambda x: linsearch_fun_CM(x, self.args_lins),
+            "cm-quasinewton": lambda x: linsearch_fun_CM(x, self.args_lins),
+            "cm-fixed-point": lambda x: linsearch_fun_CM_fixed(x),
+            "CReAMa-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "CReAMa-sparse-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-sparse-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-sparse-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "ecm-newton": lambda x: linsearch_fun_ECM(x, self.args_lins),
+            "ecm-quasinewton": lambda x: linsearch_fun_ECM(x, self.args_lins),
+            "ecm-fixed-point": lambda x: linsearch_fun_ECM_fixed(x),
+            "cm-new-newton": lambda x: linsearch_fun_CM_new(x, self.args_lins),
+            "cm-new-quasinewton": lambda x: linsearch_fun_CM_new(x, self.args_lins),
+            "cm-new-fixed-point": lambda x: linsearch_fun_CM_new_fixed(x),
+            "ecm-new-newton": lambda x: linsearch_fun_ECM_new(x, self.args_lins),
+            "ecm-new-quasinewton": lambda x: linsearch_fun_ECM_new(x, self.args_lins),
+            "ecm-new-fixed-point": lambda x: linsearch_fun_ECM_new_fixed(x)
         }
 
-        self.fun_linsearch = lins_fun[model]
+        self.fun_linsearch = lins_fun[mod_met]
         
         hess_reg = {
             "cm" : hessian_regulariser_function_eigen_based,
@@ -1718,8 +1886,10 @@ class UndirectedGraph:
         adjacency="cm",
         method="quasinewton",
         method_adjacency = "newton",
+        initial_guess_adjacency = "random",
         max_steps=100,
         tol=1e-8,
+        eps=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
@@ -1734,10 +1904,12 @@ class UndirectedGraph:
             # aggiungere check sul modello passato per l'adjacency matrix
             
             self._solve_problem(
-                initial_guess=initial_guess,
+                initial_guess=initial_guess_adjacency,
                 model=adjacency,
                 method=method_adjacency,
                 max_steps=max_steps,
+                tol=tol,
+                eps=eps,
                 full_return=full_return,
                 verbose=verbose,
                 linsearch=linsearch,
@@ -1791,10 +1963,7 @@ class UndirectedGraph:
 
         self.regularise = regularise
         self.full_return = full_return
-        if initial_guess!="random":
-            self.initial_guess = "strengths"
-        else:
-            self.initial_guess = initial_guess
+        self.initial_guess = initial_guess
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
         
@@ -1806,6 +1975,7 @@ class UndirectedGraph:
             linsearch_fun=self.fun_linsearch,
             hessian_regulariser = self.hessian_regulariser,
             tol=tol,
+            eps=eps,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
@@ -1853,11 +2023,13 @@ class UndirectedGraph:
         initial_guess=None,
         adjacency=None,
         method_adjacency = "newton",
+        initial_guess_adjacency = "random",
         max_steps=100,
         full_return=False,
         verbose=False,
         linsearch = True,
         tol=1e-8,
+        eps=1e-8,
     ):
         """function to switch around the various problems"""
         # TODO: aggiungere tutti i metodi
@@ -1871,6 +2043,7 @@ class UndirectedGraph:
                 verbose=verbose,
                 linsearch = linsearch,
                 tol=tol,
+                eps=eps,
             )
         elif model in ["CReAMa","CReAMa-sparse"]:
             self._solve_problem_CReAMa(
@@ -1879,10 +2052,12 @@ class UndirectedGraph:
                 adjacency=adjacency,
                 method=method,
                 method_adjacency = method_adjacency,
+                initial_guess_adjacency = "random",
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
                 linsearch = linsearch,
                 tol=tol,
+                eps=eps,
             )
 

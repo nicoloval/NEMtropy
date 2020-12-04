@@ -20,8 +20,8 @@ class MyTest(unittest.TestCase):
         """
         A = np.array(
             [
-                [0, 0, 1],
-                [0, 0, 1],
+                [0, 1, 1],
+                [1, 0, 1],
                 [1, 1, 0],
             ]
         )
@@ -31,7 +31,7 @@ class MyTest(unittest.TestCase):
         g._solve_problem(
             model="cm",
             method="fixed-point",
-            max_steps=100,
+            max_steps=200,
             verbose=False,
             linsearch=True,
             initial_guess="random",
