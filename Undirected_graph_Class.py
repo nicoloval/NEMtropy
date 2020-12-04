@@ -1886,6 +1886,7 @@ class UndirectedGraph:
         adjacency="cm",
         method="quasinewton",
         method_adjacency = "newton",
+        initial_guess_adjacency = "random",
         max_steps=100,
         tol=1e-8,
         eps=1e-8,
@@ -1903,7 +1904,7 @@ class UndirectedGraph:
             # aggiungere check sul modello passato per l'adjacency matrix
             
             self._solve_problem(
-                initial_guess=initial_guess,
+                initial_guess=initial_guess_adjacency,
                 model=adjacency,
                 method=method_adjacency,
                 max_steps=max_steps,
@@ -1962,10 +1963,7 @@ class UndirectedGraph:
 
         self.regularise = regularise
         self.full_return = full_return
-        if initial_guess!="random":
-            self.initial_guess = "strengths"
-        else:
-            self.initial_guess = initial_guess
+        self.initial_guess = initial_guess
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
         
@@ -2025,6 +2023,7 @@ class UndirectedGraph:
         initial_guess=None,
         adjacency=None,
         method_adjacency = "newton",
+        initial_guess_adjacency = "random",
         max_steps=100,
         full_return=False,
         verbose=False,
@@ -2053,6 +2052,7 @@ class UndirectedGraph:
                 adjacency=adjacency,
                 method=method,
                 method_adjacency = method_adjacency,
+                initial_guess_adjacency = "random",
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
