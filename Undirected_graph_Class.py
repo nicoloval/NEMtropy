@@ -670,7 +670,7 @@ def solver(
         return x
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_CReAMa(X, args):
     x = X[0]
     dx = X[1]
@@ -678,12 +678,13 @@ def linsearch_fun_CReAMa(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -716,7 +717,7 @@ def linsearch_fun_CReAMa_fixed(X):
     return alfa
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_CM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -724,12 +725,13 @@ def linsearch_fun_CM_new(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -762,7 +764,7 @@ def linsearch_fun_CM_new_fixed(X):
     return alfa
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_CM(X, args):
     x = X[0]
     dx = X[1]
@@ -770,6 +772,7 @@ def linsearch_fun_CM(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     eps2 = 1e-2
     alfa0 = (eps2 - 1) * x / dx
@@ -778,10 +781,10 @@ def linsearch_fun_CM(X, args):
             alfa = min(alfa, a)
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -819,7 +822,7 @@ def linsearch_fun_CM_fixed(X):
     return alfa
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_ECM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -827,6 +830,7 @@ def linsearch_fun_ECM_new(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     nnn = int(len(x) / 2)
     while True:
@@ -840,10 +844,10 @@ def linsearch_fun_ECM_new(X, args):
             alfa *= beta
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -890,7 +894,7 @@ def linsearch_fun_ECM_new_fixed(X):
     return alfa
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_ECM(X, args):
     x = X[0]
     dx = X[1]
@@ -898,6 +902,7 @@ def linsearch_fun_ECM(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     eps2 = 1e-2
     alfa0 = (eps2 - 1) * x / dx
@@ -915,10 +920,10 @@ def linsearch_fun_ECM(X, args):
             alfa *= beta
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -967,12 +972,12 @@ def linsearch_fun_ECM_fixed(X):
     return alfa
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):
     """return boolean indicator if upper wolfe condition are respected."""
-    sup = f_old + c1 * alpha * grad_f @ p.T
+    sup = f_old + c1 * alpha * np.dot(grad_f, p.T)
 
     return bool(f_new < sup)
 
@@ -1837,7 +1842,17 @@ class UndirectedGraph:
             self.args_p = (self.n_nodes, np.nonzero(self.dseq)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
-        self.args_lins = (self.step_fun,)
+
+        args_lin = {
+            "cm": (loglikelihood_cm, self.args),
+            "CReAMa": (loglikelihood_CReAMa, self.args),
+            "CReAMa-sparse": (loglikelihood_CReAMa_sparse, self.args),
+            "ecm": (loglikelihood_ecm, self.args),
+            "cm-new": (loglikelihood_cm_new, self.args),
+            "ecm-new": (loglikelihood_ecm_new, self.args),
+        }
+
+        self.args_lins = args_lin[model]
 
         lins_fun = {
             "cm-newton": lambda x: linsearch_fun_CM(x, self.args_lins),
