@@ -313,7 +313,7 @@ class MyTest(unittest.TestCase):
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (loglikelihood_dcm_new, args))
         hes_reg = sample.hessian_regulariser_function
 
         f = fun(x0)
@@ -607,7 +607,7 @@ class MyTest(unittest.TestCase):
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (loglikelihood_dcm_new, args))
         hes_reg = sample.hessian_regulariser_function
 
         f = fun(x0)
@@ -687,7 +687,7 @@ class MyTest(unittest.TestCase):
         fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
         step_fun = lambda x: -loglikelihood_dcm_new(x, args)
         fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
+        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (loglikelihood_dcm_new, args))
         hes_reg = sample.hessian_regulariser_function
 
         f = fun(x0)

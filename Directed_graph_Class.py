@@ -1458,7 +1458,7 @@ def solver(
         return x
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):
@@ -1472,12 +1472,12 @@ def sufficient_decrease_condition(
     # print ('grad_f',grad_f)
     # print('p.T',p.T)
 
-    sup = f_old + c1 * alpha * grad_f @ p.T
-    # print(alpha, f_new, sup)
+    sup = f_old + c1 * alpha * np.dot(grad_f, p.T)
+    #print(alpha, f_new, sup)
     return bool(f_new < sup)
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_DCM(X, args):
     x = X[0]
     dx = X[1]
@@ -1485,6 +1485,7 @@ def linsearch_fun_DCM(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     eps2 = 1e-2
     alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
@@ -1493,10 +1494,10 @@ def linsearch_fun_DCM(X, args):
             alfa = min(alfa, a)
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -1535,7 +1536,7 @@ def linsearch_fun_DCM_fixed(X):
     return alfa
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_CReAMa(X, args):
     x = X[0]
     dx = X[1]
@@ -1543,12 +1544,13 @@ def linsearch_fun_CReAMa(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -1558,7 +1560,7 @@ def linsearch_fun_CReAMa(X, args):
     return alfa
 
 
-#@jit(nopython=True)
+@jit(nopython=True)
 def linsearch_fun_CReAMa_fixed(X):
     dx = X[1]
     dx_old = X[2]
@@ -1579,7 +1581,7 @@ def linsearch_fun_CReAMa_fixed(X):
     return alfa
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_DECM(X, args):
     x = X[0]
     dx = X[1]
@@ -1587,6 +1589,7 @@ def linsearch_fun_DECM(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     eps2 = 1e-2
     alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
@@ -1606,10 +1609,10 @@ def linsearch_fun_DECM(X, args):
             alfa *= beta
     
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -2726,7 +2729,16 @@ class DirectedGraph:
             )
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
-        self.args_lins = (self.step_fun,)
+        args_lin = {
+            "dcm": (loglikelihood_dcm, self.args),
+            "CReAMa": (loglikelihood_CReAMa, self.args),
+            "CReAMa-sparse": (loglikelihood_CReAMa_Sparse, self.args),
+            "decm": (loglikelihood_decm, self.args),
+            "dcm_new": (loglikelihood_dcm_new, self.args),
+            "decm_new": (loglikelihood_decm_new, self.args),
+        }
+
+        self.args_lins = args_lin[model]
 
         lins_fun = {
             "dcm-newton": lambda x: linsearch_fun_DCM(x, self.args_lins),

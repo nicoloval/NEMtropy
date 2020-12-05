@@ -353,12 +353,13 @@ def linsearch_fun_DCM_new(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sample.sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -702,7 +703,7 @@ def iterative_decm_new_old(theta, args):
     return f
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_DECM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -710,6 +711,8 @@ def linsearch_fun_DECM_new(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
+    
 
     # Mettere il check sulle y
     nnn = int(len(x) / 4)
@@ -728,10 +731,10 @@ def linsearch_fun_DECM_new(X, args):
             alfa *= beta
     
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sample.sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
