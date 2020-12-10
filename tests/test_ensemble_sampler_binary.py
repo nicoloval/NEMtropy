@@ -34,7 +34,7 @@ class MyTest(unittest.TestCase):
         print(e)
         print(d)
         """
-        N, seed = (49, 42)
+        N, seed = (50, 42)
         A = mg.random_binary_matrix_generator_dense(N, sym=True, seed=seed)
         # number of copies to generate
 
@@ -54,7 +54,7 @@ class MyTest(unittest.TestCase):
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        n = 1000
+        n = 10000
         output_dir = "sample_cm/"
         # random.seed(100)
         g.ensemble_sampler(n=n, output_dir=output_dir, seed=42)
