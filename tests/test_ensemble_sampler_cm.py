@@ -54,7 +54,7 @@ class MyTest(unittest.TestCase):
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        n = 10000
+        n = 10
         output_dir = "sample_cm/"
         # random.seed(100)
         g.ensemble_sampler(n=n, output_dir=output_dir, seed=42)

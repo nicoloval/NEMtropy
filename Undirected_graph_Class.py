@@ -8,6 +8,7 @@ import random
 import itertools
 # import pathos.multiprocessing as mp
 import multiprocessing as mp
+import ensemble_generator as eg
 
 
 def degree(a):
@@ -1886,6 +1887,7 @@ class UndirectedGraph:
         # unico input possibile e' la cartella dove salvare i samples
         # ed il numero di samples
 
+        # tutto l'if e' obsoleto
         if self.last_model in ["cm", "cm_new"]:
             # self.x
             # joblib 
@@ -1910,6 +1912,8 @@ class UndirectedGraph:
             os.makedirs(output_dir)
 
         # compute the sample
+
+        # seed specification
         np.random.seed(seed)
         s = [np.random.randint(0,1000000) for i in range(n)]
 
@@ -1918,7 +1922,8 @@ class UndirectedGraph:
             # itertools.starmap(self.ensemble_sampler_binary_single_graph, iter_files)
             i = 0
             for item in iter_files:
-                self.ensemble_sampler_binary_single_graph(item, seed=s[i])
+                eg.ensemble_sampler_cm_graph(outfile_name=item, x=self.x, cpu_n=cpu_n, seed=s[i])
+                # self.ensemble_sampler_binary_single_graph(item, seed=s[i])
                 i += 1
 
         elif self.last_model in ["ecm", "ecm_new", "ecm-two-steps", "CReAMa", "CReAMa-sparse"]:
@@ -1927,82 +1932,4 @@ class UndirectedGraph:
         else: 
             raise ValueError("insert a model")
 
-
-    @jit(nopython=True)
-    def is_a_link(self, ind):
-        p = random.random()
-        p_ensemble = self.p_ij(ind)
-        return p < p_ensemble
-
-
-    @jit(nopython=True)
-    def p_ij_cm(inds, args):
-        i, j = inds
-        x = args[0]
-        xij = x[i]*x[j]
-        return xij/(1 + xij)
-
-
-    def ensemble_sampler_binary_single_graph(self, outfile_name,seed=None):
-        # produce and write a single undirected binary graph
-        if seed is not None:
-            np.random.seed(seed)
-
-        cpu_n = 2  #TODO: deve essere in input
-        x = self.x
-        inds = np.arange(len(x))
-
-        # put together inputs for pool 
-        # iter_ = itertools.product(zip(inds,x), zip(inds,x))
-        # print(list(zip(inds, x)))
-        iter_ = iter(((i, xi),(j, xj), np.random.randint(0,1000000)) for i,xi in zip(inds,x) for j,xj in zip(inds,x) if i<j) 
-
-        # debug
-        """
-        s=0
-        for c in iter_:
-            i=c[0][0]
-            j=c[1][0]
-            print(i,j)
-            s += 1
-        print(s)
-        """
-
-        # compute existing edges
-        with mp.Pool(processes=cpu_n) as pool:
-            edges_list = pool.starmap(is_a_link_cm, iter_)
-
-        # removing None
-        edges_list[:] = (value for value in edges_list if value is not None)
-
-        # debug
-        # print(edges_list)
-
-        # edgelist writing
-        with open(outfile_name, "w") as outfile:
-            outfile.write(
-                "".join(
-                    "{} {}\n".format(str(i),str(j)) for (i,j) in edges_list
-                    )
-                )
-
-        return outfile_name 
-                
-
-    def ensemble_sampler_weighted(self, output_name):
-        return None
-
-
-def is_a_link_cm(args_1, args_2, seed=None):
-    if seed is not None:
-        np.random.seed(seed)
-    (i, xi) = args_1
-    (j, xj) = args_2
-    p = np.random.random()
-    xij = xi*xj
-    p_ensemble =  xij/(1 + xij)
-    if p < p_ensemble:
-        return (i, j)
-    else:
-        return None
 
