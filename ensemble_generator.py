@@ -116,8 +116,8 @@ def is_a_link_ecm(args_1, args_2, seed=None):
     p_ensemble =  xij*yij/(1 - yij + xij*yij)
     if p < p_ensemble:
         q_ensemble = yij
-        w = np.random.geometric(q_ensemble)
-        return (i, j, w+1)
+        w = np.random.geometric(1-q_ensemble)
+        return (i, j, w)
     else:
         return None
 

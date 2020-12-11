@@ -54,7 +54,7 @@ class MyTest(unittest.TestCase):
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        n = 10
+        n = 100
         output_dir = "sample_cm/"
         # random.seed(100)
         g.ensemble_sampler(n=n, output_dir=output_dir, seed=42)
@@ -98,10 +98,10 @@ class MyTest(unittest.TestCase):
         print('original dseq sum ',g.dseq.sum())
         print('ensemble average dseq', d_emp)
         print('ensemble dseq sum ',np.array([d_emp[key] for key in d_emp.keys()]).sum())
-        """
         print(d_diff)
         print('empirical error', ensemble_error)
         print('theoretical error', err)
+        """
 
 
         l = os.listdir(output_dir)
@@ -110,7 +110,7 @@ class MyTest(unittest.TestCase):
         os.rmdir(output_dir)
 
         # test result
-        self.assertTrue(err < 1e-1)
+        self.assertTrue(ensemble_error < 3)
 
 
 if __name__ == "__main__":

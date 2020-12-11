@@ -44,7 +44,7 @@ class MyTest(unittest.TestCase):
 
         g._solve_problem(
             model="ecm",
-            method="fixed-point",
+            method="newton",
             max_steps=100,
             verbose=False,
             linsearch=True,
@@ -56,31 +56,38 @@ class MyTest(unittest.TestCase):
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        n = 10
-        output_dir = "sample_cm/"
+        n = 1000
+        output_dir = "sample_ecm/"
         # random.seed(100)
         g.ensemble_sampler(n=n, output_dir=output_dir, seed=42)
 
         d = {'{}'.format(i):g.dseq[i] for i in range(N)}
+        s = {'{}'.format(i):g.strength_sequence[i] for i in range(N)}
 
 
         # read all sampled graphs and check the average degree distribution is close enough
         d_emp = {'{}'.format(i):0 for i in range(N)}
+        s_emp = {'{}'.format(i):0 for i in range(N)}
 
         for l in range(n):
             f = output_dir + "{}.txt".format(l)
             if not os.stat(f).st_size == 0:
-                g_tmp = nx.read_edgelist(f)
+                g_tmp = nx.read_edgelist(f, data=(("weight", float),))
                 d_tmp = dict(g_tmp.degree)
+                s_tmp = dict(g_tmp.degree(weight='weight'))
                 for item in d_tmp.keys(): 
                     d_emp[item] += d_tmp[item]
-
+                    s_emp[item] += s_tmp[item]
 
         for item in d_emp.keys(): 
             d_emp[item] = d_emp[item]/n
+            s_emp[item] = s_emp[item]/n
 
-        a_diff = np.array([abs(d[item] - d_emp[item]) for item in d.keys()])
+        ad_diff = np.array([abs(d[item] - d_emp[item]) for item in d.keys()])
+        as_diff = np.array([abs(s[item] - s_emp[item]) for item in s.keys()])
+        a_diff = np.concatenate((ad_diff, as_diff)) 
         d_diff = {item:d[item] - d_emp[item] for item in d.keys()}
+        s_diff = {item:s[item] - s_emp[item] for item in s.keys()}
 
         ensemble_error = np.linalg.norm(a_diff, np.inf)
 
@@ -96,14 +103,14 @@ class MyTest(unittest.TestCase):
 
         # debug
         """
-        print('original dseq',d)
-        print('original dseq sum ',g.dseq.sum())
-        print('ensemble average dseq', d_emp)
-        print('ensemble dseq sum ',np.array([d_emp[key] for key in d_emp.keys()]).sum())
+        print('\n original degree sequence ', d)
+        print('\n original strength sequence ', s)
+        print('\n ensemble average strength sequence', s_emp)
+        print('\n degree by degree difference vector ', d_diff)
+        print('\n strength by strength difference vector ', s_diff)
+        print('\n empirical error = {}'.format(ensemble_error))
+        print('\n theoretical error = {}'.format(err))
         """
-        print(d_diff)
-        print('empirical error', ensemble_error)
-        print('theoretical error', err)
 
 
         l = os.listdir(output_dir)
@@ -112,7 +119,7 @@ class MyTest(unittest.TestCase):
         os.rmdir(output_dir)
 
         # test result
-        self.assertTrue(err < 1e-1)
+        self.assertTrue(ensemble_error<3)
 
 
 if __name__ == "__main__":

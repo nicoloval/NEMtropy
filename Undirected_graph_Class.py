@@ -1882,7 +1882,7 @@ class UndirectedGraph:
         self._set_solved_problem_ecm(sol)
         
     
-    def ensemble_sampler(self, n, output_dir="sample/", seed=10):
+    def ensemble_sampler(self, n, cpu_n=2, output_dir="sample/", seed=10):
         # al momento funziona solo sull'ultimo problema risolto
         # unico input possibile e' la cartella dove salvare i samples
         # ed il numero di samples
@@ -1919,16 +1919,20 @@ class UndirectedGraph:
 
         if self.last_model in ["cm", "cm_new"]:
             iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
-            # itertools.starmap(self.ensemble_sampler_binary_single_graph, iter_files)
             i = 0
             for item in iter_files:
                 eg.ensemble_sampler_cm_graph(outfile_name=item, x=self.x, cpu_n=cpu_n, seed=s[i])
-                # self.ensemble_sampler_binary_single_graph(item, seed=s[i])
                 i += 1
 
-        elif self.last_model in ["ecm", "ecm_new", "ecm-two-steps", "CReAMa", "CReAMa-sparse"]:
-            place_holder=None
-            # self.ensemble_sampler_weighted(n=n, output_dir=output_dir, seed)
+        elif self.last_model in ["ecm", "ecm_new"]:
+            iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
+            i = 0
+            for item in iter_files:
+                eg.ensemble_sampler_ecm_graph(outfile_name=item, x=self.x, y=self.y, cpu_n=cpu_n, seed=s[i])
+                i += 1
+
+        elif self.last_model in ["ecm-two-steps", "CReAMa", "CReAMa-sparse"]:
+            place_holder = None
         else: 
             raise ValueError("insert a model")
 
