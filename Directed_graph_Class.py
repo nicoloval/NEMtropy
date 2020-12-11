@@ -4,6 +4,8 @@ import scipy
 from numba import jit
 import time
 from Directed_new import *
+import os
+import ensemble_generator as eg
 
 
 def out_degree(a):
@@ -2775,3 +2777,39 @@ class DirectedGraph:
         )
 
         return weighted_realisation
+
+
+    def ensemble_sampler(self, n, cpu_n=2, output_dir="sample/", seed=10):
+        # al momento funziona solo sull'ultimo problema risolto
+        # unico input possibile e' la cartella dove salvare i samples
+        # ed il numero di samples
+
+        # create the output directory
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # compute the sample
+
+        # seed specification
+        np.random.seed(seed)
+        s = [np.random.randint(0,1000000) for i in range(n)]
+
+        if self.last_model in ["dcm", "dcm_new"]:
+            iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
+            i = 0
+            for item in iter_files:
+                eg.ensemble_sampler_dcm_graph(outfile_name=item, x=self.x, y=self.y, cpu_n=cpu_n, seed=s[i])
+                i += 1
+
+        elif self.last_model in ["decm", "decm_new"]:
+            iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
+            i = 0
+            for item in iter_files:
+                # eg.ensemble_sampler_decm_graph(outfile_name=item, x=self.x, y=self.y, cpu_n=cpu_n, seed=s[i])
+                i += 1
+
+        elif self.last_model in ["decm-two-steps", "CReAMa", "CReAMa-sparse"]:
+            place_holder = None
+        else:
+            raise ValueError("insert a model")
+

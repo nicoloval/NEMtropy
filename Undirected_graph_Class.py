@@ -1884,28 +1884,6 @@ class UndirectedGraph:
     
     def ensemble_sampler(self, n, cpu_n=2, output_dir="sample/", seed=10):
         # al momento funziona solo sull'ultimo problema risolto
-        # unico input possibile e' la cartella dove salvare i samples
-        # ed il numero di samples
-
-        # tutto l'if e' obsoleto
-        if self.last_model in ["cm", "cm_new"]:
-            # self.x
-            # joblib 
-            self.p_ij = lambda inds : p_ij_cm(inds, (self.x)),
-            # multiprocessing
-            # self.is_a_link = self.is_a_link_cm
-        elif self.last_model in ["ecm", "ecm_new"]:
-            # self.x
-            # self.y
-            self.p_ij = lambda inds : p_ij_ecm(inds, (self.x, self.y)),
-            self.q_ij = lambda inds : q_ij_ecm(inds, (self.x, self.y)),
-        elif self.last_model in ["ecm-two-steps"]:
-            self.chi = None
-            # self.b_CReM
-        elif self.last_model in ["CReAMa", "CReAMa-sparse"]:
-            self.beta = None
-        else: 
-            raise ValueError("insert a model")
 
         # create the output directory
         if not os.path.exists(output_dir):
