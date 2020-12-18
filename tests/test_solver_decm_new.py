@@ -33,7 +33,7 @@ class MyTest(unittest.TestCase):
             x, args
         )
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
+        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (sample.loglikelihood_decm_new, args))
         hes_reg = sample.hessian_regulariser_function
 
         sol = sample.solver(
@@ -89,7 +89,7 @@ class MyTest(unittest.TestCase):
             x, args
         )
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
+        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (sample.loglikelihood_decm_new, args))
         hes_reg = sample.hessian_regulariser_function
 
         sol = sample.solver(
@@ -257,7 +257,7 @@ class MyTest(unittest.TestCase):
         fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
         fun_jac = lambda x: -sample.loglikelihood_hessian_decm_new(x, args)
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
+        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (sample.loglikelihood_decm_new, args))
         hes_reg = sample.hessian_regulariser_function
 
         sol = sample.solver(
@@ -312,7 +312,7 @@ class MyTest(unittest.TestCase):
         fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
         fun_jac = lambda x: -sample.loglikelihood_hessian_decm_new(x, args)
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
+        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (sample.loglikelihood_decm_new, args))
         hes_reg = sample.hessian_regulariser_function
 
         sol = sample.solver(
@@ -483,7 +483,7 @@ class MyTest(unittest.TestCase):
 
         fun = lambda x: sample.iterative_decm_new(x, args)
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
+        lin_fun = lambda x: sample.linsearch_fun_DECM_new_fixed(x)
         hes_reg = sample.hessian_regulariser_function
 
         sol = sample.solver(
@@ -537,7 +537,7 @@ class MyTest(unittest.TestCase):
 
         fun = lambda x: sample.iterative_decm_new(x, args)
         step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
+        lin_fun = lambda x: sample.linsearch_fun_DECM_new_fixed(x)
         hes_reg = sample.hessian_regulariser_function
 
         sol = sample.solver(

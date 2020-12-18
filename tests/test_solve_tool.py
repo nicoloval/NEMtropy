@@ -114,7 +114,7 @@ class MyTest(unittest.TestCase):
         and no zero degrees
         """
 
-        n, s = (4, 25)
+        n, s = (10, 25)
 
         A = mg.random_weighted_matrix_generator_dense(
             n, sup_ext=10, sym=False, seed=s, intweights=True

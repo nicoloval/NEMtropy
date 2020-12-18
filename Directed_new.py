@@ -345,7 +345,7 @@ def expected_decm_new(theta):
     return f
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def linsearch_fun_DCM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -353,18 +353,40 @@ def linsearch_fun_DCM_new(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sample.sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
     ):
         alfa *= beta
         i += 1
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_DCM_new_fixed(X):
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx[dx!=np.infty], ord = 2) < np.linalg.norm(dx_old[dx_old!=np.infty], ord = 2)
     return alfa
 
 
@@ -681,7 +703,7 @@ def iterative_decm_new_old(theta, args):
     return f
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_DECM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -689,6 +711,8 @@ def linsearch_fun_DECM_new(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
+    
 
     # Mettere il check sulle y
     nnn = int(len(x) / 4)
@@ -700,25 +724,62 @@ def linsearch_fun_DECM_new(X, args):
             x[2 * nnn : 3 * nnn] + alfa * dx[2 * nnn : 3 * nnn]
         )
         ind_yin = np.argmin(x[3 * nnn :] + alfa * dx[3 * nnn :])
-        if (
-            (
-                x[2 * nnn : 3 * nnn][ind_yout]
-                + alfa * dx[2 * nnn : 3 * nnn][ind_yout]
-            )
-            + (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
-        ) > tmp * 0.01:
+        cond = (x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout]) + (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
+        if (cond) > tmp * 0.01:
             break
         else:
             alfa *= beta
+    
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sample.sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
     ):
         alfa *= beta
         i += 1
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_DECM_new_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    # Mettere il check sulle y
+    nnn = int(len(x) / 4)
+    ind_yout = np.argmin(x[2 * nnn : 3 * nnn])
+    ind_yin = np.argmin(x[3 * nnn :])
+    tmp = x[2 * nnn : 3 * nnn][ind_yout] + x[3 * nnn :][ind_yin]
+    
+    while True:
+        ind_yout = np.argmin(
+            x[2 * nnn : 3 * nnn] + alfa * dx[2 * nnn : 3 * nnn]
+        )
+        ind_yin = np.argmin(x[3 * nnn :] + alfa * dx[3 * nnn :])
+        cond = (x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout]) + (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
+        #print(cond)
+        if (cond) > tmp * 0.01:
+            break
+        else:
+            alfa *= beta
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx[dx!=np.infty], ord = 2) < np.linalg.norm(dx_old[dx_old!=np.infty], ord = 2)
+
     return alfa
