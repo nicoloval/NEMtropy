@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse
 import scipy
-from numba import jit
+from numba import jit, prange
 import time
 from Directed_new import *
 
@@ -129,12 +129,12 @@ def iterative_CReAMa(beta, args):
         xd[i] = xd[i] / s_out[i]
     for i in nz_index_in:
         yd[i] = yd[i] / s_in[i]
-
+ 
     return np.concatenate((xd, yd))
 
 
 @jit(nopython=True)
-def iterative_CReAMa_Sparse(beta, args):
+def iterative_CReAMa_Sparse_2(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -167,6 +167,47 @@ def iterative_CReAMa_Sparse(beta, args):
     for i in nz_index_in:
         yd[i] = yd[i] / s_in[i]
 
+    return np.concatenate((xd, yd))
+
+
+@jit(nopython=True, parallel=True)
+def iterative_CReAMa_Sparse(beta, args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    xd = np.zeros(aux_n, dtype=np.float64)
+    yd = np.zeros(aux_n, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+    
+    x_indices = x.nonzero()[0]
+    y_indices = y.nonzero()[0]
+    
+    for i in prange(x_indices.shape[0]):
+        index = x_indices[i]
+        aux = x[index] * y
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (1 + (beta_in / (beta_out[index]+np.exp(-100))))
+        xd[index] -= (aux.sum() - aux[index])
+        xd[index] = xd[index] / (s_out[index]+np.exp(-100))
+        
+    for j in prange(y_indices.shape[0]):
+        index = y_indices[j]
+        aux = x * y[index]
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (1 + (beta_out / (beta_in[index] + np.exp(-100))))
+        yd[j] -= (aux.sum() - aux[index])
+        yd[j] = yd[index] / (s_in[index]+np.exp(-100))
+    
     return np.concatenate((xd, yd))
 
 
@@ -264,7 +305,7 @@ def loglikelihood_prime_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa_Sparse(beta, args):
+def loglikelihood_prime_CReAMa_Sparse_2(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -294,7 +335,44 @@ def loglikelihood_prime_CReAMa_Sparse(beta, args):
     
     for j in y.nonzero()[0]:
         aux_F_in[j] -= s_in[j]
+    return np.concatenate((aux_F_out, aux_F_in))
 
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_prime_CReAMa_Sparse(beta, args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[0:aux_n]
+    beta_in = beta[aux_n : 2 * aux_n]
+
+    aux_F_out = np.zeros_like(beta_out, dtype=np.float64)
+    aux_F_in = np.zeros_like(beta_in, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in prange(nz_index_out.shape[0]):
+        index = nz_index_out[i]
+        aux_F_out[index] -= s_out[index]
+        aux = x[index] * y
+        aux_value = aux / (1 + aux)
+        aux = aux_value / (beta_out[index] + beta_in)
+        aux_F_out[index] += aux.sum() - aux[index]
+        
+    for j in prange(nz_index_in.shape[0]):
+        index = nz_index_in[j]
+        aux_F_in[index] -= s_in[index]
+        aux = x * y[index]
+        aux_value = aux / (1 + aux)
+        aux = aux_value / (beta_out + beta_in[index])
+        aux_F_in[index] += (aux.sum() - aux[index])
+        
     return np.concatenate((aux_F_out, aux_F_in))
 
 
@@ -352,7 +430,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
+def loglikelihood_hessian_diag_CReAMa_Sparse_2(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -382,6 +460,38 @@ def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
                     f[i + aux_n] -= aux_entry / (
                         (beta_out[j] + beta_in[i]) ** 2
                     )
+    return f
+
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    f = np.zeros(2 * aux_n, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in prange(aux_n):
+        aux = x[i] * y
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (((beta_out[i] + beta_in) ** 2) + np.exp(-100))
+        f[i] -= (aux.sum() - aux[i])
+        
+        aux = x * y[i]
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (((beta_out + beta_in[i]) ** 2) + np.exp(-100))
+        f[i + aux_n] -= (aux.sum() - aux[i])
+        
     return f
 
 
@@ -1549,15 +1659,11 @@ def linsearch_fun_CReAMa(X, args):
 
     i = 0
     s_old = -step_fun(x, arg_step_fun)
-    while (
-        sufficient_decrease_condition(
-            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
-        )
-        == False
-        and i < 50
-    ):
+    cond = sufficient_decrease_condition(s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx)
+    while ((cond == False) and (i < 50)):
         alfa *= beta
         i += 1
+        cond = sufficient_decrease_condition(s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx)
     return alfa
 
 
@@ -2799,6 +2905,10 @@ class DirectedGraph:
         regularise=True,
         regularise_eps=1e-3,
     ):
+        if model == "CReAMa-sparse":
+            self.is_sparse = True
+        else:
+            self.is_sparse = False
         
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
             not scipy.sparse.isspmatrix(adjacency)
@@ -2851,7 +2961,7 @@ class DirectedGraph:
             col_ind = col_ind.astype(np.int64)
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
-            self.is_sparse = True
+            self.is_sparse = False
             self.adjacency_given = True
 
         if self.is_sparse:
