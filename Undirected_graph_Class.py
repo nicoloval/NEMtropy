@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.sparse
-from numba import jit
+from numba import jit, prange
 import time
 from Undirected_new import *
 
@@ -157,21 +157,37 @@ def iterative_CReAMa(beta, args):
     return f
 
 
-@jit(nopython=True)
+@jit(nopython=True, parallel=True)
 def iterative_CReAMa_sparse(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
     f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
+    
+    for i in prange(n):
+        aux = x[i] * x
+        aux_value = aux / (1+aux)
+        aux = aux_value /  (1 + (beta/beta[i]))
+        f[i] = (-aux.sum() + aux[i])/(s[i] + np.exp(-100))
+    return f
 
+
+@jit(nopython=True)
+def iterative_CReAMa_sparse_2(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    
     for i in np.arange(n):
-        for j in np.arange(n):
-            if i != j:
-                aux = x[i] * x[j]
-                aux_value = aux / (1 + aux)
-                if aux_value > 0:
-                    f[i] -= aux_value / (1 + (beta[j] / beta[i]))
+        for j in np.arange(i+1, n):
+            aux = x[i] * x[j]
+            aux_value = aux / (1 + aux)
+            if aux_value > 0:
+                f[i] -= aux_value / (1 + (beta[j] / beta[i]))
+                f[j] -= aux_value / (1 + (beta[i] / beta[j]))
     for i in np.arange(n):
         if s[i] != 0:
             f[i] = f[i] / s[i]
@@ -234,7 +250,7 @@ def loglikelihood_prime_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa_sparse(beta, args):
+def loglikelihood_prime_CReAMa_sparse_2(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -250,6 +266,23 @@ def loglikelihood_prime_CReAMa_sparse(beta, args):
                 f[i] += aux_value / aux
                 f[j] += aux_value / aux
     return f
+
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_prime_CReAMa_sparse(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    for i in prange(n):
+        f[i] -= s[i]
+        aux = x[i] * x
+        aux_value = aux / (1 + aux)
+        aux = aux_value/(beta[i] + beta)
+        f[i] += aux.sum() - aux[i]
+    return f
+
 
 
 @jit(nopython=True)
@@ -309,7 +342,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa_sparse(beta, args):
+def loglikelihood_hessian_diag_CReAMa_sparse_2(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -324,6 +357,21 @@ def loglikelihood_hessian_diag_CReAMa_sparse(beta, args):
                     aux = aux_value / ((beta[i] + beta[j]) ** 2)
                     f[i] -= aux
                     f[j] -= aux
+    return f
+
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_hessian_diag_CReAMa_sparse(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    for i in prange(n):
+        aux = x[i] * x
+        aux_value = aux / (1 + aux)
+        aux = aux_value / ((beta[i] + beta) ** 2)
+        f[i] -= aux.sum() - aux[i]
     return f
 
 
@@ -1298,8 +1346,8 @@ class UndirectedGraph:
                 self.n_nodes = len(self.dseq)
                 self.n_edges = np.sum(self.dseq)
                 self.is_initialized = True
-                if self.n_nodes > 2000:
-                    self.is_sparse = True
+                #if self.n_nodes > 2000:
+                #    self.is_sparse = True
 
         elif degree_sequence is not None:
             if not isinstance(degree_sequence, (list, np.ndarray)):
@@ -1320,8 +1368,8 @@ class UndirectedGraph:
                     self.dseq = degree_sequence.astype(np.float64)
                     self.n_edges = np.sum(self.dseq)
                     self.is_initialized = True
-                    if self.n_nodes > 2000:
-                        self.is_sparse = True
+                    #if self.n_nodes > 2000:
+                    #    self.is_sparse = True
 
                 if strength_sequence is not None:
                     if not isinstance(strength_sequence, (list, np.ndarray)):
@@ -1372,8 +1420,8 @@ class UndirectedGraph:
                     self.nz_index = np.nonzero(self.strength_sequence)[0]
                     self.is_weighted = True
                     self.is_initialized = True
-                    if self.n_nodes > 2000:
-                        self.is_sparse = True
+                    #if self.n_nodes > 2000:
+                    #    self.is_sparse = True
 
     def set_adjacency_matrix(self, adjacency):
         if self.is_initialized:
@@ -1470,7 +1518,7 @@ class UndirectedGraph:
             self._set_solved_problem_cm(solution)
         elif model in ["ecm", "ecm-new"]:
             self._set_solved_problem_ecm(solution)
-        elif model in ["CReAMa", "CReAMA-sparse"]:
+        elif model in ["CReAMa", "CReAMa-sparse"]:
             self._set_solved_problem_CReAMa(solution)
 
     def degree_reduction(self):
@@ -1911,6 +1959,10 @@ class UndirectedGraph:
         linsearch=True,
         regularise=True,
     ):
+        if model == "CReAMa-sparse":
+            self.is_sparse = True
+        else:
+            self.is_sparse = False
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
             not scipy.sparse.isspmatrix(adjacency)
         ):
@@ -1931,6 +1983,8 @@ class UndirectedGraph:
                 linsearch=linsearch,
                 regularise=regularise
             )
+            
+            
             if self.is_sparse:
                 self.adjacency_CReAMa = (self.x,)
                 self.adjacency_given = False
@@ -1999,18 +2053,17 @@ class UndirectedGraph:
             linsearch=linsearch,
             full_return=full_return,
         )
-
+        
         self._set_solved_problem(sol)
 
     def _set_solved_problem_CReAMa(self, solution):
-        if self.full_return:
+        if self.full_return: 
             self.beta = solution[0]
             self.comput_time_creama = solution[1]
             self.n_steps_creama = solution[2]
             self.norm_seq_creama = solution[3]
             self.diff_seq_creama = solution[4]
             self.alfa_seq_creama = solution[5]
-
         else:
             self.beta = solution
 
@@ -2068,7 +2121,7 @@ class UndirectedGraph:
                 adjacency=adjacency,
                 method=method,
                 method_adjacency = method_adjacency,
-                initial_guess_adjacency = "random",
+                initial_guess_adjacency = initial_guess_adjacency,
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
