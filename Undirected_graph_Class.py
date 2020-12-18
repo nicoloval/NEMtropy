@@ -2021,7 +2021,7 @@ class UndirectedGraph:
             col_ind = col_ind.astype(np.int64)
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
-            self.is_sparse = True
+            self.is_sparse = False
             self.adjacency_given = True
         
         if self.is_sparse:
