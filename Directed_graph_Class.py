@@ -1396,7 +1396,7 @@ def solver(
         # direction= dx@fun(x).T
 
         x = x + alfa * dx
-
+        
         dx_old = alfa * dx.copy()
 
         toc_update += time.time() - tic
@@ -1423,7 +1423,8 @@ def solver(
             # print("x = {}".format(x))
             print("alpha = {}".format(alfa))
             print("|f(x)| = {}".format(norm))
-            print("F(x) = {}".format(step_fun(x)))
+            if method in ["newton", "quasinewton"]:
+                print("F(x) = {}".format(step_fun(x)))
             print("diff = {}".format(diff))
             if method == "newton":
                 print("min eig = {}".format(ml))

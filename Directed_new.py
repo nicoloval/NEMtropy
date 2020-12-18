@@ -386,7 +386,7 @@ def linsearch_fun_DCM_new_fixed(X):
             ):
             alfa *= beta
             kk +=1
-            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+            cond = np.linalg.norm(alfa*dx[dx!=np.infty], ord = 2) < np.linalg.norm(dx_old[dx_old!=np.infty], ord = 2)
     return alfa
 
 
@@ -780,6 +780,6 @@ def linsearch_fun_DECM_new_fixed(X):
             ):
             alfa *= beta
             kk +=1
-            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+            cond = np.linalg.norm(alfa*dx[dx!=np.infty], ord = 2) < np.linalg.norm(dx_old[dx_old!=np.infty], ord = 2)
 
     return alfa

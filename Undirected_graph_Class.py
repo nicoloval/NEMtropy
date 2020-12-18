@@ -635,7 +635,8 @@ def solver(
             print("step {}".format(n_steps))
             print("alpha = {}".format(alfa))
             print("|f(x)| = {}".format(norm))
-            print("F(x) = {}".format(step_fun(x)))
+            if method in ["newton", "quasinewton"]:
+                print("F(x) = {}".format(step_fun(x)))
             print("diff = {}".format(diff))
             if method == "newton":
                 print("min eig = {}".format(ml))
