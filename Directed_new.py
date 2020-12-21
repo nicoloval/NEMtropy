@@ -345,7 +345,7 @@ def expected_decm_new(theta):
     return f
 
 
-#@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_DCM_new(X, args):
     x = X[0]
     dx = X[1]
