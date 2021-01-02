@@ -1269,7 +1269,7 @@ class UndirectedGraph:
 
                 # self.edgelist, self.deg_seq = edgelist_from_adjacency(adjacency)
                 self.n_nodes = len(self.dseq)
-                self.n_edges = np.sum(self.dseq)
+                self.n_edges = np.sum(self.dseq)/2
                 self.is_initialized = True
 
         elif edgelist is not None:
@@ -1296,7 +1296,7 @@ class UndirectedGraph:
                         self.nodes_dict,
                     ) = edgelist_from_edgelist(edgelist)
                 self.n_nodes = len(self.dseq)
-                self.n_edges = np.sum(self.dseq)
+                self.n_edges = np.sum(self.dseq)/2
                 self.is_initialized = True
                 if self.n_nodes > 2000:
                     self.is_sparse = True
@@ -1318,7 +1318,7 @@ class UndirectedGraph:
                 else:
                     self.n_nodes = int(len(degree_sequence))
                     self.dseq = degree_sequence.astype(np.float64)
-                    self.n_edges = np.sum(self.dseq)
+                    self.n_edges = np.sum(self.dseq)/2
                     self.is_initialized = True
                     if self.n_nodes > 2000:
                         self.is_sparse = True
@@ -1499,7 +1499,7 @@ class UndirectedGraph:
 
     def _set_initial_guess_cm(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
-        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        # If you want to customize the initial guess, remember that the code starzts with a reduced number of rows and columns.
 
         if ~self.is_reduced:
             self.degree_reduction()
@@ -1519,6 +1519,8 @@ class UndirectedGraph:
                 )  # All probabilities will be 1/2 initially
             elif self.initial_guess == "degrees":
                 self.r_x = self.r_dseq.astype(np.float64)
+            elif self.initial_guess == "chung_lu":
+                self.r_x = self.r_dseq.astype(np.float64)/(2*self.n_edges)
             else:
                 raise ValueError(
                     '{} is not an available initial guess'.format(
