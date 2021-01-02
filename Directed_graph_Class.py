@@ -1167,8 +1167,8 @@ def expected_out_degree_dcm(sol):
     a_in = sol[n:]
 
     k = np.zeros(n)  # allocate k
-    for i in range(n):
-        for j in range(n):
+    for i in a_out.nonzero()[0]:
+        for j in a_in.nonzero()[0]:
             if i != j:
                 k[i] += a_in[j] * a_out[i] / (1 + a_in[j] * a_out[i])
 
@@ -1181,8 +1181,8 @@ def expected_in_degree_dcm(sol):
     a_out = sol[:n]
     a_in = sol[n:]
     k = np.zeros(n)  # allocate k
-    for i in range(n):
-        for j in range(n):
+    for i in a_in.nonzero()[0]:
+        for j in a_out.nonzero()[0]:
             if i != j:
                 k[i] += a_in[i] * a_out[j] / (1 + a_in[i] * a_out[j])
 
