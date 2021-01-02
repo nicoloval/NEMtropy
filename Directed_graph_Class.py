@@ -2350,6 +2350,9 @@ class DirectedGraph:
             elif self.initial_guess == "degrees":
                 self.r_x = self.rnz_dseq_out.astype(np.float64)
                 self.r_y = self.rnz_dseq_in.astype(np.float64)
+            elif self.initial_guess == "chung_lu":
+                self.r_x = self.rnz_dseq_out.astype(np.float64)/(2*self.n_edges)
+                self.r_y = self.rnz_dseq_in.astype(np.float64)/(2*self.n_edges)
             else:
                 raise ValueError(
                     '{} is not an available initial guess'.format(
@@ -2394,6 +2397,9 @@ class DirectedGraph:
             elif self.initial_guess == "degrees":
                 self.r_x = self.rnz_dseq_out.astype(np.float64)
                 self.r_y = self.rnz_dseq_in.astype(np.float64)
+            elif self.initial_guess == "chung_lu":
+                self.r_x = self.rnz_dseq_out.astype(np.float64)/(2*self.n_edges)
+                self.r_y = self.rnz_dseq_in.astype(np.float64)/(2*self.n_edges)
             else:
                 raise ValueError(
                     '{} is not an available initial guess'.format(
