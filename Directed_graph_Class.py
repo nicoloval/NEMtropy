@@ -1635,7 +1635,7 @@ def linsearch_fun_DCM_fixed(X):
 
     if step:
         kk = 0
-        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         #print(np.linalg.norm(alfa*dx, ord = 2), np.linalg.norm(dx_old, ord = 2))
         while(
             cond == False
@@ -1643,8 +1643,8 @@ def linsearch_fun_DCM_fixed(X):
             ):
             alfa *= beta
             kk +=1
-            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
-    return alfa
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+    return alfax
 
 
 @jit(nopython=True)
@@ -1677,14 +1677,14 @@ def linsearch_fun_CReAMa_fixed(X):
 
     if step:
         kk = 0
-        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
             cond == False
             and kk<50
             ):
             alfa *= beta
             kk +=1
-            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
     return alfa
 
 
@@ -1768,14 +1768,14 @@ def linsearch_fun_DECM_fixed(X):
     
     if step:
         kk = 0
-        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
             cond == False
             and kk<50
             ):
             alfa *= beta
             kk +=1
-            cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
     return alfa
 
 
