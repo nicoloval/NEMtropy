@@ -1580,7 +1580,7 @@ class UndirectedGraph:
             self.x = self.initial_guess[:self.n_nodes] 
             self.y = self.initial_guess[self.n_nodes:] 
         elif isinstance(self.initial_guess, str):
-            if self.initial_guess == "strengths_minor":
+            if self.initial_guess == "strengths":
                 self.x = self.dseq.astype(float) / (
                     self.n_edges + 1
                 )  # This +1 increases the stability of the solutions.
@@ -1588,7 +1588,7 @@ class UndirectedGraph:
                     self.strength_sequence.astype(float)
                     / self.strength_sequence.sum()
                 )
-            elif self.initial_guess == "strengths":
+            elif self.initial_guess == "strengths_minor":
                 self.x = np.ones_like(self.dseq, dtype=np.float64) / (
                     self.dseq + 1
                 )
