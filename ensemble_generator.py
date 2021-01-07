@@ -12,7 +12,7 @@ def ensemble_sampler_cm_graph(outfile_name, x, cpu_n=2, seed=None):
     # put together inputs for pool 
     # iter_ = itertools.product(zip(inds,x), zip(inds,x))
     # print(list(zip(inds, x)))
-    iter_ = iter(((i, xi),(j, xj), np.random.randint(0,1000000)) for i,xi in zip(inds,x) for j,xj in zip(inds,x) if i<j) 
+    iter_ = iter(((i, xi), (j, xj), np.random.randint(0, 1000000)) for i, xi in zip(inds, x) for j, xj in zip(inds, x) if i < j) 
 
     # debug
     """
@@ -83,7 +83,7 @@ def ensemble_sampler_ecm_graph(outfile_name, x, y, cpu_n=2, seed=None):
     with open(outfile_name, "w") as outfile:
         outfile.write(
             "".join(
-                "{} {} {}\n".format(str(i), str(j), str(w)) for (i,j,w) in edges_list
+                "{} {} {}\n".format(str(i), str(j), str(w)) for (i, j, w) in edges_list
                 )
             )
 
@@ -132,6 +132,52 @@ def ensemble_sampler_dcm_graph(outfile_name, x, y, cpu_n=2, seed=None):
     return outfile_name 
  
 
+def ensemble_sampler_decm_graph(outfile_name, a_out, a_in, b_out, b_in, cpu_n=2, seed=None):
+    # produce and write a single directed weighted graph
+    
+    if seed is not None:
+        np.random.seed(seed)
+
+    inds = np.arange(len(a_out))
+
+    # put together inputs for pool 
+    iter_ = iter(((i, a_out_i, b_out_i), (j, a_in_j, b_in_j), np.random.randint(0,1000000))
+                 for i, a_out_i, b_out_i in zip(inds, a_out, b_out)
+                 for j, a_in_j, b_in_j in zip(inds, a_in, b_in)
+                 if i != j)
+
+    # debug
+    """
+    s=0
+    for c in iter_:
+        i=c[0][0]
+        j=c[1][0]
+        print(i,j)
+        s += 1
+    print(s)
+    """
+
+    # compute existing edges
+    with mp.Pool(processes=cpu_n) as pool:
+        edges_list = pool.starmap(is_a_link_decm, iter_)
+
+    # removing None
+    edges_list[:] = (value for value in edges_list if value is not None)
+
+    # debug
+    # print(edges_list)
+
+    # edgelist writing
+    with open(outfile_name, "w") as outfile:
+        outfile.write(
+            "".join(
+                "{} {} {}\n".format(str(i), str(j), str(w)) for (i, j, w) in edges_list
+                )
+            )
+
+    return outfile_name
+
+
 def is_a_link_cm(args_1, args_2, seed=None):
     if seed is not None:
         np.random.seed(seed)
@@ -178,3 +224,20 @@ def is_a_link_dcm(args_1, args_2, seed=None):
         return None
 
 
+def is_a_link_decm(args_1, args_2, seed=None):
+    # q-ensemble source: 
+    # "Fast and scalable resolution of the likelihood maximization problem for Exponential Random Graph models"
+    if seed is not None:
+        np.random.seed(seed)
+    (i, a_out_i, b_out_i) = args_1
+    (j, a_in_j, b_in_j) = args_2
+    p = np.random.random()
+    aij = a_out_i * a_in_j
+    bij = b_out_i * b_in_j
+    p_ensemble =  aij*bij/(1 - bij + aij*bij)
+    if p < p_ensemble:
+        q_ensemble = bij
+        w = np.random.geometric(1-q_ensemble)
+        return (i, j, w)
+    else:
+        return None

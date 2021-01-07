@@ -2805,7 +2805,7 @@ class DirectedGraph:
             iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
             i = 0
             for item in iter_files:
-                # eg.ensemble_sampler_decm_graph(outfile_name=item, x=self.x, y=self.y, cpu_n=cpu_n, seed=s[i])
+                eg.ensemble_sampler_decm_graph(outfile_name=item, a_out=self.x, a_in=self.y, b_out=self.b_out, b_in=self.b_in, cpu_n=cpu_n, seed=s[i])
                 i += 1
 
         elif self.last_model in ["decm-two-steps", "CReAMa", "CReAMa-sparse"]:
