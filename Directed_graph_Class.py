@@ -2708,7 +2708,7 @@ class DirectedGraph:
             fun_jac=self.fun_jac,
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
-            hessian_regulariser = self.hessian_regulariser,
+            hessian_regulariser=self.hessian_regulariser,
             tol=tol,
             max_steps=max_steps,
             method=method,
@@ -2724,7 +2724,7 @@ class DirectedGraph:
     def _set_solved_problem_CReAMa(self, solution):
         if self.full_return:
             self.b_out = solution[0][: self.n_nodes]
-            self.b_in = solution[0][self.n_nodes :]
+            self.b_in = solution[0][self.n_nodes:]
             self.comput_time_creama = solution[1]
             self.n_steps_creama = solution[2]
             self.norm_seq_creama = solution[3]
@@ -2732,8 +2732,7 @@ class DirectedGraph:
             self.alfa_seq_creama = solution[5]
         else:
             self.b_out = solution[: self.n_nodes]
-            self.b_in = solution[self.n_nodes :]
-
+            self.b_in = solution[self.n_nodes:]
 
     def solve_tool(
         self,
@@ -2758,7 +2757,7 @@ class DirectedGraph:
                 verbose=verbose,
                 tol=tol,
             )
-        elif model in ["CReAMa",'CReAMa-sparse']:
+        elif model in ["CReAMa", 'CReAMa-sparse']:
             self._solve_problem_CReAMa(
                 initial_guess=initial_guess,
                 model=model,
@@ -2770,14 +2769,12 @@ class DirectedGraph:
                 tol=tol,
             )
 
-
     def _weighted_realisation(self):
         weighted_realisation = weighted_adjacency(
             np.concatenate((self.b_out, self.b_in)), self.adjacency
         )
 
         return weighted_realisation
-
 
     def ensemble_sampler(self, n, cpu_n=2, output_dir="sample/", seed=10):
         # al momento funziona solo sull'ultimo problema risolto
@@ -2792,24 +2789,40 @@ class DirectedGraph:
 
         # seed specification
         np.random.seed(seed)
-        s = [np.random.randint(0,1000000) for i in range(n)]
+        s = [np.random.randint(0, 1000000) for i in range(n)]
 
         if self.last_model in ["dcm", "dcm_new"]:
-            iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
+            iter_files = iter(
+                output_dir + "{}.txt".format(i) for i in range(n))
             i = 0
             for item in iter_files:
-                eg.ensemble_sampler_dcm_graph(outfile_name=item, x=self.x, y=self.y, cpu_n=cpu_n, seed=s[i])
+                eg.ensemble_sampler_dcm_graph(
+                    outfile_name=item,
+                    x=self.x,
+                    y=self.y,
+                    cpu_n=cpu_n,
+                    seed=s[i])
                 i += 1
 
         elif self.last_model in ["decm", "decm_new"]:
-            iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
+            iter_files = iter(
+                output_dir + "{}.txt".format(i) for i in range(n))
             i = 0
             for item in iter_files:
-                eg.ensemble_sampler_decm_graph(outfile_name=item, a_out=self.x, a_in=self.y, b_out=self.b_out, b_in=self.b_in, cpu_n=cpu_n, seed=s[i])
+                eg.ensemble_sampler_decm_graph(
+                    outfile_name=item,
+                    a_out=self.x,
+                    a_in=self.y,
+                    b_out=self.b_out,
+                    b_in=self.b_in,
+                    cpu_n=cpu_n,
+                    seed=s[i])
                 i += 1
 
-        elif self.last_model in ["decm-two-steps", "CReAMa", "CReAMa-sparse"]:
-            place_holder = None
+        # elif self.last_model in [
+        #     "decm-two-steps",
+        #     "CReAMa",
+        #     "CReAMa-sparse"]:
+        #     place_holder = None
         else:
             raise ValueError("insert a model")
-
