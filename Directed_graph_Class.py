@@ -1646,7 +1646,7 @@ def linsearch_fun_DCM_fixed(X):
             alfa *= beta
             kk +=1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-    return alfax
+    return alfa
 
 
 @jit(nopython=True)
