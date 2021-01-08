@@ -26,12 +26,12 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm-new",
+            model="cm",
             method="newton",
             max_steps=100,
             verbose=False,
             linsearch=True,
-            initial_guess='random'
+            initial_guess='degrees_minor'
         )
 
         g.solution_error()
@@ -46,6 +46,7 @@ class MyTest(unittest.TestCase):
 
         # test result
         self.assertTrue(g.error < 1e-1)
+        
 
 
     def test_cm_1(self):
@@ -56,7 +57,7 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm-new",
+            model="cm",
             method="newton",
             max_steps=300,
             verbose=False,
@@ -88,7 +89,7 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm-new",
+            model="cm",
             method="newton",
             max_steps=300,
             verbose=False,

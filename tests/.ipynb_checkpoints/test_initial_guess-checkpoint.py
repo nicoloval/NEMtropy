@@ -130,7 +130,7 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
         g.initial_guess = 'uniform'
         g._set_initial_guess('dcm_new')
-        self.assertTrue(np.concatenate((g.r_x, g.r_y)).all() == np.array([1e3,  -np.log(0.5), -np.log(0.5), -np.log(0.5), 1e3,  -np.log(0.5)]).all())
+        self.assertTrue(np.concatenate((g.r_x, g.r_y)).all() == np.array([1e3,  0.5, 0.5, 0.5, 1e3,  0.5]).all())
 
 
     def test_dcm_new(self):
@@ -182,8 +182,7 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
         g.initial_guess = 'uniform'
         g._set_initial_guess('decm_new')
-        tester = np.exp(np.ones(4*n))
-        self.assertTrue(g.x0.all() == tester.all())
+        self.assertTrue(np.concatenate((g.x, g.y, g.out_strength, g.in_strength)).all() == np.ones(4*n).all())
 
 
     def test_decm_new(self):

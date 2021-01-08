@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse
 import scipy
-from numba import jit
+from numba import jit, prange
 import time
 from Directed_new import *
 import os
@@ -131,12 +131,12 @@ def iterative_CReAMa(beta, args):
         xd[i] = xd[i] / s_out[i]
     for i in nz_index_in:
         yd[i] = yd[i] / s_in[i]
-
+ 
     return np.concatenate((xd, yd))
 
 
 @jit(nopython=True)
-def iterative_CReAMa_Sparse(beta, args):
+def iterative_CReAMa_Sparse_2(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -160,11 +160,56 @@ def iterative_CReAMa_Sparse(beta, args):
                 aux = x[i] * y[j]
                 aux_entry = aux / (1 + aux)
                 if aux_entry > 0:
-                    aux = aux_entry / (1 + beta_in[j] / beta_out[i])
-                    xd[i] -= aux / s_out[i]
-                    aux = aux_entry / (1 + beta_out[i] / beta_in[j])
-                    yd[j] -= aux / s_in[j]
+                    aux = aux_entry / (1 + (beta_in[j] / beta_out[i]))
+                    xd[i] -= aux
+                    aux = aux_entry / (1 + (beta_out[i] / beta_in[j]))
+                    yd[j] -= aux
+    for i in nz_index_out:
+        xd[i] = xd[i] / s_out[i]
+    for i in nz_index_in:
+        yd[i] = yd[i] / s_in[i]
 
+    return np.concatenate((xd, yd))
+
+
+@jit(nopython=True, parallel=True)
+def iterative_CReAMa_Sparse(beta, args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    xd = np.zeros(aux_n, dtype=np.float64)
+    yd = np.zeros(aux_n, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+    
+    x_indices = x.nonzero()[0]
+    y_indices = y.nonzero()[0]
+    
+    for i in prange(x_indices.shape[0]):
+        index = x_indices[i]
+        aux = x[index] * y
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (1 + (beta_in / (beta_out[index]+np.exp(-100))))
+        xd[index] -= (aux.sum() - aux[index])
+        xd[index] = xd[index] / (s_out[index]+np.exp(-100))
+        
+    for j in prange(y_indices.shape[0]):
+        index = y_indices[j]
+        aux = x * y[index]
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (1 + (beta_out / (beta_in[index] + np.exp(-100))))
+        yd[j] -= (aux.sum() - aux[index])
+        yd[j] = yd[index] / (s_in[index]+np.exp(-100))
+    
     return np.concatenate((xd, yd))
 
 
@@ -262,7 +307,7 @@ def loglikelihood_prime_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa_Sparse(beta, args):
+def loglikelihood_prime_CReAMa_Sparse_2(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -292,7 +337,44 @@ def loglikelihood_prime_CReAMa_Sparse(beta, args):
     
     for j in y.nonzero()[0]:
         aux_F_in[j] -= s_in[j]
+    return np.concatenate((aux_F_out, aux_F_in))
 
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_prime_CReAMa_Sparse(beta, args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[0:aux_n]
+    beta_in = beta[aux_n : 2 * aux_n]
+
+    aux_F_out = np.zeros_like(beta_out, dtype=np.float64)
+    aux_F_in = np.zeros_like(beta_in, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in prange(nz_index_out.shape[0]):
+        index = nz_index_out[i]
+        aux_F_out[index] -= s_out[index]
+        aux = x[index] * y
+        aux_value = aux / (1 + aux)
+        aux = aux_value / (beta_out[index] + beta_in)
+        aux_F_out[index] += aux.sum() - aux[index]
+        
+    for j in prange(nz_index_in.shape[0]):
+        index = nz_index_in[j]
+        aux_F_in[index] -= s_in[index]
+        aux = x * y[index]
+        aux_value = aux / (1 + aux)
+        aux = aux_value / (beta_out + beta_in[index])
+        aux_F_in[index] += (aux.sum() - aux[index])
+        
     return np.concatenate((aux_F_out, aux_F_in))
 
 
@@ -350,7 +432,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
+def loglikelihood_hessian_diag_CReAMa_Sparse_2(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -380,6 +462,38 @@ def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
                     f[i + aux_n] -= aux_entry / (
                         (beta_out[j] + beta_in[i]) ** 2
                     )
+    return f
+
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    f = np.zeros(2 * aux_n, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in prange(aux_n):
+        aux = x[i] * y
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (((beta_out[i] + beta_in) ** 2) + np.exp(-100))
+        f[i] -= (aux.sum() - aux[i])
+        
+        aux = x * y[i]
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (((beta_out + beta_in[i]) ** 2) + np.exp(-100))
+        f[i + aux_n] -= (aux.sum() - aux[i])
+        
     return f
 
 
@@ -1055,8 +1169,8 @@ def expected_out_degree_dcm(sol):
     a_in = sol[n:]
 
     k = np.zeros(n)  # allocate k
-    for i in range(n):
-        for j in range(n):
+    for i in a_out.nonzero()[0]:
+        for j in a_in.nonzero()[0]:
             if i != j:
                 k[i] += a_in[j] * a_out[i] / (1 + a_in[j] * a_out[i])
 
@@ -1069,8 +1183,8 @@ def expected_in_degree_dcm(sol):
     a_out = sol[:n]
     a_in = sol[n:]
     k = np.zeros(n)  # allocate k
-    for i in range(n):
-        for j in range(n):
+    for i in a_in.nonzero()[0]:
+        for j in a_out.nonzero()[0]:
             if i != j:
                 k[i] += a_in[i] * a_out[j] / (1 + a_in[i] * a_out[j])
 
@@ -1275,7 +1389,7 @@ def solver(
     hessian_regulariser,
     fun_jac=None,
     tol=1e-6,
-    eps=1e-16,
+    eps=1e-10,
     max_steps=100,
     method="newton",
     verbose=False,
@@ -1298,6 +1412,7 @@ def solver(
     f = fun(x)
     norm = np.linalg.norm(f)
     diff = 1
+    dx_old = np.zeros_like(x)
 
     if full_return:
         #TODO: norm,diff and alfa seqs have different lengths 
@@ -1371,9 +1486,15 @@ def solver(
         tic = time.time()
 
         # Linsearch
-        if linsearch:
+        if linsearch and (method in ["newton", "quasinewton"]):
             alfa1 = 1
             X = (x, dx, beta, alfa1, f)
+            alfa = linsearch_fun(X)
+            if full_return:
+                alfa_seq.append(alfa)
+        elif linsearch and (method in ["fixed-point"]):
+            alfa1 = 1
+            X = (x, dx, dx_old, alfa1, beta, n_steps)
             alfa = linsearch_fun(X)
             if full_return:
                 alfa_seq.append(alfa)
@@ -1387,6 +1508,8 @@ def solver(
         # direction= dx@fun(x).T
 
         x = x + alfa * dx
+        
+        dx_old = alfa * dx.copy()
 
         toc_update += time.time() - tic
 
@@ -1412,7 +1535,8 @@ def solver(
             # print("x = {}".format(x))
             print("alpha = {}".format(alfa))
             print("|f(x)| = {}".format(norm))
-            print("F(x) = {}".format(step_fun(x)))
+            if method in ["newton", "quasinewton"]:
+                print("F(x) = {}".format(step_fun(x)))
             print("diff = {}".format(diff))
             if method == "newton":
                 print("min eig = {}".format(ml))
@@ -1447,7 +1571,7 @@ def solver(
         return x
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):
@@ -1461,12 +1585,12 @@ def sufficient_decrease_condition(
     # print ('grad_f',grad_f)
     # print('p.T',p.T)
 
-    sup = f_old + c1 * alpha * grad_f @ p.T
-    # print(alpha, f_new, sup)
+    sup = f_old + c1 * alpha * np.dot(grad_f, p.T)
+    #print(alpha, f_new, sup)
     return bool(f_new < sup)
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_DCM(X, args):
     x = X[0]
     dx = X[1]
@@ -1474,6 +1598,7 @@ def linsearch_fun_DCM(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     eps2 = 1e-2
     alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
@@ -1482,10 +1607,10 @@ def linsearch_fun_DCM(X, args):
             alfa = min(alfa, a)
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -1495,7 +1620,36 @@ def linsearch_fun_DCM(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_DCM_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    eps2 = 1e-2
+    alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
+    for a in alfa0:
+        if a > 0:
+            alfa = min(alfa, a)
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        #print(np.linalg.norm(alfa*dx, ord = 2), np.linalg.norm(dx_old, ord = 2))
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+    return alfax
+
+
+@jit(nopython=True)
 def linsearch_fun_CReAMa(X, args):
     x = X[0]
     dx = X[1]
@@ -1503,12 +1657,71 @@ def linsearch_fun_CReAMa(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
+    cond = sufficient_decrease_condition(s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx)
+    while ((cond == False) and (i < 50)):
+        alfa *= beta
+        i += 1
+        cond = sufficient_decrease_condition(s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx)
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_CReAMa_fixed(X):
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_DECM(X, args):
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    arg_step_fun = args[1]
+
+    eps2 = 1e-2
+    alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
+    for a in alfa0:
+        if a > 0:
+            alfa = min(alfa, a)
+
+    # Mettere il check sulle y
+    nnn = int(len(x) / 4)
+    while True:
+        ind_yout = np.argmax(x[2 * nnn : 3 * nnn] + alfa * dx[2 * nnn : 3 * nnn])
+        ind_yin = np.argmax(x[3 * nnn :] + alfa * dx[3 * nnn :])
+        cond =  (x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout]) * (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
+        if (cond) < 1:
+            break
+        else:
+            alfa *= beta
+    
+    i = 0
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -1518,51 +1731,53 @@ def linsearch_fun_CReAMa(X, args):
     return alfa
 
 
-@jit(forceobj=True)
-def linsearch_fun_DECM(X, args):
+@jit(nopython=True)
+def linsearch_fun_DECM_fixed(X):
     x = X[0]
     dx = X[1]
-    beta = X[2]
+    dx_old = X[2]
     alfa = X[3]
-    f = X[4]
-    step_fun = args[0]
+    beta = X[4]
+    step = X[5]
 
     eps2 = 1e-2
     alfa0 = ((eps2 - 1) * x)[np.nonzero(dx)[0]] / dx[np.nonzero(dx)[0]]
-    print(alfa0)
     for a in alfa0:
         if a > 0:
             alfa = min(alfa, a)
 
-    print(alfa)
     # Mettere il check sulle y
     nnn = int(len(x) / 4)
+    
     while True:
-        ind_yout = np.argmax(x[2 * nnn : 3 * nnn])
-        ind_yin = np.argmax(x[3 * nnn :])
-        if (
-            (
-                x[2 * nnn : 3 * nnn][ind_yout]
-                + alfa * dx[2 * nnn : 3 * nnn][ind_yout]
-            )
-            * (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
-        ) < 1:
+        ind_yout = np.argmax(x[2 * nnn : 3 * nnn] + alfa * dx[2 * nnn : 3 * nnn])
+        ind_yin = np.argmax(x[3 * nnn :] + alfa * dx[3 * nnn :])
+        cond =  (x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout]) * (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
+        #print(cond)
+        #print(cond < 1)
+        
+        if cond < 1:
             break
         else:
             alfa *= beta
-
-    print(alfa)
-    i = 0
-    s_old = step_fun(x)
-    while (
-        sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
-        )
-        == False
-        and i < 50
-    ):
-        alfa *= beta
-        i += 1
+            #print(alfa)
+            #print("max b_out ",x[2 * nnn : 3 * nnn][ind_yout])
+            #print("max_b_in ", x[3 * nnn :][ind_yin])
+            #print("max b_out +alfa dx",x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout])
+            #print("max_b_in +alfa dx", x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
+            #print(cond)
+            #print(cond<1)
+    
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
     return alfa
 
 
@@ -1571,12 +1786,17 @@ def edgelist_from_edgelist(edgelist):
     Creates a new edgelist with the indexes of the nodes instead of the names.
     Returns also two dictionaries that keep track of the nodes.
     """
-    edgelist = list(zip(*edgelist))
+    # edgelist = list(zip(*edgelist))
     if len(edgelist[0]) == 2:
         nodetype = type(edgelist[0][0])
         edgelist = np.array(
             edgelist,
-            dtype=np.dtype([("source", nodetype), ("target", nodetype)]),
+            dtype=np.dtype(
+                [
+                    ("source", nodetype), 
+                    ("target", nodetype)
+                ]
+            ),
         )
     else:
         nodetype = type(edgelist[0][0])
@@ -1819,8 +2039,6 @@ class DirectedGraph:
                 self.n_nodes = len(self.dseq_out)
                 self.n_edges = np.sum(self.dseq_out)
                 self.is_initialized = True
-                if self.n_nodes > 2000:
-                    self.is_sparse = True
 
         elif degree_sequence is not None:
             if not isinstance(degree_sequence, (list, np.ndarray)):
@@ -1846,8 +2064,6 @@ class DirectedGraph:
                     self.dseq_in = degree_sequence[self.n_nodes :]
                     self.n_edges = np.sum(self.dseq_out)
                     self.is_initialized = True
-                    if self.n_nodes > 2000:
-                        self.is_sparse = True
 
                 if strength_sequence is not None:
                     if not isinstance(strength_sequence, (list, np.ndarray)):
@@ -1908,8 +2124,6 @@ class DirectedGraph:
                     self.nz_index_sin = np.nonzero(self.in_strength)[0]
                     self.is_weighted = True
                     self.is_initialized = True
-                    if self.n_nodes > 2000:
-                        self.is_sparse = True
 
 
     def set_adjacency_matrix(self, adjacency):
@@ -1953,6 +2167,7 @@ class DirectedGraph:
         method="quasinewton",
         max_steps=100,
         tol=1e-8,
+        eps=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
@@ -1975,6 +2190,7 @@ class DirectedGraph:
             linsearch_fun=self.fun_linsearch,
             hessian_regulariser = self.hessian_regulariser,
             tol=tol,
+            eps=eps,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
@@ -2136,6 +2352,9 @@ class DirectedGraph:
             elif self.initial_guess == "degrees":
                 self.r_x = self.rnz_dseq_out.astype(np.float64)
                 self.r_y = self.rnz_dseq_in.astype(np.float64)
+            elif self.initial_guess == "chung_lu":
+                self.r_x = self.rnz_dseq_out.astype(np.float64)/(2*self.n_edges)
+                self.r_y = self.rnz_dseq_in.astype(np.float64)/(2*self.n_edges)
             else:
                 raise ValueError(
                     '{} is not an available initial guess'.format(
@@ -2180,6 +2399,9 @@ class DirectedGraph:
             elif self.initial_guess == "degrees":
                 self.r_x = self.rnz_dseq_out.astype(np.float64)
                 self.r_y = self.rnz_dseq_in.astype(np.float64)
+            elif self.initial_guess == "chung_lu":
+                self.r_x = self.rnz_dseq_out.astype(np.float64)/(2*self.n_edges)
+                self.r_y = self.rnz_dseq_in.astype(np.float64)/(2*self.n_edges)
             else:
                 raise ValueError(
                     '{} is not an available initial guess'.format(
@@ -2189,7 +2411,11 @@ class DirectedGraph:
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
+        not_zero_ind_x = self.r_x != 0
+        self.r_x[not_zero_ind_x] = -np.log(self.r_x[not_zero_ind_x])
         self.r_x[self.rnz_dseq_out == 0] = 1e3
+        not_zero_ind_y = self.r_y != 0
+        self.r_y[not_zero_ind_y] = -np.log(self.r_y[not_zero_ind_y])
         self.r_y[self.rnz_dseq_in == 0] = 1e3
 
         self.x0 = np.concatenate((self.r_x, self.r_y))
@@ -2217,6 +2443,9 @@ class DirectedGraph:
                 self.b_in = (self.in_strength > 0).astype(float) / (
                     self.in_strength + 1
                 )
+            elif self.initial_guess == "random":
+                self.b_out = np.random.rand(self.n_nodes).astype(np.float64)
+                self.b_in = np.random.rand(self.n_nodes).astype(np.float64)
             else:
                 raise ValueError(
                     '{} is not an available initial guess'.format(
@@ -2225,7 +2454,10 @@ class DirectedGraph:
                     )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
-
+        
+        self.b_out[self.out_strength == 0] = 0
+        self.b_in[self.in_strength == 0] = 0
+        
         self.x0 = np.concatenate((self.b_out, self.b_in))
 
 
@@ -2324,6 +2556,19 @@ class DirectedGraph:
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
+
+        not_zero_ind_x = self.x != 0
+        self.x[not_zero_ind_x] = -np.log(self.x[not_zero_ind_x])
+
+        not_zero_ind_y = self.y != 0
+        self.y[not_zero_ind_y] = -np.log(self.y[not_zero_ind_y])
+
+        not_zero_ind_b_out = self.b_out != 0
+        self.b_out[not_zero_ind_b_out] = -np.log(self.b_out[not_zero_ind_b_out])
+
+        not_zero_ind_b_in = self.b_in != 0
+        self.b_in[not_zero_ind_b_in] = -np.log(self.b_in[not_zero_ind_b_in])
+
         self.x[self.dseq_out == 0] = 1e3
         self.y[self.dseq_in == 0] = 1e3
         self.b_out[self.out_strength == 0] = 1e3
@@ -2374,7 +2619,10 @@ class DirectedGraph:
                     (ex_s - s) / (s + np.exp(-100))
                     )
                 )
-                self.error = max(self.error_strength, self.error_degree)
+                if self.adjacency_given:
+                    self.error = self.error_strength
+                else:
+                    self.error = max(self.error_strength, self.error_degree)
 
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["decm", "decm_new"]:
@@ -2601,18 +2849,39 @@ class DirectedGraph:
             )
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
-        self.args_lins = (self.step_fun,)
-
-        lins_fun = {
-            "dcm": lambda x: linsearch_fun_DCM(x, self.args_lins),
-            "dcm_new": lambda x: linsearch_fun_DCM_new(x, self.args_lins),
-            "CReAMa": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-sparse": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "decm": lambda x: linsearch_fun_DECM(x, self.args_lins),
-            "decm_new": lambda x: linsearch_fun_DECM_new(x, self.args_lins),
+        args_lin = {
+            "dcm": (loglikelihood_dcm, self.args),
+            "CReAMa": (loglikelihood_CReAMa, self.args),
+            "CReAMa-sparse": (loglikelihood_CReAMa_Sparse, self.args),
+            "decm": (loglikelihood_decm, self.args),
+            "dcm_new": (loglikelihood_dcm_new, self.args),
+            "decm_new": (loglikelihood_decm_new, self.args),
         }
 
-        self.fun_linsearch = lins_fun[model]
+        self.args_lins = args_lin[model]
+
+        lins_fun = {
+            "dcm-newton": lambda x: linsearch_fun_DCM(x, self.args_lins),
+            "dcm-quasinewton": lambda x: linsearch_fun_DCM(x, self.args_lins),
+            "dcm-fixed-point": lambda x: linsearch_fun_DCM_fixed(x),
+            "dcm_new-newton": lambda x: linsearch_fun_DCM_new(x, self.args_lins),
+            "dcm_new-quasinewton": lambda x: linsearch_fun_DCM_new(x, self.args_lins),
+            "dcm_new-fixed-point": lambda x: linsearch_fun_DCM_new_fixed(x),
+            "CReAMa-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "CReAMa-sparse-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-sparse-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-sparse-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "decm-newton": lambda x: linsearch_fun_DECM(x, self.args_lins),
+            "decm-quasinewton": lambda x: linsearch_fun_DECM(x, self.args_lins),
+            "decm-fixed-point": lambda x: linsearch_fun_DECM_fixed(x),
+            "decm_new-newton": lambda x: linsearch_fun_DECM_new(x, self.args_lins),
+            "decm_new-quasinewton": lambda x: linsearch_fun_DECM_new(x, self.args_lins),
+            "decm_new-fixed-point": lambda x: linsearch_fun_DECM_new_fixed(x),
+        }
+
+        self.fun_linsearch = lins_fun[mod_met]
         
         hess_reg = {
             "dcm": hessian_regulariser_function_eigen_based,
@@ -2638,29 +2907,40 @@ class DirectedGraph:
         model="CReAMa",
         adjacency="dcm",
         method="quasinewton",
+        method_adjacency = "newton",
+        initial_guess_adjacency = "random",
         max_steps=100,
         tol=1e-8,
+        eps=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
         regularise=True,
         regularise_eps=1e-3,
     ):
+        if model == "CReAMa-sparse":
+            self.is_sparse = True
+        else:
+            self.is_sparse = False
+        
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
             not scipy.sparse.isspmatrix(adjacency)
         ):
             raise ValueError("adjacency must be a matrix or a method")
         elif isinstance(adjacency, str):
             self._solve_problem(
-                initial_guess=initial_guess,
+                initial_guess=initial_guess_adjacency,
                 model=adjacency,
-                method=method,
+                method=method_adjacency,
                 max_steps=max_steps,
+                tol=tol,
+                eps=eps,
                 full_return=full_return,
                 verbose=verbose,
             )
             if self.is_sparse:
                 self.adjacency_CReAMa = (self.x, self.y)
+                self.adjacency_given = False
             else:
                 pmatrix = self.fun_pmatrix(np.concatenate([self.x, self.y]))
                 raw_ind, col_ind = np.nonzero(pmatrix)
@@ -2669,6 +2949,7 @@ class DirectedGraph:
                 weigths_value = pmatrix[raw_ind, col_ind]
                 self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
                 self.is_sparse = False
+                self.adjacency_given = False
         elif isinstance(adjacency, list):
             adjacency = np.array(adjacency).astype(np.float64)
             raw_ind, col_ind = np.nonzero(adjacency)
@@ -2677,6 +2958,7 @@ class DirectedGraph:
             weigths_value = adjacency[raw_ind, col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
         elif isinstance(adjacency, np.ndarray):
             adjacency = adjacency.astype(np.float64)
             raw_ind, col_ind = np.nonzero(adjacency)
@@ -2685,6 +2967,7 @@ class DirectedGraph:
             weigths_value = adjacency[raw_ind, col_ind]
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
         elif scipy.sparse.isspmatrix(adjacency):
             raw_ind, col_ind = adjacency.nonzero()
             raw_ind = raw_ind.astype(np.int64)
@@ -2692,13 +2975,16 @@ class DirectedGraph:
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
+            self.adjacency_given = True
 
         if self.is_sparse:
             self.last_model = "CReAMa-sparse"
         else:
             self.last_model = model
+        
+        self.regularise = regularise
         self.full_return = full_return
-        self.initial_guess = "strengths"
+        self.initial_guess = initial_guess
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
 
@@ -2710,6 +2996,7 @@ class DirectedGraph:
             linsearch_fun=self.fun_linsearch,
             hessian_regulariser=self.hessian_regulariser,
             tol=tol,
+            eps=eps,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
@@ -2740,10 +3027,14 @@ class DirectedGraph:
         method,
         initial_guess=None,
         adjacency=None,
+        method_adjacency = 'newton',
+        initial_guess_adjacency = "random",
         max_steps=100,
         full_return=False,
         verbose=False,
+        linsearch=True,
         tol=1e-8,
+        eps=1e-8,
     ):
         """function to switch around the various problems"""
         # TODO: aggiungere tutti i metodi
@@ -2755,7 +3046,9 @@ class DirectedGraph:
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
+                linsearch=linsearch,
                 tol=tol,
+                eps=eps,
             )
         elif model in ["CReAMa", 'CReAMa-sparse']:
             self._solve_problem_CReAMa(
@@ -2763,10 +3056,14 @@ class DirectedGraph:
                 model=model,
                 adjacency=adjacency,
                 method=method,
+                method_adjacency = method_adjacency,
+                initial_guess_adjacency = initial_guess_adjacency,
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
+                linsearch=linsearch,
                 tol=tol,
+                eps=eps,
             )
 
     def _weighted_realisation(self):

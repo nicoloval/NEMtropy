@@ -13,12 +13,11 @@ class MyTest(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_ECM_Dianati_random_dense_20_undir(self):
+    def test_ECM_quasinewton_random_dense_20_undir(self):
 
         network = mg.random_weighted_matrix_generator_dense(
-            n=20, sup_ext=10, sym=True, seed=None, intweights=True
+            n=20, sup_ext=10, sym=True, seed=10, intweights=True
         )
-        network_bin = (network > 0).astype(int)
 
         g = sample_und.UndirectedGraph(adjacency=network)
 
@@ -27,7 +26,7 @@ class MyTest(unittest.TestCase):
             method="quasinewton",
             max_steps=1000,
             verbose=False,
-            initial_guess="uniform",
+            initial_guess="random",
         )
 
         g.solution_error()

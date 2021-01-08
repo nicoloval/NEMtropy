@@ -8,10 +8,13 @@ import unittest  # test tool
 
 
 class MyTest(unittest.TestCase):
+
+
     def setUp(self):
         pass
 
-    def test_cm_0(self):
+
+    def test_fixedpoint_cm_5(self):
         """test with 3 classes of cardinality 1
         and no zero degrees
         """
@@ -26,12 +29,12 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm-new",
-            method="newton",
+            model="cm",
+            method="fixed-point",
             max_steps=100,
             verbose=False,
             linsearch=True,
-            initial_guess='random'
+            initial_guess="random",
         )
 
         g.solution_error()
@@ -46,9 +49,9 @@ class MyTest(unittest.TestCase):
 
         # test result
         self.assertTrue(g.error < 1e-1)
+        
 
-
-    def test_cm_1(self):
+    def test_fixedpoint_cm_6(self):
         """classes with cardinality > 1, no zero degree"""
         n, seed = (20, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=True, seed=seed)
@@ -56,12 +59,12 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm-new",
-            method="newton",
+            model="cm",
+            method="fixed-point",
             max_steps=300,
             verbose=False,
             linsearch="True",
-            initial_guess='random'
+            initial_guess="random",
         )
 
         g.solution_error()
@@ -79,7 +82,7 @@ class MyTest(unittest.TestCase):
 
 
     @unittest.skip("skip large graph")
-    def test_cm_2(self):
+    def test_fixedpoint_cm_9(self):
         """classes with cardinality more than 1 and zero degrees"""
         # test Matrix 1
         n, seed = (100, 22)
@@ -88,12 +91,12 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(A)
 
         g._solve_problem(
-            model="cm-new",
-            method="newton",
+            model="cm",
+            method="fixed-point",
             max_steps=300,
             verbose=False,
             linsearch="True",
-            initial_guess='random'
+            initial_guess="random",
         )
 
         g.solution_error()

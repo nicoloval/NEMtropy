@@ -12,7 +12,7 @@ class MyTest(unittest.TestCase):
         pass
 
     def test_0(self):
-        n, seed = (14, 22)
+        n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
         )
@@ -21,7 +21,7 @@ class MyTest(unittest.TestCase):
 
         g._solve_problem(
             model="decm_new",
-            method="quasinewton",
+            method="fixed-point",
             max_steps=3000,
             verbose=False,
             initial_guess="uniform",
@@ -36,8 +36,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.error < 1)
 
     def test_1(self):
-        # test Matrix 1
-        n, seed = (14, 22)
+        n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
         )
@@ -47,7 +46,7 @@ class MyTest(unittest.TestCase):
 
         g._solve_problem(
             model="decm_new",
-            method="quasinewton",
+            method="fixed-point",
             max_steps=3000,
             verbose=False,
             initial_guess="uniform",
@@ -63,7 +62,6 @@ class MyTest(unittest.TestCase):
 
     @unittest.skip("skip large graph")
     def test_2(self):
-        # test Matrix 1
         n, seed = (40, 35)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
@@ -73,7 +71,7 @@ class MyTest(unittest.TestCase):
 
         g._solve_problem(
             model="decm_new",
-            method="quasinewton",
+            method="fixed-point",
             max_steps=25000,
             verbose=False,
             initial_guess="uniform",
@@ -103,7 +101,7 @@ class MyTest(unittest.TestCase):
 
         g._solve_problem(
             model="decm_new",
-            method="quasinewton",
+            method="fixed-point",
             max_steps=20000,
             verbose=False,
             initial_guess="uniform",

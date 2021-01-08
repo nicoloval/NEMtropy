@@ -16,15 +16,16 @@ class MyTest(unittest.TestCase):
     def test_ECM_Dianati_random_dense_20_undir(self):
 
         network = mg.random_weighted_matrix_generator_dense(
-            n=20, sup_ext=10, sym=True, seed=10, intweights=True
+            n=20, sup_ext=10, sym=True, seed=None, intweights=True
         )
+        network_bin = (network > 0).astype(int)
 
         g = sample_und.UndirectedGraph(adjacency=network)
 
         g.solve_tool(
             model="ecm",
-            method="fixed-point",
-            max_steps=20000,
+            method="quasinewton",
+            max_steps=1000,
             verbose=False,
             initial_guess="random",
         )
@@ -32,9 +33,7 @@ class MyTest(unittest.TestCase):
         g.solution_error()
 
         # test result
-        # print(g.error)
-
-        self.assertTrue(g.error < 1)
+        self.assertTrue(g.error < 1e-1)
 
 
 if __name__ == "__main__":

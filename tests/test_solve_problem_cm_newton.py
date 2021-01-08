@@ -17,8 +17,8 @@ class MyTest(unittest.TestCase):
         """
         A = np.array(
             [
-                [0, 0, 1],
-                [0, 0, 1],
+                [0, 1, 1],
+                [1, 0, 1],
                 [1, 1, 0],
             ]
         )
@@ -31,7 +31,7 @@ class MyTest(unittest.TestCase):
             max_steps=100,
             verbose=False,
             linsearch=True,
-            initial_guess='uniform'
+            initial_guess='degrees_minor'
         )
 
         g.solution_error()
@@ -46,6 +46,7 @@ class MyTest(unittest.TestCase):
 
         # test result
         self.assertTrue(g.error < 1e-1)
+        
 
 
     def test_cm_1(self):
@@ -61,7 +62,7 @@ class MyTest(unittest.TestCase):
             max_steps=300,
             verbose=False,
             linsearch="True",
-            initial_guess='uniform'
+            initial_guess='random'
         )
 
         g.solution_error()
@@ -93,7 +94,7 @@ class MyTest(unittest.TestCase):
             max_steps=300,
             verbose=False,
             linsearch="True",
-            initial_guess='uniform'
+            initial_guess='random'
         )
 
         g.solution_error()

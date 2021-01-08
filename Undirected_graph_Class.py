@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import scipy.sparse
-from numba import jit
+from numba import jit, prange
 import time
 from Undirected_new import *
 import random
@@ -97,7 +97,7 @@ def loglikelihood_prime_cm(x, args):
             if i == j:
                 f[i] -= c[i] * (c[j] - 1) * (x[j] / (1 + (x[j] ** 2)))
             else:
-                f[i] -=  c[i] * c[j] * (x[j] / (1 + x[i] * x[j]))
+                f[i] -= c[i] * c[j] * (x[j] / (1 + x[i] * x[j]))
     return f
 
 
@@ -163,21 +163,37 @@ def iterative_CReAMa(beta, args):
     return f
 
 
-@jit(nopython=True)
+@jit(nopython=True, parallel=True)
 def iterative_CReAMa_sparse(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
     f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
+    
+    for i in prange(n):
+        aux = x[i] * x
+        aux_value = aux / (1+aux)
+        aux = aux_value /  (1 + (beta/beta[i]))
+        f[i] = (-aux.sum() + aux[i])/(s[i] + np.exp(-100))
+    return f
 
+
+@jit(nopython=True)
+def iterative_CReAMa_sparse_2(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    
     for i in np.arange(n):
-        for j in np.arange(n):
-            if i != j:
-                aux = x[i] * x[j]
-                aux_value = aux / (1 + aux)
-                if aux_value > 0:
-                    f[i] -= aux_value / (1 + (beta[j] / beta[i]))
+        for j in np.arange(i+1, n):
+            aux = x[i] * x[j]
+            aux_value = aux / (1 + aux)
+            if aux_value > 0:
+                f[i] -= aux_value / (1 + (beta[j] / beta[i]))
+                f[j] -= aux_value / (1 + (beta[i] / beta[j]))
     for i in np.arange(n):
         if s[i] != 0:
             f[i] = f[i] / s[i]
@@ -240,7 +256,7 @@ def loglikelihood_prime_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa_sparse(beta, args):
+def loglikelihood_prime_CReAMa_sparse_2(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -256,6 +272,23 @@ def loglikelihood_prime_CReAMa_sparse(beta, args):
                 f[i] += aux_value / aux
                 f[j] += aux_value / aux
     return f
+
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_prime_CReAMa_sparse(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    for i in prange(n):
+        f[i] -= s[i]
+        aux = x[i] * x
+        aux_value = aux / (1 + aux)
+        aux = aux_value/(beta[i] + beta)
+        f[i] += aux.sum() - aux[i]
+    return f
+
 
 
 @jit(nopython=True)
@@ -315,7 +348,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa_sparse(beta, args):
+def loglikelihood_hessian_diag_CReAMa_sparse_2(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -330,6 +363,21 @@ def loglikelihood_hessian_diag_CReAMa_sparse(beta, args):
                     aux = aux_value / ((beta[i] + beta[j]) ** 2)
                     f[i] -= aux
                     f[j] -= aux
+    return f
+
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_hessian_diag_CReAMa_sparse(beta, args):
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    for i in prange(n):
+        aux = x[i] * x
+        aux_value = aux / (1 + aux)
+        aux = aux_value / ((beta[i] + beta) ** 2)
+        f[i] -= aux.sum() - aux[i]
     return f
 
 
@@ -509,7 +557,7 @@ def solver(
     hessian_regulariser,
     fun_jac=None,
     tol=1e-6,
-    eps=1e-16,
+    eps=1e-10,
     max_steps=100,
     method="newton",
     verbose=False,
@@ -531,6 +579,7 @@ def solver(
     f = fun(x)
     norm = np.linalg.norm(f)
     diff = 1
+    dx_old = np.zeros_like(x0)
 
     if full_return:
         norm_seq = [norm]
@@ -596,9 +645,15 @@ def solver(
         # backtraking line search
         tic = time.time()
 
-        if linsearch:
+        if linsearch and (method in ["newton", "quasinewton"]):
             alfa1 = 1
             X = (x, dx, beta, alfa1, f)
+            alfa = linsearch_fun(X)
+            if full_return:
+                alfa_seq.append(alfa)
+        elif linsearch and (method in ["fixed-point"]):
+            alfa1 = 1
+            X = (x, dx, dx_old, alfa1, beta, n_steps)
             alfa = linsearch_fun(X)
             if full_return:
                 alfa_seq.append(alfa)
@@ -612,6 +667,8 @@ def solver(
         # direction= dx@fun(x).T
 
         x = x + alfa * dx
+
+        dx_old = alfa * dx.copy()
 
         toc_update += time.time() - tic
 
@@ -631,10 +688,10 @@ def solver(
         if verbose == True:
             print("step {}".format(n_steps))
             print("alpha = {}".format(alfa))
-            print("fun = {}".format(f))
-            print("dx = {}".format(dx))
-            print("x = {}".format(x))
             print("|f(x)| = {}".format(norm))
+            if method in ["newton", "quasinewton"]:
+                print("F(x) = {}".format(step_fun(x)))
+            print("diff = {}".format(diff))
             if method == "newton":
                 print("min eig = {}".format(ml))
                 print("new mim eig = {}".format(new_ml))
@@ -668,7 +725,7 @@ def solver(
         return x
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
 def linsearch_fun_CReAMa(X, args):
     x = X[0]
     dx = X[1]
@@ -676,12 +733,13 @@ def linsearch_fun_CReAMa(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -692,7 +750,29 @@ def linsearch_fun_CReAMa(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_CReAMa_fixed(X):
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            ( cond == False)
+            and (kk<50)
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+
+    return alfa
+
+
+@jit(nopython=True)
 def linsearch_fun_CM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -700,12 +780,13 @@ def linsearch_fun_CM_new(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -716,7 +797,29 @@ def linsearch_fun_CM_new(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_CM_new_fixed(X):
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+    # print(alfa)
+    return alfa
+
+
+@jit(nopython=True)
 def linsearch_fun_CM(X, args):
     x = X[0]
     dx = X[1]
@@ -724,31 +827,57 @@ def linsearch_fun_CM(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
-
-    # print(alfa)
+    arg_step_fun = args[1]
 
     eps2 = 1e-2
     alfa0 = (eps2 - 1) * x / dx
     for a in alfa0:
         if a >= 0:
             alfa = min(alfa, a)
-    # print(alfa)
+
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
     ):
         alfa *= beta
         i += 1
-    # print(alfa)
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_CM_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    eps2 = 1e-2
+    alfa0 = (eps2 - 1) * x / dx
+    for a in alfa0:
+        if a >= 0:
+            alfa = min(alfa, a)
+    
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+    return alfa
+
+
+@jit(nopython=True)
 def linsearch_fun_ECM_new(X, args):
     x = X[0]
     dx = X[1]
@@ -756,23 +885,24 @@ def linsearch_fun_ECM_new(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     nnn = int(len(x) / 2)
     while True:
         ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
+        cond = np.sum(x[nnn:][ind_min_beta] + alfa * dx[nnn:][ind_min_beta]) > 1e-14
         if (
-            np.sum(x[nnn:][ind_min_beta] + alfa * dx[nnn:][ind_min_beta])
-            > 1e-14
+            cond
         ):
             break
         else:
             alfa *= beta
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -783,7 +913,43 @@ def linsearch_fun_ECM_new(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_ECM_new_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    nnn = int(len(x) / 2)
+    while True:
+        ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
+        cond = np.sum(x[nnn:][ind_min_beta] + alfa * dx[nnn:][ind_min_beta]) > 1e-14
+        if (
+            cond
+        ):
+            break
+        else:
+            alfa *= beta
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            (cond == False)
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+
+    #print(alfa)
+
+    return alfa
+
+
+@jit(nopython=True)
 def linsearch_fun_ECM(X, args):
     x = X[0]
     dx = X[1]
@@ -791,6 +957,7 @@ def linsearch_fun_ECM(X, args):
     alfa = X[3]
     f = X[4]
     step_fun = args[0]
+    arg_step_fun = args[1]
 
     eps2 = 1e-2
     alfa0 = (eps2 - 1) * x / dx
@@ -801,16 +968,17 @@ def linsearch_fun_ECM(X, args):
     nnn = int(len(x) / 2)
     while True:
         ind_max_y = (x[nnn:] + alfa * dx[nnn:]).argsort()[-2:][::-1]
-        if np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1:
+        cond = np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1
+        if cond:
             break
         else:
             alfa *= beta
 
     i = 0
-    s_old = step_fun(x)
+    s_old = -step_fun(x, arg_step_fun)
     while (
         sufficient_decrease_condition(
-            s_old, step_fun(x + alfa * dx), alfa, f, dx
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         == False
         and i < 50
@@ -821,12 +989,50 @@ def linsearch_fun_ECM(X, args):
     return alfa
 
 
-@jit(forceobj=True)
+@jit(nopython=True)
+def linsearch_fun_ECM_fixed(X):
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    eps2 = 1e-2
+    alfa0 = (eps2 - 1) * x / dx
+    for a in alfa0:
+        if a >= 0:
+            alfa = min(alfa, a)
+
+    nnn = int(len(x) / 2)
+    while True:
+        ind_max_y = (x[nnn:] + alfa * dx[nnn:]).argsort()[-2:][::-1]
+        cond = np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1
+        if cond:
+            break
+        else:
+            alfa *= beta
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            cond == False
+            and kk<50
+            ):
+            alfa *= beta
+            kk +=1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+
+    return alfa
+
+
+@jit(nopython=True)
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):
     """return boolean indicator if upper wolfe condition are respected."""
-    sup = f_old + c1 * alpha * grad_f @ p.T
+    sup = f_old + c1 * alpha * np.dot(grad_f, p.T)
 
     return bool(f_new < sup)
 
@@ -1117,7 +1323,7 @@ class UndirectedGraph:
 
                 # self.edgelist, self.deg_seq = edgelist_from_adjacency(adjacency)
                 self.n_nodes = len(self.dseq)
-                self.n_edges = np.sum(self.dseq)
+                self.n_edges = np.sum(self.dseq)/2
                 self.is_initialized = True
 
         elif edgelist is not None:
@@ -1144,10 +1350,10 @@ class UndirectedGraph:
                         self.nodes_dict,
                     ) = edgelist_from_edgelist(edgelist)
                 self.n_nodes = len(self.dseq)
-                self.n_edges = np.sum(self.dseq)
+                self.n_edges = np.sum(self.dseq)/2
                 self.is_initialized = True
-                if self.n_nodes > 2000:
-                    self.is_sparse = True
+                #if self.n_nodes > 2000:
+                #    self.is_sparse = True
 
         elif degree_sequence is not None:
             if not isinstance(degree_sequence, (list, np.ndarray)):
@@ -1166,10 +1372,10 @@ class UndirectedGraph:
                 else:
                     self.n_nodes = int(len(degree_sequence))
                     self.dseq = degree_sequence.astype(np.float64)
-                    self.n_edges = np.sum(self.dseq)
+                    self.n_edges = np.sum(self.dseq)/2
                     self.is_initialized = True
-                    if self.n_nodes > 2000:
-                        self.is_sparse = True
+                    #if self.n_nodes > 2000:
+                    #    self.is_sparse = True
 
                 if strength_sequence is not None:
                     if not isinstance(strength_sequence, (list, np.ndarray)):
@@ -1220,8 +1426,8 @@ class UndirectedGraph:
                     self.nz_index = np.nonzero(self.strength_sequence)[0]
                     self.is_weighted = True
                     self.is_initialized = True
-                    if self.n_nodes > 2000:
-                        self.is_sparse = True
+                    #if self.n_nodes > 2000:
+                    #    self.is_sparse = True
 
     def set_adjacency_matrix(self, adjacency):
         if self.is_initialized:
@@ -1260,6 +1466,7 @@ class UndirectedGraph:
         method="quasinewton",
         max_steps=100,
         tol=1e-8,
+        eps=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
@@ -1269,7 +1476,8 @@ class UndirectedGraph:
         self.last_model = model
         self.full_return = full_return
         self.initial_guess = initial_guess
-        self._initialize_problem(model, method)
+        self.regularise = regularise
+        self._initialize_problem(self.last_model, method)
         x0 = self.x0
 
         sol = solver(
@@ -1280,6 +1488,7 @@ class UndirectedGraph:
             linsearch_fun=self.fun_linsearch,
             hessian_regulariser = self.hessian_regulariser,
             tol=tol,
+            eps=eps,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
@@ -1315,7 +1524,7 @@ class UndirectedGraph:
             self._set_solved_problem_cm(solution)
         elif model in ["ecm", "ecm-new"]:
             self._set_solved_problem_ecm(solution)
-        elif model in ["CReAMa", "CReAMA-sparse"]:
+        elif model in ["CReAMa", "CReAMa-sparse"]:
             self._set_solved_problem_CReAMa(solution)
 
     def degree_reduction(self):
@@ -1364,12 +1573,27 @@ class UndirectedGraph:
                 )  # All probabilities will be 1/2 initially
             elif self.initial_guess == "degrees":
                 self.r_x = self.r_dseq.astype(np.float64)
+            elif self.initial_guess == "chung_lu":
+                self.r_x = self.r_dseq.astype(np.float64)/(2*self.n_edges)
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
         self.r_x[self.r_dseq == 0] = 0
-
-        self.x0 = self.r_x
+        
+        if isinstance(self.initial_guess, str):
+            if self.last_model == "cm":
+                self.x0 = self.r_x
+            elif self.last_model == "cm-new":
+                self.r_x[self.r_x!=0] = -np.log(self.r_x[self.r_x!=0])
+                self.x0 = self.r_x
+        elif isinstance(self.initial_guess, np.ndarray):
+            self.x0 = self.r_x
 
 
     def _set_initial_guess_CReAMa(self):
@@ -1387,9 +1611,19 @@ class UndirectedGraph:
                 self.beta = (self.strength_sequence > 0).astype(float) / (
                     self.strength_sequence + 1
                 )
+            elif self.initial_guess == "random":
+                self.beta = np.random.rand(self.n_nodes).astype(np.float64)
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
-
+        
+        self.beta[self.strength_sequence == 0] = 0
+        
         self.x0 = self.beta
 
 
@@ -1421,13 +1655,28 @@ class UndirectedGraph:
             elif self.initial_guess == "uniform":
                 self.x = 0.001 * np.ones(self.n_nodes, dtype=np.float64)
                 self.y = 0.001 * np.ones(self.n_nodes, dtype=np.float64)
+            else:
+                raise ValueError(
+                    '{} is not an available initial guess'.format(
+                        self.initial_guess
+                        )
+                    )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
         self.x[self.dseq == 0] = 0
         self.y[self.strength_sequence == 0] = 0
-
-        self.x0 = np.concatenate((self.x, self.y))
+        
+        if isinstance(self.initial_guess, str):
+            if self.last_model == "ecm":
+                self.x0 = np.concatenate((self.x, self.y))
+            elif self.last_model == "ecm-new":
+                self.x[self.x!=0] = -np.log(self.x[self.x!=0])
+                self.y[self.y!=0] = -np.log(self.y[self.y!=0])
+                self.x0 = np.concatenate((self.x, self.y))
+        elif isinstance(self.initial_guess, np.ndarray):
+            self.x0 = np.concatenate((self.x, self.y))
+        
 
     # DA SISTEMARE
     def solution_error(self):
@@ -1456,13 +1705,16 @@ class UndirectedGraph:
                     ex_s - self.strength_sequence, ord=np.inf
                 )
                 self.relative_error_strength = np.max(
+                    abs(
                      (ex_s - self.strength_sequence) / (self.strength_sequence + np.exp(-100))
+                    )
                 )
                 
                 if self.adjacency_given:
                     self.error = self.error_strength
                 else:
                     self.error = max(self.error_strength, self.error_degree)
+                    
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["ecm", "ecm-new"]:
             sol = np.concatenate((self.x, self.y))
@@ -1647,18 +1899,40 @@ class UndirectedGraph:
             self.args_p = (self.n_nodes, np.nonzero(self.dseq)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
-        self.args_lins = (self.step_fun,)
 
-        lins_fun = {
-            "cm": lambda x: linsearch_fun_CM(x, self.args_lins),
-            "CReAMa": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-sparse": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "ecm": lambda x: linsearch_fun_ECM(x, self.args_lins),
-            "cm-new": lambda x: linsearch_fun_CM_new(x, self.args_lins),
-            "ecm-new": lambda x: linsearch_fun_ECM_new(x, self.args_lins),
+        args_lin = {
+            "cm": (loglikelihood_cm, self.args),
+            "CReAMa": (loglikelihood_CReAMa, self.args),
+            "CReAMa-sparse": (loglikelihood_CReAMa_sparse, self.args),
+            "ecm": (loglikelihood_ecm, self.args),
+            "cm-new": (loglikelihood_cm_new, self.args),
+            "ecm-new": (loglikelihood_ecm_new, self.args),
         }
 
-        self.fun_linsearch = lins_fun[model]
+        self.args_lins = args_lin[model]
+
+        lins_fun = {
+            "cm-newton": lambda x: linsearch_fun_CM(x, self.args_lins),
+            "cm-quasinewton": lambda x: linsearch_fun_CM(x, self.args_lins),
+            "cm-fixed-point": lambda x: linsearch_fun_CM_fixed(x),
+            "CReAMa-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "CReAMa-sparse-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-sparse-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
+            "CReAMa-sparse-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "ecm-newton": lambda x: linsearch_fun_ECM(x, self.args_lins),
+            "ecm-quasinewton": lambda x: linsearch_fun_ECM(x, self.args_lins),
+            "ecm-fixed-point": lambda x: linsearch_fun_ECM_fixed(x),
+            "cm-new-newton": lambda x: linsearch_fun_CM_new(x, self.args_lins),
+            "cm-new-quasinewton": lambda x: linsearch_fun_CM_new(x, self.args_lins),
+            "cm-new-fixed-point": lambda x: linsearch_fun_CM_new_fixed(x),
+            "ecm-new-newton": lambda x: linsearch_fun_ECM_new(x, self.args_lins),
+            "ecm-new-quasinewton": lambda x: linsearch_fun_ECM_new(x, self.args_lins),
+            "ecm-new-fixed-point": lambda x: linsearch_fun_ECM_new_fixed(x)
+        }
+
+        self.fun_linsearch = lins_fun[mod_met]
         
         hess_reg = {
             "cm" : hessian_regulariser_function_eigen_based,
@@ -1670,6 +1944,12 @@ class UndirectedGraph:
         }
         
         self.hessian_regulariser = hess_reg[model]
+        
+        if isinstance(self.regularise, str):
+            if self.regularise == "eigenvalues": 
+                self.hessian_regulariser = hessian_regulariser_function_eigen_based
+            elif self.regularise == "identity":
+                self.hessian_regulariser = hessian_regulariser_function
 
     def _solve_problem_CReAMa(
         self,
@@ -1677,13 +1957,20 @@ class UndirectedGraph:
         model="CReAMa",
         adjacency="cm",
         method="quasinewton",
+        method_adjacency = "newton",
+        initial_guess_adjacency = "random",
         max_steps=100,
         tol=1e-8,
+        eps=1e-8,
         full_return=False,
         verbose=False,
         linsearch=True,
         regularise=True,
     ):
+        if model == "CReAMa-sparse":
+            self.is_sparse = True
+        else:
+            self.is_sparse = False
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
             not scipy.sparse.isspmatrix(adjacency)
         ):
@@ -1693,15 +1980,19 @@ class UndirectedGraph:
             # aggiungere check sul modello passato per l'adjacency matrix
             
             self._solve_problem(
-                initial_guess=initial_guess,
+                initial_guess=initial_guess_adjacency,
                 model=adjacency,
-                method=method,
+                method=method_adjacency,
                 max_steps=max_steps,
+                tol=tol,
+                eps=eps,
                 full_return=full_return,
                 verbose=verbose,
                 linsearch=linsearch,
                 regularise=regularise
             )
+            
+            
             if self.is_sparse:
                 self.adjacency_CReAMa = (self.x,)
                 self.adjacency_given = False
@@ -1738,22 +2029,22 @@ class UndirectedGraph:
             col_ind = col_ind.astype(np.int64)
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
             self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
-            self.is_sparse = True
+            self.is_sparse = False
             self.adjacency_given = True
-
+        
         if self.is_sparse:
             self.last_model = "CReAMa-sparse"
         else:
             self.last_model = model
-            linsearch=linsearch,
+            linsearch=linsearch
             regularise=regularise
-        
+
         self.regularise = regularise
         self.full_return = full_return
-        self.initial_guess = "strengths"
+        self.initial_guess = initial_guess
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
-
+        
         sol = solver(
             x0,
             fun=self.fun,
@@ -1762,6 +2053,7 @@ class UndirectedGraph:
             linsearch_fun=self.fun_linsearch,
             hessian_regulariser = self.hessian_regulariser,
             tol=tol,
+            eps=eps,
             max_steps=max_steps,
             method=method,
             verbose=verbose,
@@ -1769,18 +2061,17 @@ class UndirectedGraph:
             linsearch=linsearch,
             full_return=full_return,
         )
-
+        
         self._set_solved_problem(sol)
 
     def _set_solved_problem_CReAMa(self, solution):
-        if self.full_return:
+        if self.full_return: 
             self.beta = solution[0]
             self.comput_time_creama = solution[1]
             self.n_steps_creama = solution[2]
             self.norm_seq_creama = solution[3]
             self.diff_seq_creama = solution[4]
             self.alfa_seq_creama = solution[5]
-
         else:
             self.beta = solution
 
@@ -1802,17 +2093,20 @@ class UndirectedGraph:
             self.x = np.exp(-self.r_xy[: self.n_nodes])
             self.y = np.exp(-self.r_xy[self.n_nodes :])
 
-
     def solve_tool(
         self,
         model,
         method,
         initial_guess=None,
         adjacency=None,
+        method_adjacency = "newton",
+        initial_guess_adjacency = "random",
         max_steps=100,
         full_return=False,
         verbose=False,
+        linsearch = True,
         tol=1e-8,
+        eps=1e-8,
     ):
         """function to switch around the various problems"""
         # TODO: aggiungere tutti i metodi
@@ -1824,7 +2118,9 @@ class UndirectedGraph:
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
+                linsearch = linsearch,
                 tol=tol,
+                eps=eps,
             )
         elif model in ["CReAMa","CReAMa-sparse"]:
             self._solve_problem_CReAMa(
@@ -1832,56 +2128,16 @@ class UndirectedGraph:
                 model=model,
                 adjacency=adjacency,
                 method=method,
+                method_adjacency = method_adjacency,
+                initial_guess_adjacency = initial_guess_adjacency,
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
+                linsearch = linsearch,
                 tol=tol,
+                eps=eps,
             )
-        
 
-    def _solve_problem_ECM(
-        self,
-        initial_guess=None,
-        model="CReAMa",
-        adjacency="cm",
-        method="quasinewton",
-        max_steps=100,
-        tol=1e-8,
-        full_return=False,
-        verbose=False,
-        linsearch=True,
-        regularise=True,
-    ):      
-        if adjacency in ["cm", "cm-new"]:
-            self._solve_problem_CReAMa(
-                initial_guess=initial_guess,
-                model="CReAMa",
-                adjacency=adjacency,
-                method=method,
-                max_steps=max_steps,
-                tol=tol,
-                full_return=full_return,
-                verbose=verbose,
-                linsearch=linsearch,
-                regularise=regularise,
-            )
-        else:
-            raise ValueError("Adjacency value can be 'cm' or 'cm-new'.")
-        
-        if full_return:
-            sol = (np.concatenate([self.x, self.beta]),
-                   (self.comput_time, self.comput_time_creama),
-                   (self.n_steps, self.n_steps_creama),
-                   (self.norm_seq, self.norm_seq_creama),
-                   (self.diff_seq, self.diff_seq_creama),
-                   (self.alfa_seq, self.alfa_seq_creama))
-        else:
-            sol = np.concatenate(self.x, self.beta)
-        
-        self.last_model = "ecm-two-steps"
-        self._set_solved_problem_ecm(sol)
-        
-    
     def ensemble_sampler(self, n, cpu_n=2, output_dir="sample/", seed=10):
         # al momento funziona solo sull'ultimo problema risolto
 
@@ -1913,5 +2169,3 @@ class UndirectedGraph:
             place_holder = None
         else: 
             raise ValueError("insert a model")
-
-
