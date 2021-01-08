@@ -2149,23 +2149,52 @@ class UndirectedGraph:
 
         # seed specification
         np.random.seed(seed)
-        s = [np.random.randint(0,1000000) for i in range(n)]
+        s = [np.random.randint(0, 1000000) for i in range(n)]
 
         if self.last_model in ["cm", "cm_new"]:
-            iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
+            iter_files = iter(
+                output_dir + "{}.txt".format(i) for i in range(n))
             i = 0
             for item in iter_files:
-                eg.ensemble_sampler_cm_graph(outfile_name=item, x=self.x, cpu_n=cpu_n, seed=s[i])
+                eg.ensemble_sampler_cm_graph(
+                    outfile_name=item,
+                    x=self.x,
+                    cpu_n=cpu_n,
+                    seed=s[i])
                 i += 1
 
         elif self.last_model in ["ecm", "ecm_new"]:
-            iter_files = iter(output_dir + "{}.txt".format(i) for i in range(n))
+            iter_files = iter(
+                output_dir + "{}.txt".format(i) for i in range(n))
             i = 0
             for item in iter_files:
-                eg.ensemble_sampler_ecm_graph(outfile_name=item, x=self.x, y=self.y, cpu_n=cpu_n, seed=s[i])
+                eg.ensemble_sampler_ecm_graph(
+                    outfile_name=item,
+                    x=self.x,
+                    y=self.y,
+                    cpu_n=cpu_n,
+                    seed=s[i])
                 i += 1
 
-        elif self.last_model in ["ecm-two-steps", "CReAMa", "CReAMa-sparse"]:
+        elif self.last_model in ["CReAMa"]:
+            if self.adjacency_given:
+                # deterministic adj matrix
+                iter_files = iter(
+                    output_dir + "{}.txt".format(i) for i in range(n))
+                i = 0
+                for item in iter_files:
+                    eg.ensemble_sampler_creama_ecm_det_graph(
+                        outfile_name=item,
+                        beta=self.beta,
+                        adj=self.adjacency_CReAMa,
+                        cpu_n=cpu_n,
+                        seed=s[i])
+                    i += 1
+            else:
+                # probabilistic adj matrix
+                place_holder = None
+
+        elif self.last_model in ["ecm-two-steps", "CReAMa-sparse"]:
             place_holder = None
-        else: 
+        else:
             raise ValueError("insert a model")
