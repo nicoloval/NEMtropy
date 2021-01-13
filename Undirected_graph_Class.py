@@ -2192,7 +2192,17 @@ class UndirectedGraph:
                     i += 1
             else:
                 # probabilistic adj matrix
-                place_holder = None
+                iter_files = iter(
+                    output_dir + "{}.txt".format(i) for i in range(n))
+                i = 0
+                for item in iter_files:
+                    eg.ensemble_sampler_creama_ecm_prob_graph(
+                        outfile_name=item,
+                        beta=self.beta,
+                        adj=self.adjacency_CReAMa,
+                        cpu_n=cpu_n,
+                        seed=s[i])
+                    i += 1
 
         elif self.last_model in ["ecm-two-steps", "CReAMa-sparse"]:
             place_holder = None
