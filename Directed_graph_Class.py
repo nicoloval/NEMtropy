@@ -2478,12 +2478,12 @@ class DirectedGraph:
                 )  # This +1 increases the stability of the solutions.
                 self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
             elif self.initial_guess == "strengths_minor":
-                self.x = self.dseq_out.astype(float) / (self.dseq_out + 1)
-                self.y = self.dseq_in.astype(float) / (self.dseq_in + 1)
-                self.b_out = self.out_strength.astype(float) / (
+                self.x = np.ones_like(self.dseq_out) / (self.dseq_out + 1)
+                self.y = np.ones_like(self.dseq_in) / (self.dseq_in + 1)
+                self.b_out = np.ones_like(self.out_strength) / (
                     self.out_strength + 1
                 )
-                self.b_in = self.in_strength.astype(float) / (self.in_strength + 1)
+                self.b_in = np.ones_like(self.in_strength) / (self.in_strength + 1)
             elif self.initial_guess == "random":
                 self.x = np.random.rand(self.n_nodes).astype(np.float64)
                 self.y = np.random.rand(self.n_nodes).astype(np.float64)
@@ -2529,12 +2529,12 @@ class DirectedGraph:
                 )  # This +1 increases the stability of the solutions.
                 self.b_in = self.in_strength.astype(float) / self.in_strength.sum()
             elif self.initial_guess == "strengths_minor":
-                self.x = self.dseq_out.astype(float) / (self.dseq_out + 1)
-                self.y = self.dseq_in.astype(float) / (self.dseq_in + 1)
-                self.b_out = self.out_strength.astype(float) / (
+                self.x = np.ones_like(self.dseq_out) / (self.dseq_out + 1)
+                self.y = np.ones_like(self.dseq_in) / (self.dseq_in + 1)
+                self.b_out = np.ones_like(self.out_strength) / (
                     self.out_strength + 1
                 )
-                self.b_in = self.in_strength.astype(float) / (self.in_strength + 1)
+                self.b_in = np.ones_like(self.in_strength) / (self.in_strength + 1)
             elif self.initial_guess == "random":
                 self.x = np.random.rand(self.n_nodes).astype(np.float64)
                 self.y = np.random.rand(self.n_nodes).astype(np.float64)
