@@ -172,7 +172,7 @@ def iterative_CReAMa_Sparse_2(beta, args):
     return np.concatenate((xd, yd))
 
 
-@jit(nopython=True, parallel=True)
+@jit(nopython=True, parallel=True, nogil=True)
 def iterative_CReAMa_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
@@ -243,7 +243,7 @@ def loglikelihood_CReAMa(beta, args):
     return f
 
 
-@jit(nopython=True)
+@jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_CReAMa_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
@@ -261,16 +261,19 @@ def loglikelihood_CReAMa_Sparse(beta, args):
     x = adj[0]
     y = adj[1]
 
-    for i in nz_index_out:
+    for ii in prange(nz_index_out.shape[0]):
+        i = nz_index_out[ii]
         f -= s_out[i] * beta_out[i]
-        for j in nz_index_in:
+        for jj in np.arange(nz_index_in.shape[0]):
+            j = nz_index_in[jj]
             if i != j:
                 aux = x[i] * y[j]
                 aux_entry = aux / (1 + aux)
                 if aux_entry > 0:
                     f += aux_entry * np.log(beta_out[i] + beta_in[j])
 
-    for i in nz_index_in:
+    for ii in prange(nz_index_in.shape[0]):
+        i = nz_index_in[ii]
         f -= s_in[i] * beta_in[i]
 
     return f
@@ -340,7 +343,7 @@ def loglikelihood_prime_CReAMa_Sparse_2(beta, args):
     return np.concatenate((aux_F_out, aux_F_in))
 
 
-@jit(nopython=True, parallel=True)
+@jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_prime_CReAMa_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
@@ -465,7 +468,7 @@ def loglikelihood_hessian_diag_CReAMa_Sparse_2(beta, args):
     return f
 
 
-@jit(nopython=True, parallel=True)
+@jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
