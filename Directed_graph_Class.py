@@ -6,6 +6,11 @@ import time
 from Directed_new import *
 import os
 import ensemble_generator as eg
+# Stops Numba Warning for experimental feature
+from numba.core.errors import NumbaExperimentalFeatureWarning
+import warnings
+
+warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 
 def out_degree(a):
@@ -243,7 +248,7 @@ def loglikelihood_CReAMa(beta, args):
     return f
 
 
-@jit(nopython=True, parallel=True, nogil=True)
+@jit(nopython=True, nogil=True)
 def loglikelihood_CReAMa_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
@@ -261,7 +266,7 @@ def loglikelihood_CReAMa_Sparse(beta, args):
     x = adj[0]
     y = adj[1]
 
-    for ii in prange(nz_index_out.shape[0]):
+    for ii in np.arange(nz_index_out.shape[0]):
         i = nz_index_out[ii]
         f -= s_out[i] * beta_out[i]
         for jj in np.arange(nz_index_in.shape[0]):
@@ -272,7 +277,7 @@ def loglikelihood_CReAMa_Sparse(beta, args):
                 if aux_entry > 0:
                     f += aux_entry * np.log(beta_out[i] + beta_in[j])
 
-    for ii in prange(nz_index_in.shape[0]):
+    for ii in np.arange(nz_index_in.shape[0]):
         i = nz_index_in[ii]
         f -= s_in[i] * beta_in[i]
 

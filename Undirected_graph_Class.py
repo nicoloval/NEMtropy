@@ -9,6 +9,11 @@ import itertools
 # import pathos.multiprocessing as mp
 import multiprocessing as mp
 import ensemble_generator as eg
+# Stops Numba Warning for experimental feature
+from numba.core.errors import NumbaExperimentalFeatureWarning
+import warnings
+
+warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 
 def degree(a):
@@ -163,7 +168,7 @@ def iterative_CReAMa(beta, args):
     return f
 
 
-@jit(nopython=True, parallel=True)
+@jit(nopython=True, parallel=True, nogil=True)
 def iterative_CReAMa_sparse(beta, args):
     s = args[0]
     adj = args[1]
@@ -218,7 +223,7 @@ def loglikelihood_CReAMa(beta, args):
     return f
 
 
-@jit(nopython=True)
+@jit(nopython=True, nogil=True)
 def loglikelihood_CReAMa_sparse(beta, args):
     s = args[0]
     adj = args[1]
@@ -274,7 +279,7 @@ def loglikelihood_prime_CReAMa_sparse_2(beta, args):
     return f
 
 
-@jit(nopython=True, parallel=True)
+@jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_prime_CReAMa_sparse(beta, args):
     s = args[0]
     adj = args[1]
@@ -366,7 +371,7 @@ def loglikelihood_hessian_diag_CReAMa_sparse_2(beta, args):
     return f
 
 
-@jit(nopython=True, parallel=True)
+@jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_hessian_diag_CReAMa_sparse(beta, args):
     s = args[0]
     adj = args[1]
