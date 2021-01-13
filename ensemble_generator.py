@@ -1,5 +1,6 @@
 import multiprocessing as mp
 import numpy as np
+import sys
 
 
 def ensemble_sampler_cm_graph(outfile_name, x, cpu_n=2, seed=None):
@@ -168,10 +169,9 @@ def ensemble_sampler_creama_ecm_det_graph(
 
     # put together inputs for pool
     iter_ = iter(
-        ((i, beta_i), (j, beta_j), np.random.randint(0, 1000000))
-        for i, beta_i in zip(row_inds, beta)
-        for j, beta_j in zip(col_inds, beta)
-        if i < j)
+        ((i, beta[i]), (j, beta[j]), np.random.randint(0, 1000000))
+        for i, j in zip(row_inds, col_inds)
+    )
 
     # compute existing edges
     with mp.Pool(processes=cpu_n) as pool:
