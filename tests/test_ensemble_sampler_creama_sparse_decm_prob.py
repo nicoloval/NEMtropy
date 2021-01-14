@@ -26,7 +26,7 @@ class MyTest(unittest.TestCase):
         # network_bin = (network > 0).astype(int)
 
         g.solve_tool(
-            model="CReAMa",
+            model="CReAMa-sparse",
             method="quasinewton",
             initial_guess="random",
             adjacency="dcm",
@@ -38,8 +38,8 @@ class MyTest(unittest.TestCase):
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
-        n = 1000
-        output_dir = "sample_creama_decm_prob/"
+        n = 600
+        output_dir = "sample_creama_sparse_decm_prob/"
         # random.seed(100)
         g.ensemble_sampler(n=n, output_dir=output_dir, seed=42)
 
@@ -120,7 +120,7 @@ class MyTest(unittest.TestCase):
 
 
         # test result
-        self.assertTrue(ensemble_error < 4)
+        self.assertTrue(ensemble_error < 1)
 
 
 if __name__ == "__main__":
