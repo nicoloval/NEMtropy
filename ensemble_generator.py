@@ -278,6 +278,45 @@ def ensemble_sampler_creama_sparse_ecm_prob_graph(
     return outfile_name
 
 
+def ensemble_sampler_creama_decm_det_graph(
+        outfile_name,
+        beta,
+        adj,
+        cpu_n=2,
+        seed=None):
+    """Produce and write a single undirected weighted graph."""
+    if seed is not None:
+        np.random.seed(seed)
+
+    b_out, b_in = beta
+
+    (row_inds, col_inds, weigths_value) = adj
+    del weigths_value
+
+    # put together inputs for pool
+    iter_ = iter(
+        ((i, b_out[i]), (j, b_in[j]), np.random.randint(0, 1000000))
+        for i, j in zip(row_inds, col_inds)
+    )
+
+    # compute existing edges
+    with mp.Pool(processes=cpu_n) as pool:
+        edges_list = pool.starmap(is_a_link_creama_decm_det, iter_)
+
+    # debug
+    # print(edges_list)
+
+    # edgelist writing
+    with open(outfile_name, "w") as outfile:
+        outfile.write(
+            "".join(
+                "{} {} {}\n".format(str(i), str(j), str(w))
+                for (i, j, w) in edges_list)
+            )
+
+    return outfile_name
+
+
 def is_a_link_cm(args_1, args_2, seed=None):
     if seed is not None:
         np.random.seed(seed)
@@ -375,3 +414,15 @@ def is_a_link_creama_sparse_ecm_prob(args_1, args_2, seed=None):
         q_ensemble = 1/(beta_i + beta_j)
         w_link = np.random.exponential(q_ensemble)
         return (i, j, w_link)
+
+
+def is_a_link_creama_decm_det(args_1, args_2, seed=None):
+    """Q-ensemble source: "A faster Horse on a safer trail"."""
+    if seed is not None:
+        np.random.seed(seed)
+    (i, b_out_i) = args_1
+    (j, b_in_j) = args_2
+
+    q_ensemble = 1/(b_out_i + b_in_j)
+    w_link = np.random.exponential(q_ensemble)
+    return (i, j, w_link)

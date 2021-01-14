@@ -3116,10 +3116,34 @@ class DirectedGraph:
                     seed=s[i])
                 i += 1
 
-        # elif self.last_model in [
-        #     "decm-two-steps",
-        #     "CReAMa",
-        #     "CReAMa-sparse"]:
-        #     place_holder = None
+        elif self.last_model in ["CReAMa"]:
+            if self.adjacency_given:
+                # deterministic adj matrix
+                iter_files = iter(
+                    output_dir + "{}.txt".format(i) for i in range(n))
+                i = 0
+                for item in iter_files:
+                    eg.ensemble_sampler_creama_decm_det_graph(
+                        outfile_name=item,
+                        beta=(self.b_out, self.b_in),
+                        adj=self.adjacency_CReAMa,
+                        cpu_n=cpu_n,
+                        seed=s[i])
+                    i += 1
+            else:
+                # probabilistic adj matrix
+                iter_files = iter(
+                    output_dir + "{}.txt".format(i) for i in range(n))
+                i = 0
+                for item in iter_files:
+                    eg.ensemble_sampler_creama_decm_prob_graph(
+                        outfile_name=item,
+                        beta=(self.b_out, self.b_in),
+                        adj=self.adjacency_CReAMa,
+                        cpu_n=cpu_n,
+                        seed=s[i])
+                    i += 1
+        elif self.last.model in ["CReAMa-sparse"]:
+            place_holder = None
         else:
             raise ValueError("insert a model")
