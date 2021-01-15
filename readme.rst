@@ -37,7 +37,7 @@ For testing:
 
 .. code-block:: bash
 
-    pytest --cov
+    bash runn_all.sh
 
 Credits
 -------
