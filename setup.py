@@ -1,15 +1,22 @@
 from setuptools import setup
 
 
+with open('README.rst', encoding='utf-8') as readme_file:
+    readme = readme_file.read()
+
+with open('HISTORY.rst', encoding='utf-8') as history_file:
+    history = history_file.read()
+
+
 setup(
     name="netrec",
     author="Nicolo' Vallarano, Emiliano Marchese",
     author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
-    packages=["netrec"],
+    packages=["netrecon"],
     package_dir={'': 'src'},
     version="0.1.0",
     description="bla",
-    license="MIT",
+    license="GNU General Public License v3",
     install_requires=["numpy==1.19.5",
                       "numba==0.52",
                       "networkx==2.5",
@@ -17,14 +24,10 @@ setup(
                       ],
     extras_require={
         "dev": ["pytest==6.0.1",
-                "coverage==5.2.1",
-                "pytest-cov==2.10.1",
                 "flake8==3.8.3",
                 "wheel==0.35.1",
                 "matplotlib==3.3.2",
                 "check-manifest==0.44",
-                "setuptools==47.1.0",
-                "twine==3.2.0",
-                "tox==3.20.1"],
+                "setuptools==47.1.0",],
         },
 )
