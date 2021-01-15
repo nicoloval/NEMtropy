@@ -42,8 +42,6 @@ For testing run, in the tests folder, the following command:
 
 Credits
 -------
-Credits
--------
 This is a project by `Niccolò Vallarano <http://www.imtlucca.it/en/nicolo.vallarano/>`_ and `Emiliano Marchese <https://www.imtlucca.it/en/emiliano.marchese/>`_, under 
 the supervision of `Tiziano Squartini <http://www.imtlucca.it/en/tiziano.squartini/>`_ and  `Mario Zanon <http://www.imtlucca.it/it/mario.zanon/>`_.
 
