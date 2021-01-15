@@ -3,12 +3,12 @@ import os
 import scipy.sparse
 from numba import jit, prange
 import time
-from Undirected_new import *
+from .Undirected_new import *
 import random
 import itertools
 # import pathos.multiprocessing as mp
 import multiprocessing as mp
-import ensemble_generator as eg
+from . import ensemble_generator as eg
 # Stops Numba Warning for experimental feature
 from numba.core.errors import NumbaExperimentalFeatureWarning
 import warnings

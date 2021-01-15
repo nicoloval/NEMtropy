@@ -28,6 +28,9 @@ setup(
                 "wheel==0.35.1",
                 "matplotlib==3.3.2",
                 "check-manifest==0.44",
-                "setuptools==47.1.0",],
+                "setuptools==47.1.0",
+                "twine==3.2.0",
+                "tox==3.20.1",
+                ],
         },
 )
