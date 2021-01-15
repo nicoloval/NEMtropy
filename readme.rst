@@ -33,11 +33,13 @@ To build a development environment run:
     source venv/bin/activate 
     pip install -e '.[dev]'
 
-For testing:
+For testing run the following comand:
 
 .. code-block:: bash
 
     bash runn_all.sh
+
+in tests folder.
 
 Credits
 -------
