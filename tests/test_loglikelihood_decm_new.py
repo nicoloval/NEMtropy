@@ -1,9 +1,9 @@
 import sys
 
 sys.path.append("../")
-import Directed_graph_Class as sample
-from Directed_new import *
-import Matrix_Generator as mg
+import netrecon.Directed_graph_Class as sample
+from netrecon.Directed_new import *
+import netrecon.Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
 from scipy.optimize import approx_fprime
