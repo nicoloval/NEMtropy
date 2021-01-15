@@ -3,7 +3,11 @@ import scipy.sparse
 from numba import jit
 import time
 import Directed_graph_Class as sample
+# Stops Numba Warning for experimental feature
+from numba.core.errors import NumbaExperimentalFeatureWarning
+import warnings
 
+warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 # dcm functions
 

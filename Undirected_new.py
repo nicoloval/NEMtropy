@@ -2,6 +2,11 @@ import numpy as np
 import scipy.sparse
 from numba import jit
 import time
+# Stops Numba Warning for experimental feature
+from numba.core.errors import NumbaExperimentalFeatureWarning
+import warnings
+
+warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 
 @jit(nopython=True)

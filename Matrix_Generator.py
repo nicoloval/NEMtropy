@@ -5,6 +5,11 @@ from numba import jit
 import time
 import networkx as nx
 import powerlaw as plw
+# Stops Numba Warning for experimental feature
+from numba.core.errors import NumbaExperimentalFeatureWarning
+import warnings
+
+warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 
 #@jit(forceobj=True)

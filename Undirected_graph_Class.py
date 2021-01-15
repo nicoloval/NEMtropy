@@ -13,7 +13,7 @@ import ensemble_generator as eg
 from numba.core.errors import NumbaExperimentalFeatureWarning
 import warnings
 
-warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
+warnings.simplefilter(action='ignore', category=NumbaExperimentalFeatureWarning)
 
 
 def degree(a):

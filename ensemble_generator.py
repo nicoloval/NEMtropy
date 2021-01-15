@@ -1,6 +1,11 @@
 import multiprocessing as mp
 import numpy as np
 import sys
+# Stops Numba Warning for experimental feature
+from numba.core.errors import NumbaExperimentalFeatureWarning
+import warnings
+
+warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 
 def ensemble_sampler_cm_graph(outfile_name, x, cpu_n=2, seed=None):

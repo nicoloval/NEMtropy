@@ -10,7 +10,7 @@ import ensemble_generator as eg
 from numba.core.errors import NumbaExperimentalFeatureWarning
 import warnings
 
-warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
+warnings.simplefilter(action='ignore', category=NumbaExperimentalFeatureWarning)
 
 
 def out_degree(a):
@@ -177,7 +177,7 @@ def iterative_CReAMa_Sparse_2(beta, args):
     return np.concatenate((xd, yd))
 
 
-@jit(nopython=True, parallel=True, nogil=True)
+@jit(nopython=True, parallel=True)
 def iterative_CReAMa_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
@@ -248,7 +248,7 @@ def loglikelihood_CReAMa(beta, args):
     return f
 
 
-@jit(nopython=True, nogil=True)
+@jit(nopython=True)
 def loglikelihood_CReAMa_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
@@ -266,19 +266,16 @@ def loglikelihood_CReAMa_Sparse(beta, args):
     x = adj[0]
     y = adj[1]
 
-    for ii in np.arange(nz_index_out.shape[0]):
-        i = nz_index_out[ii]
+    for i in nz_index_out:
         f -= s_out[i] * beta_out[i]
-        for jj in np.arange(nz_index_in.shape[0]):
-            j = nz_index_in[jj]
+        for j in nz_index_in:
             if i != j:
                 aux = x[i] * y[j]
                 aux_entry = aux / (1 + aux)
                 if aux_entry > 0:
                     f += aux_entry * np.log(beta_out[i] + beta_in[j])
 
-    for ii in np.arange(nz_index_in.shape[0]):
-        i = nz_index_in[ii]
+    for i in nz_index_in:
         f -= s_in[i] * beta_in[i]
 
     return f
@@ -348,7 +345,7 @@ def loglikelihood_prime_CReAMa_Sparse_2(beta, args):
     return np.concatenate((aux_F_out, aux_F_in))
 
 
-@jit(nopython=True, parallel=True, nogil=True)
+@jit(nopython=True, parallel=True)
 def loglikelihood_prime_CReAMa_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
@@ -473,7 +470,7 @@ def loglikelihood_hessian_diag_CReAMa_Sparse_2(beta, args):
     return f
 
 
-@jit(nopython=True, parallel=True, nogil=True)
+@jit(nopython=True, parallel=True)
 def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
