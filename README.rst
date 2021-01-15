@@ -1,3 +1,21 @@
+TODO
+----
+
+* write documentation
+* finish ensemble generator
+* publish on pip
+
+
+DONE
+----
+
+* ~~add sparse matrices compatibility~~
+* ~~add model memory, creama interoperability~~
+* ~~add possibility of having multiple initial conditions or methods for CReAMa with dcm~~
+
+FUTURE FEATURES
+---------------
+
 
 Development
 -----------
@@ -16,7 +34,7 @@ To build a development environment run:
     source venv/bin/activate 
     pip install -e '.[dev]'
 
-For testing:
+For testing run, in the tests folder, the following command:
 
 .. code-block:: bash
 
@@ -24,8 +42,6 @@ For testing:
 
 Credits
 -------
-Credits
--------
 This is a project by `Niccolò Vallarano <http://www.imtlucca.it/en/nicolo.vallarano/>`_ and `Emiliano Marchese <https://www.imtlucca.it/en/emiliano.marchese/>`_, under 
-the supervision of `Tiziano Squartini <http://www.imtlucca.it/en/tiziano.squartini/>` and  `Mario Zanon <http://www.imtlucca.it/it/mario.zanon/>`_.
+the supervision of `Tiziano Squartini <http://www.imtlucca.it/en/tiziano.squartini/>`_ and  `Mario Zanon <http://www.imtlucca.it/it/mario.zanon/>`_.
 
