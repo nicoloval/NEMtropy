@@ -39,6 +39,7 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(np.allclose(f_sample, f_correct))
 
+
     def test_loglikelihood_prime_decm(self):
         A = np.array([[0, 2, 2], [2, 0, 2], [0, 2, 0]])
 
@@ -78,6 +79,7 @@ class MyTest(unittest.TestCase):
 
         # test result
         self.assertTrue(np.allclose(f_sample, f_correct))
+
 
     def test_loglikelihood_hessian_diag_decm(self):
         A = np.array([[0, 2, 2], [2, 0, 2], [0, 2, 0]])
