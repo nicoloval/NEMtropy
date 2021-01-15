@@ -9,7 +9,7 @@ with open('README.rst', encoding='utf-8') as readme_file:
 
 
 setup(
-    name="netrec",
+    name="netrecon",
     author="Nicolo' Vallarano, Emiliano Marchese",
     author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
     packages=["netrecon"],
