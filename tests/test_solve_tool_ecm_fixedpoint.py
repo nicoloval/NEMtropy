@@ -2,9 +2,9 @@ import sys
 import os
 
 sys.path.append("../")
-import Directed_graph_Class as sample
-import Undirected_graph_Class as sample_und
-import Matrix_Generator as mg
+import netrecon.Directed_graph_Class as sample
+import netrecon.Undirected_graph_Class as sample_und
+import netrecon.Matrix_Generator as mg
 import numpy as np
 import unittest
 

@@ -3,9 +3,9 @@ import scipy.sparse
 import scipy
 from numba import jit, prange
 import time
-from Directed_new import *
+from .Directed_new import *
 import os
-import ensemble_generator as eg
+from . import ensemble_generator as eg
 # Stops Numba Warning for experimental feature
 from numba.core.errors import NumbaExperimentalFeatureWarning
 import warnings

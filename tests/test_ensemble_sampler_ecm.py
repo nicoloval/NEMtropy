@@ -1,8 +1,8 @@
 import sys
 import os
 sys.path.append("../")
-import Undirected_graph_Class as sample
-import Matrix_Generator as mg
+import netrecon.Undirected_graph_Class as sample
+import netrecon.Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool
 import random

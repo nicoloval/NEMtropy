@@ -38,7 +38,7 @@ For testing run, in the tests folder, the following command:
 
 .. code-block:: bash
 
-    pytest --cov
+    bash run_all.sh
 
 Credits
 -------
