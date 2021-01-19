@@ -17,10 +17,12 @@ warnings.simplefilter(action='ignore', category=NumbaExperimentalFeatureWarning)
 
 
 def degree(a):
-    """returns matrix A out degrees
+    """Returns matrix a degrees
 
-    :param a: numpy.ndarray, a matrix
-    :return: numpy.ndarray
+    :param a: matrix a
+    :type a: np.ndarray, scipy.sparse
+    :return: degree sequence
+    :rtype: np.ndarray
     """
     # if the matrix is a numpy array
     if type(a) == np.ndarray:
@@ -31,10 +33,12 @@ def degree(a):
 
 
 def strength(a):
-    """returns matrix A out degrees
+    """Returns matrix a strengths sequence
 
-    :param a: numpy.ndarray, a matrix
-    :return: numpy.ndarray
+    :param a: matrix a
+    :type a: np.ndarray, scipy.sparse
+    :return: strengths sequence
+    :rtype: np.ndarray
     """
     # if the matrix is a numpy array
     if type(a) == np.ndarray:
@@ -45,6 +49,15 @@ def strength(a):
 
 
 def pmatrix_cm(x, args):
+    """[summary]
+
+    :param x: [description]
+    :type x: [type]
+    :param args: [description]
+    :type args: [type]
+    :return: [description]
+    :rtype: [type]
+    """
     n = args[0]
     f = np.zeros(shape=(n, n), dtype=np.float64)
     for i in np.arange(n):
