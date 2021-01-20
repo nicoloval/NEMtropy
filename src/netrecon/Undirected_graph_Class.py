@@ -568,14 +568,15 @@ def iterative_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_ecm(sol, args):
-    """Computes UECM loglikelihood function given x and y
+    """Computes UECM loglikelihood function given
+    the parameters x and y
 
     :param sol: loglikelihood parameters x and y
     :type sol: numpy.ndarray
     :param args: degrees and strengths sequences
     :type args: (numpy.ndarray, numpy.ndarray)
     :return: loglikelihood function value
-    :rtype: numpy.ndarray
+    :rtype: float
     """
     k = args[0]
     s = args[1]
@@ -595,6 +596,16 @@ def loglikelihood_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_ecm(sol, args):
+    """Computes UECM loglikelihood function first dervatives
+    given the parameters x and y
+
+    :param sol: loglikelihood parameters x and y
+    :type sol: numpy.ndarray
+    :param args: degrees and strengths sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: loglikelihood first derivatives
+    :rtype: numpy.ndarray
+    """
     k = args[0]
     s = args[1]
 
@@ -619,6 +630,16 @@ def loglikelihood_prime_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_ecm(sol, args):
+    """Computes UECM loglikelihood function second dervatives
+    (hessian matrix) given the parameters x and y
+
+    :param sol: loglikelihood parameters x and y
+    :type sol: numpy.ndarray
+    :param args: degrees and strengths sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: hessian matrix
+    :rtype: numpy.ndarray
+    """
     k = args[0]
     s = args[1]
 
@@ -685,6 +706,16 @@ def loglikelihood_hessian_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_ecm(sol, args):
+    """Computes the diagonal of UECM hessian matrix
+    given the parameters x and y
+
+    :param sol: loglikelihood parameters x and y
+    :type sol: numpy.ndarray
+    :param args: degrees and strengths sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: hessian matrix diagonal
+    :rtype: numpy.ndarray
+    """
     k = args[0]
     s = args[1]
 
@@ -889,6 +920,19 @@ def solver(
 
 @jit(nopython=True)
 def linsearch_fun_crema(X, args):
+    """Linsearch function for CReM newton and quasinewton methods.
+    The alfa parameters controls the size of the step
+     such that the solution at the next iteration is better
+     than the actual one
+
+    :param X: loglikelihood parameters, increment, beta parameter,
+     alfa parameter and loglikelihood prime function
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: CReM loglikelihood function and its parameters
+    :type args: (func, tuple)
+    :return: alfa parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -914,6 +958,17 @@ def linsearch_fun_crema(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_crema_fixed(X):
+    """Linsearch function for CReM fixed-point method.
+    The alfa parameters controls the size of the step
+     such that its norm at the next step is lower than the
+     actual one
+
+    :param X: increment, old increment, beta parameter,
+     alfa parameter and iteration number
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :return: alfa parameter value
+    :rtype: float
+    """
     dx = X[1]
     dx_old = X[2]
     alfa = X[3]
@@ -936,6 +991,19 @@ def linsearch_fun_crema_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_CM_new(X, args):
+    """Linsearch function for UBCM newton and quasinewton methods.
+    The alfa parameters controls the size of the step
+     such that the solution at the next iteration is better
+     than the actual one
+
+    :param X: loglikelihood parameters, increment, beta parameter,
+     alfa parameter and loglikelihood prime function
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: CReM loglikelihood function and its parameters
+    :type args: (func, tuple)
+    :return: alfa parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -961,6 +1029,18 @@ def linsearch_fun_CM_new(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_CM_new_fixed(X):
+    """Linsearch function for UBCM fixed-point method.
+    The alfa parameters controls the size of the step
+     such that its norm at the next step is lower than the
+     actual one
+
+    :param X: increment, old increment, beta parameter,
+     alfa parameter and iteration number
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :type X: (numpy.ndarray, float, float, int)
+    :return: alfa parameter value
+    :rtype: float
+    """
     dx = X[1]
     dx_old = X[2]
     alfa = X[3]
@@ -983,6 +1063,19 @@ def linsearch_fun_CM_new_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_CM(X, args):
+    """Linsearch function for UBCM newton and quasinewton methods.
+    The alfa parameters controls the size of the step
+     such that the solution at the next iteration is better
+     than the actual one
+
+    :param X: loglikelihood parameters, increment, beta parameter,
+     alfa parameter and loglikelihood prime function
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: CReM loglikelihood function and its parameters
+    :type args: (func, tuple)
+    :return: alfa parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -1013,6 +1106,17 @@ def linsearch_fun_CM(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_CM_fixed(X):
+    """Linsearch function for UBCM fixed-point method.
+    The alfa parameters controls the size of the step
+     such that its norm at the next step is lower than the
+     actual one
+
+    :param X: loglikelihood parameters, increment, old increment,
+     beta parameter, alfa parameter and iteration number
+    :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray float, float, int)
+    :return: alfa parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     dx_old = X[2]
@@ -1041,6 +1145,19 @@ def linsearch_fun_CM_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_ECM_new(X, args):
+    """Linsearch function for UECM newton and quasinewton methods.
+    The alfa parameters controls the size of the step
+     such that the solution at the next iteration is better
+     than the actual one
+
+    :param X: loglikelihood parameters, increment, beta parameter,
+     alfa parameter and loglikelihood prime function
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: CReM loglikelihood function and its parameters
+    :type args: (func, tuple)
+    :return: alfa parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -1078,6 +1195,17 @@ def linsearch_fun_ECM_new(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_ECM_new_fixed(X):
+    """Linsearch function for UECM fixed-point method.
+    The alfa parameters controls the size of the step
+     such that its norm at the next step is lower than the
+     actual one
+
+    :param X: loglikelihood parameters, increment, old increment,
+     beta parameter, alfa parameter and iteration number
+    :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray float, float, int)
+    :return: alfa parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     dx_old = X[2]
@@ -1113,6 +1241,19 @@ def linsearch_fun_ECM_new_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_ECM(X, args):
+    """Linsearch function for UECM newton and quasinewton methods.
+    The alfa parameters controls the size of the step
+     such that the solution at the next iteration is better
+     than the actual one
+
+    :param X: loglikelihood parameters, increment, beta parameter,
+     alfa parameter and loglikelihood prime function
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: CReM loglikelihood function and its parameters
+    :type args: (func, tuple)
+    :return: alfa parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -1153,6 +1294,17 @@ def linsearch_fun_ECM(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_ECM_fixed(X):
+    """Linsearch function for UECM fixed-point method.
+    The alfa parameters controls the size of the step
+     such that its norm at the next step is lower than the
+     actual one
+
+    :param X: loglikelihood parameters, increment, old increment,
+     beta parameter, alfa parameter and iteration number
+    :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray float, float, int)
+    :return: alfa parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     dx_old = X[2]
@@ -1193,25 +1345,42 @@ def linsearch_fun_ECM_fixed(X):
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):
-    """return boolean indicator if upper wolfe condition are respected."""
+    """Return boolean indicator if upper wolfe condition are respected.
+
+    :param f_old: loglikelihood value at the previous iteration
+    :type f_old: float
+    :param f_new: loglikelihood value at the actual iteration
+    :type f_new: float
+    :param alpha: alfa parameter of linsearch
+    :type alpha: float
+    :param grad_f: loglikelihood prime
+    :type grad_f: numpy.ndarray
+    :param p: increment at the actual iteration
+    :type p: numpy.ndarray
+    :param c1: [description], defaults to 1e-04
+    :type c1: parameter wolfe conditon, optional
+    :param c2: parameter wolfe conditon, defaults to 0.9
+    :type c2: float, optional
+    :return: condition is satisfied
+    :rtype: bool
+    """
     sup = f_old + c1 * alpha * np.dot(grad_f, p.T)
 
     return bool(f_new < sup)
 
 
 def hessian_regulariser_function(B, eps):
-    """Trasform input matrix in a positive defined matrix
-    by adding positive quantites to the main diagonal.
+    """ Guarantes that hessian matrix is definitie posive by adding
+     identity matrix multiplied for eps.
+     
 
-    input:
-    B: numpy.ndarray, Hessian matrix
-    eps: float, positive quantity to add
-
-    output:
-    Bf: numpy.ndarray, Regularised Hessian
-
+    :param B: hessian matrix
+    :type B: numpy.ndarray
+    :param eps: parameter multypling the identity
+    :type eps: float
+    :return: regularised hessian matrix
+    :rtype: numpy.ndarray
     """
-
     B = (B + B.transpose()) * 0.5  # symmetrization
     Bf = B + np.identity(B.shape[0]) * eps
 
@@ -1219,18 +1388,16 @@ def hessian_regulariser_function(B, eps):
 
 
 def hessian_regulariser_function_eigen_based(B, eps):
-    """Trasform input matrix in a positive defined matrix
-    by regularising eigenvalues.
+    """Guarantes that hessian matrix eigenvalues are posive by
+     manipulating their values.
 
-    input:
-    B: numpy.ndarray, Hessian matrix
-    eps: float, positive quantity to add
-
-    output:
-    Bf: numpy.ndarray, Regularised Hessian
-
+    :param B: hessian matrix
+    :type B: numpy.ndarray
+    :param eps: controls the regularisation
+    :type eps: float
+    :return: regularised hessian matrix
+    :rtype: numpy.ndarray
     """
-
     B = (B + B.transpose()) * 0.5  # symmetrization
     l, e = scipy.linalg.eigh(B)
     ll = np.array([0 if li > eps else eps - li for li in l])
@@ -1241,6 +1408,14 @@ def hessian_regulariser_function_eigen_based(B, eps):
 
 @jit(nopython=True)
 def expected_degree_cm(sol):
+    """Computes the expected degrees of UBCM given
+     its solution x
+
+    :param sol: UBCM solutions
+    :type sol: numpy.ndarray
+    :return: expected degrees sequence
+    :rtype: numpy.ndarray
+    """
     ex_k = np.zeros_like(sol, dtype=np.float64)
     n = len(sol)
     for i in np.arange(n):
@@ -1254,6 +1429,16 @@ def expected_degree_cm(sol):
 
 @jit(nopython=True)
 def expected_strength_crema(sol, adj):
+    """Computes the expected strengths of CReMa given
+     its solution beta
+
+    :param sol: CReMa solutions
+    :type sol: numpy.ndarray
+    :param adj: adjacency/pmatrix
+    :type adj: numpy.ndarray
+    :return: expected strengths sequence
+    :rtype: numpy.ndarray
+    """
     ex_s = np.zeros_like(sol, dtype=np.float64)
     raw_ind = adj[0]
     col_ind = adj[1]
@@ -1268,6 +1453,16 @@ def expected_strength_crema(sol, adj):
 
 @jit(nopython=True)
 def expected_strength_crema_sparse(sol, adj):
+    """Computes the expected strengths of CReMa given
+     its solution beta and the solutions of UBCM
+
+    :param sol: CReMa solutions
+    :type sol: numpy.ndarray
+    :param adj: UBCM solutions
+    :type adj: numpy.ndarray
+    :return: expected strengths sequence
+    :rtype: numpy.ndarray
+    """
     ex_s = np.zeros_like(sol, dtype=np.float64)
     n = len(sol)
     x = adj[0]
@@ -1284,6 +1479,14 @@ def expected_strength_crema_sparse(sol, adj):
 
 @jit(nopython=True)
 def expected_ecm(sol):
+    """Computes expected degrees and strengths
+     sequence given solution x and y of UECM
+
+    :param sol: UECM solutions
+    :type sol: numpy.ndarray
+    :return: expected degrees and strengths sequence
+    :rtype: numpy.ndarray
+    """
     n = int(len(sol) / 2)
     x = sol[:n]
     y = sol[n:]
@@ -1300,20 +1503,16 @@ def expected_ecm(sol):
     return ex_ks
 
 
-@jit(nopython=True)
-def beta_ecm(b):
-    return(np.log(1-(b)))
-
-
-@jit(nopython=True)
-def alfa_ecm(chi, b):
-    return((np.exp(-chi)*(1.0 - np.exp(-b)))/(np.exp(-b)))
-
-
 def edgelist_from_edgelist(edgelist):
-    """
-    Creates a new edgelist with the indexes of the nodes instead of the names.
-    Returns also two dictionaries that keep track of the nodes.
+    """Creates a new edgelist with the indexes of the nodes instead of the names.
+    Returns also a dictionary that keep track of the nodes and, depending of the type
+     of graph, degree and strengths sequences.
+
+    :param edgelist: edgelist
+    :type edgelist: numpy.ndarray, list
+    :return: relabelled edgelist, degrees sequence,
+     strengths sequence and new labels to old labels dictionary
+    :rtype: numpy.ndarray, numpy.ndarray, numpy.ndarray and dict
     """
     edgelist = [tuple(item) for item in edgelist]
     if len(edgelist[0]) == 2:
@@ -1377,6 +1576,18 @@ def edgelist_from_edgelist(edgelist):
 
 
 class UndirectedGraph:
+    """Undirected Graph Class. Can be initialised with adjacency matrix,
+     edgelist, degrees sequence or strengths sequence.
+
+    :param adjacency: Adjacency matrix, defaults to None
+    :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional
+    :param edgelist: edgelist, defaults to None
+    :type edgelist: numpy.ndarray, list, optional
+    :param degree_sequence: degrees sequence, defaults to None
+    :type degree_sequence: numpy.ndarray, optional
+    :param strength_sequence: strengths sequence, defaults to None
+    :type strength_sequence: numpy.ndarray, optional
+    """
     def __init__(
         self,
         adjacency=None,
@@ -1384,6 +1595,18 @@ class UndirectedGraph:
         degree_sequence=None,
         strength_sequence=None,
     ):
+        """Initilizes all the necessary attribitus for Undirected
+         graph class.
+
+        :param adjacency: Adjacency matrix, defaults to None
+        :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional
+        :param edgelist: edgelist, defaults to None
+        :type edgelist: numpy.ndarray, list, optional
+        :param degree_sequence: degrees sequence, defaults to None
+        :type degree_sequence: numpy.ndarray, optional
+        :param strength_sequence: strengths sequence, defaults to None
+        :type strength_sequence: numpy.ndarray, optional
+        """
         self.n_nodes = None
         self.n_edges = None
         self.adjacency = None
@@ -1401,6 +1624,7 @@ class UndirectedGraph:
             degree_sequence=degree_sequence,
             strength_sequence=strength_sequence,
         )
+
         self.avg_mat = None
 
         self.initial_guess = None
@@ -1465,7 +1689,7 @@ class UndirectedGraph:
                     )
                 if isinstance(
                     adjacency, list
-                ):  # Cast it to a numpy array: if it is given as a list it should not be too large
+                ):
                     self.adjacency = np.array(adjacency)
                 elif isinstance(adjacency, np.ndarray):
                     self.adjacency = adjacency
@@ -1482,7 +1706,6 @@ class UndirectedGraph:
                     self.nz_index = np.nonzero(self.strength_sequence)[0]
                     self.is_weighted = True
 
-                # self.edgelist, self.deg_seq = edgelist_from_adjacency(adjacency)
                 self.n_nodes = len(self.dseq)
                 self.n_edges = np.sum(self.dseq)/2
                 self.is_initialized = True
@@ -1513,8 +1736,6 @@ class UndirectedGraph:
                 self.n_nodes = len(self.dseq)
                 self.n_edges = np.sum(self.dseq)/2
                 self.is_initialized = True
-                #if self.n_nodes > 2000:
-                #    self.is_sparse = True
 
         elif degree_sequence is not None:
             if not isinstance(degree_sequence, (list, np.ndarray)):
@@ -1535,8 +1756,6 @@ class UndirectedGraph:
                     self.dseq = degree_sequence.astype(np.float64)
                     self.n_edges = np.sum(self.dseq)/2
                     self.is_initialized = True
-                    #if self.n_nodes > 2000:
-                    #    self.is_sparse = True
 
                 if strength_sequence is not None:
                     if not isinstance(strength_sequence, (list, np.ndarray)):
@@ -1587,10 +1806,13 @@ class UndirectedGraph:
                     self.nz_index = np.nonzero(self.strength_sequence)[0]
                     self.is_weighted = True
                     self.is_initialized = True
-                    #if self.n_nodes > 2000:
-                    #    self.is_sparse = True
 
     def set_adjacency_matrix(self, adjacency):
+        """Initialises graph given the adjacency matrix.
+
+        :param adjacency: ajdacency matrix
+        :type adjacency: numpy.ndarray, list, scipy.sparse_matrix
+        """
         if self.is_initialized:
             print(
                 "Graph already contains edges or has a degree sequence. Use clean_edges() first."
@@ -1599,6 +1821,11 @@ class UndirectedGraph:
             self._initialize_graph(adjacency=adjacency)
 
     def set_edgelist(self, edgelist):
+        """Initialises graph given the edgelist.
+
+        :param edgelist: edgelist
+        :type edgelist: numpy.ndarray, list
+        """
         if self.is_initialized:
             print(
                 "Graph already contains edges or has a degree sequence. Use clean_edges() first."
@@ -1607,6 +1834,11 @@ class UndirectedGraph:
             self._initialize_graph(edgelist=edgelist)
 
     def set_degree_sequences(self, degree_sequence):
+        """Initialises graph given the degree sequence.
+
+        :param degree_sequence: degrees sequence
+        :type degree_sequence: numpy.ndarray
+        """
         if self.is_initialized:
             print(
                 "Graph already contains edges or has a degree sequence. Use clean_edges() first."
@@ -1615,6 +1847,8 @@ class UndirectedGraph:
             self._initialize_graph(degree_sequence=degree_sequence)
 
     def clean_edges(self):
+        """Deletes all the initialiased attributes
+        """
         self.adjacency = None
         self.edgelist = None
         self.deg_seq = None
@@ -1633,7 +1867,33 @@ class UndirectedGraph:
         linsearch=True,
         regularise=True,
     ):
+        """Solves 'model' with 'method' for the given undirected graph
 
+        :param : starting points of the model, the available
+         initialisations are ['random', 'degrees_minor', 'uniform',]
+         , defaults to None
+        :type initial_guess: [type], optional
+        :param model: [description], defaults to "cm"
+        :type model: str, optional
+        :param method: [description], defaults to "quasinewton"
+        :type method: str, optional
+        :param max_steps: [description], defaults to 100
+        :type max_steps: int, optional
+        :param tol: [description], defaults to 1e-8
+        :type tol: [type], optional
+        :param eps: [description], defaults to 1e-8
+        :type eps: [type], optional
+        :param full_return: [description], defaults to False
+        :type full_return: bool, optional
+        :param verbose: [description], defaults to False
+        :type verbose: bool, optional
+        :param linsearch: [description], defaults to True
+        :type linsearch: bool, optional
+        :param regularise: [description], defaults to True
+        :type regularise: bool, optional
+        :return: [description]
+        :rtype: [type]
+        """
         self.last_model = model
         self.full_return = full_return
         self.initial_guess = initial_guess
@@ -1699,7 +1959,6 @@ class UndirectedGraph:
 
         self.is_reduced = True
 
-
     def _set_initial_guess(self, model):
 
         if model in ["cm", "cm-new"]:
@@ -1708,7 +1967,6 @@ class UndirectedGraph:
             self._set_initial_guess_ecm()
         elif model in ["crema", "crema-sparse"]:
             self._set_initial_guess_crema()
-
 
     def _set_initial_guess_cm(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
@@ -1754,7 +2012,6 @@ class UndirectedGraph:
         elif isinstance(self.initial_guess, np.ndarray):
             self.x0 = self.r_x
 
-
     def _set_initial_guess_crema(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
@@ -1784,7 +2041,6 @@ class UndirectedGraph:
         self.beta[self.strength_sequence == 0] = 0
 
         self.x0 = self.beta
-
 
     def _set_initial_guess_ecm(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
@@ -1915,6 +2171,15 @@ class UndirectedGraph:
             self.args = (self.dseq, self.strength_sequence)
 
     def _initialize_problem(self, model, method):
+        """Initialises all the functions and parameters
+         necessary used by the selected 'model' and 'method'.
+
+        :param model: model name
+        :type model: str
+        :param method: method name
+        :type method: str
+        :raises ValueError: Raise an error if model/method choice is not valid
+        """
 
         self._set_initial_guess(model)
 
