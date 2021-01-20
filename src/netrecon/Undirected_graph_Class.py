@@ -4,25 +4,23 @@ import scipy.sparse
 from numba import jit, prange
 import time
 from .Undirected_new import *
-import random
-import itertools
-# import pathos.multiprocessing as mp
-import multiprocessing as mp
+
 from . import ensemble_generator as eg
 # Stops Numba Warning for experimental feature
 from numba.core.errors import NumbaExperimentalFeatureWarning
 import warnings
 
-warnings.simplefilter(action='ignore', category=NumbaExperimentalFeatureWarning)
+warnings.simplefilter(action='ignore',
+                      category=NumbaExperimentalFeatureWarning)
 
 
 def degree(a):
     """Returns matrix a degrees
 
     :param a: matrix a
-    :type a: np.ndarray, scipy.sparse
+    :type a: numpy.ndarray, scipy.sparse
     :return: degree sequence
-    :rtype: np.ndarray
+    :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
     if type(a) == np.ndarray:
@@ -36,9 +34,9 @@ def strength(a):
     """Returns matrix a strengths sequence
 
     :param a: matrix a
-    :type a: np.ndarray, scipy.sparse
+    :type a: numpy.ndarray, scipy.sparse
     :return: strengths sequence
-    :rtype: np.ndarray
+    :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
     if type(a) == np.ndarray:
@@ -52,11 +50,11 @@ def pmatrix_cm(x, args):
     """Computes and returns pmatrix of UBCM
 
     :param x: solutions of UBCM
-    :type x: np.ndarray
-    :param args: (n, ) with n number of nodes
-    :type args: tupla(int, )
+    :type x: numpy.ndarray
+    :param args: number of nodes
+    :type args: (int, )
     :return: pmatrix UBCM
-    :rtype: np.ndarray
+    :rtype: numpy.ndarray
     """
     n = args[0]
     f = np.zeros(shape=(n, n), dtype=np.float64)
@@ -71,15 +69,15 @@ def pmatrix_cm(x, args):
 
 @jit(nopython=True)
 def iterative_cm(x, args):
-    """Computes loglikelihood parameters x at step 
+    """Computes loglikelihood parameters x at step
     n+1 given their value at step n for UBCM
 
     :param x: loglikelihood parameters x at step n
-    :type x: np.ndarray
-    :param args: (degrees, reduction coefficients)
-    :type args: tupla
-    :return: loglikelihood parameters x at step n+1 
-    :rtype: np.ndarray
+    :type x: numpy.ndarray
+    :param args: degrees and classes cardinality sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: loglikelihood parameters x at step n+1
+    :rtype: numpy.ndarray
     """
     k = args[0]
     c = args[1]
@@ -102,9 +100,9 @@ def loglikelihood_cm(x, args):
     """Computes loglikelihood of UBCM
 
     :param x: loglikelihood parameters x
-    :type x: np.ndarray
-    :param args: [description]
-    :type args: tupla
+    :type x: numpy.ndarray
+    :param args: degrees and classes cardinality sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: loglikelihood value
     :rtype: float
     """
@@ -127,11 +125,11 @@ def loglikelihood_prime_cm(x, args):
     """Computes loglikelihood first derivatives of UBCM
 
     :param x: loglikelihood parameters x
-    :type x: np.ndarray
-    :param args: [description]
-    :type args: tupla
-    :return: first derivatives of loglikelihood
-    :rtype: np.ndarray
+    :type x: numpy.ndarray
+    :param args: degrees and classes cardinality sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: loglikelihood first derivatives
+    :rtype: numpy.ndarray
     """
     k = args[0]
     c = args[1]
@@ -149,15 +147,15 @@ def loglikelihood_prime_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_cm(x, args):
-    """Computes second derivatives (hessian matrix) of 
+    """Computes second derivatives (hessian matrix) of
     UBCM loglikelihood function
 
     :param x: loglikelihood parameters x
-    :type x: np.ndarray
-    :param args: [description]
-    :type args: tupla
+    :type x: numpy.ndarray
+    :param args: degrees and classes cardinality sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: hessian matrix
-    :rtype: np.ndarray
+    :rtype: numpy.ndarray
     """
     k = args[0]
     c = args[1]
@@ -170,7 +168,8 @@ def loglikelihood_hessian_cm(x, args):
                 for h in range(n):
                     if i == h:
                         aux = 1 + x[h] * x[h]
-                        aux_f += ((x[h] * x[h]) / (aux * aux)) * c[i] * (c[h] - 1)
+                        aux_f += ((x[h] * x[h]) /
+                                  (aux * aux)) * c[i] * (c[h] - 1)
                     else:
                         aux = 1 + x[i] * x[h]
                         aux_f += ((x[h] * x[h]) / (aux * aux)) * c[i] * c[h]
@@ -186,13 +185,14 @@ def loglikelihood_hessian_cm(x, args):
 @jit(nopython=True)
 def loglikelihood_hessian_diag_cm(x, args):
     """Computes the diagonal of UBCM loglikelihood function
+    hessian matrix
 
     :param x: loglikelihood parameters x
-    :type x: np.ndarray
-    :param args: [description]
-    :type args: tupla
+    :type x: numpy.ndarray
+    :param args: degrees and classes cardinality sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: diagonal of the hessian matrix
-    :rtype: np.ndarray
+    :rtype: numpy.ndarray
     """
     k = args[0]
     c = args[1]
@@ -212,16 +212,16 @@ def loglikelihood_hessian_diag_cm(x, args):
 
 @jit(nopython=True)
 def iterative_crema(beta, args):
-    """Computes loglikelihood parameters x at step 
-    n+1 given their value at step n for CReMa. 
+    """Computes loglikelihood parameters x at step
+    n+1 given their value at step n for CReMa.
     The UBCM pmatrix is pre-computed and explicitly passed
 
     :param beta: loglikelihood parameters beta at step n
-    :type beta: np.ndarray
-    :param args: [description]
-    :type args: tuple
+    :type beta: numpy.ndarray
+    :param args: strengths sequence and adjacency binary/probability matrix
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: loglikelihood parameters beta at step n+1
-    :rtype: np.ndarray
+    :rtype: numpy.ndarray
     """
     s = args[0]
     adj = args[1]
@@ -241,29 +241,29 @@ def iterative_crema(beta, args):
 
 @jit(nopython=True, parallel=True, nogil=True)
 def iterative_crema_sparse(beta, args):
-    """Computes loglikelihood parameters x at step 
-    n+1 given their value at step n for CReMa. 
-    The UBCM pmatrix is computed inside the function 
+    """Computes loglikelihood parameters x at step
+    n+1 given their value at step n for CReMa.
+    The UBCM pmatrix is computed inside the function
     in order to avoid memory errors due to the dimensions
     of the latter
 
     :param beta: loglikelihood parameters beta at step n
-    :type beta: np.ndarray
-    :param args: [description]
-    :type args: tuple
+    :type beta: numpy.ndarray
+    :param args: strengths sequence and UBCM solutions
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: loglikelihood parameters beta at step n+1
-    :rtype: np.ndarray
+    :rtype: numpy.ndarray
     """
     s = args[0]
     adj = args[1]
     n = len(s)
     f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
-    
+
     for i in prange(n):
         aux = x[i] * x
         aux_value = aux / (1+aux)
-        aux = aux_value /  (1 + (beta/beta[i]))
+        aux = aux_value / (1 + (beta/beta[i]))
         f[i] = (-aux.sum() + aux[i])/(s[i] + np.exp(-100))
     return f
 
@@ -275,7 +275,7 @@ def iterative_crema_sparse_2(beta, args):
     n = len(s)
     f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
-    
+
     for i in np.arange(n):
         for j in np.arange(i+1, n):
             aux = x[i] * x[j]
@@ -291,14 +291,15 @@ def iterative_crema_sparse_2(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_crema(beta, args):
-    """[summary]
+    """Computes CReMa loglikelihood function.
+    The UBCM pmatrix is pre-computed and explicitly passed
 
-    :param beta: [description]
-    :type beta: [type]
-    :param args: [description]
-    :type args: [type]
-    :return: [description]
-    :rtype: [type]
+    :param beta: loglikelihood parameters beta
+    :type beta: numpy.ndarray
+    :param args: strengths sequence and adjacency binary/probability matrix
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: loglikelihood value
+    :rtype: float
     """
     s = args[0]
     adj = args[1]
@@ -318,6 +319,18 @@ def loglikelihood_crema(beta, args):
 
 @jit(nopython=True, nogil=True)
 def loglikelihood_crema_sparse(beta, args):
+    """Computes CReMa loglikelihood function.
+    The UBCM pmatrix is computed inside the function
+    in order to avoid memory errors due to the dimensions
+    of the latter
+
+    :param beta: loglikelihood parameters beta
+    :type beta: numpy.ndarray
+    :param args: strengths sequence and UBCM solutions
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: loglikelihood value
+    :rtype: float
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -336,6 +349,16 @@ def loglikelihood_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_crema(beta, args):
+    """Computes CReMa loglikelihood function first derivatives.
+    The UBCM pmatrix is pre-computed and explicitly passed
+
+    :param beta: loglikelihood parameters beta
+    :type beta: numpy.ndarray
+    :param args: strengths sequence and adjacency binary/probability matrix
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: loglikelihood first derivatives
+    :rtype: numpy.ndarray
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -374,6 +397,18 @@ def loglikelihood_prime_crema_sparse_2(beta, args):
 
 @jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_prime_crema_sparse(beta, args):
+    """Computes CReMa loglikelihood function first derivatives.
+    The UBCM pmatrix is computed inside the function
+    in order to avoid memory errors due to the dimensions
+    of the latter
+
+    :param beta: loglikelihood parameters beta
+    :type beta: numpy.ndarray
+    :param args: strengths sequence and UBCM solutions
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: loglikelihood first derivatives
+    :rtype: numpy.ndarray
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -388,9 +423,19 @@ def loglikelihood_prime_crema_sparse(beta, args):
     return f
 
 
-
 @jit(nopython=True)
 def loglikelihood_hessian_crema(beta, args):
+    """Computes CReMa loglikelihood function second derivatives
+    (hessian matrix).
+    The UBCM pmatrix is pre-computed and explicitly passed
+
+    :param beta: loglikelihood parameters beta
+    :type beta: numpy.ndarray
+    :param args: strengths sequence and adjacency binary/probability matrix
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: hessian matrix
+    :rtype: numpy.ndarray
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -409,30 +454,19 @@ def loglikelihood_hessian_crema(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_crema_sparse(beta, args):
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros(shape=(n, n), dtype=np.float64)
-    x = adj[0]
-    for i in np.arange(n):
-        for j in np.arange(0, i):
-            aux = x[i] * x[j]
-            aux_value = aux / (1 + aux)
-            if aux_value > 0:
-                aux = -aux_value / ((beta[i] + beta[j]) ** 2)
-                f[i, j] = aux
-                f[j, i] = aux
-                f[i, i] += aux
-                f[j, j] += aux
-    return f
-
-
-@jit(nopython=True)
 def loglikelihood_hessian_diag_crema(beta, args):
+    """Computes the diagonal of CReMa loglikelihood function hessian matrix.
+    The UBCM pmatrix is pre-computed and explicitly passed
+
+    :param beta: loglikelihood parameters beta
+    :type beta: numpy.ndarray
+    :param args: strengths sequence and adjacency binary/probability matrix
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: hessian matrix diagonal
+    :rtype: numpy.ndarray
+    """
     s = args[0]
     adj = args[1]
-    n = len(s)
     f = np.zeros_like(s, dtype=np.float64)
     raw_ind = adj[0]
     col_ind = adj[1]
@@ -466,6 +500,18 @@ def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
 
 @jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_hessian_diag_crema_sparse(beta, args):
+    """Computes the diagonal of CReMa loglikelihood function hessian matrix.
+    The UBCM pmatrix is computed inside the function
+    in order to avoid memory errors due to the dimensions
+    of the latter
+
+    :param beta: loglikelihood parameters beta
+    :type beta: numpy.ndarray
+    :param args: strengths sequence and UBCM solutions
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: hessian matrix diagonal
+    :rtype: numpy.ndarray
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -481,6 +527,16 @@ def loglikelihood_hessian_diag_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def iterative_ecm(sol, args):
+    """Computes loglikelihood parameters x at step
+    n+1 given their value at step n for UECM
+
+    :param sol: loglikelihood parameters x and y at step n
+    :type sol: numpy.ndarray
+    :param args: degrees and strengths sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: loglikelihood parameters x and y at step n+1
+    :rtype: numpy.ndarray
+    """
     k = args[0]
     s = args[1]
 
@@ -512,6 +568,15 @@ def iterative_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_ecm(sol, args):
+    """Computes UECM loglikelihood function given x and y
+
+    :param sol: loglikelihood parameters x and y
+    :type sol: numpy.ndarray
+    :param args: degrees and strengths sequences
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: loglikelihood function value
+    :rtype: numpy.ndarray
+    """
     k = args[0]
     s = args[1]
 
@@ -814,7 +879,6 @@ def solver(
         print("toc_update = {}".format(toc_update))
         print("toc_loop = {}".format(toc_loop))
         print("toc_all = {}".format(toc_all))
-        
 
     if full_return:
         return (x, toc_all, n_steps, np.array(norm_seq),
@@ -860,11 +924,11 @@ def linsearch_fun_crema_fixed(X):
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
-            ( cond == False)
-            and (kk<50)
-            ):
+            (cond == False)
+            and (kk < 50)
+             ):
             alfa *= beta
-            kk +=1
+            kk += 1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
 
     return alfa
@@ -908,10 +972,10 @@ def linsearch_fun_CM_new_fixed(X):
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
             cond == False
-            and kk<50
-            ):
+            and kk < 50
+             ):
             alfa *= beta
-            kk +=1
+            kk += 1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
     # print(alfa)
     return alfa
@@ -961,16 +1025,16 @@ def linsearch_fun_CM_fixed(X):
     for a in alfa0:
         if a >= 0:
             alfa = min(alfa, a)
-    
+
     if step:
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
             cond == False
-            and kk<50
-            ):
+            and kk < 50
+             ):
             alfa *= beta
-            kk +=1
+            kk += 1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
     return alfa
 
@@ -988,7 +1052,8 @@ def linsearch_fun_ECM_new(X, args):
     nnn = int(len(x) / 2)
     while True:
         ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
-        cond = np.sum(x[nnn:][ind_min_beta] + alfa * dx[nnn:][ind_min_beta]) > 1e-14
+        cond = np.sum(x[nnn:][ind_min_beta] +
+                      alfa * dx[nnn:][ind_min_beta]) > 1e-14
         if (
             cond
         ):
@@ -1023,7 +1088,8 @@ def linsearch_fun_ECM_new_fixed(X):
     nnn = int(len(x) / 2)
     while True:
         ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
-        cond = np.sum(x[nnn:][ind_min_beta] + alfa * dx[nnn:][ind_min_beta]) > 1e-14
+        cond = np.sum(x[nnn:][ind_min_beta] +
+                      alfa * dx[nnn:][ind_min_beta]) > 1e-14
         if (
             cond
         ):
@@ -1036,13 +1102,11 @@ def linsearch_fun_ECM_new_fixed(X):
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
             (cond == False)
-            and kk<50
-            ):
+            and kk < 50
+             ):
             alfa *= beta
-            kk +=1
+            kk += 1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-
-    #print(alfa)
 
     return alfa
 
@@ -1116,10 +1180,10 @@ def linsearch_fun_ECM_fixed(X):
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
             cond == False
-            and kk<50
-            ):
+            and kk < 50
+             ):
             alfa *= beta
-            kk +=1
+            kk += 1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
 
     return alfa
@@ -1140,11 +1204,11 @@ def hessian_regulariser_function(B, eps):
     by adding positive quantites to the main diagonal.
 
     input:
-    B: np.ndarray, Hessian matrix
+    B: numpy.ndarray, Hessian matrix
     eps: float, positive quantity to add
 
     output:
-    Bf: np.ndarray, Regularised Hessian
+    Bf: numpy.ndarray, Regularised Hessian
 
     """
 
@@ -1159,11 +1223,11 @@ def hessian_regulariser_function_eigen_based(B, eps):
     by regularising eigenvalues.
 
     input:
-    B: np.ndarray, Hessian matrix
+    B: numpy.ndarray, Hessian matrix
     eps: float, positive quantity to add
 
     output:
-    Bf: np.ndarray, Regularised Hessian
+    Bf: numpy.ndarray, Regularised Hessian
 
     """
 
@@ -1191,7 +1255,6 @@ def expected_degree_cm(sol):
 @jit(nopython=True)
 def expected_strength_crema(sol, adj):
     ex_s = np.zeros_like(sol, dtype=np.float64)
-    n = len(sol)
     raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
@@ -1243,7 +1306,7 @@ def beta_ecm(b):
 
 
 @jit(nopython=True)
-def alfa_ecm( chi, b):
+def alfa_ecm(chi, b):
     return((np.exp(-chi)*(1.0 - np.exp(-b)))/(np.exp(-b)))
 
 
@@ -1584,7 +1647,7 @@ class UndirectedGraph:
             fun_jac=self.fun_jac,
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
-            hessian_regulariser = self.hessian_regulariser,
+            hessian_regulariser=self.hessian_regulariser,
             tol=tol,
             eps=eps,
             max_steps=max_steps,
@@ -1596,7 +1659,6 @@ class UndirectedGraph:
         )
 
         self._set_solved_problem(sol)
-
 
     def _set_solved_problem_cm(self, solution):
         if self.full_return:
@@ -1614,7 +1676,6 @@ class UndirectedGraph:
             self.x = self.r_x[self.r_invert_dseq]
         elif self.last_model == "cm-new":
             self.x = np.exp(-self.r_x[self.r_invert_dseq])
-
 
     def _set_solved_problem(self, solution):
         model = self.last_model
@@ -1657,7 +1718,7 @@ class UndirectedGraph:
             self.degree_reduction()
 
         if isinstance(self.initial_guess, np.ndarray):
-            self.r_x = self.initial_guess[self.r_index_dseq] 
+            self.r_x = self.initial_guess[self.r_index_dseq]
         elif isinstance(self.initial_guess, str):
             if self.initial_guess == "degrees_minor":
                 self.r_x = self.r_dseq / (
@@ -1683,12 +1744,12 @@ class UndirectedGraph:
             raise TypeError('initial_guess must be str or numpy.ndarray')
 
         self.r_x[self.r_dseq == 0] = 0
-        
+
         if isinstance(self.initial_guess, str):
             if self.last_model == "cm":
                 self.x0 = self.r_x
             elif self.last_model == "cm-new":
-                self.r_x[self.r_x!=0] = -np.log(self.r_x[self.r_x!=0])
+                self.r_x[self.r_x != 0] = -np.log(self.r_x[self.r_x != 0])
                 self.x0 = self.r_x
         elif isinstance(self.initial_guess, np.ndarray):
             self.x0 = self.r_x
@@ -1719,9 +1780,9 @@ class UndirectedGraph:
                     )
         else:
             raise TypeError('initial_guess must be str or numpy.ndarray')
-        
+
         self.beta[self.strength_sequence == 0] = 0
-        
+
         self.x0 = self.beta
 
 
@@ -1729,8 +1790,8 @@ class UndirectedGraph:
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         if isinstance(self.initial_guess, np.ndarray):
-            self.x = self.initial_guess[:self.n_nodes] 
-            self.y = self.initial_guess[self.n_nodes:] 
+            self.x = self.initial_guess[:self.n_nodes]
+            self.y = self.initial_guess[self.n_nodes:]
         elif isinstance(self.initial_guess, str):
             if self.initial_guess == "strengths":
                 self.x = self.dseq.astype(float) / (
@@ -1764,17 +1825,16 @@ class UndirectedGraph:
 
         self.x[self.dseq == 0] = 0
         self.y[self.strength_sequence == 0] = 0
-        
+
         if isinstance(self.initial_guess, str):
             if self.last_model == "ecm":
                 self.x0 = np.concatenate((self.x, self.y))
             elif self.last_model == "ecm-new":
-                self.x[self.x!=0] = -np.log(self.x[self.x!=0])
-                self.y[self.y!=0] = -np.log(self.y[self.y!=0])
+                self.x[self.x != 0] = -np.log(self.x[self.x != 0])
+                self.y[self.y != 0] = -np.log(self.y[self.y != 0])
                 self.x0 = np.concatenate((self.x, self.y))
         elif isinstance(self.initial_guess, np.ndarray):
             self.x0 = np.concatenate((self.x, self.y))
-        
 
     # DA SISTEMARE
     def solution_error(self):
@@ -1807,32 +1867,36 @@ class UndirectedGraph:
                      (ex_s - self.strength_sequence) / (self.strength_sequence + np.exp(-100))
                     )
                 )
-                
+
                 if self.adjacency_given:
                     self.error = self.error_strength
                 else:
                     self.error = max(self.error_strength, self.error_degree)
-                    
+
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["ecm", "ecm-new"]:
             sol = np.concatenate((self.x, self.y))
             ex = expected_ecm(sol)
             k = np.concatenate((self.dseq, self.strength_sequence))
             self.expected_dseq = ex[: self.n_nodes]
-            self.expected_strength_seq = ex[self.n_nodes :]
+            self.expected_strength_seq = ex[self.n_nodes:]
 
             # error output
-            self.error_degree = np.linalg.norm(self.expected_dseq - self.dseq,ord=np.inf)
-            self.error_strength = np.linalg.norm(self.expected_strength_seq - self.strength_sequence,ord=np.inf)
+            self.error_degree = np.linalg.norm(self.expected_dseq -
+                                               self.dseq, ord=np.inf)
+            self.error_strength = np.linalg.norm(self.expected_strength_seq -
+                                                 self.strength_sequence,
+                                                 ord=np.inf)
             self.relative_error_strength = max(
                 abs(
-                    (self.strength_sequence - self.expected_strength_seq)/ self.strength_sequence
+                    (self.strength_sequence -
+                     self.expected_strength_seq)/self.strength_sequence
                     )
                 )
 
             self.relative_error_degree = max(
                 abs(
-                    (self.dseq - self.expected_dseq)/ self.dseq
+                    (self.dseq - self.expected_dseq)/self.dseq
                     )
                 )
             self.error = max(self.error_strength, self.error_degree)
@@ -1918,7 +1982,7 @@ class UndirectedGraph:
                 x, self.args
             ),
             "ecm-fixed-point": None,
-            "crema-sparse-newton": lambda x: -loglikelihood_hessian_crema_sparse(
+            "crema-sparse-newton": lambda x: -loglikelihood_hessian_crema(
                 x, self.args
             ),
             "crema-sparse-quasinewton": lambda x: -loglikelihood_hessian_diag_crema_sparse(
@@ -1997,7 +2061,6 @@ class UndirectedGraph:
             self.args_p = (self.n_nodes, np.nonzero(self.dseq)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
-
         args_lin = {
             "cm": (loglikelihood_cm, self.args),
             "crema": (loglikelihood_crema, self.args),
@@ -2031,20 +2094,20 @@ class UndirectedGraph:
         }
 
         self.fun_linsearch = lins_fun[mod_met]
-        
+
         hess_reg = {
-            "cm" : hessian_regulariser_function_eigen_based,
-            "cm-new" : hessian_regulariser_function,
-            "ecm" : hessian_regulariser_function_eigen_based,
-            "ecm-new" : hessian_regulariser_function,
-            "crema" : hessian_regulariser_function,
-            "crema-sparse" : hessian_regulariser_function,
+            "cm": hessian_regulariser_function_eigen_based,
+            "cm-new": hessian_regulariser_function,
+            "ecm": hessian_regulariser_function_eigen_based,
+            "ecm-new": hessian_regulariser_function,
+            "crema": hessian_regulariser_function,
+            "crema-sparse": hessian_regulariser_function,
         }
-        
+
         self.hessian_regulariser = hess_reg[model]
-        
+
         if isinstance(self.regularise, str):
-            if self.regularise == "eigenvalues": 
+            if self.regularise == "eigenvalues":
                 self.hessian_regulariser = hessian_regulariser_function_eigen_based
             elif self.regularise == "identity":
                 self.hessian_regulariser = hessian_regulariser_function
@@ -2055,8 +2118,8 @@ class UndirectedGraph:
         model="crema",
         adjacency="cm",
         method="quasinewton",
-        method_adjacency = "newton",
-        initial_guess_adjacency = "random",
+        method_adjacency="newton",
+        initial_guess_adjacency="random",
         max_steps=100,
         tol=1e-8,
         eps=1e-8,
@@ -2074,9 +2137,9 @@ class UndirectedGraph:
         ):
             raise ValueError("adjacency must be a matrix or a method")
         elif isinstance(adjacency, str):
-            
+
             # aggiungere check sul modello passato per l'adjacency matrix
-            
+
             self._solve_problem(
                 initial_guess=initial_guess_adjacency,
                 model=adjacency,
@@ -2089,8 +2152,7 @@ class UndirectedGraph:
                 linsearch=linsearch,
                 regularise=regularise
             )
-            
-            
+
             if self.is_sparse:
                 self.adjacency_crema = (self.x,)
                 self.adjacency_given = False
@@ -2129,27 +2191,27 @@ class UndirectedGraph:
             self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
-        
+
         if self.is_sparse:
             self.last_model = "crema-sparse"
         else:
             self.last_model = model
-            linsearch=linsearch
-            regularise=regularise
+            linsearch = linsearch
+            regularise = regularise
 
         self.regularise = regularise
         self.full_return = full_return
         self.initial_guess = initial_guess
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
-        
+
         sol = solver(
             x0,
             fun=self.fun,
             fun_jac=self.fun_jac,
             step_fun=self.step_fun,
             linsearch_fun=self.fun_linsearch,
-            hessian_regulariser = self.hessian_regulariser,
+            hessian_regulariser=self.hessian_regulariser,
             tol=tol,
             eps=eps,
             max_steps=max_steps,
@@ -2159,11 +2221,11 @@ class UndirectedGraph:
             linsearch=linsearch,
             full_return=full_return,
         )
-        
+
         self._set_solved_problem(sol)
 
     def _set_solved_problem_crema(self, solution):
-        if self.full_return: 
+        if self.full_return:
             self.beta = solution[0]
             self.comput_time_crema = solution[1]
             self.n_steps_crema = solution[2]
@@ -2186,10 +2248,10 @@ class UndirectedGraph:
 
         if self.last_model == "ecm":
             self.x = self.r_xy[: self.n_nodes]
-            self.y = self.r_xy[self.n_nodes :]
+            self.y = self.r_xy[self.n_nodes:]
         elif self.last_model == "ecm-new":
-            self.x = np.exp(-self.r_xy[: self.n_nodes])
-            self.y = np.exp(-self.r_xy[self.n_nodes :])
+            self.x = np.exp(-self.r_xy[:self.n_nodes])
+            self.y = np.exp(-self.r_xy[self.n_nodes:])
 
     def solve_tool(
         self,
@@ -2197,12 +2259,12 @@ class UndirectedGraph:
         method,
         initial_guess=None,
         adjacency=None,
-        method_adjacency = "newton",
-        initial_guess_adjacency = "random",
+        method_adjacency="newton",
+        initial_guess_adjacency="random",
         max_steps=100,
         full_return=False,
         verbose=False,
-        linsearch = True,
+        linsearch=True,
         tol=1e-8,
         eps=1e-8,
     ):
@@ -2216,22 +2278,22 @@ class UndirectedGraph:
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
-                linsearch = linsearch,
+                linsearch=linsearch,
                 tol=tol,
                 eps=eps,
             )
-        elif model in ["crema","crema-sparse"]:
+        elif model in ["crema", "crema-sparse"]:
             self._solve_problem_crema(
                 initial_guess=initial_guess,
                 model=model,
                 adjacency=adjacency,
                 method=method,
-                method_adjacency = method_adjacency,
-                initial_guess_adjacency = initial_guess_adjacency,
+                method_adjacency=method_adjacency,
+                initial_guess_adjacency=initial_guess_adjacency,
                 max_steps=max_steps,
                 full_return=full_return,
                 verbose=verbose,
-                linsearch = linsearch,
+                linsearch=linsearch,
                 tol=tol,
                 eps=eps,
             )
