@@ -49,14 +49,14 @@ def strength(a):
 
 
 def pmatrix_cm(x, args):
-    """[summary]
+    """Computes and returns pmatrix of UBCM
 
-    :param x: [description]
-    :type x: [type]
-    :param args: [description]
-    :type args: [type]
-    :return: [description]
-    :rtype: [type]
+    :param x: solutions of UBCM
+    :type x: np.ndarray
+    :param args: (n, ) with n number of nodes
+    :type args: tupla(int, )
+    :return: pmatrix UBCM
+    :rtype: np.ndarray
     """
     n = args[0]
     f = np.zeros(shape=(n, n), dtype=np.float64)
@@ -71,6 +71,16 @@ def pmatrix_cm(x, args):
 
 @jit(nopython=True)
 def iterative_cm(x, args):
+    """Computes loglikelihood parameters x at step 
+    n+1 given their value at step n for UBCM
+
+    :param x: loglikelihood parameters x at step n
+    :type x: np.ndarray
+    :param args: (degrees, reduction coefficients)
+    :type args: tupla
+    :return: loglikelihood parameters x at step n+1 
+    :rtype: np.ndarray
+    """
     k = args[0]
     c = args[1]
     n = len(k)
@@ -89,6 +99,15 @@ def iterative_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_cm(x, args):
+    """Computes loglikelihood of UBCM
+
+    :param x: loglikelihood parameters x
+    :type x: np.ndarray
+    :param args: [description]
+    :type args: tupla
+    :return: loglikelihood value
+    :rtype: float
+    """
     k = args[0]
     c = args[1]
     n = len(k)
@@ -105,6 +124,15 @@ def loglikelihood_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_cm(x, args):
+    """Computes loglikelihood first derivatives of UBCM
+
+    :param x: loglikelihood parameters x
+    :type x: np.ndarray
+    :param args: [description]
+    :type args: tupla
+    :return: first derivatives of loglikelihood
+    :rtype: np.ndarray
+    """
     k = args[0]
     c = args[1]
     n = len(k)
@@ -121,6 +149,16 @@ def loglikelihood_prime_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_cm(x, args):
+    """Computes second derivatives (hessian matrix) of 
+    UBCM loglikelihood function
+
+    :param x: loglikelihood parameters x
+    :type x: np.ndarray
+    :param args: [description]
+    :type args: tupla
+    :return: hessian matrix
+    :rtype: np.ndarray
+    """
     k = args[0]
     c = args[1]
     n = len(k)
@@ -147,6 +185,15 @@ def loglikelihood_hessian_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_cm(x, args):
+    """Computes the diagonal of UBCM loglikelihood function
+
+    :param x: loglikelihood parameters x
+    :type x: np.ndarray
+    :param args: [description]
+    :type args: tupla
+    :return: diagonal of the hessian matrix
+    :rtype: np.ndarray
+    """
     k = args[0]
     c = args[1]
     n = len(k)
@@ -164,7 +211,18 @@ def loglikelihood_hessian_diag_cm(x, args):
 
 
 @jit(nopython=True)
-def iterative_CReAMa(beta, args):
+def iterative_crema(beta, args):
+    """Computes loglikelihood parameters x at step 
+    n+1 given their value at step n for CReMa. 
+    The UBCM pmatrix is pre-computed and explicitly passed
+
+    :param beta: loglikelihood parameters beta at step n
+    :type beta: np.ndarray
+    :param args: [description]
+    :type args: tuple
+    :return: loglikelihood parameters beta at step n+1
+    :rtype: np.ndarray
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -182,7 +240,20 @@ def iterative_CReAMa(beta, args):
 
 
 @jit(nopython=True, parallel=True, nogil=True)
-def iterative_CReAMa_sparse(beta, args):
+def iterative_crema_sparse(beta, args):
+    """Computes loglikelihood parameters x at step 
+    n+1 given their value at step n for CReMa. 
+    The UBCM pmatrix is computed inside the function 
+    in order to avoid memory errors due to the dimensions
+    of the latter
+
+    :param beta: loglikelihood parameters beta at step n
+    :type beta: np.ndarray
+    :param args: [description]
+    :type args: tuple
+    :return: loglikelihood parameters beta at step n+1
+    :rtype: np.ndarray
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -198,7 +269,7 @@ def iterative_CReAMa_sparse(beta, args):
 
 
 @jit(nopython=True)
-def iterative_CReAMa_sparse_2(beta, args):
+def iterative_crema_sparse_2(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -219,7 +290,16 @@ def iterative_CReAMa_sparse_2(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_CReAMa(beta, args):
+def loglikelihood_crema(beta, args):
+    """[summary]
+
+    :param beta: [description]
+    :type beta: [type]
+    :param args: [description]
+    :type args: [type]
+    :return: [description]
+    :rtype: [type]
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -237,7 +317,7 @@ def loglikelihood_CReAMa(beta, args):
 
 
 @jit(nopython=True, nogil=True)
-def loglikelihood_CReAMa_sparse(beta, args):
+def loglikelihood_crema_sparse(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -255,7 +335,7 @@ def loglikelihood_CReAMa_sparse(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa(beta, args):
+def loglikelihood_prime_crema(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -274,7 +354,7 @@ def loglikelihood_prime_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa_sparse_2(beta, args):
+def loglikelihood_prime_crema_sparse_2(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -293,7 +373,7 @@ def loglikelihood_prime_CReAMa_sparse_2(beta, args):
 
 
 @jit(nopython=True, parallel=True, nogil=True)
-def loglikelihood_prime_CReAMa_sparse(beta, args):
+def loglikelihood_prime_crema_sparse(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -310,7 +390,7 @@ def loglikelihood_prime_CReAMa_sparse(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_CReAMa(beta, args):
+def loglikelihood_hessian_crema(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -329,7 +409,7 @@ def loglikelihood_hessian_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_CReAMa_sparse(beta, args):
+def loglikelihood_hessian_crema_sparse(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -349,7 +429,7 @@ def loglikelihood_hessian_CReAMa_sparse(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa(beta, args):
+def loglikelihood_hessian_diag_crema(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -366,7 +446,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa_sparse_2(beta, args):
+def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -385,7 +465,7 @@ def loglikelihood_hessian_diag_CReAMa_sparse_2(beta, args):
 
 
 @jit(nopython=True, parallel=True, nogil=True)
-def loglikelihood_hessian_diag_CReAMa_sparse(beta, args):
+def loglikelihood_hessian_diag_crema_sparse(beta, args):
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -744,7 +824,7 @@ def solver(
 
 
 @jit(nopython=True)
-def linsearch_fun_CReAMa(X, args):
+def linsearch_fun_crema(X, args):
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -769,7 +849,7 @@ def linsearch_fun_CReAMa(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_CReAMa_fixed(X):
+def linsearch_fun_crema_fixed(X):
     dx = X[1]
     dx_old = X[2]
     alfa = X[3]
@@ -1109,7 +1189,7 @@ def expected_degree_cm(sol):
 
 
 @jit(nopython=True)
-def expected_strength_CReAMa(sol, adj):
+def expected_strength_crema(sol, adj):
     ex_s = np.zeros_like(sol, dtype=np.float64)
     n = len(sol)
     raw_ind = adj[0]
@@ -1124,7 +1204,7 @@ def expected_strength_CReAMa(sol, adj):
 
 
 @jit(nopython=True)
-def expected_strength_CReAMa_sparse(sol, adj):
+def expected_strength_crema_sparse(sol, adj):
     ex_s = np.zeros_like(sol, dtype=np.float64)
     n = len(sol)
     x = adj[0]
@@ -1542,8 +1622,8 @@ class UndirectedGraph:
             self._set_solved_problem_cm(solution)
         elif model in ["ecm", "ecm-new"]:
             self._set_solved_problem_ecm(solution)
-        elif model in ["CReAMa", "CReAMa-sparse"]:
-            self._set_solved_problem_CReAMa(solution)
+        elif model in ["crema", "crema-sparse"]:
+            self._set_solved_problem_crema(solution)
 
     def degree_reduction(self):
         self.r_dseq, self.r_index_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
@@ -1565,8 +1645,8 @@ class UndirectedGraph:
             self._set_initial_guess_cm()
         elif model in ["ecm", "ecm-new"]:
             self._set_initial_guess_ecm()
-        elif model in ["CReAMa", "CReAMa-sparse"]:
-            self._set_initial_guess_CReAMa()
+        elif model in ["crema", "crema-sparse"]:
+            self._set_initial_guess_crema()
 
 
     def _set_initial_guess_cm(self):
@@ -1614,7 +1694,7 @@ class UndirectedGraph:
             self.x0 = self.r_x
 
 
-    def _set_initial_guess_CReAMa(self):
+    def _set_initial_guess_crema(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
 
@@ -1698,7 +1778,7 @@ class UndirectedGraph:
 
     # DA SISTEMARE
     def solution_error(self):
-        if self.last_model in ["cm", "cm-new", "CReAMa", "CReAMa-sparse"]:
+        if self.last_model in ["cm", "cm-new", "crema", "crema-sparse"]:
             if self.x is not None:
                 ex_k = expected_degree_cm(self.x)
                 # print(k, ex_k)
@@ -1710,12 +1790,12 @@ class UndirectedGraph:
 
             if self.beta is not None:
                 if self.is_sparse:
-                    ex_s = expected_strength_CReAMa_sparse(
-                        self.beta, self.adjacency_CReAMa
+                    ex_s = expected_strength_crema_sparse(
+                        self.beta, self.adjacency_crema
                     )
                 else:
-                    ex_s = expected_strength_CReAMa(
-                        self.beta, self.adjacency_CReAMa
+                    ex_s = expected_strength_crema(
+                        self.beta, self.adjacency_crema
                     )
                 self.expected_stregth_seq = ex_s
                 # error output
@@ -1759,10 +1839,10 @@ class UndirectedGraph:
 
     def _set_args(self, model):
 
-        if model in ["CReAMa", "CReAMa-sparse"]:
+        if model in ["crema", "crema-sparse"]:
             self.args = (
                 self.strength_sequence,
-                self.adjacency_CReAMa,
+                self.adjacency_crema,
                 self.nz_index,
             )
         elif model in ["cm", "cm-new"]:
@@ -1783,25 +1863,25 @@ class UndirectedGraph:
             "cm-newton": lambda x: -loglikelihood_prime_cm(x, self.args),
             "cm-quasinewton": lambda x: -loglikelihood_prime_cm(x, self.args),
             "cm-fixed-point": lambda x: iterative_cm(x, self.args),
-            "CReAMa-newton": lambda x: -loglikelihood_prime_CReAMa(
+            "crema-newton": lambda x: -loglikelihood_prime_crema(
                 x, self.args
             ),
-            "CReAMa-quasinewton": lambda x: -loglikelihood_prime_CReAMa(
+            "crema-quasinewton": lambda x: -loglikelihood_prime_crema(
                 x, self.args
             ),
-            "CReAMa-fixed-point": lambda x: -iterative_CReAMa(x, self.args),
+            "crema-fixed-point": lambda x: -iterative_crema(x, self.args),
             "ecm-newton": lambda x: -loglikelihood_prime_ecm(x, self.args),
             "ecm-quasinewton": lambda x: -loglikelihood_prime_ecm(
                 x, self.args
             ),
             "ecm-fixed-point": lambda x: iterative_ecm(x, self.args),
-            "CReAMa-sparse-newton": lambda x: -loglikelihood_prime_CReAMa_sparse(
+            "crema-sparse-newton": lambda x: -loglikelihood_prime_crema_sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-quasinewton": lambda x: -loglikelihood_prime_CReAMa_sparse(
+            "crema-sparse-quasinewton": lambda x: -loglikelihood_prime_crema_sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-fixed-point": lambda x: -iterative_CReAMa_sparse(
+            "crema-sparse-fixed-point": lambda x: -iterative_crema_sparse(
                 x, self.args
             ),
             "cm-new-newton": lambda x: -loglikelihood_prime_cm_new(
@@ -1826,25 +1906,25 @@ class UndirectedGraph:
                 x, self.args
             ),
             "cm-fixed-point": None,
-            "CReAMa-newton": lambda x: -loglikelihood_hessian_CReAMa(
+            "crema-newton": lambda x: -loglikelihood_hessian_crema(
                 x, self.args
             ),
-            "CReAMa-quasinewton": lambda x: -loglikelihood_hessian_diag_CReAMa(
+            "crema-quasinewton": lambda x: -loglikelihood_hessian_diag_crema(
                 x, self.args
             ),
-            "CReAMa-fixed-point": None,
+            "crema-fixed-point": None,
             "ecm-newton": lambda x: -loglikelihood_hessian_ecm(x, self.args),
             "ecm-quasinewton": lambda x: -loglikelihood_hessian_diag_ecm(
                 x, self.args
             ),
             "ecm-fixed-point": None,
-            "CReAMa-sparse-newton": lambda x: -loglikelihood_hessian_CReAMa_sparse(
+            "crema-sparse-newton": lambda x: -loglikelihood_hessian_crema_sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-quasinewton": lambda x: -loglikelihood_hessian_diag_CReAMa_sparse(
+            "crema-sparse-quasinewton": lambda x: -loglikelihood_hessian_diag_crema_sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-fixed-point": None,
+            "crema-sparse-fixed-point": None,
             "cm-new-newton": lambda x: -loglikelihood_hessian_cm_new(
                 x, self.args
             ),
@@ -1865,23 +1945,23 @@ class UndirectedGraph:
             "cm-newton": lambda x: -loglikelihood_cm(x, self.args),
             "cm-quasinewton": lambda x: -loglikelihood_cm(x, self.args),
             "cm-fixed-point": lambda x: -loglikelihood_cm(x, self.args),
-            "CReAMa-newton": lambda x: -loglikelihood_CReAMa(x, self.args),
-            "CReAMa-quasinewton": lambda x: -loglikelihood_CReAMa(
+            "crema-newton": lambda x: -loglikelihood_crema(x, self.args),
+            "crema-quasinewton": lambda x: -loglikelihood_crema(
                 x, self.args
             ),
-            "CReAMa-fixed-point": lambda x: -loglikelihood_CReAMa(
+            "crema-fixed-point": lambda x: -loglikelihood_crema(
                 x, self.args
             ),
             "ecm-newton": lambda x: -loglikelihood_ecm(x, self.args),
             "ecm-quasinewton": lambda x: -loglikelihood_ecm(x, self.args),
             "ecm-fixed-point": lambda x: -loglikelihood_ecm(x, self.args),
-            "CReAMa-sparse-newton": lambda x: -loglikelihood_CReAMa_sparse(
+            "crema-sparse-newton": lambda x: -loglikelihood_crema_sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-quasinewton": lambda x: -loglikelihood_CReAMa_sparse(
+            "crema-sparse-quasinewton": lambda x: -loglikelihood_crema_sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-fixed-point": lambda x: -loglikelihood_CReAMa_sparse(
+            "crema-sparse-fixed-point": lambda x: -loglikelihood_crema_sparse(
                 x, self.args
             ),
             "cm-new-newton": lambda x: -loglikelihood_cm_new(x, self.args),
@@ -1920,8 +2000,8 @@ class UndirectedGraph:
 
         args_lin = {
             "cm": (loglikelihood_cm, self.args),
-            "CReAMa": (loglikelihood_CReAMa, self.args),
-            "CReAMa-sparse": (loglikelihood_CReAMa_sparse, self.args),
+            "crema": (loglikelihood_crema, self.args),
+            "crema-sparse": (loglikelihood_crema_sparse, self.args),
             "ecm": (loglikelihood_ecm, self.args),
             "cm-new": (loglikelihood_cm_new, self.args),
             "ecm-new": (loglikelihood_ecm_new, self.args),
@@ -1933,12 +2013,12 @@ class UndirectedGraph:
             "cm-newton": lambda x: linsearch_fun_CM(x, self.args_lins),
             "cm-quasinewton": lambda x: linsearch_fun_CM(x, self.args_lins),
             "cm-fixed-point": lambda x: linsearch_fun_CM_fixed(x),
-            "CReAMa-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
-            "CReAMa-sparse-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-sparse-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-sparse-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "crema-newton": lambda x: linsearch_fun_crema(x, self.args_lins),
+            "crema-quasinewton": lambda x: linsearch_fun_crema(x, self.args_lins),
+            "crema-fixed-point": lambda x: linsearch_fun_crema_fixed(x),
+            "crema-sparse-newton": lambda x: linsearch_fun_crema(x, self.args_lins),
+            "crema-sparse-quasinewton": lambda x: linsearch_fun_crema(x, self.args_lins),
+            "crema-sparse-fixed-point": lambda x: linsearch_fun_crema_fixed(x),
             "ecm-newton": lambda x: linsearch_fun_ECM(x, self.args_lins),
             "ecm-quasinewton": lambda x: linsearch_fun_ECM(x, self.args_lins),
             "ecm-fixed-point": lambda x: linsearch_fun_ECM_fixed(x),
@@ -1957,8 +2037,8 @@ class UndirectedGraph:
             "cm-new" : hessian_regulariser_function,
             "ecm" : hessian_regulariser_function_eigen_based,
             "ecm-new" : hessian_regulariser_function,
-            "CReAMa" : hessian_regulariser_function,
-            "CReAMa-sparse" : hessian_regulariser_function,
+            "crema" : hessian_regulariser_function,
+            "crema-sparse" : hessian_regulariser_function,
         }
         
         self.hessian_regulariser = hess_reg[model]
@@ -1969,10 +2049,10 @@ class UndirectedGraph:
             elif self.regularise == "identity":
                 self.hessian_regulariser = hessian_regulariser_function
 
-    def _solve_problem_CReAMa(
+    def _solve_problem_crema(
         self,
         initial_guess=None,
-        model="CReAMa",
+        model="crema",
         adjacency="cm",
         method="quasinewton",
         method_adjacency = "newton",
@@ -1985,7 +2065,7 @@ class UndirectedGraph:
         linsearch=True,
         regularise=True,
     ):
-        if model == "CReAMa-sparse":
+        if model == "crema-sparse":
             self.is_sparse = True
         else:
             self.is_sparse = False
@@ -2012,7 +2092,7 @@ class UndirectedGraph:
             
             
             if self.is_sparse:
-                self.adjacency_CReAMa = (self.x,)
+                self.adjacency_crema = (self.x,)
                 self.adjacency_given = False
             else:
                 pmatrix = self.fun_pmatrix(self.x)
@@ -2020,7 +2100,7 @@ class UndirectedGraph:
                 raw_ind = raw_ind.astype(np.int64)
                 col_ind = col_ind.astype(np.int64)
                 weigths_value = pmatrix[raw_ind, col_ind]
-                self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+                self.adjacency_crema = (raw_ind, col_ind, weigths_value)
                 self.is_sparse = False
                 self.adjacency_given = False
         elif isinstance(adjacency, list):
@@ -2029,7 +2109,7 @@ class UndirectedGraph:
             raw_ind = raw_ind.astype(np.int64)
             col_ind = col_ind.astype(np.int64)
             weigths_value = adjacency[raw_ind, col_ind]
-            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+            self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
         elif isinstance(adjacency, np.ndarray):
@@ -2038,7 +2118,7 @@ class UndirectedGraph:
             raw_ind = raw_ind.astype(np.int64)
             col_ind = col_ind.astype(np.int64)
             weigths_value = adjacency[raw_ind, col_ind]
-            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+            self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
         elif scipy.sparse.isspmatrix(adjacency):
@@ -2046,12 +2126,12 @@ class UndirectedGraph:
             raw_ind = raw_ind.astype(np.int64)
             col_ind = col_ind.astype(np.int64)
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
-            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+            self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
         
         if self.is_sparse:
-            self.last_model = "CReAMa-sparse"
+            self.last_model = "crema-sparse"
         else:
             self.last_model = model
             linsearch=linsearch
@@ -2082,14 +2162,14 @@ class UndirectedGraph:
         
         self._set_solved_problem(sol)
 
-    def _set_solved_problem_CReAMa(self, solution):
+    def _set_solved_problem_crema(self, solution):
         if self.full_return: 
             self.beta = solution[0]
-            self.comput_time_creama = solution[1]
-            self.n_steps_creama = solution[2]
-            self.norm_seq_creama = solution[3]
-            self.diff_seq_creama = solution[4]
-            self.alfa_seq_creama = solution[5]
+            self.comput_time_crema = solution[1]
+            self.n_steps_crema = solution[2]
+            self.norm_seq_crema = solution[3]
+            self.diff_seq_crema = solution[4]
+            self.alfa_seq_crema = solution[5]
         else:
             self.beta = solution
 
@@ -2140,8 +2220,8 @@ class UndirectedGraph:
                 tol=tol,
                 eps=eps,
             )
-        elif model in ["CReAMa","CReAMa-sparse"]:
-            self._solve_problem_CReAMa(
+        elif model in ["crema","crema-sparse"]:
+            self._solve_problem_crema(
                 initial_guess=initial_guess,
                 model=model,
                 adjacency=adjacency,
@@ -2194,17 +2274,17 @@ class UndirectedGraph:
                     seed=s[i])
                 i += 1
 
-        elif self.last_model in ["CReAMa"]:
+        elif self.last_model in ["crema"]:
             if self.adjacency_given:
                 # deterministic adj matrix
                 iter_files = iter(
                     output_dir + "{}.txt".format(i) for i in range(n))
                 i = 0
                 for item in iter_files:
-                    eg.ensemble_sampler_creama_ecm_det_graph(
+                    eg.ensemble_sampler_crema_ecm_det_graph(
                         outfile_name=item,
                         beta=self.beta,
-                        adj=self.adjacency_CReAMa,
+                        adj=self.adjacency_crema,
                         cpu_n=cpu_n,
                         seed=s[i])
                     i += 1
@@ -2214,24 +2294,24 @@ class UndirectedGraph:
                     output_dir + "{}.txt".format(i) for i in range(n))
                 i = 0
                 for item in iter_files:
-                    eg.ensemble_sampler_creama_ecm_prob_graph(
+                    eg.ensemble_sampler_crema_ecm_prob_graph(
                         outfile_name=item,
                         beta=self.beta,
-                        adj=self.adjacency_CReAMa,
+                        adj=self.adjacency_crema,
                         cpu_n=cpu_n,
                         seed=s[i])
                     i += 1
-        elif self.last_model in ["CReAMa-sparse"]:
+        elif self.last_model in ["crema-sparse"]:
             if not self.adjacency_given:
                 # probabilistic adj matrix
                 iter_files = iter(
                     output_dir + "{}.txt".format(i) for i in range(n))
                 i = 0
                 for item in iter_files:
-                    eg.ensemble_sampler_creama_sparse_ecm_prob_graph(
+                    eg.ensemble_sampler_crema_sparse_ecm_prob_graph(
                         outfile_name=item,
                         beta=self.beta,
-                        adj=self.adjacency_CReAMa,
+                        adj=self.adjacency_crema,
                         cpu_n=cpu_n,
                         seed=s[i])
                     i += 1

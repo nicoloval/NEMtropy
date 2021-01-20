@@ -103,8 +103,8 @@ def weighted_adjacency(x, adj):
 
 
 @jit(nopython=True)
-def iterative_CReAMa(beta, args):
-    """Return the next iterative step for the CReAMa Model.
+def iterative_crema(beta, args):
+    """Return the next iterative step for the CReMa Model.
 
     :param numpy.ndarray v: old iteration step
     :param numpy.ndarray par: constant parameters of the cm function
@@ -141,7 +141,7 @@ def iterative_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def iterative_CReAMa_Sparse_2(beta, args):
+def iterative_crema_Sparse_2(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -178,7 +178,7 @@ def iterative_CReAMa_Sparse_2(beta, args):
 
 
 @jit(nopython=True, parallel=True)
-def iterative_CReAMa_Sparse(beta, args):
+def iterative_crema_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -219,7 +219,7 @@ def iterative_CReAMa_Sparse(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_CReAMa(beta, args):
+def loglikelihood_crema(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -249,7 +249,7 @@ def loglikelihood_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_CReAMa_Sparse(beta, args):
+def loglikelihood_crema_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -282,7 +282,7 @@ def loglikelihood_CReAMa_Sparse(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa(beta, args):
+def loglikelihood_prime_crema(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -312,7 +312,7 @@ def loglikelihood_prime_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_CReAMa_Sparse_2(beta, args):
+def loglikelihood_prime_crema_Sparse_2(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -346,7 +346,7 @@ def loglikelihood_prime_CReAMa_Sparse_2(beta, args):
 
 
 @jit(nopython=True, parallel=True)
-def loglikelihood_prime_CReAMa_Sparse(beta, args):
+def loglikelihood_prime_crema_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -384,7 +384,7 @@ def loglikelihood_prime_CReAMa_Sparse(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_CReAMa(beta, args):
+def loglikelihood_hessian_crema(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -412,7 +412,7 @@ def loglikelihood_hessian_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa(beta, args):
+def loglikelihood_hessian_diag_crema(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -437,7 +437,7 @@ def loglikelihood_hessian_diag_CReAMa(beta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_CReAMa_Sparse_2(beta, args):
+def loglikelihood_hessian_diag_crema_Sparse_2(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -471,7 +471,7 @@ def loglikelihood_hessian_diag_CReAMa_Sparse_2(beta, args):
 
 
 @jit(nopython=True, parallel=True)
-def loglikelihood_hessian_diag_CReAMa_Sparse(beta, args):
+def loglikelihood_hessian_diag_crema_Sparse(beta, args):
     s_out = args[0]
     s_in = args[1]
     adj = args[2]
@@ -1292,7 +1292,7 @@ def hessian_regulariser_function_eigen_based(B, eps):
 
 
 @jit(nopython=True)
-def expected_out_strength_CReAMa(sol, adj):
+def expected_out_strength_crema(sol, adj):
     n = int(sol.size / 2)
     b_out = sol[:n]
     b_in = sol[n:]
@@ -1308,7 +1308,7 @@ def expected_out_strength_CReAMa(sol, adj):
 
 
 @jit(nopython=True)
-def expected_out_strength_CReAMa_Sparse(sol, adj):
+def expected_out_strength_crema_Sparse(sol, adj):
     n = int(sol.size / 2)
     b_out = sol[:n]
     b_in = sol[n:]
@@ -1328,7 +1328,7 @@ def expected_out_strength_CReAMa_Sparse(sol, adj):
 
 
 @jit(nopython=True)
-def expected_in_stregth_CReAMa(sol, adj):
+def expected_in_stregth_crema(sol, adj):
     n = int(sol.size / 2)
     b_out = sol[:n]
     b_in = sol[n:]
@@ -1345,7 +1345,7 @@ def expected_in_stregth_CReAMa(sol, adj):
 
 
 @jit(nopython=True)
-def expected_in_stregth_CReAMa_Sparse(sol, adj):
+def expected_in_stregth_crema_Sparse(sol, adj):
     n = int(sol.size / 2)
     b_out = sol[:n]
     b_in = sol[n:]
@@ -1655,7 +1655,7 @@ def linsearch_fun_DCM_fixed(X):
 
 
 @jit(nopython=True)
-def linsearch_fun_CReAMa(X, args):
+def linsearch_fun_crema(X, args):
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -1675,7 +1675,7 @@ def linsearch_fun_CReAMa(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_CReAMa_fixed(X):
+def linsearch_fun_crema_fixed(X):
     dx = X[1]
     dx_old = X[2]
     alfa = X[3]
@@ -2289,8 +2289,8 @@ class DirectedGraph:
             self._set_solved_problem_decm(solution)
         elif model in ["decm_new"]:
             self._set_solved_problem_decm_new(solution)
-        elif model in ["CReAMa", "CReAMa-sparse"]:
-            self._set_solved_problem_CReAMa(solution)
+        elif model in ["crema", "crema-sparse"]:
+            self._set_solved_problem_crema(solution)
 
 
     def degree_reduction(self):
@@ -2326,8 +2326,8 @@ class DirectedGraph:
                 self._set_initial_guess_decm()
             elif model in ["decm_new"]:
                 self._set_initial_guess_decm_new()
-            elif model in ["CReAMa", "CReAMa-sparse"]:
-                self._set_initial_guess_CReAMa()
+            elif model in ["crema", "crema-sparse"]:
+                self._set_initial_guess_crema()
 
     def _set_initial_guess_dcm(self):
             # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
@@ -2426,7 +2426,7 @@ class DirectedGraph:
         self.x0 = np.concatenate((self.r_x, self.r_y))
 
 
-    def _set_initial_guess_CReAMa(self):
+    def _set_initial_guess_crema(self):
         # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
         # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
         # TODO: mettere un self.is_weighted bool
@@ -2584,7 +2584,7 @@ class DirectedGraph:
 
     def solution_error(self):
 
-        if self.last_model in ["dcm_new", "dcm", "CReAMa", "CReAMa-sparse"]:
+        if self.last_model in ["dcm_new", "dcm", "crema", "crema-sparse"]:
             if (self.x is not None) and (self.y is not None):
                 sol = np.concatenate((self.x, self.y))
                 ex_k_out = expected_out_degree_dcm(sol)
@@ -2601,18 +2601,18 @@ class DirectedGraph:
             if (self.b_out is not None) and (self.b_in is not None):
                 sol = np.concatenate([self.b_out, self.b_in])
                 if self.is_sparse:
-                    ex_s_out = expected_out_strength_CReAMa_Sparse(
-                        sol, self.adjacency_CReAMa
+                    ex_s_out = expected_out_strength_crema_Sparse(
+                        sol, self.adjacency_crema
                     )
-                    ex_s_in = expected_in_stregth_CReAMa_Sparse(
-                        sol, self.adjacency_CReAMa
+                    ex_s_in = expected_in_stregth_crema_Sparse(
+                        sol, self.adjacency_crema
                     )
                 else:
-                    ex_s_out = expected_out_strength_CReAMa(
-                        sol, self.adjacency_CReAMa
+                    ex_s_out = expected_out_strength_crema(
+                        sol, self.adjacency_crema
                     )
-                    ex_s_in = expected_in_stregth_CReAMa(
-                        sol, self.adjacency_CReAMa
+                    ex_s_in = expected_in_stregth_crema(
+                        sol, self.adjacency_crema
                     )
                 ex_s = np.concatenate([ex_s_out, ex_s_in])
                 s = np.concatenate([self.out_strength, self.in_strength])
@@ -2677,11 +2677,11 @@ class DirectedGraph:
 
     def _set_args(self, model):
 
-        if model in ["CReAMa", "CReAMa-sparse"]:
+        if model in ["crema", "crema-sparse"]:
             self.args = (
                 self.out_strength,
                 self.in_strength,
-                self.adjacency_CReAMa,
+                self.adjacency_crema,
                 self.nz_index_sout,
                 self.nz_index_sin,
             )
@@ -2723,13 +2723,13 @@ class DirectedGraph:
                 x, self.args
             ),
             "dcm_new-fixed-point": lambda x: iterative_dcm_new(x, self.args),
-            "CReAMa-newton": lambda x: -loglikelihood_prime_CReAMa(
+            "crema-newton": lambda x: -loglikelihood_prime_crema(
                 x, self.args
             ),
-            "CReAMa-quasinewton": lambda x: -loglikelihood_prime_CReAMa(
+            "crema-quasinewton": lambda x: -loglikelihood_prime_crema(
                 x, self.args
             ),
-            "CReAMa-fixed-point": lambda x: -iterative_CReAMa(x, self.args),
+            "crema-fixed-point": lambda x: -iterative_crema(x, self.args),
             "decm-newton": lambda x: -loglikelihood_prime_decm(x, self.args),
             "decm-quasinewton": lambda x: -loglikelihood_prime_decm(
                 x, self.args
@@ -2742,13 +2742,13 @@ class DirectedGraph:
                 x, self.args
             ),
             "decm_new-fixed-point": lambda x: iterative_decm_new(x, self.args),
-            "CReAMa-sparse-newton": lambda x: -loglikelihood_prime_CReAMa_Sparse(
+            "crema-sparse-newton": lambda x: -loglikelihood_prime_crema_Sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-quasinewton": lambda x: -loglikelihood_prime_CReAMa_Sparse(
+            "crema-sparse-quasinewton": lambda x: -loglikelihood_prime_crema_Sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-fixed-point": lambda x: -iterative_CReAMa_Sparse(
+            "crema-sparse-fixed-point": lambda x: -iterative_crema_Sparse(
                 x, self.args
             ),
         }
@@ -2766,13 +2766,13 @@ class DirectedGraph:
                 x, self.args
             ),
             "dcm_new-fixed-point": None,
-            "CReAMa-newton": lambda x: -loglikelihood_hessian_CReAMa(
+            "crema-newton": lambda x: -loglikelihood_hessian_crema(
                 x, self.args
             ),
-            "CReAMa-quasinewton": lambda x: -loglikelihood_hessian_diag_CReAMa(
+            "crema-quasinewton": lambda x: -loglikelihood_hessian_diag_crema(
                 x, self.args
             ),
-            "CReAMa-fixed-point": None,
+            "crema-fixed-point": None,
             "decm-newton": lambda x: -loglikelihood_hessian_decm(x, self.args),
             "decm-quasinewton": lambda x: -loglikelihood_hessian_diag_decm(
                 x, self.args
@@ -2785,13 +2785,13 @@ class DirectedGraph:
                 x, self.args
             ),
             "decm_new-fixed-point": None,
-            "CReAMa-sparse-newton": lambda x: -loglikelihood_hessian_CReAMa(
+            "crema-sparse-newton": lambda x: -loglikelihood_hessian_crema(
                 x, self.args
             ),
-            "CReAMa-sparse-quasinewton": lambda x: -loglikelihood_hessian_diag_CReAMa_Sparse(
+            "crema-sparse-quasinewton": lambda x: -loglikelihood_hessian_diag_crema_Sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-fixed-point": None,
+            "crema-sparse-fixed-point": None,
         }
 
         d_fun_step = {
@@ -2805,11 +2805,11 @@ class DirectedGraph:
             "dcm_new-fixed-point": lambda x: -loglikelihood_dcm_new(
                 x, self.args
             ),
-            "CReAMa-newton": lambda x: -loglikelihood_CReAMa(x, self.args),
-            "CReAMa-quasinewton": lambda x: -loglikelihood_CReAMa(
+            "crema-newton": lambda x: -loglikelihood_crema(x, self.args),
+            "crema-quasinewton": lambda x: -loglikelihood_crema(
                 x, self.args
             ),
-            "CReAMa-fixed-point": lambda x: -loglikelihood_CReAMa(
+            "crema-fixed-point": lambda x: -loglikelihood_crema(
                 x, self.args
             ),
             "decm-newton": lambda x: -loglikelihood_decm(x, self.args),
@@ -2822,13 +2822,13 @@ class DirectedGraph:
             "decm_new-fixed-point": lambda x: -loglikelihood_decm_new(
                 x, self.args
             ),
-            "CReAMa-sparse-newton": lambda x: -loglikelihood_CReAMa_Sparse(
+            "crema-sparse-newton": lambda x: -loglikelihood_crema_Sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-quasinewton": lambda x: -loglikelihood_CReAMa_Sparse(
+            "crema-sparse-quasinewton": lambda x: -loglikelihood_crema_Sparse(
                 x, self.args
             ),
-            "CReAMa-sparse-fixed-point": lambda x: -loglikelihood_CReAMa_Sparse(
+            "crema-sparse-fixed-point": lambda x: -loglikelihood_crema_Sparse(
                 x, self.args
             ),
         }
@@ -2856,8 +2856,8 @@ class DirectedGraph:
 
         args_lin = {
             "dcm": (loglikelihood_dcm, self.args),
-            "CReAMa": (loglikelihood_CReAMa, self.args),
-            "CReAMa-sparse": (loglikelihood_CReAMa_Sparse, self.args),
+            "crema": (loglikelihood_crema, self.args),
+            "crema-sparse": (loglikelihood_crema_Sparse, self.args),
             "decm": (loglikelihood_decm, self.args),
             "dcm_new": (loglikelihood_dcm_new, self.args),
             "decm_new": (loglikelihood_decm_new, self.args),
@@ -2872,12 +2872,12 @@ class DirectedGraph:
             "dcm_new-newton": lambda x: linsearch_fun_DCM_new(x, self.args_lins),
             "dcm_new-quasinewton": lambda x: linsearch_fun_DCM_new(x, self.args_lins),
             "dcm_new-fixed-point": lambda x: linsearch_fun_DCM_new_fixed(x),
-            "CReAMa-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
-            "CReAMa-sparse-newton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-sparse-quasinewton": lambda x: linsearch_fun_CReAMa(x, self.args_lins),
-            "CReAMa-sparse-fixed-point": lambda x: linsearch_fun_CReAMa_fixed(x),
+            "crema-newton": lambda x: linsearch_fun_crema(x, self.args_lins),
+            "crema-quasinewton": lambda x: linsearch_fun_crema(x, self.args_lins),
+            "crema-fixed-point": lambda x: linsearch_fun_crema_fixed(x),
+            "crema-sparse-newton": lambda x: linsearch_fun_crema(x, self.args_lins),
+            "crema-sparse-quasinewton": lambda x: linsearch_fun_crema(x, self.args_lins),
+            "crema-sparse-fixed-point": lambda x: linsearch_fun_crema_fixed(x),
             "decm-newton": lambda x: linsearch_fun_DECM(x, self.args_lins),
             "decm-quasinewton": lambda x: linsearch_fun_DECM(x, self.args_lins),
             "decm-fixed-point": lambda x: linsearch_fun_DECM_fixed(x),
@@ -2893,8 +2893,8 @@ class DirectedGraph:
             "dcm_new": hessian_regulariser_function,
             "decm": hessian_regulariser_function_eigen_based,
             "decm_new": hessian_regulariser_function,
-            "CReAMa": hessian_regulariser_function,
-            "CReAMa-sparse": hessian_regulariser_function,
+            "crema": hessian_regulariser_function,
+            "crema-sparse": hessian_regulariser_function,
         }
         
         self.hessian_regulariser = hess_reg[model]
@@ -2906,10 +2906,10 @@ class DirectedGraph:
                 self.hessian_regulariser = hessian_regulariser_function
 
 
-    def _solve_problem_CReAMa(
+    def _solve_problem_crema(
         self,
         initial_guess=None,
-        model="CReAMa",
+        model="crema",
         adjacency="dcm",
         method="quasinewton",
         method_adjacency = "newton",
@@ -2923,7 +2923,7 @@ class DirectedGraph:
         regularise=True,
         regularise_eps=1e-3,
     ):
-        if model == "CReAMa-sparse":
+        if model == "crema-sparse":
             self.is_sparse = True
         else:
             self.is_sparse = False
@@ -2944,7 +2944,7 @@ class DirectedGraph:
                 verbose=verbose,
             )
             if self.is_sparse:
-                self.adjacency_CReAMa = (self.x, self.y)
+                self.adjacency_crema = (self.x, self.y)
                 self.adjacency_given = False
             else:
                 pmatrix = self.fun_pmatrix(np.concatenate([self.x, self.y]))
@@ -2952,7 +2952,7 @@ class DirectedGraph:
                 raw_ind = raw_ind.astype(np.int64)
                 col_ind = col_ind.astype(np.int64)
                 weigths_value = pmatrix[raw_ind, col_ind]
-                self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+                self.adjacency_crema = (raw_ind, col_ind, weigths_value)
                 self.is_sparse = False
                 self.adjacency_given = False
         elif isinstance(adjacency, list):
@@ -2961,7 +2961,7 @@ class DirectedGraph:
             raw_ind = raw_ind.astype(np.int64)
             col_ind = col_ind.astype(np.int64)
             weigths_value = adjacency[raw_ind, col_ind]
-            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+            self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
         elif isinstance(adjacency, np.ndarray):
@@ -2970,7 +2970,7 @@ class DirectedGraph:
             raw_ind = raw_ind.astype(np.int64)
             col_ind = col_ind.astype(np.int64)
             weigths_value = adjacency[raw_ind, col_ind]
-            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+            self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
         elif scipy.sparse.isspmatrix(adjacency):
@@ -2978,12 +2978,12 @@ class DirectedGraph:
             raw_ind = raw_ind.astype(np.int64)
             col_ind = col_ind.astype(np.int64)
             weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
-            self.adjacency_CReAMa = (raw_ind, col_ind, weigths_value)
+            self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
 
         if self.is_sparse:
-            self.last_model = "CReAMa-sparse"
+            self.last_model = "crema-sparse"
         else:
             self.last_model = model
         
@@ -3011,17 +3011,17 @@ class DirectedGraph:
             full_return=full_return,
         )
 
-        self._set_solved_problem_CReAMa(sol)
+        self._set_solved_problem_crema(sol)
 
-    def _set_solved_problem_CReAMa(self, solution):
+    def _set_solved_problem_crema(self, solution):
         if self.full_return:
             self.b_out = solution[0][: self.n_nodes]
             self.b_in = solution[0][self.n_nodes:]
-            self.comput_time_creama = solution[1]
-            self.n_steps_creama = solution[2]
-            self.norm_seq_creama = solution[3]
-            self.diff_seq_creama = solution[4]
-            self.alfa_seq_creama = solution[5]
+            self.comput_time_crema = solution[1]
+            self.n_steps_crema = solution[2]
+            self.norm_seq_crema = solution[3]
+            self.diff_seq_crema = solution[4]
+            self.alfa_seq_crema = solution[5]
         else:
             self.b_out = solution[: self.n_nodes]
             self.b_in = solution[self.n_nodes:]
@@ -3055,8 +3055,8 @@ class DirectedGraph:
                 tol=tol,
                 eps=eps,
             )
-        elif model in ["CReAMa", 'CReAMa-sparse']:
-            self._solve_problem_CReAMa(
+        elif model in ["crema", 'crema-sparse']:
+            self._solve_problem_crema(
                 initial_guess=initial_guess,
                 model=model,
                 adjacency=adjacency,
@@ -3121,17 +3121,17 @@ class DirectedGraph:
                     seed=s[i])
                 i += 1
 
-        elif self.last_model in ["CReAMa"]:
+        elif self.last_model in ["crema"]:
             if self.adjacency_given:
                 # deterministic adj matrix
                 iter_files = iter(
                     output_dir + "{}.txt".format(i) for i in range(n))
                 i = 0
                 for item in iter_files:
-                    eg.ensemble_sampler_creama_decm_det_graph(
+                    eg.ensemble_sampler_crema_decm_det_graph(
                         outfile_name=item,
                         beta=(self.b_out, self.b_in),
-                        adj=self.adjacency_CReAMa,
+                        adj=self.adjacency_crema,
                         cpu_n=cpu_n,
                         seed=s[i])
                     i += 1
@@ -3141,24 +3141,24 @@ class DirectedGraph:
                     output_dir + "{}.txt".format(i) for i in range(n))
                 i = 0
                 for item in iter_files:
-                    eg.ensemble_sampler_creama_decm_prob_graph(
+                    eg.ensemble_sampler_crema_decm_prob_graph(
                         outfile_name=item,
                         beta=(self.b_out, self.b_in),
-                        adj=self.adjacency_CReAMa,
+                        adj=self.adjacency_crema,
                         cpu_n=cpu_n,
                         seed=s[i])
                     i += 1
-        elif self.last_model in ["CReAMa-sparse"]:
+        elif self.last_model in ["crema-sparse"]:
             if not self.adjacency_given:
                 # probabilistic adj matrix
                 iter_files = iter(
                     output_dir + "{}.txt".format(i) for i in range(n))
                 i = 0
                 for item in iter_files:
-                    eg.ensemble_sampler_creama_sparse_decm_prob_graph(
+                    eg.ensemble_sampler_crema_sparse_decm_prob_graph(
                         outfile_name=item,
                         beta=(self.b_out, self.b_in),
-                        adj=self.adjacency_CReAMa,
+                        adj=self.adjacency_crema,
                         cpu_n=cpu_n,
                         seed=s[i])
                     i += 1
