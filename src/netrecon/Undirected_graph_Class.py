@@ -822,7 +822,7 @@ def solver(
         elif method == "quasinewton":
             # quasinewton hessian approximation
             B = fun_jac(x)  # Jacobian diagonal
-            if regularise == True:
+            if regularise:
                 B = np.maximum(B, B * 0 + np.max(np.abs(fun(x))) * 1e-3)
         toc_jacfun += time.time() - tic
 
@@ -879,7 +879,7 @@ def solver(
         # step update
         n_steps += 1
 
-        if verbose == True:
+        if verbose:
             print("step {}".format(n_steps))
             print("alpha = {}".format(alfa))
             print("|f(x)| = {}".format(norm))
@@ -901,7 +901,7 @@ def solver(
     toc_loop = time.time() - tic_loop
     toc_all = time.time() - tic_all
 
-    if verbose == True:
+    if verbose:
         print("Number of steps for convergence = {}".format(n_steps))
         print("toc_init = {}".format(toc_init))
         print("toc_jacfun = {}".format(toc_jacfun))
@@ -943,13 +943,14 @@ def linsearch_fun_crema(X, args):
 
     i = 0
     s_old = -step_fun(x, arg_step_fun)
-    while (
-        sufficient_decrease_condition(
-            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
-        )
-        == False
-        and i < 50
-    ):
+    while ((not sufficient_decrease_condition(s_old,
+                                              -step_fun(x + alfa * dx,
+                                                        arg_step_fun),
+                                              alfa,
+                                              f,
+                                              dx))
+            and (i < 50)
+           ):
         alfa *= beta
         i += 1
 
@@ -2043,8 +2044,11 @@ class UndirectedGraph:
         self.x0 = self.beta
 
     def _set_initial_guess_ecm(self):
-        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
-        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        """[summary]
+
+        :raises ValueError: [description]
+        :raises TypeError: [description]
+        """
         if isinstance(self.initial_guess, np.ndarray):
             self.x = self.initial_guess[:self.n_nodes]
             self.y = self.initial_guess[self.n_nodes:]
