@@ -3,8 +3,8 @@ GNU GENERAL PUBLIC LICENSE
 
     The graph ensemble package contains a set of methods to build 
 	fitness based graph ensembles from marginal information.
-    Copyright (C) 2020  Leonardo Niccolò Ialongo, Emiliano Marchese
-
+    Copyright (C) 2020  Emiliano Marchese, Nicolò Vallarano.
+    
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
