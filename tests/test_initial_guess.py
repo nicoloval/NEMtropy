@@ -39,7 +39,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.x.all() == x0.all())
 
 
-    def test_CREAMA_uniform(self):
+    def test_crema_uniform(self):
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
@@ -47,7 +47,7 @@ class MyTest(unittest.TestCase):
 
         g = sample_u.UndirectedGraph(A)
         g.initial_guess = 'strengths_minor'
-        g._set_initial_guess('CReAMa')
+        g._set_initial_guess('crema')
 
         x = (g.strength_sequence > 0).astype(float) / (
                     g.strength_sequence + 1
@@ -55,7 +55,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(g.x0.all() == x.all())
 
 
-    def test_CREAMA(self):
+    def test_crema(self):
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
@@ -64,9 +64,9 @@ class MyTest(unittest.TestCase):
         x0 = np.random.rand(n)
         g = sample_u.UndirectedGraph(A)
         g.initial_guess = x0
-        g._set_initial_guess_CReAMa()
+        g._set_initial_guess_crema()
         g.full_return = False
-        g._set_solved_problem_CReAMa(g.x0)
+        g._set_solved_problem_crema(g.x0)
         self.assertTrue(g.beta.all() == x0.all())
 
 
@@ -96,7 +96,7 @@ class MyTest(unittest.TestCase):
         x0 = np.random.rand(n)
         g = sample_u.UndirectedGraph(A)
         g.initial_guess = x0
-        g._set_initial_guess_CReAMa()
+        g._set_initial_guess_crema()
         self.assertTrue(g.x0.all() == x0.all())
 
 
@@ -200,7 +200,7 @@ class MyTest(unittest.TestCase):
         self.assertTrue(np.concatenate((g.x, g.y,g.out_strength, g.in_strength)).all() == x0.all())
 
 
-    def test_CREAMA_uniform(self):
+    def test_crema_uniform(self):
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
@@ -208,12 +208,12 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
         g.initial_guess = 'strengths_minor'
-        g._set_initial_guess_CReAMa()
+        g._set_initial_guess_crema()
         x = np.concatenate((sample.out_strength(A)/(sample.out_strength(A) + 1), sample.in_strength(A)/(sample.in_strength(A) + 1)))
         self.assertTrue(g.x0.all() == x.all())
 
 
-    def test_CREAMA(self):
+    def test_crema(self):
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
@@ -222,7 +222,7 @@ class MyTest(unittest.TestCase):
         x0 = np.random.rand(2*n)
         g = sample.DirectedGraph(A)
         g.initial_guess = x0
-        g._set_initial_guess_CReAMa()
+        g._set_initial_guess_crema()
         g._set_solved_problem_decm(x0)
         self.assertTrue(g.x0.all() == x0.all())
 

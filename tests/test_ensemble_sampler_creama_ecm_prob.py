@@ -24,7 +24,7 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(adjacency=network)
 
         g.solve_tool(
-            model="CReAMa",
+            model="crema",
             method="quasinewton",
             initial_guess="random",
             adjacency="cm",
@@ -37,7 +37,7 @@ class MyTest(unittest.TestCase):
 
         # print('\ntest 5: error = {}'.format(g.error))
         n_sample = 50
-        output_dir = "sample_creama_ecm_prob/"
+        output_dir = "sample_crema_ecm_prob/"
         # random.seed(100)
         g.ensemble_sampler(n=n_sample, output_dir=output_dir, seed=42)
 

@@ -26,7 +26,7 @@ class MyTest(unittest.TestCase):
         network_bin = (network > 0).astype(int)
 
         g.solve_tool(
-            model="CReAMa",
+            model="crema",
             method="quasinewton",
             initial_guess="random",
             adjacency=network_bin,
@@ -39,7 +39,7 @@ class MyTest(unittest.TestCase):
 
         # print('\ntest 5: error = {}'.format(g.error))
         n = 100
-        output_dir = "sample_creama_decm_det/"
+        output_dir = "sample_crema_decm_det/"
         # random.seed(100)
         g.ensemble_sampler(n=n, output_dir=output_dir, seed=42)
 

@@ -159,7 +159,7 @@ def ensemble_sampler_decm_graph(
     return outfile_name
 
 
-def ensemble_sampler_creama_ecm_det_graph(
+def ensemble_sampler_crema_ecm_det_graph(
         outfile_name,
         beta,
         adj,
@@ -180,7 +180,7 @@ def ensemble_sampler_creama_ecm_det_graph(
 
     # compute existing edges
     with mp.Pool(processes=cpu_n) as pool:
-        edges_list = pool.starmap(is_a_link_creama_ecm_det, iter_)
+        edges_list = pool.starmap(is_a_link_crema_ecm_det, iter_)
 
     # removing None
     # commented cause there should be no None
@@ -200,7 +200,7 @@ def ensemble_sampler_creama_ecm_det_graph(
     return outfile_name
 
 
-def ensemble_sampler_creama_ecm_prob_graph(
+def ensemble_sampler_crema_ecm_prob_graph(
         outfile_name,
         beta,
         adj,
@@ -220,7 +220,7 @@ def ensemble_sampler_creama_ecm_prob_graph(
 
     # compute existing edges
     with mp.Pool(processes=cpu_n) as pool:
-        edges_list = pool.starmap(is_a_link_creama_ecm_prob, iter_)
+        edges_list = pool.starmap(is_a_link_crema_ecm_prob, iter_)
 
     # removing None
     # commented cause there should be no None
@@ -240,7 +240,7 @@ def ensemble_sampler_creama_ecm_prob_graph(
     return outfile_name
 
 
-def ensemble_sampler_creama_sparse_ecm_prob_graph(
+def ensemble_sampler_crema_sparse_ecm_prob_graph(
         outfile_name,
         beta,
         adj,
@@ -263,7 +263,7 @@ def ensemble_sampler_creama_sparse_ecm_prob_graph(
 
     # compute existing edges
     with mp.Pool(processes=cpu_n) as pool:
-        edges_list = pool.starmap(is_a_link_creama_sparse_ecm_prob, iter_)
+        edges_list = pool.starmap(is_a_link_crema_sparse_ecm_prob, iter_)
 
     # removing None
     # commented cause there should be no None
@@ -283,7 +283,7 @@ def ensemble_sampler_creama_sparse_ecm_prob_graph(
     return outfile_name
 
 
-def ensemble_sampler_creama_decm_prob_graph(
+def ensemble_sampler_crema_decm_prob_graph(
         outfile_name,
         beta,
         adj,
@@ -305,7 +305,7 @@ def ensemble_sampler_creama_decm_prob_graph(
 
     # compute existing edges
     with mp.Pool(processes=cpu_n) as pool:
-        edges_list = pool.starmap(is_a_link_creama_decm_prob, iter_)
+        edges_list = pool.starmap(is_a_link_crema_decm_prob, iter_)
 
     # debug
     # print(edges_list)
@@ -321,7 +321,7 @@ def ensemble_sampler_creama_decm_prob_graph(
     return outfile_name
 
 
-def ensemble_sampler_creama_decm_det_graph(
+def ensemble_sampler_crema_decm_det_graph(
         outfile_name,
         beta,
         adj,
@@ -344,7 +344,7 @@ def ensemble_sampler_creama_decm_det_graph(
 
     # compute existing edges
     with mp.Pool(processes=cpu_n) as pool:
-        edges_list = pool.starmap(is_a_link_creama_decm_det, iter_)
+        edges_list = pool.starmap(is_a_link_crema_decm_det, iter_)
 
     # debug
     # print(edges_list)
@@ -360,7 +360,7 @@ def ensemble_sampler_creama_decm_det_graph(
     return outfile_name
 
 
-def ensemble_sampler_creama_sparse_decm_prob_graph(
+def ensemble_sampler_crema_sparse_decm_prob_graph(
         outfile_name,
         beta,
         adj,
@@ -387,7 +387,7 @@ def ensemble_sampler_creama_sparse_decm_prob_graph(
 
     # compute existing edges
     with mp.Pool(processes=cpu_n) as pool:
-        edges_list = pool.starmap(is_a_link_creama_sparse_decm_prob, iter_)
+        edges_list = pool.starmap(is_a_link_crema_sparse_decm_prob, iter_)
 
     # debug
     # print(edges_list)
@@ -461,7 +461,7 @@ def is_a_link_decm(args_1, args_2, seed=None):
         return (i, j, w)
 
 
-def is_a_link_creama_ecm_det(args_1, args_2, seed=None):
+def is_a_link_crema_ecm_det(args_1, args_2, seed=None):
     """Q-ensemble source: "A faster Horse on a safer trail"."""
     if seed is not None:
         np.random.seed(seed)
@@ -473,7 +473,7 @@ def is_a_link_creama_ecm_det(args_1, args_2, seed=None):
     return (i, j, w_link)
 
 
-def is_a_link_creama_ecm_prob(args_1, args_2, p_ensemble, seed=None):
+def is_a_link_crema_ecm_prob(args_1, args_2, p_ensemble, seed=None):
     """Q-ensemble source: "A faster Horse on a safer trail"."""
     if seed is not None:
         np.random.seed(seed)
@@ -487,7 +487,7 @@ def is_a_link_creama_ecm_prob(args_1, args_2, p_ensemble, seed=None):
         return (i, j, w_link)
 
 
-def is_a_link_creama_sparse_ecm_prob(args_1, args_2, seed=None):
+def is_a_link_crema_sparse_ecm_prob(args_1, args_2, seed=None):
     """Q-ensemble source: "A faster Horse on a safer trail"."""
     if seed is not None:
         np.random.seed(seed)
@@ -502,7 +502,7 @@ def is_a_link_creama_sparse_ecm_prob(args_1, args_2, seed=None):
         return (i, j, w_link)
 
 
-def is_a_link_creama_decm_det(args_1, args_2, seed=None):
+def is_a_link_crema_decm_det(args_1, args_2, seed=None):
     """Q-ensemble source: "A faster Horse on a safer trail"."""
     if seed is not None:
         np.random.seed(seed)
@@ -514,7 +514,7 @@ def is_a_link_creama_decm_det(args_1, args_2, seed=None):
     return (i, j, w_link)
 
 
-def is_a_link_creama_decm_prob(args_1, args_2, p_ensemble, seed=None):
+def is_a_link_crema_decm_prob(args_1, args_2, p_ensemble, seed=None):
     """Q-ensemble source: "A faster Horse on a safer trail"."""
     if seed is not None:
         np.random.seed(seed)
@@ -528,7 +528,7 @@ def is_a_link_creama_decm_prob(args_1, args_2, p_ensemble, seed=None):
         return (i, j, w_link)
 
 
-def is_a_link_creama_sparse_decm_prob(args_1, args_2, seed=None):
+def is_a_link_crema_sparse_decm_prob(args_1, args_2, seed=None):
     """Q-ensemble source: "A faster Horse on a safer trail"."""
     if seed is not None:
         np.random.seed(seed)
