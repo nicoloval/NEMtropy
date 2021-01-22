@@ -3,7 +3,7 @@ import os
 import scipy.sparse
 from numba import jit, prange
 import time
-from .Undirected_new import *
+from netrecon.Undirected_new import *
 
 from . import ensemble_generator as eg
 # Stops Numba Warning for experimental feature
@@ -15,11 +15,11 @@ warnings.simplefilter(action='ignore',
 
 
 def degree(a):
-    """Returns matrix a degrees
+    """Returns symmetric matrix *a* degrees sequence.
 
-    :param a: matrix a
+    :param a: matrix a.
     :type a: numpy.ndarray, scipy.sparse
-    :return: degree sequence
+    :return: degree sequence.
     :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
@@ -31,11 +31,11 @@ def degree(a):
 
 
 def strength(a):
-    """Returns matrix a strengths sequence
+    """Returns symmetric matrix *a* strengths sequence.
 
-    :param a: matrix a
+    :param a: matrix a.
     :type a: numpy.ndarray, scipy.sparse
-    :return: strengths sequence
+    :return: strengths sequence.
     :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
@@ -47,13 +47,13 @@ def strength(a):
 
 
 def pmatrix_cm(x, args):
-    """Computes and returns pmatrix of UBCM
+    """Computes and returns pmatrix of UBCM.
 
-    :param x: solutions of UBCM
+    :param x: solutions of UBCM.
     :type x: numpy.ndarray
-    :param args: number of nodes
+    :param args: number of nodes.
     :type args: (int, )
-    :return: pmatrix UBCM
+    :return: pmatrix UBCM.
     :rtype: numpy.ndarray
     """
     n = args[0]
@@ -69,14 +69,13 @@ def pmatrix_cm(x, args):
 
 @jit(nopython=True)
 def iterative_cm(x, args):
-    """Computes loglikelihood parameters x at step
-    n+1 given their value at step n for UBCM
+    """Computes loglikelihood parameters x at step n+1 given their value at step n for UBCM.
 
-    :param x: loglikelihood parameters x at step n
+    :param x: loglikelihood parameters *x* at step n.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences
+    :param args: degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood parameters x at step n+1
+    :return: loglikelihood parameters *x* at step n+1.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -97,13 +96,13 @@ def iterative_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_cm(x, args):
-    """Computes loglikelihood of UBCM
+    """Computes loglikelihood of UBCM.
 
-    :param x: loglikelihood parameters x
+    :param x: loglikelihood parameters *x*.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences
+    :param args: degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood value
+    :return: loglikelihood value.
     :rtype: float
     """
     k = args[0]
@@ -122,13 +121,13 @@ def loglikelihood_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_cm(x, args):
-    """Computes loglikelihood first derivatives of UBCM
+    """Computes loglikelihood first derivatives of UBCM.
 
-    :param x: loglikelihood parameters x
+    :param x: loglikelihood parameters *x*.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences
+    :param args: degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood first derivatives
+    :return: loglikelihood first derivatives.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -147,14 +146,13 @@ def loglikelihood_prime_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_cm(x, args):
-    """Computes second derivatives (hessian matrix) of
-    UBCM loglikelihood function
+    """Computes second derivatives (hessian matrix) of UBCM loglikelihood function.
 
-    :param x: loglikelihood parameters x
+    :param x: loglikelihood parameters x.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences
+    :param args: degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix
+    :return: hessian matrix.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -184,14 +182,13 @@ def loglikelihood_hessian_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_cm(x, args):
-    """Computes the diagonal of UBCM loglikelihood function
-    hessian matrix
+    """Computes the diagonal of UBCM loglikelihood function hessian matrix.
 
-    :param x: loglikelihood parameters x
+    :param x: loglikelihood parameters x.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences
+    :param args: degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: diagonal of the hessian matrix
+    :return: diagonal of the hessian matrix.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -212,15 +209,13 @@ def loglikelihood_hessian_diag_cm(x, args):
 
 @jit(nopython=True)
 def iterative_crema(beta, args):
-    """Computes loglikelihood parameters x at step
-    n+1 given their value at step n for CReMa.
-    The UBCM pmatrix is pre-computed and explicitly passed
+    """Computes loglikelihood parameters x at step n+1 given their value at step n for CReMa. The UBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: loglikelihood parameters beta at step n
+    :param beta: loglikelihood parameters beta at step n.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix
+    :param args: strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood parameters beta at step n+1
+    :return: loglikelihood parameters beta at step n+1.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -241,17 +236,13 @@ def iterative_crema(beta, args):
 
 @jit(nopython=True, parallel=True, nogil=True)
 def iterative_crema_sparse(beta, args):
-    """Computes loglikelihood parameters x at step
-    n+1 given their value at step n for CReMa.
-    The UBCM pmatrix is computed inside the function
-    in order to avoid memory errors due to the dimensions
-    of the latter
+    """Computes loglikelihood parameters x at step n+1 given their value at step n for CReMa. The UBCM pmatrix is computed inside the function in order to avoid memory errors due to the dimensions of the latter.
 
-    :param beta: loglikelihood parameters beta at step n
+    :param beta: loglikelihood parameters beta at step n.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and UBCM solutions
+    :param args: strengths sequence and UBCM solutions.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood parameters beta at step n+1
+    :return: loglikelihood parameters beta at step n+1.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -291,14 +282,13 @@ def iterative_crema_sparse_2(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_crema(beta, args):
-    """Computes CReMa loglikelihood function.
-    The UBCM pmatrix is pre-computed and explicitly passed
+    """Computes CReMa loglikelihood function. The UBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: loglikelihood parameters beta
+    :param beta: loglikelihood parameters beta.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix
+    :param args: strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood value
+    :return: loglikelihood value.
     :rtype: float
     """
     s = args[0]
@@ -319,16 +309,13 @@ def loglikelihood_crema(beta, args):
 
 @jit(nopython=True, nogil=True)
 def loglikelihood_crema_sparse(beta, args):
-    """Computes CReMa loglikelihood function.
-    The UBCM pmatrix is computed inside the function
-    in order to avoid memory errors due to the dimensions
-    of the latter
+    """Computes CReMa loglikelihood function. The UBCM pmatrix is computed inside the function in order to avoid memory errors due to the dimensions of the latter.
 
-    :param beta: loglikelihood parameters beta
+    :param beta: loglikelihood parameters beta.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and UBCM solutions
+    :param args: strengths sequence and UBCM solutions.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood value
+    :return: loglikelihood value.
     :rtype: float
     """
     s = args[0]
@@ -349,14 +336,13 @@ def loglikelihood_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_crema(beta, args):
-    """Computes CReMa loglikelihood function first derivatives.
-    The UBCM pmatrix is pre-computed and explicitly passed
+    """Computes CReMa loglikelihood function first derivatives. The UBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: loglikelihood parameters beta
+    :param beta: loglikelihood parameters beta.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix
+    :param args: strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood first derivatives
+    :return: loglikelihood first derivatives.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -397,16 +383,13 @@ def loglikelihood_prime_crema_sparse_2(beta, args):
 
 @jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_prime_crema_sparse(beta, args):
-    """Computes CReMa loglikelihood function first derivatives.
-    The UBCM pmatrix is computed inside the function
-    in order to avoid memory errors due to the dimensions
-    of the latter
+    """Computes CReMa loglikelihood function first derivatives. The UBCM pmatrix is computed inside the function in order to avoid memory errors due to the dimensions of the latter.
 
-    :param beta: loglikelihood parameters beta
+    :param beta: loglikelihood parameters beta.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and UBCM solutions
+    :param args: strengths sequence and UBCM solutions.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood first derivatives
+    :return: loglikelihood first derivatives.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -425,15 +408,13 @@ def loglikelihood_prime_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_crema(beta, args):
-    """Computes CReMa loglikelihood function second derivatives
-    (hessian matrix).
-    The UBCM pmatrix is pre-computed and explicitly passed
+    """Computes CReMa loglikelihood function second derivatives (hessian matrix). The UBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: loglikelihood parameters beta
+    :param beta: loglikelihood parameters beta.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix
+    :param args: strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix
+    :return: hessian matrix.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -455,14 +436,13 @@ def loglikelihood_hessian_crema(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_crema(beta, args):
-    """Computes the diagonal of CReMa loglikelihood function hessian matrix.
-    The UBCM pmatrix is pre-computed and explicitly passed
+    """Computes the diagonal of CReMa loglikelihood function hessian matrix. The UBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: loglikelihood parameters beta
+    :param beta: loglikelihood parameters beta.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix
+    :param args: strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix diagonal
+    :return: hessian matrix diagonal.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -500,16 +480,13 @@ def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
 
 @jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_hessian_diag_crema_sparse(beta, args):
-    """Computes the diagonal of CReMa loglikelihood function hessian matrix.
-    The UBCM pmatrix is computed inside the function
-    in order to avoid memory errors due to the dimensions
-    of the latter
+    """Computes the diagonal of CReMa loglikelihood function hessian matrix. The UBCM pmatrix is computed inside the function in order to avoid memory errors due to the dimensions of the latter.
 
-    :param beta: loglikelihood parameters beta
+    :param beta: loglikelihood parameters beta.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and UBCM solutions
+    :param args: strengths sequence and UBCM solutions.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix diagonal
+    :return: hessian matrix diagonal.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -527,14 +504,13 @@ def loglikelihood_hessian_diag_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def iterative_ecm(sol, args):
-    """Computes loglikelihood parameters x at step
-    n+1 given their value at step n for UECM
+    """Computes loglikelihood parameters x at step n+1 given their value at step n for UECM.
 
-    :param sol: loglikelihood parameters x and y at step n
+    :param sol: loglikelihood parameters x and y at step n.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences
+    :param args: degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood parameters x and y at step n+1
+    :return: loglikelihood parameters x and y at step n+1.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -568,14 +544,13 @@ def iterative_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_ecm(sol, args):
-    """Computes UECM loglikelihood function given
-    the parameters x and y
+    """Computes UECM loglikelihood function given the parameters x and y.
 
-    :param sol: loglikelihood parameters x and y
+    :param sol: loglikelihood parameters x and y.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences
+    :param args: degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood function value
+    :return: loglikelihood function value.
     :rtype: float
     """
     k = args[0]
@@ -596,14 +571,13 @@ def loglikelihood_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_ecm(sol, args):
-    """Computes UECM loglikelihood function first dervatives
-    given the parameters x and y
+    """Computes UECM loglikelihood function first dervatives given the parameters x and y.
 
-    :param sol: loglikelihood parameters x and y
+    :param sol: loglikelihood parameters x and y.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences
+    :param args: degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood first derivatives
+    :return: loglikelihood first derivatives.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -630,14 +604,13 @@ def loglikelihood_prime_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_ecm(sol, args):
-    """Computes UECM loglikelihood function second dervatives
-    (hessian matrix) given the parameters x and y
+    """Computes UECM loglikelihood function second dervatives (hessian matrix) given the parameters x and y.
 
-    :param sol: loglikelihood parameters x and y
+    :param sol: loglikelihood parameters x and y.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences
+    :param args: degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix
+    :return: hessian matrix.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -706,14 +679,13 @@ def loglikelihood_hessian_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_ecm(sol, args):
-    """Computes the diagonal of UECM hessian matrix
-    given the parameters x and y
+    """Computes the diagonal of UECM hessian matrix given the parameters x and y.
 
-    :param sol: loglikelihood parameters x and y
+    :param sol: loglikelihood parameters x and y.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences
+    :param args: degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix diagonal
+    :return: hessian matrix diagonal.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -879,7 +851,7 @@ def solver(
         # step update
         n_steps += 1
 
-        if verbose:
+        if verbose == True:
             print("step {}".format(n_steps))
             print("alpha = {}".format(alfa))
             print("|f(x)| = {}".format(norm))
@@ -901,7 +873,7 @@ def solver(
     toc_loop = time.time() - tic_loop
     toc_all = time.time() - tic_all
 
-    if verbose:
+    if verbose == True:
         print("Number of steps for convergence = {}".format(n_steps))
         print("toc_init = {}".format(toc_init))
         print("toc_jacfun = {}".format(toc_jacfun))
@@ -920,17 +892,13 @@ def solver(
 
 @jit(nopython=True)
 def linsearch_fun_crema(X, args):
-    """Linsearch function for CReM newton and quasinewton methods.
-    The alfa parameters controls the size of the step
-     such that the solution at the next iteration is better
-     than the actual one
+    """Linsearch function for CReM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
 
-    :param X: loglikelihood parameters, increment, beta parameter,
-     alfa parameter and loglikelihood prime function
+    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
     :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters
+    :param args: CReM loglikelihood function and its parameters.
     :type args: (func, tuple)
-    :return: alfa parameter value
+    :return: alfa parameter value.
     :rtype: float
     """
     x = X[0]
@@ -959,15 +927,11 @@ def linsearch_fun_crema(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_crema_fixed(X):
-    """Linsearch function for CReM fixed-point method.
-    The alfa parameters controls the size of the step
-     such that its norm at the next step is lower than the
-     actual one
+    """Linsearch function for CReM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
 
-    :param X: increment, old increment, beta parameter,
-     alfa parameter and iteration number
+    :param X: increment, old increment, beta parameter, alfa parameter and iteration number.
     :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
-    :return: alfa parameter value
+    :return: alfa parameter value.
     :rtype: float
     """
     dx = X[1]
@@ -992,15 +956,11 @@ def linsearch_fun_crema_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_CM_new(X, args):
-    """Linsearch function for UBCM newton and quasinewton methods.
-    The alfa parameters controls the size of the step
-     such that the solution at the next iteration is better
-     than the actual one
+    """Linsearch function for UBCM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
 
-    :param X: loglikelihood parameters, increment, beta parameter,
-     alfa parameter and loglikelihood prime function
+    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
     :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters
+    :param args: CReM loglikelihood function and its parameters.
     :type args: (func, tuple)
     :return: alfa parameter value
     :rtype: float
@@ -1030,15 +990,11 @@ def linsearch_fun_CM_new(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_CM_new_fixed(X):
-    """Linsearch function for UBCM fixed-point method.
-    The alfa parameters controls the size of the step
-     such that its norm at the next step is lower than the
-     actual one
+    """Linsearch function for UBCM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
 
-    :param X: increment, old increment, beta parameter,
-     alfa parameter and iteration number
+    :param X: increment, old increment, beta parameter, alfa parameter and iteration number.
     :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
-    :type X: (numpy.ndarray, float, float, int)
+    :type X: (numpy.ndarray, float, float, int).
     :return: alfa parameter value
     :rtype: float
     """
@@ -1064,17 +1020,13 @@ def linsearch_fun_CM_new_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_CM(X, args):
-    """Linsearch function for UBCM newton and quasinewton methods.
-    The alfa parameters controls the size of the step
-     such that the solution at the next iteration is better
-     than the actual one
+    """Linsearch function for UBCM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
 
-    :param X: loglikelihood parameters, increment, beta parameter,
-     alfa parameter and loglikelihood prime function
+    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
     :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters
+    :param args: CReM loglikelihood function and its parameters.
     :type args: (func, tuple)
-    :return: alfa parameter value
+    :return: alfa parameter value.
     :rtype: float
     """
     x = X[0]
@@ -1107,15 +1059,11 @@ def linsearch_fun_CM(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_CM_fixed(X):
-    """Linsearch function for UBCM fixed-point method.
-    The alfa parameters controls the size of the step
-     such that its norm at the next step is lower than the
-     actual one
+    """Linsearch function for UBCM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
 
-    :param X: loglikelihood parameters, increment, old increment,
-     beta parameter, alfa parameter and iteration number
+    :param X: loglikelihood parameters, increment, old increment, beta parameter, alfa parameter and iteration number.
     :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray float, float, int)
-    :return: alfa parameter value
+    :return: alfa parameter value.
     :rtype: float
     """
     x = X[0]
@@ -1146,17 +1094,13 @@ def linsearch_fun_CM_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_ECM_new(X, args):
-    """Linsearch function for UECM newton and quasinewton methods.
-    The alfa parameters controls the size of the step
-     such that the solution at the next iteration is better
-     than the actual one
+    """Linsearch function for UECM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
 
-    :param X: loglikelihood parameters, increment, beta parameter,
-     alfa parameter and loglikelihood prime function
+    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
     :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters
+    :param args: CReM loglikelihood function and its parameters.
     :type args: (func, tuple)
-    :return: alfa parameter value
+    :return: alfa parameter value.
     :rtype: float
     """
     x = X[0]
@@ -1196,15 +1140,11 @@ def linsearch_fun_ECM_new(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_ECM_new_fixed(X):
-    """Linsearch function for UECM fixed-point method.
-    The alfa parameters controls the size of the step
-     such that its norm at the next step is lower than the
-     actual one
+    """Linsearch function for UECM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
 
-    :param X: loglikelihood parameters, increment, old increment,
-     beta parameter, alfa parameter and iteration number
+    :param X: loglikelihood parameters, increment, old increment, beta parameter, alfa parameter and iteration number.
     :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray float, float, int)
-    :return: alfa parameter value
+    :return: alfa parameter value.
     :rtype: float
     """
     x = X[0]
@@ -1242,17 +1182,13 @@ def linsearch_fun_ECM_new_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_ECM(X, args):
-    """Linsearch function for UECM newton and quasinewton methods.
-    The alfa parameters controls the size of the step
-     such that the solution at the next iteration is better
-     than the actual one
+    """Linsearch function for UECM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
 
-    :param X: loglikelihood parameters, increment, beta parameter,
-     alfa parameter and loglikelihood prime function
+    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
     :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters
+    :param args: CReM loglikelihood function and its parameters.
     :type args: (func, tuple)
-    :return: alfa parameter value
+    :return: alfa parameter value.
     :rtype: float
     """
     x = X[0]
@@ -1295,15 +1231,11 @@ def linsearch_fun_ECM(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_ECM_fixed(X):
-    """Linsearch function for UECM fixed-point method.
-    The alfa parameters controls the size of the step
-     such that its norm at the next step is lower than the
-     actual one
+    """Linsearch function for UECM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
 
-    :param X: loglikelihood parameters, increment, old increment,
-     beta parameter, alfa parameter and iteration number
+    :param X: loglikelihood parameters, increment, old increment, beta parameter, alfa parameter and iteration number.
     :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray float, float, int)
-    :return: alfa parameter value
+    :return: alfa parameter value.
     :rtype: float
     """
     x = X[0]
@@ -1348,21 +1280,21 @@ def sufficient_decrease_condition(
 ):
     """Return boolean indicator if upper wolfe condition are respected.
 
-    :param f_old: loglikelihood value at the previous iteration
+    :param f_old: loglikelihood value at the previous iteration.
     :type f_old: float
-    :param f_new: loglikelihood value at the actual iteration
+    :param f_new: loglikelihood value at the actual iteration.
     :type f_new: float
-    :param alpha: alfa parameter of linsearch
+    :param alpha: alfa parameter of linsearch.
     :type alpha: float
-    :param grad_f: loglikelihood prime
+    :param grad_f: loglikelihood prime.
     :type grad_f: numpy.ndarray
-    :param p: increment at the actual iteration
+    :param p: increment at the actual iteration.
     :type p: numpy.ndarray
-    :param c1: [description], defaults to 1e-04
+    :param c1: [description], defaults to 1e-04.
     :type c1: parameter wolfe conditon, optional
-    :param c2: parameter wolfe conditon, defaults to 0.9
+    :param c2: parameter wolfe conditon, defaults to 0.9.
     :type c2: float, optional
-    :return: condition is satisfied
+    :return: condition is satisfied.
     :rtype: bool
     """
     sup = f_old + c1 * alpha * np.dot(grad_f, p.T)
@@ -1371,15 +1303,14 @@ def sufficient_decrease_condition(
 
 
 def hessian_regulariser_function(B, eps):
-    """ Guarantes that hessian matrix is definitie posive by adding
-     identity matrix multiplied for eps.
+    """ Guarantes that hessian matrix is definitie posive by adding identity matrix multiplied for eps.
      
 
-    :param B: hessian matrix
+    :param B: hessian matrix.
     :type B: numpy.ndarray
-    :param eps: parameter multypling the identity
+    :param eps: parameter multypling the identity.
     :type eps: float
-    :return: regularised hessian matrix
+    :return: regularised hessian matrix.
     :rtype: numpy.ndarray
     """
     B = (B + B.transpose()) * 0.5  # symmetrization
@@ -1389,14 +1320,13 @@ def hessian_regulariser_function(B, eps):
 
 
 def hessian_regulariser_function_eigen_based(B, eps):
-    """Guarantes that hessian matrix eigenvalues are posive by
-     manipulating their values.
+    """Guarantes that hessian matrix eigenvalues are posive by manipulating their values.
 
-    :param B: hessian matrix
+    :param B: hessian matrix.
     :type B: numpy.ndarray
-    :param eps: controls the regularisation
+    :param eps: controls the regularisation.
     :type eps: float
-    :return: regularised hessian matrix
+    :return: regularised hessian matrix.
     :rtype: numpy.ndarray
     """
     B = (B + B.transpose()) * 0.5  # symmetrization
@@ -1409,12 +1339,11 @@ def hessian_regulariser_function_eigen_based(B, eps):
 
 @jit(nopython=True)
 def expected_degree_cm(sol):
-    """Computes the expected degrees of UBCM given
-     its solution x
+    """Computes the expected degrees of UBCM given its solution x.
 
-    :param sol: UBCM solutions
+    :param sol: UBCM solutions.
     :type sol: numpy.ndarray
-    :return: expected degrees sequence
+    :return: expected degrees sequence.
     :rtype: numpy.ndarray
     """
     ex_k = np.zeros_like(sol, dtype=np.float64)
@@ -1430,14 +1359,13 @@ def expected_degree_cm(sol):
 
 @jit(nopython=True)
 def expected_strength_crema(sol, adj):
-    """Computes the expected strengths of CReMa given
-     its solution beta
+    """Computes the expected strengths of CReMa given its solution beta.
 
-    :param sol: CReMa solutions
+    :param sol: CReMa solutions.
     :type sol: numpy.ndarray
-    :param adj: adjacency/pmatrix
+    :param adj: adjacency/pmatrix.
     :type adj: numpy.ndarray
-    :return: expected strengths sequence
+    :return: expected strengths sequence.
     :rtype: numpy.ndarray
     """
     ex_s = np.zeros_like(sol, dtype=np.float64)
@@ -1454,14 +1382,13 @@ def expected_strength_crema(sol, adj):
 
 @jit(nopython=True)
 def expected_strength_crema_sparse(sol, adj):
-    """Computes the expected strengths of CReMa given
-     its solution beta and the solutions of UBCM
+    """Computes the expected strengths of CReMa given its solution beta and the solutions of UBCM.
 
-    :param sol: CReMa solutions
+    :param sol: CReMa solutions.
     :type sol: numpy.ndarray
-    :param adj: UBCM solutions
+    :param adj: UBCM solutions.
     :type adj: numpy.ndarray
-    :return: expected strengths sequence
+    :return: expected strengths sequence.
     :rtype: numpy.ndarray
     """
     ex_s = np.zeros_like(sol, dtype=np.float64)
@@ -1480,12 +1407,11 @@ def expected_strength_crema_sparse(sol, adj):
 
 @jit(nopython=True)
 def expected_ecm(sol):
-    """Computes expected degrees and strengths
-     sequence given solution x and y of UECM
+    """Computes expected degrees and strengths sequence given solution x and y of UECM.
 
-    :param sol: UECM solutions
+    :param sol: UECM solutions.
     :type sol: numpy.ndarray
-    :return: expected degrees and strengths sequence
+    :return: expected degrees and strengths sequence.
     :rtype: numpy.ndarray
     """
     n = int(len(sol) / 2)
@@ -1505,15 +1431,12 @@ def expected_ecm(sol):
 
 
 def edgelist_from_edgelist(edgelist):
-    """Creates a new edgelist with the indexes of the nodes instead of the names.
-    Returns also a dictionary that keep track of the nodes and, depending of the type
-     of graph, degree and strengths sequences.
+    """Creates a new edgelist with the indexes of the nodes instead of the names. Returns also a dictionary that keep track of the nodes and, depending on the type of graph, degree and strengths sequences.
 
-    :param edgelist: edgelist
-    :type edgelist: numpy.ndarray, list
-    :return: relabelled edgelist, degrees sequence,
-     strengths sequence and new labels to old labels dictionary
-    :rtype: numpy.ndarray, numpy.ndarray, numpy.ndarray and dict
+    :param edgelist: edgelist.
+    :type edgelist: numpy.ndarray or list
+    :return: edgelist, degrees sequence, strengths sequence and new labels to old labels dictionary.
+    :rtype: (numpy.ndarray, numpy.ndarray, numpy.ndarray, dict)
     """
     edgelist = [tuple(item) for item in edgelist]
     if len(edgelist[0]) == 2:
@@ -1577,16 +1500,15 @@ def edgelist_from_edgelist(edgelist):
 
 
 class UndirectedGraph:
-    """Undirected Graph Class. Can be initialised with adjacency matrix,
-     edgelist, degrees sequence or strengths sequence.
+    """Undirected Graph instance can be initialised with adjacency matrix, edgelist, degrees sequence or strengths sequence.
 
-    :param adjacency: Adjacency matrix, defaults to None
-    :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional
-    :param edgelist: edgelist, defaults to None
+    :param adjacency: Adjacency matrix, defaults to None.
+    :type adjacency: numpy.ndarray, list or scipy.sparse_matrix, optional
+    :param edgelist: edgelist, defaults to None.
     :type edgelist: numpy.ndarray, list, optional
-    :param degree_sequence: degrees sequence, defaults to None
+    :param degree_sequence: degrees sequence, defaults to None.
     :type degree_sequence: numpy.ndarray, optional
-    :param strength_sequence: strengths sequence, defaults to None
+    :param strength_sequence: strengths sequence, defaults to None.
     :type strength_sequence: numpy.ndarray, optional
     """
     def __init__(
@@ -1596,16 +1518,15 @@ class UndirectedGraph:
         degree_sequence=None,
         strength_sequence=None,
     ):
-        """Initilizes all the necessary attribitus for Undirected
-         graph class.
+        """Initilizes all the necessary attribitus for Undirected graph class.
 
-        :param adjacency: Adjacency matrix, defaults to None
+        :param adjacency: Adjacency matrix, defaults to None.
         :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional
-        :param edgelist: edgelist, defaults to None
+        :param edgelist: edgelist, defaults to None.
         :type edgelist: numpy.ndarray, list, optional
-        :param degree_sequence: degrees sequence, defaults to None
+        :param degree_sequence: degrees sequence, defaults to None.
         :type degree_sequence: numpy.ndarray, optional
-        :param strength_sequence: strengths sequence, defaults to None
+        :param strength_sequence: strengths sequence, defaults to None.
         :type strength_sequence: numpy.ndarray, optional
         """
         self.n_nodes = None
@@ -1811,7 +1732,7 @@ class UndirectedGraph:
     def set_adjacency_matrix(self, adjacency):
         """Initialises graph given the adjacency matrix.
 
-        :param adjacency: ajdacency matrix
+        :param adjacency: ajdacency matrix.
         :type adjacency: numpy.ndarray, list, scipy.sparse_matrix
         """
         if self.is_initialized:
@@ -1824,7 +1745,7 @@ class UndirectedGraph:
     def set_edgelist(self, edgelist):
         """Initialises graph given the edgelist.
 
-        :param edgelist: edgelist
+        :param edgelist: edgelist.
         :type edgelist: numpy.ndarray, list
         """
         if self.is_initialized:
@@ -1837,7 +1758,7 @@ class UndirectedGraph:
     def set_degree_sequences(self, degree_sequence):
         """Initialises graph given the degree sequence.
 
-        :param degree_sequence: degrees sequence
+        :param degree_sequence: degrees sequence.
         :type degree_sequence: numpy.ndarray
         """
         if self.is_initialized:
@@ -1848,7 +1769,9 @@ class UndirectedGraph:
             self._initialize_graph(degree_sequence=degree_sequence)
 
     def clean_edges(self):
-        """Deletes all the initialiased attributes
+        """
+        Deletes all the initialiased attributes.
+
         """
         self.adjacency = None
         self.edgelist = None
@@ -1868,33 +1791,6 @@ class UndirectedGraph:
         linsearch=True,
         regularise=True,
     ):
-        """Solves 'model' with 'method' for the given undirected graph
-
-        :param : starting points of the model, the available
-         initialisations are ['random', 'degrees_minor', 'uniform',]
-         , defaults to None
-        :type initial_guess: [type], optional
-        :param model: [description], defaults to "cm"
-        :type model: str, optional
-        :param method: [description], defaults to "quasinewton"
-        :type method: str, optional
-        :param max_steps: [description], defaults to 100
-        :type max_steps: int, optional
-        :param tol: [description], defaults to 1e-8
-        :type tol: [type], optional
-        :param eps: [description], defaults to 1e-8
-        :type eps: [type], optional
-        :param full_return: [description], defaults to False
-        :type full_return: bool, optional
-        :param verbose: [description], defaults to False
-        :type verbose: bool, optional
-        :param linsearch: [description], defaults to True
-        :type linsearch: bool, optional
-        :param regularise: [description], defaults to True
-        :type regularise: bool, optional
-        :return: [description]
-        :rtype: [type]
-        """
         self.last_model = model
         self.full_return = full_return
         self.initial_guess = initial_guess
@@ -1948,6 +1844,9 @@ class UndirectedGraph:
             self._set_solved_problem_crema(solution)
 
     def degree_reduction(self):
+        """
+        Carries out degree reduction.
+        """
         self.r_dseq, self.r_index_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
             self.dseq,
             return_index=True,
@@ -1961,6 +1860,11 @@ class UndirectedGraph:
         self.is_reduced = True
 
     def _set_initial_guess(self, model):
+        """Calls the proper set initial guess function given the selected *model*.
+
+        :param model: Selected model.
+        :type model: str
+        """
 
         if model in ["cm", "cm-new"]:
             self._set_initial_guess_cm()
@@ -1970,8 +1874,11 @@ class UndirectedGraph:
             self._set_initial_guess_crema()
 
     def _set_initial_guess_cm(self):
-        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
-        # If you want to customize the initial guess, remember that the code starzts with a reduced number of rows and columns.
+        """Sets the initial guess for UBCM given the choice made by the user.
+
+        :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.
+        :raises TypeError: raises type error if the selected *initial_guess* is wrong.
+        """
 
         if ~self.is_reduced:
             self.degree_reduction()
@@ -2014,8 +1921,11 @@ class UndirectedGraph:
             self.x0 = self.r_x
 
     def _set_initial_guess_crema(self):
-        # The preselected initial guess works best usually. The suggestion is, if this does not work, trying with random initial conditions several times.
-        # If you want to customize the initial guess, remember that the code starts with a reduced number of rows and columns.
+        """Sets the initial guess for CReMa given the choice made by the user.
+
+        :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.
+        :raises TypeError: raises type error if the selected *initial_guess* is wrong.
+        """
 
         if isinstance(self.initial_guess, np.ndarray):
             self.beta = self.initial_guess
@@ -2044,10 +1954,10 @@ class UndirectedGraph:
         self.x0 = self.beta
 
     def _set_initial_guess_ecm(self):
-        """[summary]
+        """Sets the initial guess for UECM given the choice made by the user.
 
-        :raises ValueError: [description]
-        :raises TypeError: [description]
+        :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.
+        :raises TypeError: raises type error if the selected *initial_guess* is wrong.
         """
         if isinstance(self.initial_guess, np.ndarray):
             self.x = self.initial_guess[:self.n_nodes]
@@ -2098,6 +2008,9 @@ class UndirectedGraph:
 
     # DA SISTEMARE
     def solution_error(self):
+        """
+        Computes the error given the solutions to the optimisation problem.
+        """
         if self.last_model in ["cm", "cm-new", "crema", "crema-sparse"]:
             if self.x is not None:
                 ex_k = expected_degree_cm(self.x)
@@ -2162,6 +2075,11 @@ class UndirectedGraph:
             self.error = max(self.error_strength, self.error_degree)
 
     def _set_args(self, model):
+        """Sets up functions arguments given for the selected *model*.
+
+        :param model: model name.
+        :type model: str
+        """
 
         if model in ["crema", "crema-sparse"]:
             self.args = (
@@ -2175,14 +2093,13 @@ class UndirectedGraph:
             self.args = (self.dseq, self.strength_sequence)
 
     def _initialize_problem(self, model, method):
-        """Initialises all the functions and parameters
-         necessary used by the selected 'model' and 'method'.
+        """Initialises all the functions and parameters necessary used by the selected 'model' and 'method'.
 
-        :param model: model name
+        :param model: model name.
         :type model: str
-        :param method: method name
+        :param method: method name.
         :type method: str
-        :raises ValueError: Raise an error if model/method choice is not valid
+        :raises ValueError: Raise an error if model/method choice is not valid.
         """
 
         self._set_initial_guess(model)
@@ -2527,7 +2444,7 @@ class UndirectedGraph:
         model,
         method,
         initial_guess=None,
-        adjacency=None,
+        adjacency="cm-new",
         method_adjacency="newton",
         initial_guess_adjacency="random",
         max_steps=100,
@@ -2537,7 +2454,58 @@ class UndirectedGraph:
         tol=1e-8,
         eps=1e-8,
     ):
-        """function to switch around the various problems"""
+        """[summary]
+
+        :param model: Available models are:
+
+            - *cm*: solves UBCM respect to the parameters *x* of the loglikelihood function, it works for uweighted undirected graphs [insert ref].
+            - *cm-new*: differently from the *cm* option, *cm-new* considers the exponents of *x* as parameters [insert ref].
+            - *ecm*: solves UECM respect to the parameters *x* and *y* of the loglikelihood function, it is conceived for weighted undirected graphs [insert ref].
+            - *ecm-new*: differently from the *ecm* option, *ecm-new* considers the exponents of *x* and *y* as parameters [insert ref].
+            - *crema*: solves CReMa for a weighted undirectd graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
+            - *crema-sparse*: alternative implementetio of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
+
+        :type model: str
+        :param method: Available methods to solve the given *model* are:
+
+            - *newton*: uses Newton-Rhapson method to solve the selected model, it can be memory demanding for *crema* because it requires the computation of the entire Hessian matrix. This method is not available for *creama-sparse*.
+            - *quasinewton*: uses Newton-Rhapson method with Hessian matrix approximated by its principal diagonal to find parameters maximising loglikelihood function.
+            - *fixed-point*: uses a fixed-point method to find parameters maximising loglikelihood function.
+
+        :type method: str
+        :param initial_guess: Starting point solution may affect the results of the optization process. The user can provid an initial guess or choose between the following options:
+
+            - **Binary Models**:
+                - *random*: random numbers in (0, 1);
+                - *uniform*: uniform initial guess in (0, 1);
+                - *degrees*: initial guess of each node is proportianal to its degree;
+                - *degrees_minor*: initial guess of each node is inversely proportional to its degree;
+                - *chung_lu*: initial guess given by Chung-Lu formula;
+            - **Weighted Models**:
+                - *random*: random numbers in (0, 1);
+                - *uniform*: uniform initial guess in (0, 1);
+                - *strengths*: initial guess of each node is proportianal to its stength;
+                - *strengths_minor*: initial guess of each node is inversely proportional to its strength;
+        :type initial_guess: str, optional
+        :param adjacency: Adjacency can be a binary method (defaults is *cm-new*) or an adjacency matrix.
+        :type adjacency: str or numpy.ndarray, optional
+        :param method_adjacency: If adjacency is a *model*, it is the *methdod* used to solve it. Defaults to "newton".
+        :type method_adjacency: str, optional
+        :param initial_guess_adjacency: If adjacency is a *model*, it is the chosen initial guess. Defaults to "random".
+        :type initial_guess_adjacency: str, optional
+        :param max_steps: maximum number of iteration, defaults to 100.
+        :type max_steps: int, optional
+        :param full_return: If True the algorithm returns more statistics than the obtained solution, defaults to False.
+        :type full_return: bool, optional
+        :param verbose: If True the algorithm prints a bunch of statistics at each step, defaults to False.
+        :type verbose: bool, optional
+        :param linsearch: If True the linsearch function is active, defaults to True.
+        :type linsearch: bool, optional
+        :param tol: parameter controlling the tollerance of the norm the gradient function, defaults to 1e-8.
+        :type tol: float, optional
+        :param eps: parameter controlling the tollerance of the difference between two iterations, defaults to 1e-8.
+        :type eps: float, optional
+        """
         # TODO: aggiungere tutti i metodi
         if model in ["cm", "cm-new", "ecm", "ecm-new"]:
             self._solve_problem(
