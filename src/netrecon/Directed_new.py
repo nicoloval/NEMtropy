@@ -1,7 +1,5 @@
 import numpy as np
-import scipy.sparse
 from numba import jit
-import time
 from . import Directed_graph_Class as sample
 
 # Stops Numba Warning for experimental feature
@@ -10,12 +8,22 @@ import warnings
 
 warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
-# dcm functions
-
 
 @jit(nopython=True)
-def iterative_dcm_new_bis(theta, args):
-    """run only on non-zero indexes"""
+def iterative_dcm_new_2(theta, args):
+    """Returns the next iterative step for the DBCM.
+        It is based on the exponential version of the DBCM.
+        This version only runs on non-zero indices.
+
+    :param theta: Previous solution iterative step
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in strengths sequences,
+        adjacency matrix, and non zero out and in indices
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: next solution iterative step
+    :rtype: numpy.ndarray
+    """
     # problem fixed parameters
     k_out = args[0]
     k_in = args[1]
@@ -56,7 +64,31 @@ def iterative_dcm_new_bis(theta, args):
 
 @jit(nopython=True)
 def iterative_dcm_new(theta, args):
-    """run on all indexes"""
+    """Returns the next iterative step for the DBCM [1]_ [2]_.
+    It is based on the exponential version of the DBCM.
+
+    :param theta: Previous solution iterative step
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degrees sequences,
+         non zero out and in indices,
+         and the sequence of classes cardinalities
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: next solution iterative step
+    :rtype: numpy.ndarray
+
+    .. rubric: References
+    .. [1] Squartini, Tiziano, and Diego Garlaschelli.
+        "Analytical maximum-likelihood method to detect patterns
+        in real networks."
+        New Journal of Physics 13.8 (2011): 083001.
+        `https://arxiv.org/abs/1103.0701 <https://arxiv.org/abs/1103.0701>`_
+
+    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+        "Unbiased sampling of network ensembles."
+        New Journal of Physics 17.2 (2015): 023052.
+        `https://arxiv.org/abs/1406.1197 <https://arxiv.org/abs/1406.1197>`_
+    """
     # problem fixed parameters
     k_out = args[0]
     k_in = args[1]
@@ -93,8 +125,30 @@ def iterative_dcm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_dcm_new(theta, args):
-    """loglikelihood function for dcm
-    reduced, not-zero indexes
+    """Returns DBCM [1]_ [2]_ loglikelihood function evaluated in x.
+    It is based on the exponential version of the DBCM.
+
+    :param theta: Evaluating point
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degrees sequences,
+        and non zero out and in indices,
+        and the sequence of classes cardinalities
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood value
+    :rtype: float
+
+    .. rubric: References
+    .. [1] Squartini, Tiziano, and Diego Garlaschelli.
+        "Analytical maximum-likelihood method to detect patterns
+        in real networks."
+        New Journal of Physics 13.8 (2011): 083001.
+        `https://arxiv.org/abs/1103.0701 <https://arxiv.org/abs/1103.0701>`_
+
+    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+        "Unbiased sampling of network ensembles."
+        New Journal of Physics 17.2 (2015): 023052.
+        `https://arxiv.org/abs/1406.1197 <https://arxiv.org/abs/1406.1197>`_
     """
     # problem fixed parameters
     k_out = args[0]
@@ -109,7 +163,6 @@ def loglikelihood_dcm_new(theta, args):
     n = len(k_out)
 
     f = 0
-    x = np.exp(-theta)
 
     for i in nz_index_out:
         f -= c[i] * k_out[i] * theta[i]
@@ -131,6 +184,31 @@ def loglikelihood_dcm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_dcm_new(theta, args):
+    """Returns DBCM [1]_ [2]_ loglikelihood gradient function evaluated in x.
+    It is based on the exponential version of the DBCM.
+
+    :param theta: Evaluating point
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degrees sequences,
+        and non zero out and in indices,
+        and the sequence of classes cardinalities
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood gradient
+    :rtype: numpy.ndarray
+
+    .. rubric: References
+    .. [1] Squartini, Tiziano, and Diego Garlaschelli.
+        "Analytical maximum-likelihood method to detect patterns
+        in real networks."
+        New Journal of Physics 13.8 (2011): 083001.
+        `https://arxiv.org/abs/1103.0701 <https://arxiv.org/abs/1103.0701>`_
+
+    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+        "Unbiased sampling of network ensembles."
+        New Journal of Physics 17.2 (2015): 023052.
+        `https://arxiv.org/abs/1406.1197 <https://arxiv.org/abs/1406.1197>`_
+    """
     # problem fixed parameters
     k_out = args[0]
     k_in = args[1]
@@ -175,6 +253,32 @@ def loglikelihood_prime_dcm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_dcm_new(theta, args):
+    """Returns DBCM [1]_ [2]_ loglikelihood hessian function evaluated in x.
+    It is based on the exponential version of the DBCM.
+
+    :param theta: Evaluating point
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degrees sequences,
+        and non zero out and in indices,
+        and the sequence of classes cardinalities
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian matrix
+    :rtype: numpy.ndarray
+
+    .. rubric: References
+    .. [1] Squartini, Tiziano, and Diego Garlaschelli.
+        "Analytical maximum-likelihood method to detect patterns
+         in real networks."
+        New Journal of Physics 13.8 (2011): 083001.
+        `https://arxiv.org/abs/1103.0701 <https://arxiv.org/abs/1103.0701>`_
+
+    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+        "Unbiased sampling of network ensembles."
+        New Journal of Physics 17.2 (2015): 023052.
+        `https://arxiv.org/abs/1406.1197 <https://arxiv.org/abs/1406.1197>`_
+    """
+
     k_out = args[0]
     k_in = args[1]
     nz_out_index = args[2]
@@ -219,6 +323,31 @@ def loglikelihood_hessian_dcm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_dcm_new(theta, args):
+    """Returns the diagonal of the DBCM [1]_ [2]_ loglikelihood hessian
+    function evaluated in x. It is based on DBCM exponential version.
+
+    :param theta: Evaluating point
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degrees sequences,
+        and non zero out and in indices,
+        and the sequence of classes cardinalities
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian matrix diagonal
+    :rtype: numpy.ndarray
+
+    .. rubric: References
+    .. [1] Squartini, Tiziano, and Diego Garlaschelli.
+        "Analytical maximum-likelihood method to detect patterns
+         in real networks."
+        New Journal of Physics 13.8 (2011): 083001.
+        `https://arxiv.org/abs/1103.0701 <https://arxiv.org/abs/1103.0701>`_
+
+    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+        "Unbiased sampling of network ensembles."
+        New Journal of Physics 17.2 (2015): 023052.
+        `https://arxiv.org/abs/1406.1197 <https://arxiv.org/abs/1406.1197>`_
+    """
     # problem fixed paprameters
     k_out = args[0]
     k_in = args[1]
@@ -267,6 +396,14 @@ def loglikelihood_hessian_diag_dcm_new(theta, args):
 
 @jit(nopython=True)
 def expected_out_degree_dcm_new(sol):
+    """Expected out-degrees after the DBCM. It is based on DBCM
+    exponential version.
+
+    :param sol: DBCM solution
+    :type sol: numpy.ndarray
+    :return: Out-degrees DBCM expectation
+    :rtype: numpy.ndarray
+    """
     n = int(len(sol) / 2)
     ex_k = np.zeros(n, dtype=np.float64)
 
@@ -280,6 +417,14 @@ def expected_out_degree_dcm_new(sol):
 
 @jit(nopython=True)
 def expected_in_degree_dcm_new(theta):
+    """Expected in-degrees after the DBCM. It is based on DBCM
+    exponential version.
+
+    :param sol: DBCM solution
+    :type sol: numpy.ndarray
+    :return: In-degrees DBCM expectation
+    :rtype: numpy.ndarray
+    """
     sol = np.exp(-theta)
     n = int(len(sol) / 2)
     a_out = sol[:n]
@@ -295,8 +440,15 @@ def expected_in_degree_dcm_new(theta):
 
 @jit(nopython=True)
 def expected_decm_new(theta):
-    """"""
-    # casadi MX function calculation
+    """Expected parameters after the DBCM.
+    It returns a concatenated array of out-degrees and in-degrees.
+    It is based on DBCM exponential version.
+
+    :param theta: DBCM solution
+    :type x: numpy.ndarray
+    :return: DBCM expected parameters sequence
+    :rtype: numpy.ndarray
+    """
     x = np.exp(-theta)
     n = int(len(x) / 4)
     f = np.zeros_like(x, np.float64)
@@ -352,6 +504,20 @@ def expected_decm_new(theta):
 
 @jit(nopython=True)
 def linsearch_fun_DCM_new(X, args):
+    """Linsearch function for DBCM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on DBCM exponential version.
+
+    :param X: Loglikelihood parameters, increment vector, beta parameter,
+        alpha parameter and loglikelihood prime function.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: DBCM loglikelihood function and its parameters.
+    :type args: (func, tuple)
+    :return: Alpha parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -366,7 +532,7 @@ def linsearch_fun_DCM_new(X, args):
         sample.sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
-        == False
+        is False
         and i < 50
     ):
         alfa *= beta
@@ -376,6 +542,18 @@ def linsearch_fun_DCM_new(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_DCM_new_fixed(X):
+    """Linsearch function for DBCM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on DBCM exponential version.
+
+    :param X: Current solution, new and onld increment vectors,
+        alpha parameter, beta parameter.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, bool) 
+    :return: Alpha parameter value
+    :rtype: float
+    """
     dx = X[1]
     dx_old = X[2]
     alfa = X[3]
@@ -384,14 +562,13 @@ def linsearch_fun_DCM_new_fixed(X):
 
     if step:
         kk = 0
-        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
-        while(
-            cond == False
-            and kk<50
-            ):
+        cond = np.linalg.norm(alfa*dx, ord=2) < np.linalg.norm(dx_old, ord=2)
+        while(cond is False
+                and kk < 50):
             alfa *= beta
-            kk +=1
-            cond = np.linalg.norm(alfa*dx[dx!=np.infty], ord = 2) < np.linalg.norm(dx_old[dx_old!=np.infty], ord = 2)
+            kk += 1
+            cond = np.linalg.norm(alfa*dx[dx != np.infty], ord=2) < \
+                np.linalg.norm(dx_old[dx_old != np.infty], ord=2)
     return alfa
 
 
@@ -400,7 +577,25 @@ def linsearch_fun_DCM_new_fixed(X):
 
 @jit(nopython=True)
 def loglikelihood_decm_new(x, args):
-    """not reduced"""
+    """Returns DECM [1]_ loglikelihood function evaluated in x.
+    It is based on the exponential version of the DECM.
+
+    :param theta: Evaluating point
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degrees sequences,
+        and out and in strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray)
+    :return: Loglikelihood value
+    :rtype: float
+
+    .. rubric: References
+    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+        "A faster horse on a safer trail: generalized inference for the
+        efficient reconstruction of weighted networks."
+        New Journal of Physics 22.5 (2020): 053053.
+        `https://arxiv.org/abs/1811.09829 <https://arxiv.org/abs/1811.09829>`_
+    """
     # problem fixed parameters
     k_out = args[0]
     k_in = args[1]
@@ -428,7 +623,25 @@ def loglikelihood_decm_new(x, args):
 
 # @jit(nopython=True)
 def loglikelihood_prime_decm_new(theta, args):
-    """not reduced"""
+    """Returns DECM [1]_ loglikelihood gradient function evaluated in x.
+    It is based on the exponential version of the DECM.
+
+    :param theta: Evaluating point
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degrees sequences,
+        and out and in strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray)
+    :return: Loglikelihood gradient
+    :rtype: numpy.ndarray
+
+    .. rubric: References
+    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+        "A faster horse on a safer trail: generalized inference for the
+        efficient reconstruction of weighted networks."
+        New Journal of Physics 22.5 (2020): 053053.
+        `https://arxiv.org/abs/1811.09829 <https://arxiv.org/abs/1811.09829>`_
+    """
     # problem fixed parameters
     k_out = args[0]
     k_in = args[1]
@@ -466,7 +679,25 @@ def loglikelihood_prime_decm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_decm_new(theta, args):
+    """Returns DECM [1]_ loglikelihood hessian function evaluated in x.
+    It is based on the exponential version of the DECM.
 
+    :param theta: Evaluating point
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degrees sequences,
+        and out and in strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray)
+    :return: Loglikelihood hessian matrix
+    :rtype: numpy.ndarray
+
+    .. rubric: References
+    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+        "A faster horse on a safer trail: generalized inference for the
+        efficient reconstruction of weighted networks."
+        New Journal of Physics 22.5 (2020): 053053.
+        `https://arxiv.org/abs/1811.09829 <https://arxiv.org/abs/1811.09829>`_
+    """
     k_out = args[0]
     k_in = args[1]
     s_out = args[2]
@@ -477,9 +708,9 @@ def loglikelihood_hessian_decm_new(theta, args):
     x = np.exp(-theta)
 
     a_out = x[:n]
-    a_in = x[n : 2 * n]
-    b_out = x[2 * n : 3 * n]
-    b_in = x[3 * n :]
+    a_in = x[n: 2 * n]
+    b_out = x[2 * n: 3 * n]
+    b_in = x[3 * n:]
 
     for i in range(n):
         for j in range(n):
@@ -547,7 +778,25 @@ def loglikelihood_hessian_decm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_decm_new(theta, args):
+    """Returns the diagonal of the DECM [1]_ loglikelihood hessian
+    function evaluated in x. It is based on the DECM exponential version.
 
+    :param theta: Evaluating point
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degrees sequences,
+        and out and in strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray)
+    :return: Loglikelihood hessian matrix diagonal
+    :rtype: numpy.ndarray
+
+    .. rubric: References
+    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+        "A faster horse on a safer trail: generalized inference for the
+        efficient reconstruction of weighted networks."
+        New Journal of Physics 22.5 (2020): 053053.
+        `https://arxiv.org/abs/1811.09829 <https://arxiv.org/abs/1811.09829>`_
+    """
     k_out = args[0]
     k_in = args[1]
     s_out = args[2]
@@ -558,9 +807,9 @@ def loglikelihood_hessian_diag_decm_new(theta, args):
     x = np.exp(-theta)
 
     a_out = x[:n]
-    a_in = x[n : 2 * n]
-    b_out = x[2 * n : 3 * n]
-    b_in = x[3 * n :]
+    a_in = x[n: 2 * n]
+    b_out = x[2 * n: 3 * n]
+    b_in = x[3 * n:]
 
     for i in range(n):
         for j in range(n):
@@ -598,7 +847,18 @@ def loglikelihood_hessian_diag_decm_new(theta, args):
 
 @jit(nopython=True)
 def iterative_decm_new(theta, args):
-    """not reduced"""
+    """Returns the next iterative step for the DECM.
+    It is based on the exponential version of the DBCM.
+
+    :param theta: Previous solution iterative step
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degree sequences,
+        and out and in strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: next solution iterative step
+    :rtype: numpy.ndarray
+    """
     # problem fixed parameters
     k_out = args[0]
     k_in = args[1]
@@ -662,8 +922,19 @@ def iterative_decm_new(theta, args):
 
 
 @jit(nopython=True)
-def iterative_decm_new_old(theta, args):
-    """not reduced"""
+def iterative_decm_new_2(theta, args):
+    """Returns the next iterative step for the DECM.
+    It is based on the exponential version of the DBCM.
+
+    :param theta: Previous solution iterative step
+    :type theta: numpy.ndarray
+    :param args: Tuple containing out and in degree sequences,
+        and out and in strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: next solution iterative step
+    :rtype: numpy.ndarray
+    """
     # problem fixed parameters
     k_out = args[0]
     k_in = args[1]
@@ -710,6 +981,20 @@ def iterative_decm_new_old(theta, args):
 
 @jit(nopython=True)
 def linsearch_fun_DECM_new(X, args):
+    """Linsearch function for DECM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on DECM exponential version.
+
+    :param X: Loglikelihood parameters, increment vector, beta parameter,
+        alpha parameter and loglikelihood prime function.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: DECM loglikelihood function and its arguments.
+    :type args: (func, tuple)
+    :return: Alpha parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -717,31 +1002,33 @@ def linsearch_fun_DECM_new(X, args):
     f = X[4]
     step_fun = args[0]
     arg_step_fun = args[1]
-    
 
     # Mettere il check sulle y
     nnn = int(len(x) / 4)
-    ind_yout = np.argmin(x[2 * nnn : 3 * nnn])
-    ind_yin = np.argmin(x[3 * nnn :])
-    tmp = x[2 * nnn : 3 * nnn][ind_yout] + x[3 * nnn :][ind_yin]
+    ind_yout = np.argmin(x[2 * nnn: 3 * nnn])
+    ind_yin = np.argmin(x[3 * nnn:])
+    tmp = x[2 * nnn: 3 * nnn][ind_yout] + x[3 * nnn:][ind_yin]
     while True:
         ind_yout = np.argmin(
-            x[2 * nnn : 3 * nnn] + alfa * dx[2 * nnn : 3 * nnn]
+            x[2 * nnn: 3 * nnn] + alfa * dx[2 * nnn: 3 * nnn]
         )
-        ind_yin = np.argmin(x[3 * nnn :] + alfa * dx[3 * nnn :])
-        cond = (x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout]) + (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
+        ind_yin = np.argmin(x[3 * nnn:] + alfa * dx[3 * nnn:])
+        cond = (x[2 * nnn: 3 * nnn][ind_yout]
+                + alfa * dx[2 * nnn: 3 * nnn][ind_yout]) + \
+            (x[3 * nnn:][ind_yin]
+             + alfa * dx[3 * nnn:][ind_yin])
         if (cond) > tmp * 0.01:
             break
         else:
             alfa *= beta
-    
+
     i = 0
     s_old = -step_fun(x, arg_step_fun)
     while (
         sample.sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
-        == False
+        is False
         and i < 50
     ):
         alfa *= beta
@@ -751,6 +1038,18 @@ def linsearch_fun_DECM_new(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_DECM_new_fixed(X):
+    """Linsearch function for DECM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on DECM exponential version.
+
+    :param X: Current solution, new and onld increment vectors,
+        alpha parameter, beta parameter.
+    :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray, float, float, bool)
+    :return: Alpha parameter value
+    :rtype: float
+    """
     x = X[0]
     dx = X[1]
     dx_old = X[2]
@@ -760,17 +1059,19 @@ def linsearch_fun_DECM_new_fixed(X):
 
     # Mettere il check sulle y
     nnn = int(len(x) / 4)
-    ind_yout = np.argmin(x[2 * nnn : 3 * nnn])
-    ind_yin = np.argmin(x[3 * nnn :])
-    tmp = x[2 * nnn : 3 * nnn][ind_yout] + x[3 * nnn :][ind_yin]
-    
+    ind_yout = np.argmin(x[2 * nnn: 3 * nnn])
+    ind_yin = np.argmin(x[3 * nnn:])
+    tmp = x[2 * nnn: 3 * nnn][ind_yout] + x[3 * nnn:][ind_yin]
+
     while True:
         ind_yout = np.argmin(
-            x[2 * nnn : 3 * nnn] + alfa * dx[2 * nnn : 3 * nnn]
+            x[2 * nnn: 3 * nnn] + alfa * dx[2 * nnn: 3 * nnn]
         )
-        ind_yin = np.argmin(x[3 * nnn :] + alfa * dx[3 * nnn :])
-        cond = (x[2 * nnn : 3 * nnn][ind_yout] + alfa * dx[2 * nnn : 3 * nnn][ind_yout]) + (x[3 * nnn :][ind_yin] + alfa * dx[3 * nnn :][ind_yin])
-        #print(cond)
+        ind_yin = np.argmin(x[3 * nnn:] + alfa * dx[3 * nnn:])
+        cond = (x[2 * nnn: 3 * nnn][ind_yout]
+                + alfa * dx[2 * nnn: 3 * nnn][ind_yout]) + \
+            (x[3 * nnn:][ind_yin]
+             + alfa * dx[3 * nnn:][ind_yin])
         if (cond) > tmp * 0.01:
             break
         else:
@@ -778,13 +1079,13 @@ def linsearch_fun_DECM_new_fixed(X):
 
     if step:
         kk = 0
-        cond = np.linalg.norm(alfa*dx, ord = 2) < np.linalg.norm(dx_old, ord = 2)
-        while(
-            cond == False
-            and kk<50
-            ):
+        cond = np.linalg.norm(alfa*dx, ord=2) < \
+            np.linalg.norm(dx_old, ord=2)
+        while(cond is False
+              and kk < 50):
             alfa *= beta
-            kk +=1
-            cond = np.linalg.norm(alfa*dx[dx!=np.infty], ord = 2) < np.linalg.norm(dx_old[dx_old!=np.infty], ord = 2)
+            kk += 1
+            cond = np.linalg.norm(alfa*dx[dx != np.infty], ord=2) < \
+                np.linalg.norm(dx_old[dx_old != np.infty], ord=2)
 
     return alfa
