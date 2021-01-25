@@ -10,6 +10,7 @@ warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 @jit(nopython=True)
 def iterative_cm_new(x, args):
     """Computes loglikelihood parameters x at step n+1 given their value at step n for UBCM
+    It is based on the exponential version of the UBCM.
 
     :param x: exponents of loglikelihood parameters x at step n
     :type x: numpy.ndarray

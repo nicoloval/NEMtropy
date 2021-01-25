@@ -16,12 +16,12 @@ warnings.simplefilter(
 
 
 def out_degree(a):
-    """Compute matrix out degrees sequence
+    """Returns matrix *a* out degrees sequence.
 
-    :param a: matrix
+    :param a: Adjacency matrix
     :type a: numpy.ndarray, scipy.sparse.csr.csr_matrix,
         scipy.sparse.coo.coo_matrix
-    :return: out degree sequence
+    :return: Out degree sequence
     :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
@@ -33,12 +33,12 @@ def out_degree(a):
 
 
 def in_degree(a):
-    """Compute matrix in degree sequence
+    """Returns matrix *a* in degrees sequence.
 
-    :param a: matrix
+    :param a: Adjacency matrix.
     :type a: numpy.ndarray, scipy.sparse.csr.csr_matrix,
         scipy.sparse.coo.coo_matrix
-    :return: in degree sequence
+    :return: In degree sequence.
     :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
@@ -50,12 +50,12 @@ def in_degree(a):
 
 
 def out_strength(a):
-    """Compute matrix out strengths sequence
+    """Returns matrix *a* out strengths sequence.
 
-    :param a: matrix
+    :param a: Adjacency matrix.
     :type a: numpy.ndarray, scipy.sparse.csr.csr_matrix,
         scipy.sparse.coo.coo_matrix
-    :return: out strengths sequence
+    :return: Out strengths sequence.
     :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
@@ -67,12 +67,12 @@ def out_strength(a):
 
 
 def in_strength(a):
-    """Compute matrix in strengths sequence
+    """Returns matrix *a* in strengths sequence.
 
-    :param a: matrix
+    :param a: Adjacency matrix.
     :type a: numpy.ndarray, scipy.sparse.csr.csr_matrix,
         scipy.sparse.coo.coo_matrix
-    :return: in strengths sequence
+    :return: In strengths sequence.
     :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
@@ -85,8 +85,7 @@ def in_strength(a):
 
 @jit(nopython=True)
 def pmatrix_dcm(x, args):
-    """Function evaluating the DBCM probability matrix given the solution of
-        the underlying model.
+    """Computes and returns the probability matrix induced by DBCM.
 
     :param x: DBCM solution
     :type x: numpy.ndarray
@@ -112,12 +111,14 @@ def pmatrix_dcm(x, args):
 
 @jit(nopython=True)
 def iterative_crema(beta, args):
-    """Return the next iterative step for the CReMa Model.
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The DBCM pmatrix is pre-computed and explicitly passed.
 
     :param beta: previous solution iterative step
     :type beta: numpy.ndarray
-    :param args: tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+    :param args: Out and in strengths sequences,
+        adjacency binary/probability matrix,
+        and non zero out and in indices
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
     :return: next solution iterative step
@@ -1505,14 +1506,14 @@ def expected_decm(x):
 
 
 def hessian_regulariser_function(b, eps):
-    """Trasform input matrix in a positive defined matrix
+    """Trasforms input matrix in a positive defined matrix
     by adding positive quantites to the main diagonal.
 
-    :param b:Matrix
+    :param b: Matrix.
     :type b: numpy.ndarray
     :param eps: Positive quantity to add.
     :type eps: float
-    :return: Regularised matrix
+    :return: Regularised matrix.
     :rtype: numpy.ndarray
     """
     b = (b + b.transpose()) * 0.5  # symmetrization
@@ -1525,11 +1526,11 @@ def hessian_regulariser_function_eigen_based(b, eps):
     """Trasform input matrix in a positive defined matrix
     by regularising eigenvalues.
 
-    :param b:Matrix
+    :param b: Matrix.
     :type b: numpy.ndarray
     :param eps: Positive quantity to add.
     :type eps: float
-    :return: Regularised matrix
+    :return: Regularised matrix.
     :rtype: numpy.ndarray
     """
     b = (b + b.transpose()) * 0.5  # symmetrization
@@ -1537,25 +1538,6 @@ def hessian_regulariser_function_eigen_based(b, eps):
     ll = np.array([0 if li > eps else eps - li for li in t])
     bf = e @ (np.diag(ll) + np.diag(t)) @ e.transpose()
 
-    return bf
-
-
-def hessian_regulariser_function_old(b, eps):
-    """Trasform input matrix in a positive defined matrix.
-        Obsolete version.
-
-    :param b:Matrix
-    :type b: numpy.ndarray
-    :param eps: Positive quantity to add.
-    :type eps: float
-    :return: Regularised matrix
-    :rtype: numpy.ndarray
-    """
-    b = (b + b.transpose()) * 0.5  # symmetrization
-    t, e = scipy.linalg.eigh(b)
-    eps = eps * np.max(t)
-    ll = np.array([0 if li > eps else eps - li for li in t])
-    bf = e @ (np.diag(ll) + np.diag(t)) @ e.transpose()
     return bf
 
 
@@ -1689,7 +1671,7 @@ def solver(
     linsearch=True,
 ):
     """Find roots of eq. fun = 0, using newton, quasinewton or
-        fixed-point algorithm.
+    fixed-point algorithm.
 
     :param x0: Initial point
     :type x0: numpy.ndarray
@@ -1851,7 +1833,8 @@ def solver(
         # stopping condition computation
         norm = np.linalg.norm(f)
         diff_v = x - x_old
-        diff_v[np.isnan(diff_v)] = 0  # to avoid nans given by inf-inf
+        # to avoid nans given by inf-inf
+        diff_v[np.isnan(diff_v)] = -1
         diff = np.linalg.norm(diff_v)
 
         if full_return:
@@ -1908,23 +1891,23 @@ def solver(
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):
-    """Return boolean indicator whether upper wolfe condition are respected.
+    """Returns True if upper wolfe condition is respected.
 
-    :param f_old: Function old value
+    :param f_old: Function value at previous iteration.
     :type f_old: float
-    :param f_new: Function updated value
+    :param f_new: Function value at current iteration.
     :type f_new: float
-    :param alpha: Step length
+    :param alpha: Alpha parameter of linsearch.
     :type alpha: float
-    :param grad_f: Function gradient
+    :param grad_f: Function gradient.
     :type grad_f: numpy.ndarray
-    :param p: [description]
-    :type p: [type]
-    :param c1: Tuning parameter, defaults to 1e-04
+    :param p: Current iteration increment.
+    :type p: numpy.ndarray
+    :param c1: Tuning parameter, defaults to 1e-04.
     :type c1: float, optional
-    :param c2: Tuning parameter, defaults to 0.9
+    :param c2: Tuning parameter, defaults to 0.9.
     :type c2: float, optional
-    :return: Boolean indicator
+    :return: Condition validity.
     :rtype: bool
     """
     sup = f_old + c1 * alpha * np.dot(grad_f, p.T)
@@ -2188,12 +2171,14 @@ def edgelist_from_edgelist(edgelist):
     nodes index-label relation.
     Works also on weighted graphs.
 
-    :param edgelist: List of edges
+    :param edgelist: List of edges.
     :type edgelist: list
     :return: Re-indexed list of edges, out-degrees, in-degrees,
         index to label dictionary
     :rtype: (dict, numpy.ndarray, numpy.ndarray, dict)
     """
+    # TODO: inserire esempio edgelist pesata edgelist binaria
+    # nel docstring
     # edgelist = list(zip(*edgelist))
     if len(edgelist[0]) == 2:
         nodetype = type(edgelist[0][0])
@@ -2287,6 +2272,15 @@ def edgelist_from_edgelist(edgelist):
 class DirectedGraph:
     """Directed graph instance can be initialised with
     adjacency matrix, edgelist, degree sequence or strengths sequence.
+
+    :param adjacency: Adjacency matrix, defaults to None.
+    :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional
+    :param edgelist: edgelist, defaults to None.
+    :type edgelist: numpy.ndarray, list, optional
+    :param degree_sequence: degrees sequence, defaults to None.
+    :type degree_sequence: numpy.ndarray, optional
+    :param strength_sequence: strengths sequence, defaults to None.
+    :type strength_sequence: numpy.ndarray, optional
     """
     def __init__(
         self,
@@ -2381,7 +2375,7 @@ class DirectedGraph:
         degree_sequence=None,
         strength_sequence=None,
     ):
-        """[summary]
+        """Initilizes all the necessary attribitus for Directed graph class.
 
         :param adjacency: Adjacency matrix, defaults to None.
         :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional
@@ -2391,22 +2385,6 @@ class DirectedGraph:
         :type degree_sequence: numpy.ndarray, optional
         :param strength_sequence: strengths sequence, defaults to None.
         :type strength_sequence: numpy.ndarray, optional
-        :raises TypeError: [description]
-        :raises TypeError: [description]
-        :raises TypeError: [description]
-        :raises ValueError: [description]
-        :raises TypeError: [description]
-        :raises TypeError: [description]
-        :raises ValueError: [description]
-        :raises ValueError: [description]
-        :raises TypeError: [description]
-        :raises TypeError: [description]
-        :raises ValueError: [description]
-        :raises ValueError: [description]
-        :raises TypeError: [description]
-        :raises TypeError: [description]
-        :raises ValueError: [description]
-        :raises ValueError: [description]
         """
         if adjacency is not None:
             if not isinstance(
@@ -2577,7 +2555,7 @@ class DirectedGraph:
     def set_adjacency_matrix(self, adjacency):
         """Initializes a graph from the adjacency matrix.
 
-        :param adjacency: Adjacency matrix
+        :param adjacency: Adjacency matrix.
         :type adjacency: numpy.ndarray, list, scipy.sparse_matrix
         """
         if self.is_initialized:
@@ -2603,7 +2581,7 @@ class DirectedGraph:
             self._initialize_graph(edgelist=edgelist)
 
     def set_degree_sequences(self, degree_sequence):
-        """Initializes a graph from the degrees sequence.
+        """Initializes graph from the degrees sequence.
 
         :param adjacency: Degrees sequence
         :type adjacency: numpy.ndarray
@@ -3065,7 +3043,7 @@ class DirectedGraph:
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
 
     def solution_error(self):
-        """Computes the error given the solutions of the optimization problem
+        """Computes the error given the solutions of the optimization problem.
         """
         if self.last_model in ["dcm_new", "dcm", "crema", "crema-sparse"]:
             if (self.x is not None) and (self.y is not None):
@@ -3582,7 +3560,10 @@ class DirectedGraph:
         tol=1e-8,
         eps=1e-8,
     ):
-        """The function solves the ERGM optimization problem.
+        """The function solves the ERGM optimization problem from
+        a range of available models. The user can choose among three
+        optimization methods.
+        The graph should be initialized.
 
         :param model: Available models are:
             - *dcm*: solves DBCM respect to the parameters *x* and "y" of the loglikelihood function, it works for uweighted directed graphs [insert ref].
@@ -3659,18 +3640,19 @@ class DirectedGraph:
             )
 
 
-    def ensemble_sampler(self, n, cpu_n=2, output_dir="sample/", seed=10):
-        """The function sample a given number of graphs in the ensemble generated from the last model solved.
-        Each grpah is written as an edgelist in a `.txt` file in the output directory.
+    def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=42):
+        """The function sample a given number of graphs in the ensemble
+        generated from the last model solved. Each grpah is an edgelist
+        written in the output directory as `.txt` file.
         The function is parallelised and can run on multiple cpus.
 
-        :param n: Number of graphs to sampl
+        :param n: Number of graphs to sample.
         :type n: int
-        :param cpu_n: Number of cpus to use, defaults to 2
+        :param cpu_n: Number of cpus to use, defaults to 1.
         :type cpu_n: int, optional
-        :param output_dir: Name of the output directory, defaults to "sample/"
+        :param output_dir: Name of the output directory, defaults to "sample/".
         :type output_dir: str, optional
-        :param seed: Random seed, defaults to 10
+        :param seed: Random seed, defaults to 42.
         :type seed: int, optional
         :raises ValueError: [description]
         """

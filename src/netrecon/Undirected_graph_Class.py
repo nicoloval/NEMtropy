@@ -15,11 +15,11 @@ warnings.simplefilter(action='ignore',
 
 
 def degree(a):
-    """Returns symmetric matrix *a* degrees sequence.
+    """Returns matrix *a* degrees sequence.
 
-    :param a: matrix a.
+    :param a: Adjacency matrix.
     :type a: numpy.ndarray, scipy.sparse
-    :return: degree sequence.
+    :return: Degree sequence.
     :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
@@ -31,11 +31,11 @@ def degree(a):
 
 
 def strength(a):
-    """Returns symmetric matrix *a* strengths sequence.
+    """Returns matrix *a* strengths sequence.
 
-    :param a: matrix a.
+    :param a: Adjacency matrix.
     :type a: numpy.ndarray, scipy.sparse
-    :return: strengths sequence.
+    :return: Strengths sequence.
     :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
@@ -47,13 +47,13 @@ def strength(a):
 
 
 def pmatrix_cm(x, args):
-    """Computes and returns pmatrix of UBCM.
+    """Computes and returns the probability matrix induced by UBCM.
 
     :param x: solutions of UBCM.
     :type x: numpy.ndarray
     :param args: number of nodes.
     :type args: (int, )
-    :return: pmatrix UBCM.
+    :return: UBCM probability matrix.
     :rtype: numpy.ndarray
     """
     n = args[0]
@@ -209,13 +209,14 @@ def loglikelihood_hessian_diag_cm(x, args):
 
 @jit(nopython=True)
 def iterative_crema(beta, args):
-    """Computes loglikelihood parameters x at step n+1 given their value at step n for CReMa. The UBCM pmatrix is pre-computed and explicitly passed.
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The UBCM pmatrix is pre-compute and explicitly passed.
 
-    :param beta: loglikelihood parameters beta at step n.
+    :param beta: previous solution iterative step
     :type beta: numpy.ndarray
     :param args: strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood parameters beta at step n+1.
+    :return: next solution iterative step
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -236,7 +237,9 @@ def iterative_crema(beta, args):
 
 @jit(nopython=True, parallel=True, nogil=True)
 def iterative_crema_sparse(beta, args):
-    """Computes loglikelihood parameters x at step n+1 given their value at step n for CReMa. The UBCM pmatrix is computed inside the function in order to avoid memory errors due to the dimensions of the latter.
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The UBCM pmatrix is computed inside the function in order 
+    to avoid memory errors due to the dimensions of the latter.
 
     :param beta: loglikelihood parameters beta at step n.
     :type beta: numpy.ndarray
@@ -1304,7 +1307,6 @@ def sufficient_decrease_condition(
 
 def hessian_regulariser_function(B, eps):
     """ Guarantes that hessian matrix is definitie posive by adding identity matrix multiplied for eps.
-     
 
     :param B: hessian matrix.
     :type B: numpy.ndarray
@@ -1756,7 +1758,7 @@ class UndirectedGraph:
             self._initialize_graph(edgelist=edgelist)
 
     def set_degree_sequences(self, degree_sequence):
-        """Initialises graph given the degree sequence.
+        """Initialises graph given the degrees sequence.
 
         :param degree_sequence: degrees sequence.
         :type degree_sequence: numpy.ndarray
@@ -1769,9 +1771,7 @@ class UndirectedGraph:
             self._initialize_graph(degree_sequence=degree_sequence)
 
     def clean_edges(self):
-        """
-        Deletes all the initialiased attributes.
-
+        """Deletes all the initialiased attributes.
         """
         self.adjacency = None
         self.edgelist = None
@@ -1845,7 +1845,8 @@ class UndirectedGraph:
 
     def degree_reduction(self):
         """
-        Carries out degree reduction.
+        Carries out degree reduction for UBCM.
+        The graph should be initialized.
         """
         self.r_dseq, self.r_index_dseq, self.r_invert_dseq, self.r_multiplicity = np.unique(
             self.dseq,
@@ -2008,8 +2009,7 @@ class UndirectedGraph:
 
     # DA SISTEMARE
     def solution_error(self):
-        """
-        Computes the error given the solutions to the optimisation problem.
+        """Computes the error given the solutions to the optimisation problem.
         """
         if self.last_model in ["cm", "cm-new", "crema", "crema-sparse"]:
             if self.x is not None:
@@ -2454,7 +2454,10 @@ class UndirectedGraph:
         tol=1e-8,
         eps=1e-8,
     ):
-        """[summary]
+        """The function solves the ERGM optimization problem from
+        a range of available models. The user can choose among three
+        optimization methods.
+        The graph should be initialized.
 
         :param model: Available models are:
 
@@ -2535,7 +2538,22 @@ class UndirectedGraph:
                 eps=eps,
             )
 
-    def ensemble_sampler(self, n, cpu_n=2, output_dir="sample/", seed=10):
+    def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=42):
+        """The function sample a given number of graphs in the ensemble
+        generated from the last model solved. Each grpah is an edgelist
+        written in the output directory as `.txt` file.
+        The function is parallelised and can run on multiple cpus.
+
+        :param n: Number of graphs to sample.
+        :type n: int
+        :param cpu_n: Number of cpus to use, defaults to 1.
+        :type cpu_n: int, optional
+        :param output_dir: Name of the output directory, defaults to "sample/".
+        :type output_dir: str, optional
+        :param seed: Random seed, defaults to 42.
+        :type seed: int, optional
+        :raises ValueError: [description]
+        """
         # al momento funziona solo sull'ultimo problema risolto
 
         # create the output directory
