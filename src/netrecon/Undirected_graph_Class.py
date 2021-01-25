@@ -70,13 +70,12 @@ def pmatrix_cm(x, args):
 @jit(nopython=True)
 def iterative_cm(x, args):
     """Returns the next UBCM iterative step for the fixed-point method.
-    The UBCM pmatrix is pre-computed and explicitly passed.
 
-    :param x: Previous solution iterative step.
+    :param x: Previous iterative step.
     :type x: numpy.ndarray
     :param args: Degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Next solution iterative step.
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -97,7 +96,7 @@ def iterative_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_cm(x, args):
-    """Returns UBCM loglikelihood function evaluated in beta.
+    """Returns UBCM loglikelihood function evaluated in x.
 
     :param x: Evaluating point *x*.
     :type x: numpy.ndarray
@@ -123,7 +122,7 @@ def loglikelihood_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_cm(x, args):
-    """Returns UBCM loglikelihood function evaluated in beta.
+    """Returns UBCM loglikelihood gradient function evaluated in x.
 
     :param x: Evaluating point *x*.
     :type x: numpy.ndarray
@@ -149,7 +148,7 @@ def loglikelihood_prime_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_cm(x, args):
-    """Returns UBCM loglikelihood hessian function evaluated in beta.
+    """Returns UBCM loglikelihood hessian function evaluated in x.
 
     :param x: Evaluating point *x*.
     :type x: numpy.ndarray
@@ -187,7 +186,7 @@ def loglikelihood_hessian_cm(x, args):
 @jit(nopython=True)
 def loglikelihood_hessian_diag_cm(x, args):
     """Returns the diagonal of the UBCM loglikelihood hessian function
-    evaluated in beta.
+    evaluated in x.
 
     :param x: Evaluating point *x*.
     :type x: numpy.ndarray
@@ -218,11 +217,11 @@ def iterative_crema(beta, args):
     """Returns the next CReMa iterative step for the fixed-point method.
     The UBCM pmatrix is pre-compute and explicitly passed.
 
-    :param beta: previous solution iterative step
+    :param beta: Previous iterative step.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix.
+    :param args: Strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -244,14 +243,14 @@ def iterative_crema(beta, args):
 @jit(nopython=True, parallel=True, nogil=True)
 def iterative_crema_sparse(beta, args):
     """Returns the next CReMa iterative step for the fixed-point method.
-    The UBCM pmatrix is computed inside the function in order 
-    to avoid memory errors due to the dimensions of the latter.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+    Alternative version not in use..
 
-    :param beta: loglikelihood parameters beta at step n.
+    :param beta: Previous iterative step..
     :type beta: numpy.ndarray
-    :param args: strengths sequence and UBCM solutions.
+    :param args: Strengths sequence and adjacency matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood parameters beta at step n+1.
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -270,6 +269,17 @@ def iterative_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def iterative_crema_sparse_2(beta, args):
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+    Alternative version not in use..
+
+    :param beta: Previous iterative step..
+    :type beta: numpy.ndarray
+    :param args: Strengths sequence and adjacency matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Next iterative step.
+    :rtype: numpy.ndarray
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -291,13 +301,15 @@ def iterative_crema_sparse_2(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_crema(beta, args):
-    """Computes CReMa loglikelihood function. The UBCM pmatrix is pre-computed and explicitly passed.
+    """Returns CReMa loglikelihood function evaluated in beta.
+    The UBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: loglikelihood parameters beta.
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix.
+    :param args: Arguments to define the loglikelihood function.
+        Strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood value.
+    :return: Loglikelihood value.
     :rtype: float
     """
     s = args[0]
@@ -318,13 +330,16 @@ def loglikelihood_crema(beta, args):
 
 @jit(nopython=True, nogil=True)
 def loglikelihood_crema_sparse(beta, args):
-    """Computes CReMa loglikelihood function. The UBCM pmatrix is computed inside the function in order to avoid memory errors due to the dimensions of the latter.
+    """Computes CReMa loglikelihood function.
+    The UBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialisation version.
 
-    :param beta: loglikelihood parameters beta.
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and UBCM solutions.
+    :param args: Arguments to define the loglikelihood function.
+        Strengths sequence and adjacency matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood value.
+    :return: Loglikelihood value.
     :rtype: float
     """
     s = args[0]
@@ -345,13 +360,15 @@ def loglikelihood_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_crema(beta, args):
-    """Computes CReMa loglikelihood function first derivatives. The UBCM pmatrix is pre-computed and explicitly passed.
+    """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The DBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: loglikelihood parameters beta.
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix.
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood first derivatives.
+    :return: Loglikelihood gradient value.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -373,6 +390,18 @@ def loglikelihood_prime_crema(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_crema_sparse_2(beta, args):
+    """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The UBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialization version.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood gradient value.
+    :rtype: numpy.ndarray
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -392,13 +421,16 @@ def loglikelihood_prime_crema_sparse_2(beta, args):
 
 @jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_prime_crema_sparse(beta, args):
-    """Computes CReMa loglikelihood function first derivatives. The UBCM pmatrix is computed inside the function in order to avoid memory errors due to the dimensions of the latter.
+    """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The UBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialization version.
 
-    :param beta: loglikelihood parameters beta.
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and UBCM solutions.
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood first derivatives.
+    :return: Loglikelihood gradient value.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -417,13 +449,15 @@ def loglikelihood_prime_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_crema(beta, args):
-    """Computes CReMa loglikelihood function second derivatives (hessian matrix). The UBCM pmatrix is pre-computed and explicitly passed.
+    """Returns CReMa loglikelihood hessian function evaluated in beta.
+    The UBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: loglikelihood parameters beta.
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix.
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix.
+    :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -445,13 +479,15 @@ def loglikelihood_hessian_crema(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_crema(beta, args):
-    """Computes the diagonal of CReMa loglikelihood function hessian matrix. The UBCM pmatrix is pre-computed and explicitly passed.
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: loglikelihood parameters beta.
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and adjacency binary/probability matrix.
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix diagonal.
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -470,6 +506,18 @@ def loglikelihood_hessian_diag_crema(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialization version.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian diagonal.
+    :rtype: numpy.ndarray
+    """
     s = args[0]
     adj = args[1]
     n = len(s)
@@ -489,13 +537,16 @@ def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
 
 @jit(nopython=True, parallel=True, nogil=True)
 def loglikelihood_hessian_diag_crema_sparse(beta, args):
-    """Computes the diagonal of CReMa loglikelihood function hessian matrix. The UBCM pmatrix is computed inside the function in order to avoid memory errors due to the dimensions of the latter.
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialization version.
 
-    :param beta: loglikelihood parameters beta.
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: strengths sequence and UBCM solutions.
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix diagonal.
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
     s = args[0]
@@ -513,13 +564,13 @@ def loglikelihood_hessian_diag_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def iterative_ecm(sol, args):
-    """Computes loglikelihood parameters x at step n+1 given their value at step n for UECM.
+    """Returns the next UECM iterative step for the fixed-point method.
 
-    :param sol: loglikelihood parameters x and y at step n.
+    :param sol: Previous iterative step.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences.
+    :param args: Degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood parameters x and y at step n+1.
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -553,13 +604,14 @@ def iterative_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_ecm(sol, args):
-    """Computes UECM loglikelihood function given the parameters x and y.
+    """Returns UECM loglikelihood function evaluated in sol.
 
-    :param sol: loglikelihood parameters x and y.
+    :param sol: Evaluating point *sol*.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences.
+    :param args: Arguments to define the loglikelihood function.
+        Degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood function value.
+    :return: Loglikelihood value.
     :rtype: float
     """
     k = args[0]
@@ -580,13 +632,14 @@ def loglikelihood_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_ecm(sol, args):
-    """Computes UECM loglikelihood function first dervatives given the parameters x and y.
+    """Returns DECM loglikelihood gradient function evaluated in sol.
 
-    :param sol: loglikelihood parameters x and y.
+    :param sol: Evaluating point *sol*.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences.
+    :param args: Arguments to define the loglikelihood gradient.
+        Degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood first derivatives.
+    :return: Loglikelihood gradient.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -613,13 +666,14 @@ def loglikelihood_prime_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_ecm(sol, args):
-    """Computes UECM loglikelihood function second dervatives (hessian matrix) given the parameters x and y.
+    """Returns DBCM loglikelihood hessian function evaluated in sol.
 
-    :param sol: loglikelihood parameters x and y.
+    :param sol:.Evaluating point *sol*.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences.
+    :param args: Arguments to define the loglikelihood hessian.
+        Degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix.
+    :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -688,13 +742,15 @@ def loglikelihood_hessian_ecm(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_ecm(sol, args):
-    """Computes the diagonal of UECM hessian matrix given the parameters x and y.
+    """Returns the diagonal of UECM loglikelihood hessian function
+    evaluated in sol.
 
-    :param sol: loglikelihood parameters x and y.
+    :param sol: Evaluating point *sol*.
     :type sol: numpy.ndarray
-    :param args: degrees and strengths sequences.
+    :param args: Arguments to define the loglikelihood hessian function.
+        Degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix diagonal.
+    :return: Hessian matrix diagonal.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -1351,7 +1407,7 @@ def expected_degree_cm(sol):
 
     :param sol: UBCM solutions.
     :type sol: numpy.ndarray
-    :return: expected degrees sequence.
+    :return: Expected degrees sequence.
     :rtype: numpy.ndarray
     """
     ex_k = np.zeros_like(sol, dtype=np.float64)

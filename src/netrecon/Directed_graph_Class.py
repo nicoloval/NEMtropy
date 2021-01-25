@@ -259,7 +259,8 @@ def iterative_crema_sparse(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_crema(beta, args):
-    """Returns CReMa loglikelihood function evaluated in beta.
+    """Returns CReMa loglikelihood function evaluated.
+    The DBCM pmatrix is pre-computed and explicitly passed.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
@@ -268,7 +269,7 @@ def loglikelihood_crema(beta, args):
         and non zero out and in indices
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood value.
     :rtype: float
     """
     s_out = args[0]
@@ -301,8 +302,9 @@ def loglikelihood_crema(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_crema_sparse(beta, args):
-    """Returns CReMa loglikelihood function evaluated in beta.
-        Sparse initialisation version.
+    """Returns CReMa loglikelihood function evaluated.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialisation version.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
@@ -348,6 +350,7 @@ def loglikelihood_crema_sparse(beta, args):
 @jit(nopython=True)
 def loglikelihood_prime_crema(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The DBCM pmatrix is pre-computed and explicitly passed.
 
     :param beta: Evaluating point *beta*. 
     :type beta: numpy.ndarray
@@ -390,8 +393,10 @@ def loglikelihood_prime_crema(beta, args):
 @jit(nopython=True)
 def loglikelihood_prime_crema_sparse_2(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialization version.
 
-    :param beta: Evaluating point *beta*. 
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
         Out and in strengths sequences, adjacency matrix,
@@ -437,9 +442,10 @@ def loglikelihood_prime_crema_sparse_2(beta, args):
 @jit(nopython=True, parallel=True)
 def loglikelihood_prime_crema_sparse(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The DBCM pmatrix is pre-computed and explicitly passed.
     Sparse initialization version.
 
-    :param beta: Evaluating point *beta*. 
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
         Out and in strengths sequences, adjacency matrix,
@@ -488,8 +494,9 @@ def loglikelihood_prime_crema_sparse(beta, args):
 @jit(nopython=True)
 def loglikelihood_hessian_crema(beta, args):
     """Returns CReMa loglikelihood hessian function evaluated in beta.
+    The DBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: Evaluating point *beta*. 
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood hessian function.
         Out and in strengths sequences, adjacency matrix,
@@ -529,9 +536,9 @@ def loglikelihood_hessian_crema(beta, args):
 @jit(nopython=True)
 def loglikelihood_hessian_diag_crema(beta, args):
     """Returns the diagonal of CReMa loglikelihood hessian function
-    evaluated in beta.
+    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: Evaluating point *beta*. 
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
         Out and in strengths sequences, adjacency matrix,
@@ -567,18 +574,18 @@ def loglikelihood_hessian_diag_crema(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
-    """Returns the diagonal of CReMa loglikelihood hessian
-        function evaluated in beta. 
-        Sparse initialisation alternative version.
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialization version.
 
-    :param beta: Evaluating point
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood hessian function
-        Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+    :param args: Arguments to define the loglikelihood gradient function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
     # TODO: remove commented lines?
@@ -616,18 +623,18 @@ def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
 
 @jit(nopython=True, parallel=True)
 def loglikelihood_hessian_diag_crema_sparse(beta, args):
-    """Returns the diagonal of CReMa loglikelihood hessian
-        function evaluated in beta.
-        Sparse initialisation version.
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialization version.
 
-    :param beta: Evaluating point
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood hessian function
-        Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+    :param args: Arguments to define the loglikelihood gradient function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
     # TODO: remove commented lines?
@@ -665,14 +672,14 @@ def loglikelihood_hessian_diag_crema_sparse(beta, args):
 def loglikelihood_dcm(x, args):
     """Returns DBCM loglikelihood function evaluated in x.
 
-    :param x: Evaluating point
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function
-        Tuple containing out and in degrees sequences,
-        non zero out and in indices, and classes cardinality sequence.
+    :param args: Arguments to define the loglikelihood function.
+        Out and in degrees sequences, non zero out and in indices,
+        and classes cardinality sequence.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood value.
     :rtype: float
     """
     k_out = args[0]
@@ -701,14 +708,14 @@ def loglikelihood_dcm(x, args):
 def loglikelihood_prime_dcm(x, args):
     """Returns DBCM loglikelihood gradient function evaluated in x.
 
-    :param x: Evaluating point
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function.
-        Tuple containing out and in degrees sequences,
-        non zero out and in indices, and classes cardinality sequence.
+    :param args: Arguments to define the loglikelihood gradient.
+        Out and in degrees sequences, non zero out and in indices,
+        and classes cardinality sequence.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood gradient array
+    :return: Loglikelihood gradient.
     :rtype: numpy.ndarray
     """
     k_out = args[0]
@@ -755,14 +762,14 @@ def loglikelihood_prime_dcm(x, args):
 def loglikelihood_hessian_dcm(x, args):
     """Returns DBCM loglikelihood hessian function evaluated in x.
 
-    :param x: Evaluating point
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
     :param args: Arguments to define the loglikelihood function.
         Tuple containing out and in degrees sequences,
         non zero out and in indices, and classes cardinality sequence.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian matrix
+    :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
     """
     k_out = args[0]
@@ -808,15 +815,15 @@ def loglikelihood_hessian_dcm(x, args):
 
 @jit(nopython=True)
 def iterative_dcm(x, args):
-    """Returns the next iterative step for the DBCM.
+    """Returns the next DBCM iterative step for the fixed-point method.
 
-    :param : previous solution iterative step
-    :type : numpy.ndarray
-    :param args: tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+    :param x: Previous iterative step.
+    :type x: numpy.ndarray
+    :param args: Out and in strengths sequences, non zero out and in indices,
+        and classes cardinalities sequences.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     # TODO: remove commented lines?
@@ -854,16 +861,17 @@ def iterative_dcm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_dcm(x, args):
-    """Returns the diagonal of DBCM loglikelihood hessian function evaluated in x.
+    """Returns the diagonal of DBCM loglikelihood hessian function
+    evaluated in x.
 
-    :param x: Evaluating point
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function.
-        Tuple containing out and in degrees sequences,
-        non zero out and in indices, and classes cardinality sequence.
+    :param args: Arguments to define the loglikelihood hessian function.
+        Out and in degrees sequences, non zero out and in indices,
+        and classes cardinality sequence.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian matrix diagonal
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
     # problem fixed paprameters
@@ -915,14 +923,13 @@ def loglikelihood_hessian_diag_dcm(x, args):
 def loglikelihood_decm(x, args):
     """Returns DECM loglikelihood function evaluated in x.
 
-    :param x: Evaluating point
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
     :param args: Arguments to define the loglikelihood function.
-        Tuple containing out and in degrees sequences,
-        and out and in strengths sequences.
+        Out and in degrees sequences, and out and in strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood value.
     :rtype: float
     """
     k_out = args[0]
@@ -953,14 +960,13 @@ def loglikelihood_decm(x, args):
 def loglikelihood_prime_decm(x, args):
     """Returns DECM loglikelihood gradient function evaluated in x.
 
-    :param x: Evaluating point
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function.
-        Tuple containing out and in degrees sequences,
-        and out and in strengths sequences.
+    :param args: Arguments to define the loglikelihood gradient.
+        Out and in degrees sequences, and out and in strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray)
-    :return: Loglikelihood gradient array
+    :return: Loglikelihood gradient.
     :rtype: numpy.array
     """
     k_out = args[0]
@@ -1014,16 +1020,16 @@ def loglikelihood_prime_decm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_decm(x, args):
-    """Returns the diagonal of DECM loglikelihood hessian function evaluated in x.
+    """Returns the diagonal of DECM loglikelihood hessian function
+    evaluated in x.
 
-    :param x: Evaluating point
+    :param x: Evaluating point *x*. 
     :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function.
-        Tuple containing out and in degrees sequences,
-        and out and in strengths sequences.
+    :param args: Arguments to define the loglikelihood hessian.
+        Out and in degrees sequences, and out and in strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray)
-    :return: Loglikelihood hessian matrix
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
     k_out = args[0]
@@ -1086,14 +1092,13 @@ def loglikelihood_hessian_diag_decm(x, args):
 def loglikelihood_hessian_decm(x, args):
     """Returns DECM loglikelihood hessian function evaluated in x.
 
-    :param x: Evaluating point
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function.
-        Tuple containing out and in degrees sequences,
-        and out and in strengths sequences.
+    :param args: Arguments to define the loglikelihood hessian.
+        Out and in degrees sequences, and out and in strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray)
-    :return: Loglikelihood hessian matrix
+    :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
     """
     k_out = args[0]
@@ -1329,15 +1334,15 @@ def loglikelihood_hessian_decm(x, args):
 
 @jit(nopython=True)
 def iterative_decm(x, args):
-    """Return the next iterative step for the DECM Model.
+    """Returns the next iterative step for the DECM Model.
 
-    :param : Previous solution iterative step
+    :param : Previous iterative step.
     :type : numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-        and out and in strengths sequences
+    :param args: Out and in degrees sequences, and out and in strengths
+        sequences.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     k_out = args[0]
@@ -1403,9 +1408,9 @@ def iterative_decm(x, args):
 def expected_out_degree_dcm(sol):
     """Expected out-degree after the DBCM.
 
-    :param sol: DBCM solution
+    :param sol: DBCM solution.
     :type sol: numpy.ndarray
-    :return: Expected out-degree sequence
+    :return: Expected out-degree sequence.
     :rtype: numpy.ndarray
     """
     n = int(len(sol) / 2)
@@ -1425,9 +1430,9 @@ def expected_out_degree_dcm(sol):
 def expected_in_degree_dcm(sol):
     """Expected in-degree after the DBCM.
 
-    :param sol: DBCM solution
+    :param sol: DBCM solution.
     :type sol: numpy.ndarray
-    :return: Expected in-degree sequence
+    :return: Expected in-degree sequence.
     :rtype: numpy.ndarray
     """
     n = int(len(sol) / 2)
@@ -1448,9 +1453,9 @@ def expected_decm(x):
        It returns a concatenated array of out-degrees, in-degrees,
        out-strengths, in-strengths.
 
-    :param x: DECM solution
+    :param x: DECM solution.
     :type x: numpy.ndarray
-    :return: DECM expected parameters sequence
+    :return: Expected parameters sequence.
     :rtype: numpy.ndarray
     """
     n = int(len(x) / 4)

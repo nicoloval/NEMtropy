@@ -11,17 +11,17 @@ warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 @jit(nopython=True)
 def iterative_dcm_new_2(theta, args):
-    """Returns the next iterative step for the DBCM.
+    """Returns the next DBCM iterative step for the fixed-point.
         It is based on the exponential version of the DBCM.
         This version only runs on non-zero indices.
 
-    :param theta: Previous solution iterative step
+    :param theta: Previous iterative step.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+    :param args: Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     # problem fixed parameters
@@ -64,17 +64,17 @@ def iterative_dcm_new_2(theta, args):
 
 @jit(nopython=True)
 def iterative_dcm_new(theta, args):
-    """Returns the next iterative step for the DBCM [1]_ [2]_.
-    It is based on the exponential version of the DBCM.
+    """Returns the next DBCM iterative step for the fixed-point [1]_ [2]_.
+        It is based on the exponential version of the DBCM.
+        This version only runs on non-zero indices.
 
-    :param theta: Previous solution iterative step
+    :param theta: Previous iterative step.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-         non zero out and in indices,
-         and the sequence of classes cardinalities
+    :param args: Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray
 
     .. rubric: References
@@ -125,17 +125,17 @@ def iterative_dcm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_dcm_new(theta, args):
-    """Returns DBCM [1]_ [2]_ loglikelihood function evaluated in x.
+    """Returns DBCM [1]_ [2]_ loglikelihood function evaluated in theta.
     It is based on the exponential version of the DBCM.
 
-    :param theta: Evaluating point
+    :param theta: Evaluating point *theta*.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-        and non zero out and in indices,
-        and the sequence of classes cardinalities
+    :param args: Arguments to define the loglikelihood function.
+        Out and in degrees sequences, and non zero out and in indices,
+        and classes cardinalities sequence.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood value.
     :rtype: float
 
     .. rubric: References
@@ -184,17 +184,17 @@ def loglikelihood_dcm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_dcm_new(theta, args):
-    """Returns DBCM [1]_ [2]_ loglikelihood gradient function evaluated in x.
+    """Returns DBCM [1]_ [2]_ loglikelihood gradient function evaluated in theta.
     It is based on the exponential version of the DBCM.
 
-    :param theta: Evaluating point
+    :param theta: Evaluating point *theta*.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-        and non zero out and in indices,
-        and the sequence of classes cardinalities
+    :param args: Arguments to define the loglikelihood gradient.
+        Out and in degrees sequences, and non zero out and in indices,
+        and the sequence of classes cardinalities.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood gradient
+    :return: Loglikelihood gradient.
     :rtype: numpy.ndarray
 
     .. rubric: References
@@ -253,17 +253,17 @@ def loglikelihood_prime_dcm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_dcm_new(theta, args):
-    """Returns DBCM [1]_ [2]_ loglikelihood hessian function evaluated in x.
+    """Returns DBCM [1]_ [2]_ loglikelihood hessian function evaluated in theta.
     It is based on the exponential version of the DBCM.
 
-    :param theta: Evaluating point
+    :param theta: Evaluating point *theta*.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-        and non zero out and in indices,
-        and the sequence of classes cardinalities
+    :param args: Arguments to define the loglikelihood function.
+        Out and in degrees sequences, and non zero out and in indices,
+        and the sequence of classes cardinalities.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian matrix
+    :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
 
     .. rubric: References
@@ -324,16 +324,16 @@ def loglikelihood_hessian_dcm_new(theta, args):
 @jit(nopython=True)
 def loglikelihood_hessian_diag_dcm_new(theta, args):
     """Returns the diagonal of the DBCM [1]_ [2]_ loglikelihood hessian
-    function evaluated in x. It is based on DBCM exponential version.
+    function evaluated in theta. It is based on DBCM exponential version.
 
-    :param theta: Evaluating point
+    :param theta: Evaluating point *theta*.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-        and non zero out and in indices,
-        and the sequence of classes cardinalities
+    :param args: Arguments to define the loglikelihood function.
+        Out and in degrees sequences, and non zero out and in indices,
+        and the sequence of classes cardinalities.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian matrix diagonal
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
 
     .. rubric: References
@@ -399,9 +399,9 @@ def expected_out_degree_dcm_new(sol):
     """Expected out-degrees after the DBCM. It is based on DBCM
     exponential version.
 
-    :param sol: DBCM solution
+    :param sol: DBCM solution.
     :type sol: numpy.ndarray
-    :return: Out-degrees DBCM expectation
+    :return: Out-degrees DBCM expectation.
     :rtype: numpy.ndarray
     """
     n = int(len(sol) / 2)
@@ -420,9 +420,9 @@ def expected_in_degree_dcm_new(theta):
     """Expected in-degrees after the DBCM. It is based on DBCM
     exponential version.
 
-    :param sol: DBCM solution
+    :param sol: DBCM solution.
     :type sol: numpy.ndarray
-    :return: In-degrees DBCM expectation
+    :return: In-degrees DBCM expectation.
     :rtype: numpy.ndarray
     """
     sol = np.exp(-theta)
@@ -444,9 +444,9 @@ def expected_decm_new(theta):
     It returns a concatenated array of out-degrees and in-degrees.
     It is based on DBCM exponential version.
 
-    :param theta: DBCM solution
+    :param theta: DBCM solution.
     :type x: numpy.ndarray
-    :return: DBCM expected parameters sequence
+    :return: DBCM expected parameters sequence.
     :rtype: numpy.ndarray
     """
     x = np.exp(-theta)
@@ -577,16 +577,16 @@ def linsearch_fun_DCM_new_fixed(X):
 
 @jit(nopython=True)
 def loglikelihood_decm_new(x, args):
-    """Returns DECM [1]_ loglikelihood function evaluated in x.
+    """Returns DECM [1]_ loglikelihood function evaluated in theta.
     It is based on the exponential version of the DECM.
 
-    :param theta: Evaluating point
+    :param theta: Evaluating point *theta*.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-        and out and in strengths sequences.
+    :param args: Arguments to define the loglikelihood function.
+        Out and in degrees sequences, and out and in strengths sequences
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood value.
     :rtype: float
 
     .. rubric: References
@@ -623,16 +623,16 @@ def loglikelihood_decm_new(x, args):
 
 # @jit(nopython=True)
 def loglikelihood_prime_decm_new(theta, args):
-    """Returns DECM [1]_ loglikelihood gradient function evaluated in x.
+    """Returns DECM [1]_ loglikelihood gradient function evaluated in theta.
     It is based on the exponential version of the DECM.
 
-    :param theta: Evaluating point
+    :param theta: Evaluating point *theta*.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-        and out and in strengths sequences.
+    :param args: Arguments to define the loglikelihood function.
+        Out and in degrees sequences, and out and in strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray)
-    :return: Loglikelihood gradient
+    :return: Loglikelihood gradient.
     :rtype: numpy.ndarray
 
     .. rubric: References
@@ -679,16 +679,16 @@ def loglikelihood_prime_decm_new(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_decm_new(theta, args):
-    """Returns DECM [1]_ loglikelihood hessian function evaluated in x.
+    """Returns DECM [1]_ loglikelihood hessian function evaluated in theta.
     It is based on the exponential version of the DECM.
 
-    :param theta: Evaluating point
+    :param theta: Evaluating point *theta*.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-        and out and in strengths sequences.
+    :param args: Arguments to define the loglikelihood function.
+        Out and in degrees sequences, and out and in strengths sequences..
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray)
-    :return: Loglikelihood hessian matrix
+    :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
 
     .. rubric: References
@@ -779,15 +779,15 @@ def loglikelihood_hessian_decm_new(theta, args):
 @jit(nopython=True)
 def loglikelihood_hessian_diag_decm_new(theta, args):
     """Returns the diagonal of the DECM [1]_ loglikelihood hessian
-    function evaluated in x. It is based on the DECM exponential version.
+    function evaluated in *theta*. It is based on the DECM exponential version.
 
-    :param theta: Evaluating point
+    :param theta: Evaluating point *theta*.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degrees sequences,
-        and out and in strengths sequences.
+    :param args: Arguments to define the loglikelihood hessian.
+        Out and in degrees sequences, and out and in strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray)
-    :return: Loglikelihood hessian matrix diagonal
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
 
     .. rubric: References
@@ -850,13 +850,13 @@ def iterative_decm_new(theta, args):
     """Returns the next iterative step for the DECM.
     It is based on the exponential version of the DBCM.
 
-    :param theta: Previous solution iterative step
+    :param theta: Previous iterative step.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degree sequences,
-        and out and in strengths sequences.
+    :param args: Out and in degrees sequences, and out and in strengths
+        sequences.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     # problem fixed parameters
@@ -926,13 +926,13 @@ def iterative_decm_new_2(theta, args):
     """Returns the next iterative step for the DECM.
     It is based on the exponential version of the DBCM.
 
-    :param theta: Previous solution iterative step
+    :param theta: Previous iterative step.
     :type theta: numpy.ndarray
-    :param args: Tuple containing out and in degree sequences,
-        and out and in strengths sequences.
+    :param args: Out and in degrees sequences, and out and in strengths
+        sequences..
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     # problem fixed parameters

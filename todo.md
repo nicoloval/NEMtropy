@@ -42,6 +42,8 @@ Correzioni tipografiche
 DOPO
 ----
 
+* inserire citazioni nelle functions
+
 * scrivere il readme
 
 * inserire esempi nelle funzioni
