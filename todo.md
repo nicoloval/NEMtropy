@@ -3,11 +3,11 @@ Correzioni tipografiche
 
 ## nicomlo
 
-* Maiuscole e punti nel docstring per descrizione parametri e descrizione funzione.
+* ~~Maiuscole e punti nel docstring per descrizione parametri e descrizione funzione.~~
 
-* max lunghezza linea 79 caratteri
+* ~~max lunghezza linea 79 caratteri~~
 
-* nicolo fa le funzioni dcm cm decm ecm (anche new versions)
+* ~~nicolo fa le funzioni dcm cm decm ecm (anche new versions)~~
 
 ## emiliamno
 
