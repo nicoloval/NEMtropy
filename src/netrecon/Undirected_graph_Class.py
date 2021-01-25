@@ -1339,7 +1339,7 @@ def hessian_regulariser_function_eigen_based(B, eps):
 
 @jit(nopython=True)
 def expected_degree_cm(sol):
-    """Computes the expected degrees of UBCM given its solution x.
+    """Computes the expected degrees of UBCM given the solution x.
 
     :param sol: UBCM solutions.
     :type sol: numpy.ndarray
