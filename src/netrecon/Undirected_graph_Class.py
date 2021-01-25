@@ -49,9 +49,9 @@ def strength(a):
 def pmatrix_cm(x, args):
     """Computes and returns the probability matrix induced by UBCM.
 
-    :param x: solutions of UBCM.
+    :param x: Solutions of UBCM.
     :type x: numpy.ndarray
-    :param args: number of nodes.
+    :param args: Number of nodes.
     :type args: (int, )
     :return: UBCM probability matrix.
     :rtype: numpy.ndarray
@@ -69,13 +69,14 @@ def pmatrix_cm(x, args):
 
 @jit(nopython=True)
 def iterative_cm(x, args):
-    """Computes loglikelihood parameters x at step n+1 given their value at step n for UBCM.
+    """Returns the next UBCM iterative step for the fixed-point method.
+    The UBCM pmatrix is pre-computed and explicitly passed.
 
-    :param x: loglikelihood parameters *x* at step n.
+    :param x: Previous solution iterative step.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences.
+    :param args: Degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood parameters *x* at step n+1.
+    :return: Next solution iterative step.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -96,13 +97,14 @@ def iterative_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_cm(x, args):
-    """Computes loglikelihood of UBCM.
+    """Returns UBCM loglikelihood function evaluated in beta.
 
-    :param x: loglikelihood parameters *x*.
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences.
+    :param args: Arguments to define the loglikelihood function.
+        Degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood value.
+    :return: Loglikelihood value.
     :rtype: float
     """
     k = args[0]
@@ -121,14 +123,15 @@ def loglikelihood_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_cm(x, args):
-    """Computes loglikelihood first derivatives of UBCM.
+    """Returns UBCM loglikelihood function evaluated in beta.
 
-    :param x: loglikelihood parameters *x*.
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences.
+    :param args: Arguments to define the loglikelihood gradient function.
+        Degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: loglikelihood first derivatives.
-    :rtype: numpy.ndarray
+    :return: Loglikelihood gradient.
+    :rtype: float
     """
     k = args[0]
     c = args[1]
@@ -146,13 +149,14 @@ def loglikelihood_prime_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_cm(x, args):
-    """Computes second derivatives (hessian matrix) of UBCM loglikelihood function.
+    """Returns UBCM loglikelihood hessian function evaluated in beta.
 
-    :param x: loglikelihood parameters x.
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences.
+    :param args: Arguments to define the loglikelihood hessian function.
+        Degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: hessian matrix.
+    :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
     """
     k = args[0]
@@ -182,13 +186,15 @@ def loglikelihood_hessian_cm(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_cm(x, args):
-    """Computes the diagonal of UBCM loglikelihood function hessian matrix.
+    """Returns the diagonal of the UBCM loglikelihood hessian function
+    evaluated in beta.
 
-    :param x: loglikelihood parameters x.
+    :param x: Evaluating point *x*.
     :type x: numpy.ndarray
-    :param args: degrees and classes cardinality sequences.
+    :param args: Arguments to define the loglikelihood hessian function.
+        Degrees and classes cardinality sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
-    :return: diagonal of the hessian matrix.
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
     k = args[0]

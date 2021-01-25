@@ -87,10 +87,9 @@ def in_strength(a):
 def pmatrix_dcm(x, args):
     """Computes and returns the probability matrix induced by DBCM.
 
-    :param x: DBCM solution
+    :param x: DBCM solution.
     :type x: numpy.ndarray
-    :param args: tuple containing problem dimension,
-        out and in indices of non-zero nodes
+    :param args: Problem dimension, out and in indices of non-zero nodes.
     :type args: (int, numpy.ndarray, numpy.ndarray)
     :return: DBCM probability matrix
     :rtype: numpy.ndarray
@@ -114,14 +113,14 @@ def iterative_crema(beta, args):
     """Returns the next CReMa iterative step for the fixed-point method.
     The DBCM pmatrix is pre-computed and explicitly passed.
 
-    :param beta: previous solution iterative step
+    :param beta: Previous iterative step.
     :type beta: numpy.ndarray
     :param args: Out and in strengths sequences,
         adjacency binary/probability matrix,
         and non zero out and in indices
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray
     """
     s_out = args[0]
@@ -155,16 +154,17 @@ def iterative_crema(beta, args):
 
 @jit(nopython=True)
 def iterative_crema_sparse_2(beta, args):
-    """Return the next iterative version for the CReMa
-        sparse initialisation. Alternative version not in use.
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+    Alternative version not in use.
 
-    :param beta: previous solution iterative step
+    :param beta: Previous iterative step.
     :type beta: numpy.ndarray
-    :param args: tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+    :param args: Out and in strengths sequences,
+        adjacency matrix, and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray]
     """
     s_out = args[0]
@@ -204,16 +204,17 @@ def iterative_crema_sparse_2(beta, args):
 
 @jit(nopython=True, parallel=True)
 def iterative_crema_sparse(beta, args):
-    """Return the next iterative version for the CReMa
-        sparse initialisation.
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+    Alternative version not in use.
 
-    :param beta: previous solution iterative step
+    :param beta: Previous iterative step.
     :type beta: numpy.ndarray
-    :param args: tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+    :param args: Out and in strengths sequences,
+        adjacency matrix, and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: next solution iterative step
+    :return: Next iterative step.
     :rtype: numpy.ndarray]
     """
     s_out = args[0]
@@ -260,11 +261,11 @@ def iterative_crema_sparse(beta, args):
 def loglikelihood_crema(beta, args):
     """Returns CReMa loglikelihood function evaluated in beta.
 
-    :param beta: Evaluating point
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood function.
-        Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood value
@@ -303,14 +304,14 @@ def loglikelihood_crema_sparse(beta, args):
     """Returns CReMa loglikelihood function evaluated in beta.
         Sparse initialisation version.
 
-    :param beta: Evaluating point
+    :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood function.
-        Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood value.
     :rtype: float
     """
     s_out = args[0]
@@ -348,14 +349,14 @@ def loglikelihood_crema_sparse(beta, args):
 def loglikelihood_prime_crema(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
 
-    :param beta: Evaluating point
+    :param beta: Evaluating point *beta*. 
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
-        Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood gradient value.
     :rtype: numpy.ndarray
     """
     s_out = args[0]
@@ -389,16 +390,15 @@ def loglikelihood_prime_crema(beta, args):
 @jit(nopython=True)
 def loglikelihood_prime_crema_sparse_2(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
-        Sparse initialisation alternative version.
 
-    :param beta: Evaluating point
+    :param beta: Evaluating point *beta*. 
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
-        Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood gradient value.
     :rtype: numpy.ndarray
     """
     s_out = args[0]
@@ -437,16 +437,16 @@ def loglikelihood_prime_crema_sparse_2(beta, args):
 @jit(nopython=True, parallel=True)
 def loglikelihood_prime_crema_sparse(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
-        Sparse initialisation version.
+    Sparse initialization version.
 
-    :param beta: Evaluating point
+    :param beta: Evaluating point *beta*. 
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
-        Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood gradient.
     :rtype: numpy.ndarray
     """
     s_out = args[0]
@@ -489,14 +489,14 @@ def loglikelihood_prime_crema_sparse(beta, args):
 def loglikelihood_hessian_crema(beta, args):
     """Returns CReMa loglikelihood hessian function evaluated in beta.
 
-    :param beta: Evaluating point
+    :param beta: Evaluating point *beta*. 
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood hessian function.
-        Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
     """
     # TODO: remove commented lines?
@@ -528,17 +528,17 @@ def loglikelihood_hessian_crema(beta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_crema(beta, args):
-    """Returns the diagonal of CReMa loglikelihood hessian
-        function evaluated in beta.
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta.
 
-    :param beta: Evaluating point
+    :param beta: Evaluating point *beta*. 
     :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood hessian function.
-        Tuple containing out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices
+    :param args: Arguments to define the loglikelihood gradient function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value
+    :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
     # TODO: remove commented lines?
