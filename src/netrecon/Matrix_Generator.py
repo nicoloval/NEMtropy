@@ -59,8 +59,7 @@ def random_binary_matrix_generator_dense(n, sym=False, seed=None):
 def random_binary_matrix_generator_custom_density(
     n, p=0.1, sym=False, seed=None
 ):
-    """Generates a random binary adjacency matrix with
-    density determined by the parameter p.
+    """Generates a random binary adjacency matrix with density determined by the parameter p.
 
     :param n: number of nodes
     :type n: int
@@ -180,9 +179,7 @@ def random_weighted_matrix_generator_dense(
 def random_weighted_matrix_generator_uniform_custom_density(
     n, p=0.1, sup_ext=10, sym=False, seed=None, intweights=False
 ):
-    """Generates a random weighted adjacency matrix with
-     density determined by the parameter p and weights extracted from
-     a uniform distribution.
+    """Generates a random weighted adjacency matrix with density determined by the parameter p and weights extracted from a uniform distribution.
 
     :param n: number of nodes
     :type n: int
@@ -252,9 +249,7 @@ def random_weighted_matrix_generator_uniform_custom_density(
 def random_weighted_matrix_generator_gaussian_custom_density(
     n, mean, sigma, p=0.1, sym=False, seed=None, intweights=False
 ):
-    """Generates a random weighted adjacency matrix with
-     density determined by the parameter p and weights extracted from
-     a gaussian distribution.
+    """Generates a random weighted adjacency matrix with density determined by the parameter p and weights extracted from a gaussian distribution.
 
     :param n: number of nodes
     :type n: int
@@ -329,8 +324,7 @@ def random_weighted_matrix_generator_gaussian_custom_density(
 def random_binary_matrix_generator_custom_density_sparse(
     n, p=0.1, sym=False, seed=None
 ):
-    """Generates a random binary adjacency sparse matrix with
-     density determined by the parameter p.
+    """Generates a random binary adjacency sparse matrix with density determined by the parameter p.
 
     :param n: number of nodes
     :type n: int
@@ -362,9 +356,7 @@ def random_binary_matrix_generator_custom_density_sparse(
 def random_uniform_weighted_matrix_generator_custom_density_sparse(
     n, sup_ext, p=0.1, sym=False, seed=None, intweights=False
 ):
-    """Generates a random weighted adjacency sparse matrix with
-     density determined by the parameter p and weights extracted from
-     a uniform distribution.
+    """Generates a random weighted adjacency sparse matrix with density determined by the parameter p and weights extracted from a uniform distribution.
 
     :param n: number of nodes
     :type n: int
@@ -424,9 +416,7 @@ def random_uniform_weighted_matrix_generator_custom_density_sparse(
 def random_gaussian_weighted_matrix_generator_custom_density_sparse(
     n, mean, sigma, p=0.1, sym=False, seed=None, intweights=False
 ):
-    """Generates a random weighted adjacency sparse matrix with
-     density determined by the parameter p and weights extracted from
-     a gaussian distribution.
+    """Generates a random weighted adjacency sparse matrix with density determined by the parameter p and weights extracted from a gaussian distribution.
 
     :param n: number of nodes
     :type n: int
@@ -492,9 +482,7 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(
 def random_graph_nx(
     n, p, sup_ext, alpha, seed=None, is_weighted=None, is_sparse=False
 ):
-    """Generates a undirected weighted adjacency matrix using
-     erdos-renyi model for the binary part and assigning weights extracted
-     from a uniform, gaussian or powerlaw distribution.
+    """Generates a undirected weighted adjacency matrix using erdos-renyi model for the binary part and assigning weights extracted from a uniform, gaussian or powerlaw distribution.
 
     :param n: number of nodes
     :type n: int
@@ -548,9 +536,7 @@ def random_graph_nx(
 def barabasi_albert_graph_nx(
     n, m, sup_ext, alpha, seed=None, is_weighted=None, is_sparse=False
 ):
-    """Generates a undirected weighted adjacency matrix using
-     barabasi-albert model for the binary part and assigning weights extracted
-     from a uniform, gaussian or powerlaw distribution.
+    """Generates a undirected weighted adjacency matrix using barabasi-albert model for the binary part and assigning weights extracted from a uniform, gaussian or powerlaw distribution.
 
     :param n: number of nodes
     :type n: int

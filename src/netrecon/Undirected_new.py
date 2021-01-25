@@ -9,8 +9,7 @@ warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 @jit(nopython=True)
 def iterative_cm_new(x, args):
-    """Computes loglikelihood parameters x at step
-    n+1 given their value at step n for UBCM
+    """Computes loglikelihood parameters x at step n+1 given their value at step n for UBCM
 
     :param x: exponents of loglikelihood parameters x at step n
     :type x: numpy.ndarray
@@ -93,8 +92,7 @@ def loglikelihood_prime_cm_new(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_cm_new(x, args):
-    """Computes second derivatives (hessian matrix) of
-    UBCM loglikelihood function
+    """Computes second derivatives (hessian matrix) of UBCM loglikelihood function
 
     :param x: exponents of loglikelihood parameters x
     :type x: numpy.ndarray
@@ -130,8 +128,7 @@ def loglikelihood_hessian_cm_new(x, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_cm_new(x, args):
-    """Computes the diagonal of UBCM loglikelihood function
-    hessian matrix
+    """Computes the diagonal of UBCM loglikelihood function hessian matrix
 
     :param x: exponents of loglikelihood parameters x
     :type x: numpy.ndarray
@@ -158,8 +155,7 @@ def loglikelihood_hessian_diag_cm_new(x, args):
 
 @jit(nopython=True)
 def iterative_ecm_new(sol, args):
-    """Computes loglikelihood parameters x at step
-    n+1 given their value at step n for UECM
+    """Computes loglikelihood parameters x at step n+1 given their value at step n for UECM
 
     :param sol: exponents of loglikelihood parameters x and y at step n
     :type sol: numpy.ndarray
@@ -199,8 +195,7 @@ def iterative_ecm_new(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_ecm_new(sol, args):
-    """Computes UECM loglikelihood function given
-    the parameters x and y
+    """Computes UECM loglikelihood function given the parameters x and y
 
     :param sol: exponents of loglikelihood parameters x and y
     :type sol: numpy.ndarray
@@ -229,8 +224,7 @@ def loglikelihood_ecm_new(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_ecm_new(sol, args):
-    """Computes UECM loglikelihood function first dervatives
-    given the parameters x and y
+    """Computes UECM loglikelihood function first dervatives given the parameters x and y
 
     :param sol: exponents of loglikelihood parameters x and y
     :type sol: numpy.ndarray
@@ -264,8 +258,7 @@ def loglikelihood_prime_ecm_new(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_ecm_new(sol, args):
-    """Computes UECM loglikelihood function second dervatives
-    (hessian matrix) given the parameters x and y
+    """Computes UECM loglikelihood function second dervatives (hessian matrix) given the parameters x and y
 
     :param sol: exponents of loglikelihood parameters x and y
     :type sol: numpy.ndarray
@@ -332,8 +325,7 @@ def loglikelihood_hessian_ecm_new(sol, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_ecm_new(sol, args):
-    """Computes the diagonal of UECM hessian matrix
-    given the parameters x and y
+    """Computes the diagonal of UECM hessian matrix given the parameters x and y
 
     :param sol: exponents of loglikelihood parameters x and y
     :type sol: numpy.ndarray
@@ -366,6 +358,13 @@ def loglikelihood_hessian_diag_ecm_new(sol, args):
 
 @jit(nopython=True)
 def expected_degree_cm_new(sol):
+    """Computes the expected degrees of UBCM given its solution x.
+
+    :param sol: UBCM solutions.
+    :type sol: numpy.ndarray
+    :return: expected degrees sequence.
+    :rtype: numpy.ndarray
+    """
     ex_k = np.zeros_like(sol, dtype=np.float64)
     n = len(sol)
     for i in np.arange(n):
