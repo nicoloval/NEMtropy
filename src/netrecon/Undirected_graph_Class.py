@@ -240,11 +240,10 @@ def iterative_crema(beta, args):
     return f
 
 
-@jit(nopython=True, parallel=True, nogil=True)
+@jit(nopython=True, parallel=True)
 def iterative_crema_sparse(beta, args):
     """Returns the next CReMa iterative step for the fixed-point method.
-    The DBCM pmatrix is pre-computed and explicitly passed.
-    Alternative version not in use..
+    The UBCM pmatrix is computed inside the function.
 
     :param beta: Previous iterative step..
     :type beta: numpy.ndarray
@@ -270,8 +269,8 @@ def iterative_crema_sparse(beta, args):
 @jit(nopython=True)
 def iterative_crema_sparse_2(beta, args):
     """Returns the next CReMa iterative step for the fixed-point method.
-    The DBCM pmatrix is pre-computed and explicitly passed.
-    Alternative version not in use..
+    The UBCM pmatrix is computed inside the function.
+    Alternative version not in use.
 
     :param beta: Previous iterative step..
     :type beta: numpy.ndarray
@@ -328,10 +327,10 @@ def loglikelihood_crema(beta, args):
     return f
 
 
-@jit(nopython=True, nogil=True)
+@jit(nopython=True)
 def loglikelihood_crema_sparse(beta, args):
-    """Computes CReMa loglikelihood function.
-    The UBCM pmatrix is pre-computed and explicitly passed.
+    """Computes CReMa loglikelihood function evaluated in beta.
+    The UBCM pmatrix is computed inside the function.
     Sparse initialisation version.
 
     :param beta: Evaluating point *beta*.
@@ -361,7 +360,7 @@ def loglikelihood_crema_sparse(beta, args):
 @jit(nopython=True)
 def loglikelihood_prime_crema(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
-    The DBCM pmatrix is pre-computed and explicitly passed.
+    The UBCM pmatrix is pre-computed and explicitly passed.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
@@ -388,38 +387,7 @@ def loglikelihood_prime_crema(beta, args):
     return f
 
 
-@jit(nopython=True)
-def loglikelihood_prime_crema_sparse_2(beta, args):
-    """Returns CReMa loglikelihood gradient function evaluated in beta.
-    The UBCM pmatrix is pre-computed and explicitly passed.
-    Sparse initialization version.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood gradient value.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    x = adj[0]
-    for i in np.arange(n):
-        f[i] -= s[i]
-        for j in np.arange(0, i):
-            aux = x[i] * x[j]
-            aux_value = aux / (1 + aux)
-            if aux_value > 0:
-                aux = beta[i] + beta[j]
-                f[i] += aux_value / aux
-                f[j] += aux_value / aux
-    return f
-
-
-@jit(nopython=True, parallel=True, nogil=True)
+@jit(nopython=True, parallel=True)
 def loglikelihood_prime_crema_sparse(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
     The UBCM pmatrix is pre-computed and explicitly passed.
@@ -444,6 +412,37 @@ def loglikelihood_prime_crema_sparse(beta, args):
         aux_value = aux / (1 + aux)
         aux = aux_value/(beta[i] + beta)
         f[i] += aux.sum() - aux[i]
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_crema_sparse_2(beta, args):
+    """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The UBCM pmatrix is computed inside the function.
+    Sparse initialization version.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood gradient value.
+    :rtype: numpy.ndarray
+    """
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    for i in np.arange(n):
+        f[i] -= s[i]
+        for j in np.arange(0, i):
+            aux = x[i] * x[j]
+            aux_value = aux / (1 + aux)
+            if aux_value > 0:
+                aux = beta[i] + beta[j]
+                f[i] += aux_value / aux
+                f[j] += aux_value / aux
     return f
 
 
@@ -504,38 +503,7 @@ def loglikelihood_hessian_diag_crema(beta, args):
     return f
 
 
-@jit(nopython=True)
-def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
-    """Returns the diagonal of CReMa loglikelihood hessian function
-    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
-    Sparse initialization version.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian diagonal.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    x = adj[0]
-    for i in np.arange(n):
-        for j in np.arange(0, i):
-            if i != j:
-                aux = x[i] * x[j]
-                aux_value = aux / (1 + aux)
-                if aux_value > 0:
-                    aux = aux_value / ((beta[i] + beta[j]) ** 2)
-                    f[i] -= aux
-                    f[j] -= aux
-    return f
-
-
-@jit(nopython=True, parallel=True, nogil=True)
+@jit(nopython=True, parallel=True)
 def loglikelihood_hessian_diag_crema_sparse(beta, args):
     """Returns the diagonal of CReMa loglikelihood hessian function
     evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
@@ -559,6 +527,38 @@ def loglikelihood_hessian_diag_crema_sparse(beta, args):
         aux_value = aux / (1 + aux)
         aux = aux_value / ((beta[i] + beta) ** 2)
         f[i] -= aux.sum() - aux[i]
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta. The UBCM pmatrix is computed inside the function.
+    Sparse initialization version.
+    Alternative version not in use.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian diagonal.
+    :rtype: numpy.ndarray
+    """
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    x = adj[0]
+    for i in np.arange(n):
+        for j in np.arange(0, i):
+            if i != j:
+                aux = x[i] * x[j]
+                aux_value = aux / (1 + aux)
+                if aux_value > 0:
+                    aux = aux_value / ((beta[i] + beta[j]) ** 2)
+                    f[i] -= aux
+                    f[j] -= aux
     return f
 
 
@@ -957,15 +957,22 @@ def solver(
 
 @jit(nopython=True)
 def linsearch_fun_crema(X, args):
-    """Linsearch function for CReM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
+    """Linsearch function for CReMa newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
 
-    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f
+    :type X: (numpy.ndarray, numpy.ndarray,
+        float, float, func)
+    :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
-    :return: alfa parameter value.
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -992,13 +999,19 @@ def linsearch_fun_crema(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_crema_fixed(X):
-    """Linsearch function for CReM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
+    """Linsearch function for CReMa fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
 
-    :param X: increment, old increment, beta parameter, alfa parameter and iteration number.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
     :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
-    :return: alfa parameter value.
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     dx = X[1]
     dx_old = X[2]
     alfa = X[3]
@@ -1021,15 +1034,22 @@ def linsearch_fun_crema_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_CM_new(X, args):
-    """Linsearch function for UBCM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
+    """Linsearch function for UBCM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on UBCM exponential version.
 
-    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f
     :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters.
+    :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
-    :return: alfa parameter value
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -1055,14 +1075,20 @@ def linsearch_fun_CM_new(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_CM_new_fixed(X):
-    """Linsearch function for UBCM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
+    """Linsearch function for UBCM fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on UBCM exponential version.
 
-    :param X: increment, old increment, beta parameter, alfa parameter and iteration number.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
     :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
-    :type X: (numpy.ndarray, float, float, int).
-    :return: alfa parameter value
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     dx = X[1]
     dx_old = X[2]
     alfa = X[3]
@@ -1085,15 +1111,21 @@ def linsearch_fun_CM_new_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_CM(X, args):
-    """Linsearch function for UBCM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
+    """Linsearch function for UBCM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
 
-    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f
     :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters.
+    :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
-    :return: alfa parameter value.
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -1124,13 +1156,19 @@ def linsearch_fun_CM(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_CM_fixed(X):
-    """Linsearch function for UBCM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
+    """Linsearch function for UBCM fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
 
-    :param X: loglikelihood parameters, increment, old increment, beta parameter, alfa parameter and iteration number.
-    :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray float, float, int)
-    :return: alfa parameter value.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     x = X[0]
     dx = X[1]
     dx_old = X[2]
@@ -1159,15 +1197,22 @@ def linsearch_fun_CM_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_ECM_new(X, args):
-    """Linsearch function for UECM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
+    """Linsearch function for UECM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on UBCM exponential version.
 
-    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f
     :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters.
+    :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
-    :return: alfa parameter value.
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -1205,13 +1250,20 @@ def linsearch_fun_ECM_new(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_ECM_new_fixed(X):
-    """Linsearch function for UECM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
+    """Linsearch function for UECM fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on UBCM exponential version.
 
-    :param X: loglikelihood parameters, increment, old increment, beta parameter, alfa parameter and iteration number.
-    :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray float, float, int)
-    :return: alfa parameter value.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     x = X[0]
     dx = X[1]
     dx_old = X[2]
@@ -1247,15 +1299,21 @@ def linsearch_fun_ECM_new_fixed(X):
 
 @jit(nopython=True)
 def linsearch_fun_ECM(X, args):
-    """Linsearch function for UECM newton and quasinewton methods. The alfa parameters controls the size of the step such that the solution at the next iteration is better than the actual one.
+    """Linsearch function for UECM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
 
-    :param X: loglikelihood parameters, increment, beta parameter, alfa parameter and loglikelihood prime function.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f
     :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: CReM loglikelihood function and its parameters.
+    :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
-    :return: alfa parameter value.
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     x = X[0]
     dx = X[1]
     beta = X[2]
@@ -1296,13 +1354,19 @@ def linsearch_fun_ECM(X, args):
 
 @jit(nopython=True)
 def linsearch_fun_ECM_fixed(X):
-    """Linsearch function for UECM fixed-point method. The alfa parameters controls the size of the step such that its norm at the next step is lower than the actual one.
+    """Linsearch function for UECM fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
 
-    :param X: loglikelihood parameters, increment, old increment, beta parameter, alfa parameter and iteration number.
-    :type X: (numpy.ndarray, numpy.ndarray, numpy.ndarray float, float, int)
-    :return: alfa parameter value.
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :return: Working alpha.
     :rtype: float
     """
+    # TODO: change X to xx
     x = X[0]
     dx = X[1]
     dx_old = X[2]

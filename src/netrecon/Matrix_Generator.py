@@ -13,16 +13,16 @@ warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 def random_binary_matrix_generator_dense(n, sym=False, seed=None):
     """Generates a densely connected random binary adjacency matrix.
 
-    :param n: number of nodes
+    :param n: Number of nodes.
     :type n: int
-    :param sym: if True the adjacency matrix is simmetrix, defaults to False
+    :param sym: If True the adjacency matrix is simmetric, defaults to False.
     :type sym: bool, optional
-    :param seed: seed of the random process, defaults to None
+    :param seed: Seed of the random process, defaults to None.
     :type seed: int, optional
-    :return: a binary adjacency matrix
+    :return: Binary adjacency matrix.
     :rtype: numpy.ndarray
     """
-    if not False:
+    if not sym:
         np.random.seed(seed=seed)
         A = np.random.randint(0, 2, size=(n, n))
         # zeros on the diagonal
@@ -61,19 +61,19 @@ def random_binary_matrix_generator_custom_density(
 ):
     """Generates a random binary adjacency matrix with density determined by the parameter p.
 
-    :param n: number of nodes
+    :param n: Number of nodes.
     :type n: int
-    :param p: probability of observing a link between a couple of nodes,
-     defaults to 0.1
+    :param p: Probability of observing a link between a couple of nodes,
+     defaults to 0.1.
     :type p: float, optional
-    :param sym: if True the adjacency matrix is simmetrix, defaults to False
+    :param sym: If True the adjacency matrix is simmetric, defaults to False.
     :type sym: bool, optional
-    :param seed: seed of the random process, defaults to None
+    :param seed: Seed of the random process, defaults to None.
     :type seed: int, optional
-    :return: a binary adjacency matrix
+    :return: Binary adjacency matrix.
     :rtype: numpy.ndarray
     """
-    if not False:
+    if not sym:
         np.random.seed(seed=seed)
         A = np.zeros(shape=(n, n))
         for i in range(n):
@@ -119,20 +119,20 @@ def random_weighted_matrix_generator_dense(
 ):
     """Generates a densely connected random weighted adjacency matrix.
 
-    :param n: number of nodes
+    :param n: Number of nodes.
     :type n: int
-    :param sup_ext: maximum strength, defaults to 10
+    :param sup_ext: Maximum strength, defaults to 10.
     :type sup_ext: int, float, optional
-    :param sym: if True the adjacency matrix is simmetrix, defaults to False
+    :param sym: If True the adjacency matrix is simmetric, defaults to False.
     :type sym: bool, optional
-    :param seed: seed of the random process, defaults to None
+    :param seed: Seed of the random process, defaults to None.
     :type seed: int, optional
-    :param intweights: if True weights are integers, defaults to False
+    :param intweights: If True weights are integers, defaults to False.
     :type intweights: bool, optional
-    :return: a weighted adjacency matrix
+    :return: Weighted adjacency matrix.
     :rtype: numpy.ndarray
     """
-    if not False:
+    if not sym:
         np.random.seed(seed=seed)
         A = np.random.random(size=(n, n)) * sup_ext
         np.fill_diagonal(A, 0)
@@ -179,25 +179,26 @@ def random_weighted_matrix_generator_dense(
 def random_weighted_matrix_generator_uniform_custom_density(
     n, p=0.1, sup_ext=10, sym=False, seed=None, intweights=False
 ):
-    """Generates a random weighted adjacency matrix with density determined by the parameter p and weights extracted from a uniform distribution.
+    """Generates a random weighted adjacency matrix with density determined
+    by the parameter p and weights extracted from a uniform distribution.
 
-    :param n: number of nodes
+    :param n: Number of nodes.
     :type n: int
-    :param p: probability of observing a link between a couple of nodes,
-     defaults to 0.1
+    :param p: Probability of observing a link between a couple of nodes,
+     defaults to 0.1.
     :type p: float, optional
-    :param sup_ext: maximum strength, defaults to 10
-    :type sup_ext: int, float, optional
-    :param sym: if True the adjacency matrix is simmetrix, defaults to False
+    :param sup_ext: Maximum strength, defaults to 10.
+    :type sup_ext: int or float, optional
+    :param sym: If True the adjacency matrix is simmetric, defaults to False.
     :type sym: bool, optional
-    :param seed: seed of the random process, defaults to None
+    :param seed: Seed of the random process, defaults to None.
     :type seed: int, optional
-    :param intweights: if True weights are integers, defaults to False
+    :param intweights: If True weights are integers, defaults to False.
     :type intweights: bool, optional
-    :return: a weighted adjacency matrix
+    :return: Weighted adjacency matrix.
     :rtype: numpy.ndarray
     """
-    if not False:
+    if not sym:
         np.random.seed(seed=seed)
         A = np.zeros(shape=(n, n))
         for i in range(n):
@@ -249,27 +250,28 @@ def random_weighted_matrix_generator_uniform_custom_density(
 def random_weighted_matrix_generator_gaussian_custom_density(
     n, mean, sigma, p=0.1, sym=False, seed=None, intweights=False
 ):
-    """Generates a random weighted adjacency matrix with density determined by the parameter p and weights extracted from a gaussian distribution.
+    """Generates a random weighted adjacency matrix with density determined
+    by the parameter p and weights extracted from a gaussian distribution.
 
-    :param n: number of nodes
+    :param n: Number of nodes.
     :type n: int
-    :param mean: mean of the gaussian
+    :param mean: Mean of the gaussian.
     :type mean: int, float
-    :param sigma: sigma of the gaussian
+    :param sigma: Sigma of the gaussian.
     :type sigma: int, float
-    :param p: probability of observing a link between a couple of nodes,
-     defaults to 0.1
+    :param p: Probability of observing a link between a couple of nodes,
+     defaults to 0.1.
     :type p: float, optional
-    :param sym: if True the adjacency matrix is simmetrix, defaults to False
+    :param sym: If True the adjacency matrix is simmetric, defaults to False.
     :type sym: bool, optional
-    :param seed: seed of the random process, defaults to None
+    :param seed: Seed of the random process, defaults to None.
     :type seed: int, optional
-    :param intweights: if True weights are integers, defaults to False
+    :param intweights: If True weights are integers, defaults to False.
     :type intweights: bool, optional
-    :return: a weighted adjacency matrix
+    :return: Weighted adjacency matrix.
     :rtype: numpy.ndarray
     """
-    if not False:
+    if not sym:
         np.random.seed(seed=seed)
         A = np.zeros(shape=(n, n))
         for i in range(n):
@@ -324,18 +326,19 @@ def random_weighted_matrix_generator_gaussian_custom_density(
 def random_binary_matrix_generator_custom_density_sparse(
     n, p=0.1, sym=False, seed=None
 ):
-    """Generates a random binary adjacency sparse matrix with density determined by the parameter p.
+    """Generates a random binary adjacency sparse matrix
+    with density determined by the parameter p.
 
-    :param n: number of nodes
+    :param n: Number of nodes.
     :type n: int
-    :param p: probability of observing a link between a couple of nodes,
-     defaults to 0.1
+    :param p: Probability of observing a link between a couple of nodes,
+     defaults to 0.1.
     :type p: float, optional
-    :param sym: if True the adjacency matrix is simmetrix, defaults to False
+    :param sym: If True the adjacency matrix is simmetric, defaults to False.
     :type sym: bool, optional
-    :param seed: seed of the random process, defaults to None
+    :param seed: seed of the random process, defaults to None.
     :type seed: int, optional
-    :return: a binary sparse adjacency matrix
+    :return: a binary sparse adjacency matrix.
     :rtype: scipy.sparse_matrix
     """
     if sym:
@@ -356,22 +359,24 @@ def random_binary_matrix_generator_custom_density_sparse(
 def random_uniform_weighted_matrix_generator_custom_density_sparse(
     n, sup_ext, p=0.1, sym=False, seed=None, intweights=False
 ):
-    """Generates a random weighted adjacency sparse matrix with density determined by the parameter p and weights extracted from a uniform distribution.
+    """Generates a random weighted adjacency sparse matrix with density
+    determined by the parameter p and weights extracted
+    from a uniform distribution.
 
-    :param n: number of nodes
+    :param n: Number of nodes.
     :type n: int
-    :param sup_ext: maximum strength, defaults to 10
+    :param sup_ext: Maximum strength, defaults to 10.
     :type sup_ext: int, float, optional
-    :param p: probability of observing a link between a couple of nodes,
-     defaults to 0.1
+    :param p: Probability of observing a link between a couple of nodes,
+     defaults to 0.1.
     :type p: float, optional
-    :param sym: if True the adjacency matrix is simmetrix, defaults to False
+    :param sym: If True the adjacency matrix is simmetrix, defaults to False.
     :type sym: bool, optional
-    :param seed: seed of the random process, defaults to None
+    :param seed: Seed of the random process, defaults to None.
     :type seed: int, optional
-    :param intweights: if True weights are integers, defaults to False
+    :param intweights: If True weights are integers, defaults to False.
     :type intweights: bool, optional
-    :return: a weighted sparse adjacency matrix
+    :return: Weighted sparse adjacency matrix.
     :rtype: scipy.sparse_matrix
     """
     if sym:
@@ -416,24 +421,26 @@ def random_uniform_weighted_matrix_generator_custom_density_sparse(
 def random_gaussian_weighted_matrix_generator_custom_density_sparse(
     n, mean, sigma, p=0.1, sym=False, seed=None, intweights=False
 ):
-    """Generates a random weighted adjacency sparse matrix with density determined by the parameter p and weights extracted from a gaussian distribution.
+    """Generates a random weighted adjacency sparse matrix with density
+    determined by the parameter p and weights
+    extracted from a gaussian distribution.
 
-    :param n: number of nodes
+    :param n: Number of nodes.
     :type n: int
-    :param mean: mean of the gaussian
+    :param mean: Mean of the gaussian.
     :type mean: int, float
-    :param sigma: sigma of the gaussian
+    :param sigma: Sigma of the gaussian.
     :type sigma: int, float
-    :param p: probability of observing a link between a couple of nodes,
-     defaults to 0.1
+    :param p: Probability of observing a link between a couple of nodes,
+     defaults to 0.1.
     :type p: float, optional
-    :param sym: if True the adjacency matrix is simmetrix, defaults to False
+    :param sym: If True the adjacency matrix is simmetrix, defaults to False.
     :type sym: bool, optional
-    :param seed: seed of the random process, defaults to None
+    :param seed: Seed of the random process, defaults to None.
     :type seed: int, optional
-    :param intweights: if True weights are integers, defaults to False
+    :param intweights: If True weights are integers, defaults to False.
     :type intweights: bool, optional
-    :return: a weighted sparse adjacency matrix
+    :return: Weighted sparse adjacency matrix.
     :rtype: scipy.sparse_matrix
     """
     if sym:
@@ -482,26 +489,28 @@ def random_gaussian_weighted_matrix_generator_custom_density_sparse(
 def random_graph_nx(
     n, p, sup_ext, alpha, seed=None, is_weighted=None, is_sparse=False
 ):
-    """Generates a undirected weighted adjacency matrix using erdos-renyi model for the binary part and assigning weights extracted from a uniform, gaussian or powerlaw distribution.
+    """Retunrs an undirected weighted adjacency matrix using erdos-renyi model
+    to generate the binary adjacency and assigning weights extracted'
+    from a uniform, gaussian or powerlaw distribution.
 
-    :param n: number of nodes
+    :param n: umber of nodes.
     :type n: int
-    :param p: probability of observing a link between a couple of nodes,
-     defaults to 0.1
+    :param p: Probability of observing a link between a couple of nodes,
+     defaults to 0.1.
     :type p: float, optional
-    :param sup_ext: maximum strength, defaults to 10
+    :param sup_ext: Maximum strength, defaults to 10.
     :type sup_ext: int, float, optional
-    :param alpha: powerlaw exponent
+    :param alpha: Powerlaw exponent.
     :type alpha: float
-    :param seed: seed of the random process, defaults to None
+    :param seed: Seed of the random process, defaults to None.
     :type seed: int, optional
-    :param is_weighted: if True the adjacency matrix is weighted,
-     defaults to None
+    :param is_weighted: If True the adjacency matrix is weighted,
+     defaults to None.
     :type is_weighted: bool, optional
-    :param is_sparse: if True the adjacency matrix is sparse,
-     defaults to False
+    :param is_sparse: If True the adjacency matrix is sparse,
+     defaults to False.
     :type is_sparse: bool, optional
-    :return: adjacency matrix
+    :return: Adjacency matrix.
     :rtype: numpy.ndarray, scipy.sparse_matrix
     """
     if seed is None:
@@ -536,25 +545,27 @@ def random_graph_nx(
 def barabasi_albert_graph_nx(
     n, m, sup_ext, alpha, seed=None, is_weighted=None, is_sparse=False
 ):
-    """Generates a undirected weighted adjacency matrix using barabasi-albert model for the binary part and assigning weights extracted from a uniform, gaussian or powerlaw distribution.
+    """Generates a undirected weighted adjacency matrix using barabasi-albert model
+    for the binary part and assigning weights extracted from
+    a uniform, gaussian or powerlaw distribution.
 
-    :param n: number of nodes
+    :param n: Number of nodes.
     :type n: int
-    :param m: Number of edges to attach from a new node to existing nodes
+    :param m: Number of edges to attach from a new node to existing nodes.
     :type m: int
-    :param sup_ext: maximum strength, defaults to 10
+    :param sup_ext: Maximum strength, defaults to 10.
     :type sup_ext: int, float, optional
-    :param alpha: powerlaw exponent
+    :param alpha: Powerlaw exponent.
     :type alpha: float
-    :param seed: seed of the random process, defaults to None
+    :param seed: Seed of the random process, defaults to None.
     :type seed: int, optional
-    :param is_weighted: if True the adjacency matrix is weighted,
-     defaults to None
+    :param is_weighted: If True the adjacency matrix is weighted,
+     defaults to None.
     :type is_weighted: bool, optional
-    :param is_sparse: if True the adjacency matrix is sparse,
-     defaults to False
+    :param is_sparse: If True the adjacency matrix is sparse,
+     defaults to False.
     :type is_sparse: bool, optional
-    :return: adjacency matrix
+    :return: Adjacency matrix.
     :rtype: numpy.ndarray, scipy.sparse_matrix
     """
     if seed is None:
