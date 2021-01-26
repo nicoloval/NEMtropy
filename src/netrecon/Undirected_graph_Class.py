@@ -4,7 +4,8 @@ import scipy.sparse
 from numba import jit, prange
 import time
 from netrecon.Undirected_new import *
-
+from . import models_functions as mof
+from . import solver_functions as sof
 from . import ensemble_generator as eg
 # Stops Numba Warning for experimental feature
 from numba.core.errors import NumbaExperimentalFeatureWarning
@@ -44,740 +45,6 @@ def strength(a):
     # if the matrix is a scipy sparse matrix
     elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
         return np.sum(a, 1).A1
-
-
-def pmatrix_cm(x, args):
-    """Computes and returns the probability matrix induced by UBCM.
-
-    :param x: Solutions of UBCM.
-    :type x: numpy.ndarray
-    :param args: Number of nodes.
-    :type args: (int, )
-    :return: UBCM probability matrix.
-    :rtype: numpy.ndarray
-    """
-    n = args[0]
-    f = np.zeros(shape=(n, n), dtype=np.float64)
-    for i in np.arange(n):
-        for j in np.arange(i + 1, n):
-            aux = x[i] * x[j]
-            aux1 = aux / (1 + aux)
-            f[i, j] = aux1
-            f[j, i] = aux1
-    return f
-
-
-@jit(nopython=True)
-def iterative_cm(x, args):
-    """Returns the next UBCM iterative step for the fixed-point method.
-
-    :param x: Previous iterative step.
-    :type x: numpy.ndarray
-    :param args: Degrees and classes cardinality sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Next iterative step.
-    :rtype: numpy.ndarray
-    """
-    k = args[0]
-    c = args[1]
-    n = len(k)
-    f = np.zeros_like(k, dtype=np.float64)
-    for i in np.arange(n):
-        fx = 0
-        for j in np.arange(n):
-            if i == j:
-                fx += (c[j] - 1) * (x[j] / (1 + x[j] * x[i]))
-            else:
-                fx += (c[j]) * (x[j] / (1 + x[j] * x[i]))
-        if fx:
-            f[i] = k[i] / fx
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_cm(x, args):
-    """Returns UBCM loglikelihood function evaluated in x.
-
-    :param x: Evaluating point *x*.
-    :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function.
-        Degrees and classes cardinality sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value.
-    :rtype: float
-    """
-    k = args[0]
-    c = args[1]
-    n = len(k)
-    f = 0.0
-    for i in np.arange(n):
-        f += c[i] * k[i] * np.log(x[i])
-        for j in np.arange(n):
-            if i == j:
-                f -= (c[i] * (c[i] - 1) * np.log(1 + (x[i]) ** 2)) / 2
-            else:
-                f -= (c[i] * c[j] * np.log(1 + x[i] * x[j])) / 2
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_prime_cm(x, args):
-    """Returns UBCM loglikelihood gradient function evaluated in x.
-
-    :param x: Evaluating point *x*.
-    :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Degrees and classes cardinality sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood gradient.
-    :rtype: float
-    """
-    k = args[0]
-    c = args[1]
-    n = len(k)
-    f = np.zeros_like(k, dtype=np.float64)
-    for i in np.arange(n):
-        f[i] += c[i] * k[i] / x[i]
-        for j in np.arange(n):
-            if i == j:
-                f[i] -= c[i] * (c[j] - 1) * (x[j] / (1 + (x[j] ** 2)))
-            else:
-                f[i] -= c[i] * c[j] * (x[j] / (1 + x[i] * x[j]))
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_hessian_cm(x, args):
-    """Returns UBCM loglikelihood hessian function evaluated in x.
-
-    :param x: Evaluating point *x*.
-    :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood hessian function.
-        Degrees and classes cardinality sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian matrix.
-    :rtype: numpy.ndarray
-    """
-    k = args[0]
-    c = args[1]
-    n = len(k)
-    f = np.zeros(shape=(n, n), dtype=np.float64)
-    for i in np.arange(n):
-        for j in np.arange(i, n):
-            if i == j:
-                aux_f = -k[i] / (x[i] * x[i]) * c[i]
-                for h in range(n):
-                    if i == h:
-                        aux = 1 + x[h] * x[h]
-                        aux_f += ((x[h] * x[h]) /
-                                  (aux * aux)) * c[i] * (c[h] - 1)
-                    else:
-                        aux = 1 + x[i] * x[h]
-                        aux_f += ((x[h] * x[h]) / (aux * aux)) * c[i] * c[h]
-            else:
-                aux = 1 + x[i] * x[j]
-                aux_f = ((x[j] * x[j] - aux) / (aux * aux)) * c[i] * c[j]
-
-            f[i, j] = aux_f
-            f[j, i] = aux_f
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_hessian_diag_cm(x, args):
-    """Returns the diagonal of the UBCM loglikelihood hessian function
-    evaluated in x.
-
-    :param x: Evaluating point *x*.
-    :type x: numpy.ndarray
-    :param args: Arguments to define the loglikelihood hessian function.
-        Degrees and classes cardinality sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian diagonal.
-    :rtype: numpy.ndarray
-    """
-    k = args[0]
-    c = args[1]
-    n = len(k)
-    f = np.zeros(n, dtype=np.float64)
-    for i in np.arange(n):
-        f[i] -= k[i] / (x[i] * x[i]) * c[i]
-        for j in np.arange(n):
-            if i == j:
-                aux = 1 + x[j] * x[j]
-                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[i] * (c[j] - 1)
-            else:
-                aux = 1 + x[i] * x[j]
-                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[i] * c[j]
-    return f
-
-
-@jit(nopython=True)
-def iterative_crema(beta, args):
-    """Returns the next CReMa iterative step for the fixed-point method.
-    The UBCM pmatrix is pre-compute and explicitly passed.
-
-    :param beta: Previous iterative step.
-    :type beta: numpy.ndarray
-    :param args: Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Next iterative step.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    raw_ind = adj[0]
-    col_ind = adj[1]
-    weigths_val = adj[2]
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        f[i] -= w / (1 + (beta[j] / beta[i]))
-        f[j] -= w / (1 + (beta[i] / beta[j]))
-    for i in np.arange(n):
-        if s[i] != 0:
-            f[i] = f[i] / s[i]
-    return f
-
-
-@jit(nopython=True, parallel=True)
-def iterative_crema_sparse(beta, args):
-    """Returns the next CReMa iterative step for the fixed-point method.
-    The UBCM pmatrix is computed inside the function.
-
-    :param beta: Previous iterative step..
-    :type beta: numpy.ndarray
-    :param args: Strengths sequence and adjacency matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Next iterative step.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    x = adj[0]
-
-    for i in prange(n):
-        aux = x[i] * x
-        aux_value = aux / (1+aux)
-        aux = aux_value / (1 + (beta/beta[i]))
-        f[i] = (-aux.sum() + aux[i])/(s[i] + np.exp(-100))
-    return f
-
-
-@jit(nopython=True)
-def iterative_crema_sparse_2(beta, args):
-    """Returns the next CReMa iterative step for the fixed-point method.
-    The UBCM pmatrix is computed inside the function.
-    Alternative version not in use.
-
-    :param beta: Previous iterative step..
-    :type beta: numpy.ndarray
-    :param args: Strengths sequence and adjacency matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Next iterative step.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    x = adj[0]
-
-    for i in np.arange(n):
-        for j in np.arange(i+1, n):
-            aux = x[i] * x[j]
-            aux_value = aux / (1 + aux)
-            if aux_value > 0:
-                f[i] -= aux_value / (1 + (beta[j] / beta[i]))
-                f[j] -= aux_value / (1 + (beta[i] / beta[j]))
-    for i in np.arange(n):
-        if s[i] != 0:
-            f[i] = f[i] / s[i]
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_crema(beta, args):
-    """Returns CReMa loglikelihood function evaluated in beta.
-    The UBCM pmatrix is pre-computed and explicitly passed.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value.
-    :rtype: float
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = 0.0
-    raw_ind = adj[0]
-    col_ind = adj[1]
-    weigths_val = adj[2]
-
-    for i in np.arange(n):
-        f -= s[i] * beta[i]
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        f += w * np.log(beta[i] + beta[j])
-
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_crema_sparse(beta, args):
-    """Computes CReMa loglikelihood function evaluated in beta.
-    The UBCM pmatrix is computed inside the function.
-    Sparse initialisation version.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function.
-        Strengths sequence and adjacency matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value.
-    :rtype: float
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = 0.0
-    x = adj[0]
-
-    for i in np.arange(n):
-        f -= s[i] * beta[i]
-        for j in np.arange(0, i):
-            aux = x[i] * x[j]
-            aux_value = aux / (1 + aux)
-            if aux_value > 0:
-                f += aux_value * np.log(beta[i] + beta[j])
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_prime_crema(beta, args):
-    """Returns CReMa loglikelihood gradient function evaluated in beta.
-    The UBCM pmatrix is pre-computed and explicitly passed.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood gradient value.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    raw_ind = adj[0]
-    col_ind = adj[1]
-    weigths_val = adj[2]
-
-    for i in np.arange(n):
-        f[i] -= s[i]
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        aux = beta[i] + beta[j]
-        f[i] += w / aux
-        f[j] += w / aux
-    return f
-
-
-@jit(nopython=True, parallel=True)
-def loglikelihood_prime_crema_sparse(beta, args):
-    """Returns CReMa loglikelihood gradient function evaluated in beta.
-    The UBCM pmatrix is pre-computed and explicitly passed.
-    Sparse initialization version.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood gradient value.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    x = adj[0]
-    for i in prange(n):
-        f[i] -= s[i]
-        aux = x[i] * x
-        aux_value = aux / (1 + aux)
-        aux = aux_value/(beta[i] + beta)
-        f[i] += aux.sum() - aux[i]
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_prime_crema_sparse_2(beta, args):
-    """Returns CReMa loglikelihood gradient function evaluated in beta.
-    The UBCM pmatrix is computed inside the function.
-    Sparse initialization version.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood gradient value.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    x = adj[0]
-    for i in np.arange(n):
-        f[i] -= s[i]
-        for j in np.arange(0, i):
-            aux = x[i] * x[j]
-            aux_value = aux / (1 + aux)
-            if aux_value > 0:
-                aux = beta[i] + beta[j]
-                f[i] += aux_value / aux
-                f[j] += aux_value / aux
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_hessian_crema(beta, args):
-    """Returns CReMa loglikelihood hessian function evaluated in beta.
-    The UBCM pmatrix is pre-computed and explicitly passed.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian matrix.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros(shape=(n, n), dtype=np.float64)
-    raw_ind = adj[0]
-    col_ind = adj[1]
-    weigths_val = adj[2]
-
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        aux = -w / ((beta[i] + beta[j]) ** 2)
-        f[i, j] = aux
-        f[j, i] = aux
-        f[i, i] += aux
-        f[j, j] += aux
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_hessian_diag_crema(beta, args):
-    """Returns the diagonal of CReMa loglikelihood hessian function
-    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian diagonal.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    f = np.zeros_like(s, dtype=np.float64)
-    raw_ind = adj[0]
-    col_ind = adj[1]
-    weigths_val = adj[2]
-
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        aux = w / ((beta[i] + beta[j]) ** 2)
-        f[i] -= aux
-        f[j] -= aux
-    return f
-
-
-@jit(nopython=True, parallel=True)
-def loglikelihood_hessian_diag_crema_sparse(beta, args):
-    """Returns the diagonal of CReMa loglikelihood hessian function
-    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
-    Sparse initialization version.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian diagonal.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    x = adj[0]
-    for i in prange(n):
-        aux = x[i] * x
-        aux_value = aux / (1 + aux)
-        aux = aux_value / ((beta[i] + beta) ** 2)
-        f[i] -= aux.sum() - aux[i]
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
-    """Returns the diagonal of CReMa loglikelihood hessian function
-    evaluated in beta. The UBCM pmatrix is computed inside the function.
-    Sparse initialization version.
-    Alternative version not in use.
-
-    :param beta: Evaluating point *beta*.
-    :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient function.
-        Strengths sequence and adjacency binary/probability matrix.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian diagonal.
-    :rtype: numpy.ndarray
-    """
-    s = args[0]
-    adj = args[1]
-    n = len(s)
-    f = np.zeros_like(s, dtype=np.float64)
-    x = adj[0]
-    for i in np.arange(n):
-        for j in np.arange(0, i):
-            if i != j:
-                aux = x[i] * x[j]
-                aux_value = aux / (1 + aux)
-                if aux_value > 0:
-                    aux = aux_value / ((beta[i] + beta[j]) ** 2)
-                    f[i] -= aux
-                    f[j] -= aux
-    return f
-
-
-@jit(nopython=True)
-def iterative_ecm(sol, args):
-    """Returns the next UECM iterative step for the fixed-point method.
-
-    :param sol: Previous iterative step.
-    :type sol: numpy.ndarray
-    :param args: Degrees and strengths sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Next iterative step.
-    :rtype: numpy.ndarray
-    """
-    k = args[0]
-    s = args[1]
-
-    n = len(k)
-
-    x = sol[:n]
-    y = sol[n:]
-
-    f = np.zeros(2 * n, dtype=np.float64)
-    for i in np.arange(n):
-        fx = 0.0
-        fy = 0.0
-        for j in np.arange(n):
-            if i != j:
-                aux1 = x[i] * x[j]
-                aux2 = y[i] * y[j]
-                fx += (x[j] * aux2) / (1 - aux2 + aux1 * aux2)
-                fy += (aux1 * y[j]) / ((1 - aux2) * (1 - aux2 + aux1 * aux2))
-        if fx:
-            f[i] = k[i] / fx
-        else:
-            f[i] = 0.0
-        if fy:
-            f[i + n] = s[i] / fy
-        else:
-            f[i + n] = 0.0
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_ecm(sol, args):
-    """Returns UECM loglikelihood function evaluated in sol.
-
-    :param sol: Evaluating point *sol*.
-    :type sol: numpy.ndarray
-    :param args: Arguments to define the loglikelihood function.
-        Degrees and strengths sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood value.
-    :rtype: float
-    """
-    k = args[0]
-    s = args[1]
-
-    n = len(k)
-
-    x = sol[:n]
-    y = sol[n:]
-    f = 0.0
-    for i in np.arange(n):
-        f += k[i] * np.log(x[i]) + s[i] * np.log(y[i])
-        for j in np.arange(0, i):
-            aux = y[i] * y[j]
-            f += np.log((1 - aux) / (1 - aux + x[i] * x[j] * aux))
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_prime_ecm(sol, args):
-    """Returns DECM loglikelihood gradient function evaluated in sol.
-
-    :param sol: Evaluating point *sol*.
-    :type sol: numpy.ndarray
-    :param args: Arguments to define the loglikelihood gradient.
-        Degrees and strengths sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood gradient.
-    :rtype: numpy.ndarray
-    """
-    k = args[0]
-    s = args[1]
-
-    n = len(k)
-
-    x = sol[:n]
-    y = sol[n:]
-    f = np.zeros(2 * n, dtype=np.float64)
-    for i in np.arange(n):
-        f[i] += k[i] / x[i]
-        f[i + n] += s[i] / y[i]
-        for j in np.arange(n):
-            if i != j:
-                aux1 = x[i] * x[j]
-                aux2 = y[i] * y[j]
-                f[i] -= (x[j] * aux2) / (1 - aux2 + aux1 * aux2)
-                f[i + n] -= (aux1 * y[j]) / (
-                    (1 - aux2) * (1 - aux2 + aux1 * aux2)
-                )
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_hessian_ecm(sol, args):
-    """Returns DBCM loglikelihood hessian function evaluated in sol.
-
-    :param sol:.Evaluating point *sol*.
-    :type sol: numpy.ndarray
-    :param args: Arguments to define the loglikelihood hessian.
-        Degrees and strengths sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood hessian matrix.
-    :rtype: numpy.ndarray
-    """
-    k = args[0]
-    s = args[1]
-
-    n = len(k)
-
-    x = sol[:n]
-    y = sol[n:]
-    f = np.zeros(shape=(2 * n, 2 * n), dtype=np.float64)
-    for i in np.arange(n):
-
-        for j in np.arange(i, n):
-            if i == j:
-                f1 = -k[i] / (x[i] ** 2)
-                f2 = -s[i] / ((y[i]) ** 2)
-                f3 = 0.0
-                for h in np.arange(n):
-                    if h != i:
-                        aux1 = x[i] * x[h]
-                        aux2 = y[i] * y[h]
-                        aux3 = (1 - aux2) ** 2
-                        aux4 = (1 - aux2 + aux1 * aux2) ** 2
-                        f1 += ((x[h] * aux2) ** 2) / aux4
-                        f2 += (
-                            (
-                                aux1
-                                * y[h]
-                                * (
-                                    aux1 * y[h] * (1 - 2 * aux2)
-                                    - 2 * y[h] * (1 - aux2)
-                                )
-                            )
-                        ) / (aux3 * aux4)
-                        f3 -= (x[h] * y[h]) / aux4
-                f[i, i] = f1
-                f[i + n, i + n] = f2
-                f[i + n, i] = f3
-                f[i, i + n] = f3
-            else:
-                aux1 = x[i] * x[j]
-                aux2 = y[i] * y[j]
-                aux3 = (1 - aux2) ** 2
-                aux4 = (1 - aux2 + aux1 * aux2) ** 2
-
-                aux = -(aux2 * (1 - aux2)) / aux4
-                f[i, j] = aux
-                f[j, i] = aux
-
-                aux = -(x[j] * y[i]) / aux4
-                f[i, j + n] = aux
-                f[j + n, i] = aux
-
-                aux = -(aux1 * (1 - aux2 ** 2 + aux1 * (aux2 ** 2))) / (
-                    aux3 * aux4
-                )
-                f[i + n, j + n] = aux
-                f[j + n, i + n] = aux
-
-                aux = -(x[i] * y[j]) / aux4
-                f[i + n, j] = aux
-                f[j, i + n] = aux
-
-    return f
-
-
-@jit(nopython=True)
-def loglikelihood_hessian_diag_ecm(sol, args):
-    """Returns the diagonal of UECM loglikelihood hessian function
-    evaluated in sol.
-
-    :param sol: Evaluating point *sol*.
-    :type sol: numpy.ndarray
-    :param args: Arguments to define the loglikelihood hessian function.
-        Degrees and strengths sequences.
-    :type args: (numpy.ndarray, numpy.ndarray)
-    :return: Hessian matrix diagonal.
-    :rtype: numpy.ndarray
-    """
-    k = args[0]
-    s = args[1]
-
-    n = len(k)
-
-    x = sol[:n]
-    y = sol[n:]
-    f = np.zeros(2 * n, dtype=np.float64)
-
-    for i in np.arange(n):
-        f[i] -= k[i] / (x[i] * x[i])
-        f[i + n] -= s[i] / (y[i] * y[i])
-        for j in np.arange(n):
-            if j != i:
-                aux1 = x[i] * x[j]
-                aux2 = y[i] * y[j]
-                aux3 = (1 - aux2) ** 2
-                aux4 = (1 - aux2 + aux1 * aux2) ** 2
-                f[i] += ((x[j] * aux2) ** 2) / aux4
-                f[i + n] += (
-                    aux1
-                    * y[j]
-                    * (aux1 * y[j] * (1 - 2 * aux2) - 2 * y[j] * (1 - aux2))
-                ) / (aux3 * aux4)
-    return f
 
 
 def solver(
@@ -956,466 +223,18 @@ def solver(
 
 
 @jit(nopython=True)
-def linsearch_fun_crema(X, args):
-    """Linsearch function for CReMa newton and quasinewton methods.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray,
-        float, float, func)
-    :param args: Tuple, step function and arguments.
-    :type args: (func, tuple)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
-    step_fun = args[0]
-    arg_step_fun = args[1]
-
-    i = 0
-    s_old = -step_fun(x, arg_step_fun)
-    while ((not sufficient_decrease_condition(s_old,
-                                              -step_fun(x + alfa * dx,
-                                                        arg_step_fun),
-                                              alfa,
-                                              f,
-                                              dx))
-            and (i < 50)
-           ):
-        alfa *= beta
-        i += 1
-
-    return alfa
-
-
-@jit(nopython=True)
-def linsearch_fun_crema_fixed(X):
-    """Linsearch function for CReMa fixed-point method.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
-
-    if step:
-        kk = 0
-        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-        while(
-            (not cond)
-            and (kk < 50)
-             ):
-            alfa *= beta
-            kk += 1
-            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-
-    return alfa
-
-
-@jit(nopython=True)
-def linsearch_fun_CM_new(X, args):
-    """Linsearch function for UBCM newton and quasinewton methods.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-    This function works on UBCM exponential version.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: Tuple, step function and arguments.
-    :type args: (func, tuple)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
-    step_fun = args[0]
-    arg_step_fun = args[1]
-
-    i = 0
-    s_old = -step_fun(x, arg_step_fun)
-    while (
-        sufficient_decrease_condition(
-            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
-        )
-        is False
-        and i < 50
-    ):
-        alfa *= beta
-        i += 1
-    # print(alfa)
-    return alfa
-
-
-@jit(nopython=True)
-def linsearch_fun_CM_new_fixed(X):
-    """Linsearch function for UBCM fixed-point method.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-    This function works on UBCM exponential version.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
-
-    if step:
-        kk = 0
-        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-        while(
-            not cond
-            and kk < 50
-             ):
-            alfa *= beta
-            kk += 1
-            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-    # print(alfa)
-    return alfa
-
-
-@jit(nopython=True)
-def linsearch_fun_CM(X, args):
-    """Linsearch function for UBCM newton and quasinewton methods.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: Tuple, step function and arguments.
-    :type args: (func, tuple)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
-    step_fun = args[0]
-    arg_step_fun = args[1]
-
-    eps2 = 1e-2
-    alfa0 = (eps2 - 1) * x / dx
-    for a in alfa0:
-        if a >= 0:
-            alfa = min(alfa, a)
-
-    i = 0
-    s_old = -step_fun(x, arg_step_fun)
-    while (
-        sufficient_decrease_condition(
-            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
-        )
-        is False
-        and i < 50
-    ):
-        alfa *= beta
-        i += 1
-    return alfa
-
-
-@jit(nopython=True)
-def linsearch_fun_CM_fixed(X):
-    """Linsearch function for UBCM fixed-point method.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
-
-    eps2 = 1e-2
-    alfa0 = (eps2 - 1) * x / dx
-    for a in alfa0:
-        if a >= 0:
-            alfa = min(alfa, a)
-
-    if step:
-        kk = 0
-        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-        while(
-            cond is False
-            and kk < 50
-             ):
-            alfa *= beta
-            kk += 1
-            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-    return alfa
-
-
-@jit(nopython=True)
-def linsearch_fun_ECM_new(X, args):
-    """Linsearch function for UECM newton and quasinewton methods.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-    This function works on UBCM exponential version.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: Tuple, step function and arguments.
-    :type args: (func, tuple)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
-    step_fun = args[0]
-    arg_step_fun = args[1]
-
-    nnn = int(len(x) / 2)
-    while True:
-        ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
-        cond = np.sum(x[nnn:][ind_min_beta] +
-                      alfa * dx[nnn:][ind_min_beta]) > 1e-14
-        if (
-            cond
-        ):
-            break
-        else:
-            alfa *= beta
-
-    i = 0
-    s_old = -step_fun(x, arg_step_fun)
-    while (
-        sufficient_decrease_condition(
-            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
-        )
-        is False
-        and i < 50
-    ):
-        alfa *= beta
-        i += 1
-
-    return alfa
-
-
-@jit(nopython=True)
-def linsearch_fun_ECM_new_fixed(X):
-    """Linsearch function for UECM fixed-point method.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-    This function works on UBCM exponential version.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
-
-    nnn = int(len(x) / 2)
-    while True:
-        ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
-        cond = np.sum(x[nnn:][ind_min_beta] +
-                      alfa * dx[nnn:][ind_min_beta]) > 1e-14
-        if (
-            cond
-        ):
-            break
-        else:
-            alfa *= beta
-
-    if step:
-        kk = 0
-        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-        while(
-            (not cond)
-            and kk < 50
-             ):
-            alfa *= beta
-            kk += 1
-            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-
-    return alfa
-
-
-@jit(nopython=True)
-def linsearch_fun_ECM(X, args):
-    """Linsearch function for UECM newton and quasinewton methods.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
-    :param args: Tuple, step function and arguments.
-    :type args: (func, tuple)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
-    step_fun = args[0]
-    arg_step_fun = args[1]
-
-    eps2 = 1e-2
-    alfa0 = (eps2 - 1) * x / dx
-    for a in alfa0:
-        if a >= 0:
-            alfa = min(alfa, a)
-
-    nnn = int(len(x) / 2)
-    while True:
-        ind_max_y = (x[nnn:] + alfa * dx[nnn:]).argsort()[-2:][::-1]
-        cond = np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1
-        if cond:
-            break
-        else:
-            alfa *= beta
-
-    i = 0
-    s_old = -step_fun(x, arg_step_fun)
-    while (
-        sufficient_decrease_condition(
-            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
-        )
-        is False
-        and i < 50
-    ):
-        alfa *= beta
-        i += 1
-
-    return alfa
-
-
-@jit(nopython=True)
-def linsearch_fun_ECM_fixed(X):
-    """Linsearch function for UECM fixed-point method.
-    The function returns the step's size, alpha.
-    Alpha determines how much to move on the descending direction
-    found by the algorithm.
-
-    :param X: Tuple of arguments to find alpha:
-        solution, solution step, tuning parameter beta,
-        initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
-    :return: Working alpha.
-    :rtype: float
-    """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
-
-    eps2 = 1e-2
-    alfa0 = (eps2 - 1) * x / dx
-    for a in alfa0:
-        if a >= 0:
-            alfa = min(alfa, a)
-
-    nnn = int(len(x) / 2)
-    while True:
-        ind_max_y = (x[nnn:] + alfa * dx[nnn:]).argsort()[-2:][::-1]
-        cond = np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1
-        if cond:
-            break
-        else:
-            alfa *= beta
-
-    if step:
-        kk = 0
-        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-        while(
-            cond is False
-            and kk < 50
-             ):
-            alfa *= beta
-            kk += 1
-            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-
-    return alfa
-
-
-@jit(nopython=True)
 def sufficient_decrease_condition(
     f_old, f_new, alpha, grad_f, p, c1=1e-04, c2=0.9
 ):
     """Return boolean indicator if upper wolfe condition are respected.
 
-    :param f_old: loglikelihood value at the previous iteration.
+    :param f_old: mof.loglikelihood value at the previous iteration.
     :type f_old: float
-    :param f_new: loglikelihood value at the actual iteration.
+    :param f_new: mof.loglikelihood value at the actual iteration.
     :type f_new: float
     :param alpha: alfa parameter of linsearch.
     :type alpha: float
-    :param grad_f: loglikelihood prime.
+    :param grad_f: mof.loglikelihood prime.
     :type grad_f: numpy.ndarray
     :param p: increment at the actual iteration.
     :type p: numpy.ndarray
@@ -1463,99 +282,6 @@ def hessian_regulariser_function_eigen_based(B, eps):
     Bf = e @ (np.diag(ll) + np.diag(l)) @ e.transpose()
 
     return Bf
-
-
-@jit(nopython=True)
-def expected_degree_cm(sol):
-    """Computes the expected degrees of UBCM given the solution x.
-
-    :param sol: UBCM solutions.
-    :type sol: numpy.ndarray
-    :return: Expected degrees sequence.
-    :rtype: numpy.ndarray
-    """
-    ex_k = np.zeros_like(sol, dtype=np.float64)
-    n = len(sol)
-    for i in np.arange(n):
-        for j in np.arange(n):
-            if i != j:
-                aux = sol[i] * sol[j]
-                # print("({},{}) p = {}".format(i,j,aux/(1+aux)))
-                ex_k[i] += aux / (1 + aux)
-    return ex_k
-
-
-@jit(nopython=True)
-def expected_strength_crema(sol, adj):
-    """Computes the expected strengths of CReMa given its solution beta.
-
-    :param sol: CReMa solutions.
-    :type sol: numpy.ndarray
-    :param adj: adjacency/pmatrix.
-    :type adj: numpy.ndarray
-    :return: expected strengths sequence.
-    :rtype: numpy.ndarray
-    """
-    ex_s = np.zeros_like(sol, dtype=np.float64)
-    raw_ind = adj[0]
-    col_ind = adj[1]
-    weigths_val = adj[2]
-
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        aux = w / (sol[i] + sol[j])
-        ex_s[i] += aux
-        ex_s[j] += aux
-    return ex_s
-
-
-@jit(nopython=True)
-def expected_strength_crema_sparse(sol, adj):
-    """Computes the expected strengths of CReMa given its solution beta and the solutions of UBCM.
-
-    :param sol: CReMa solutions.
-    :type sol: numpy.ndarray
-    :param adj: UBCM solutions.
-    :type adj: numpy.ndarray
-    :return: expected strengths sequence.
-    :rtype: numpy.ndarray
-    """
-    ex_s = np.zeros_like(sol, dtype=np.float64)
-    n = len(sol)
-    x = adj[0]
-    for i in np.arange(n):
-        for j in np.arange(0, i):
-            aux = x[i] * x[j]
-            aux_value = aux / (1 + aux)
-            if aux_value > 0:
-                aux = aux_value / (sol[i] + sol[j])
-                ex_s[i] += aux
-                ex_s[j] += aux
-    return ex_s
-
-
-@jit(nopython=True)
-def expected_ecm(sol):
-    """Computes expected degrees and strengths sequence given solution x and y of UECM.
-
-    :param sol: UECM solutions.
-    :type sol: numpy.ndarray
-    :return: expected degrees and strengths sequence.
-    :rtype: numpy.ndarray
-    """
-    n = int(len(sol) / 2)
-    x = sol[:n]
-    y = sol[n:]
-    ex_ks = np.zeros(2 * n, dtype=np.float64)
-    for i in np.arange(n):
-        for j in np.arange(n):
-            if i != j:
-                aux1 = x[i] * x[j]
-                aux2 = y[i] * y[j]
-                ex_ks[i] += (aux1 * aux2) / (1 - aux2 + aux1 * aux2)
-                ex_ks[i + n] += (aux1 * aux2) / (
-                    (1 - aux2 + aux1 * aux2) * (1 - aux2)
-                )
-    return ex_ks
 
 
 def edgelist_from_edgelist(edgelist):
@@ -1967,7 +693,7 @@ class UndirectedGraph:
         elif model in ["ecm", "ecm-new"]:
             self._set_solved_problem_ecm(solution)
         elif model in ["crema", "crema-sparse"]:
-            self._set_solved_problem_crema(solution)
+            self._set_solved_problem_crema_undirected(solution)
 
     def degree_reduction(self):
         """
@@ -1998,7 +724,7 @@ class UndirectedGraph:
         elif model in ["ecm", "ecm-new"]:
             self._set_initial_guess_ecm()
         elif model in ["crema", "crema-sparse"]:
-            self._set_initial_guess_crema()
+            self._set_initial_guess_crema_undirected()
 
     def _set_initial_guess_cm(self):
         """Sets the initial guess for UBCM given the choice made by the user.
@@ -2047,7 +773,7 @@ class UndirectedGraph:
         elif isinstance(self.initial_guess, np.ndarray):
             self.x0 = self.r_x
 
-    def _set_initial_guess_crema(self):
+    def _set_initial_guess_crema_undirected(self):
         """Sets the initial guess for CReMa given the choice made by the user.
 
         :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.
@@ -2139,7 +865,7 @@ class UndirectedGraph:
         """
         if self.last_model in ["cm", "cm-new", "crema", "crema-sparse"]:
             if self.x is not None:
-                ex_k = expected_degree_cm(self.x)
+                ex_k = mof.expected_degree_cm(self.x)
                 # print(k, ex_k)
                 self.expected_dseq = ex_k
                 # error output
@@ -2149,11 +875,11 @@ class UndirectedGraph:
 
             if self.beta is not None:
                 if self.is_sparse:
-                    ex_s = expected_strength_crema_sparse(
+                    ex_s = mof.expected_strength_crema_undirected_sparse(
                         self.beta, self.adjacency_crema
                     )
                 else:
-                    ex_s = expected_strength_crema(
+                    ex_s = mof.expected_strength_crema_undirected(
                         self.beta, self.adjacency_crema
                     )
                 self.expected_stregth_seq = ex_s
@@ -2175,7 +901,7 @@ class UndirectedGraph:
         # potremmo strutturarlo così per evitare ridondanze
         elif self.last_model in ["ecm", "ecm-new"]:
             sol = np.concatenate((self.x, self.y))
-            ex = expected_ecm(sol)
+            ex = mof.expected_ecm(sol)
             k = np.concatenate((self.dseq, self.strength_sequence))
             self.expected_dseq = ex[: self.n_nodes]
             self.expected_strength_seq = ex[self.n_nodes:]
@@ -2236,122 +962,122 @@ class UndirectedGraph:
         mod_met = mod_met.join([model, method])
 
         d_fun = {
-            "cm-newton": lambda x: -loglikelihood_prime_cm(x, self.args),
-            "cm-quasinewton": lambda x: -loglikelihood_prime_cm(x, self.args),
-            "cm-fixed-point": lambda x: iterative_cm(x, self.args),
-            "crema-newton": lambda x: -loglikelihood_prime_crema(
+            "cm-newton": lambda x: -mof.loglikelihood_prime_cm(x, self.args),
+            "cm-quasinewton": lambda x: -mof.loglikelihood_prime_cm(x, self.args),
+            "cm-fixed-point": lambda x: mof.iterative_cm(x, self.args),
+            "crema-newton": lambda x: -mof.loglikelihood_prime_crema_undirected(
                 x, self.args
             ),
-            "crema-quasinewton": lambda x: -loglikelihood_prime_crema(
+            "crema-quasinewton": lambda x: -mof.loglikelihood_prime_crema_undirected(
                 x, self.args
             ),
-            "crema-fixed-point": lambda x: -iterative_crema(x, self.args),
-            "ecm-newton": lambda x: -loglikelihood_prime_ecm(x, self.args),
-            "ecm-quasinewton": lambda x: -loglikelihood_prime_ecm(
+            "crema-fixed-point": lambda x: -mof.iterative_crema_undirected(x, self.args),
+            "ecm-newton": lambda x: -mof.loglikelihood_prime_ecm(x, self.args),
+            "ecm-quasinewton": lambda x: -mof.loglikelihood_prime_ecm(
                 x, self.args
             ),
-            "ecm-fixed-point": lambda x: iterative_ecm(x, self.args),
-            "crema-sparse-newton": lambda x: -loglikelihood_prime_crema_sparse(
+            "ecm-fixed-point": lambda x: mof.iterative_ecm(x, self.args),
+            "crema-sparse-newton": lambda x: -mof.loglikelihood_prime_crema_undirected_sparse(
                 x, self.args
             ),
-            "crema-sparse-quasinewton": lambda x: -loglikelihood_prime_crema_sparse(
+            "crema-sparse-quasinewton": lambda x: -mof.loglikelihood_prime_crema_undirected_sparse(
                 x, self.args
             ),
-            "crema-sparse-fixed-point": lambda x: -iterative_crema_sparse(
+            "crema-sparse-fixed-point": lambda x: -mof.iterative_crema_undirected_sparse(
                 x, self.args
             ),
-            "cm-new-newton": lambda x: -loglikelihood_prime_cm_new(
+            "cm-new-newton": lambda x: -mof.loglikelihood_prime_cm_new(
                 x, self.args
             ),
-            "cm-new-quasinewton": lambda x: -loglikelihood_prime_cm_new(
+            "cm-new-quasinewton": lambda x: -mof.loglikelihood_prime_cm_new(
                 x, self.args
             ),
-            "cm-new-fixed-point": lambda x: iterative_cm_new(x, self.args),
-            "ecm-new-newton": lambda x: -loglikelihood_prime_ecm_new(
+            "cm-new-fixed-point": lambda x: mof.iterative_cm_new(x, self.args),
+            "ecm-new-newton": lambda x: -mof.loglikelihood_prime_ecm_new(
                 x, self.args
             ),
-            "ecm-new-quasinewton": lambda x: -loglikelihood_prime_ecm_new(
+            "ecm-new-quasinewton": lambda x: -mof.loglikelihood_prime_ecm_new(
                 x, self.args
             ),
-            "ecm-new-fixed-point": lambda x: iterative_ecm_new(x, self.args),
+            "ecm-new-fixed-point": lambda x: mof.iterative_ecm_new(x, self.args),
         }
 
         d_fun_jac = {
-            "cm-newton": lambda x: -loglikelihood_hessian_cm(x, self.args),
-            "cm-quasinewton": lambda x: -loglikelihood_hessian_diag_cm(
+            "cm-newton": lambda x: -mof.loglikelihood_hessian_cm(x, self.args),
+            "cm-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_cm(
                 x, self.args
             ),
             "cm-fixed-point": None,
-            "crema-newton": lambda x: -loglikelihood_hessian_crema(
+            "crema-newton": lambda x: -mof.loglikelihood_hessian_crema_undirected(
                 x, self.args
             ),
-            "crema-quasinewton": lambda x: -loglikelihood_hessian_diag_crema(
+            "crema-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_crema_undirected(
                 x, self.args
             ),
             "crema-fixed-point": None,
-            "ecm-newton": lambda x: -loglikelihood_hessian_ecm(x, self.args),
-            "ecm-quasinewton": lambda x: -loglikelihood_hessian_diag_ecm(
+            "ecm-newton": lambda x: -mof.loglikelihood_hessian_ecm(x, self.args),
+            "ecm-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_ecm(
                 x, self.args
             ),
             "ecm-fixed-point": None,
-            "crema-sparse-newton": lambda x: -loglikelihood_hessian_crema(
+            "crema-sparse-newton": lambda x: -mof.loglikelihood_hessian_crema_undirected(
                 x, self.args
             ),
-            "crema-sparse-quasinewton": lambda x: -loglikelihood_hessian_diag_crema_sparse(
+            "crema-sparse-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_crema_undirected_sparse(
                 x, self.args
             ),
             "crema-sparse-fixed-point": None,
-            "cm-new-newton": lambda x: -loglikelihood_hessian_cm_new(
+            "cm-new-newton": lambda x: -mof.loglikelihood_hessian_cm_new(
                 x, self.args
             ),
-            "cm-new-quasinewton": lambda x: -loglikelihood_hessian_diag_cm_new(
+            "cm-new-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_cm_new(
                 x, self.args
             ),
             "cm-new-fixed-point": None,
-            "ecm-new-newton": lambda x: -loglikelihood_hessian_ecm_new(
+            "ecm-new-newton": lambda x: -mof.loglikelihood_hessian_ecm_new(
                 x, self.args
             ),
-            "ecm-new-quasinewton": lambda x: -loglikelihood_hessian_diag_ecm_new(
+            "ecm-new-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_ecm_new(
                 x, self.args
             ),
             "ecm-new-fixed-point": None,
         }
 
         d_fun_stop = {
-            "cm-newton": lambda x: -loglikelihood_cm(x, self.args),
-            "cm-quasinewton": lambda x: -loglikelihood_cm(x, self.args),
-            "cm-fixed-point": lambda x: -loglikelihood_cm(x, self.args),
-            "crema-newton": lambda x: -loglikelihood_crema(x, self.args),
-            "crema-quasinewton": lambda x: -loglikelihood_crema(
+            "cm-newton": lambda x: -mof.loglikelihood_cm(x, self.args),
+            "cm-quasinewton": lambda x: -mof.loglikelihood_cm(x, self.args),
+            "cm-fixed-point": lambda x: -mof.loglikelihood_cm(x, self.args),
+            "crema-newton": lambda x: -mof.loglikelihood_crema_undirected(x, self.args),
+            "crema-quasinewton": lambda x: -mof.loglikelihood_crema_undirected(
                 x, self.args
             ),
-            "crema-fixed-point": lambda x: -loglikelihood_crema(
+            "crema-fixed-point": lambda x: -mof.loglikelihood_crema_undirected(
                 x, self.args
             ),
-            "ecm-newton": lambda x: -loglikelihood_ecm(x, self.args),
-            "ecm-quasinewton": lambda x: -loglikelihood_ecm(x, self.args),
-            "ecm-fixed-point": lambda x: -loglikelihood_ecm(x, self.args),
-            "crema-sparse-newton": lambda x: -loglikelihood_crema_sparse(
+            "ecm-newton": lambda x: -mof.loglikelihood_ecm(x, self.args),
+            "ecm-quasinewton": lambda x: -mof.loglikelihood_ecm(x, self.args),
+            "ecm-fixed-point": lambda x: -mof.loglikelihood_ecm(x, self.args),
+            "crema-sparse-newton": lambda x: -mof.loglikelihood_crema_undirected_sparse(
                 x, self.args
             ),
-            "crema-sparse-quasinewton": lambda x: -loglikelihood_crema_sparse(
+            "crema-sparse-quasinewton": lambda x: -mof.loglikelihood_crema_undirected_sparse(
                 x, self.args
             ),
-            "crema-sparse-fixed-point": lambda x: -loglikelihood_crema_sparse(
+            "crema-sparse-fixed-point": lambda x: -mof.loglikelihood_crema_undirected_sparse(
                 x, self.args
             ),
-            "cm-new-newton": lambda x: -loglikelihood_cm_new(x, self.args),
-            "cm-new-quasinewton": lambda x: -loglikelihood_cm_new(
+            "cm-new-newton": lambda x: -mof.loglikelihood_cm_new(x, self.args),
+            "cm-new-quasinewton": lambda x: -mof.loglikelihood_cm_new(
                 x, self.args
             ),
-            "cm-new-fixed-point": lambda x: -loglikelihood_cm_new(
+            "cm-new-fixed-point": lambda x: -mof.loglikelihood_cm_new(
                 x, self.args
             ),
-            "ecm-new-newton": lambda x: -loglikelihood_ecm_new(x, self.args),
-            "ecm-new-quasinewton": lambda x: -loglikelihood_ecm_new(
+            "ecm-new-newton": lambda x: -mof.loglikelihood_ecm_new(x, self.args),
+            "ecm-new-quasinewton": lambda x: -mof.loglikelihood_ecm_new(
                 x, self.args
             ),
-            "ecm-new-fixed-point": lambda x: -loglikelihood_ecm_new(
+            "ecm-new-fixed-point": lambda x: -mof.loglikelihood_ecm_new(
                 x, self.args
             ),
         }
@@ -2374,35 +1100,35 @@ class UndirectedGraph:
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
         args_lin = {
-            "cm": (loglikelihood_cm, self.args),
-            "crema": (loglikelihood_crema, self.args),
-            "crema-sparse": (loglikelihood_crema_sparse, self.args),
-            "ecm": (loglikelihood_ecm, self.args),
-            "cm-new": (loglikelihood_cm_new, self.args),
-            "ecm-new": (loglikelihood_ecm_new, self.args),
+            "cm": (mof.loglikelihood_cm, self.args),
+            "crema": (mof.loglikelihood_crema, self.args),
+            "crema-sparse": (mof.loglikelihood_crema_sparse, self.args),
+            "ecm": (mof.loglikelihood_ecm, self.args),
+            "cm-new": (mof.loglikelihood_cm_new, self.args),
+            "ecm-new": (mof.loglikelihood_ecm_new, self.args),
         }
 
         self.args_lins = args_lin[model]
 
         lins_fun = {
-            "cm-newton": lambda x: linsearch_fun_CM(x, self.args_lins),
-            "cm-quasinewton": lambda x: linsearch_fun_CM(x, self.args_lins),
-            "cm-fixed-point": lambda x: linsearch_fun_CM_fixed(x),
-            "crema-newton": lambda x: linsearch_fun_crema(x, self.args_lins),
-            "crema-quasinewton": lambda x: linsearch_fun_crema(x, self.args_lins),
-            "crema-fixed-point": lambda x: linsearch_fun_crema_fixed(x),
-            "crema-sparse-newton": lambda x: linsearch_fun_crema(x, self.args_lins),
-            "crema-sparse-quasinewton": lambda x: linsearch_fun_crema(x, self.args_lins),
-            "crema-sparse-fixed-point": lambda x: linsearch_fun_crema_fixed(x),
-            "ecm-newton": lambda x: linsearch_fun_ECM(x, self.args_lins),
-            "ecm-quasinewton": lambda x: linsearch_fun_ECM(x, self.args_lins),
-            "ecm-fixed-point": lambda x: linsearch_fun_ECM_fixed(x),
-            "cm-new-newton": lambda x: linsearch_fun_CM_new(x, self.args_lins),
-            "cm-new-quasinewton": lambda x: linsearch_fun_CM_new(x, self.args_lins),
-            "cm-new-fixed-point": lambda x: linsearch_fun_CM_new_fixed(x),
-            "ecm-new-newton": lambda x: linsearch_fun_ECM_new(x, self.args_lins),
-            "ecm-new-quasinewton": lambda x: linsearch_fun_ECM_new(x, self.args_lins),
-            "ecm-new-fixed-point": lambda x: linsearch_fun_ECM_new_fixed(x)
+            "cm-newton": lambda x: mof.linsearch_fun_CM(x, self.args_lins),
+            "cm-quasinewton": lambda x: mof.linsearch_fun_CM(x, self.args_lins),
+            "cm-fixed-point": lambda x: mof.linsearch_fun_CM_fixed(x),
+            "crema-newton": lambda x: mof.linsearch_fun_crema_undirected(x, self.args_lins),
+            "crema-quasinewton": lambda x: mof.linsearch_fun_crema_undirected(x, self.args_lins),
+            "crema-fixed-point": lambda x: mof.linsearch_fun_crema_fixed(x),
+            "crema-sparse-newton": lambda x: mof.linsearch_fun_crema_undirected(x, self.args_lins),
+            "crema-sparse-quasinewton": lambda x: mof.linsearch_fun_crema_undirected(x, self.args_lins),
+            "crema-sparse-fixed-point": lambda x: mof.linsearch_fun_crema_fixed(x),
+            "ecm-newton": lambda x: mof.linsearch_fun_ECM(x, self.args_lins),
+            "ecm-quasinewton": lambda x: mof.linsearch_fun_ECM(x, self.args_lins),
+            "ecm-fixed-point": lambda x: mof.linsearch_fun_ECM_fixed(x),
+            "cm-new-newton": lambda x: mof.linsearch_fun_CM_new(x, self.args_lins),
+            "cm-new-quasinewton": lambda x: mof.linsearch_fun_CM_new(x, self.args_lins),
+            "cm-new-fixed-point": lambda x: mof.linsearch_fun_CM_new_fixed(x),
+            "ecm-new-newton": lambda x: mof.linsearch_fun_ECM_new(x, self.args_lins),
+            "ecm-new-quasinewton": lambda x: mof.linsearch_fun_ECM_new(x, self.args_lins),
+            "ecm-new-fixed-point": lambda x: mof.linsearch_fun_ECM_new_fixed(x)
         }
 
         self.fun_linsearch = lins_fun[mod_met]
@@ -2424,7 +1150,7 @@ class UndirectedGraph:
             elif self.regularise == "identity":
                 self.hessian_regulariser = hessian_regulariser_function
 
-    def _solve_problem_crema(
+    def _solve_problem_crema_undirected(
         self,
         initial_guess=None,
         model="crema",
@@ -2536,7 +1262,7 @@ class UndirectedGraph:
 
         self._set_solved_problem(sol)
 
-    def _set_solved_problem_crema(self, solution):
+    def _set_solved_problem_crema_undirected(self, solution):
         if self.full_return:
             self.beta = solution[0]
             self.comput_time_crema = solution[1]
@@ -2587,9 +1313,9 @@ class UndirectedGraph:
 
         :param model: Available models are:
 
-            - *cm*: solves UBCM respect to the parameters *x* of the loglikelihood function, it works for uweighted undirected graphs [insert ref].
+            - *cm*: solves UBCM respect to the parameters *x* of the mof.loglikelihood function, it works for uweighted undirected graphs [insert ref].
             - *cm-new*: differently from the *cm* option, *cm-new* considers the exponents of *x* as parameters [insert ref].
-            - *ecm*: solves UECM respect to the parameters *x* and *y* of the loglikelihood function, it is conceived for weighted undirected graphs [insert ref].
+            - *ecm*: solves UECM respect to the parameters *x* and *y* of the mof.loglikelihood function, it is conceived for weighted undirected graphs [insert ref].
             - *ecm-new*: differently from the *ecm* option, *ecm-new* considers the exponents of *x* and *y* as parameters [insert ref].
             - *crema*: solves CReMa for a weighted undirectd graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
             - *crema-sparse*: alternative implementetio of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
@@ -2598,8 +1324,8 @@ class UndirectedGraph:
         :param method: Available methods to solve the given *model* are:
 
             - *newton*: uses Newton-Rhapson method to solve the selected model, it can be memory demanding for *crema* because it requires the computation of the entire Hessian matrix. This method is not available for *creama-sparse*.
-            - *quasinewton*: uses Newton-Rhapson method with Hessian matrix approximated by its principal diagonal to find parameters maximising loglikelihood function.
-            - *fixed-point*: uses a fixed-point method to find parameters maximising loglikelihood function.
+            - *quasinewton*: uses Newton-Rhapson method with Hessian matrix approximated by its principal diagonal to find parameters maximising mof.loglikelihood function.
+            - *fixed-point*: uses a fixed-point method to find parameters maximising mof.loglikelihood function.
 
         :type method: str
         :param initial_guess: Starting point solution may affect the results of the optization process. The user can provid an initial guess or choose between the following options:
@@ -2649,7 +1375,7 @@ class UndirectedGraph:
                 eps=eps,
             )
         elif model in ["crema", "crema-sparse"]:
-            self._solve_problem_crema(
+            self._solve_problem_crema_undirected(
                 initial_guess=initial_guess,
                 model=model,
                 adjacency=adjacency,

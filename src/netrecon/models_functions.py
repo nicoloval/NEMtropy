@@ -9,761 +9,1300 @@ warnings.simplefilter(
     action='ignore',
     category=NumbaExperimentalFeatureWarning)
 
-# CREMA functions
-# ---------------
+
+# UBCM functions
+# --------------
 
 
 @jit(nopython=True)
-def iterative_crema(beta, args):
-    """Returns the next CReMa iterative step for the fixed-point method.
-    The DBCM pmatrix is pre-computed and explicitly passed.
+def iterative_cm(x, args):
+    """Returns the next UBCM iterative step for the fixed-point method.
 
-    :param beta: Previous iterative step.
-    :type beta: numpy.ndarray
-    :param args: Out and in strengths sequences,
-        adjacency binary/probability matrix,
-        and non zero out and in indices
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+    :param x: Previous iterative step.
+    :type x: numpy.ndarray
+    :param args: Degrees and classes cardinality sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Next iterative step.
     :rtype: numpy.ndarray
     """
-    s_out = args[0]
-    s_in = args[1]
-    adj = args[2]
-    nz_index_out = args[3]
-    nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[:aux_n]
-    beta_in = beta[aux_n:]
-
-    xd = np.zeros(aux_n, dtype=np.float64)
-    yd = np.zeros(aux_n, dtype=np.float64)
-
-    raw_ind = adj[0]
-    col_ind = adj[1]
-    weigths_val = adj[2]
-
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        xd[i] -= w / (1 + (beta_in[j] / beta_out[i]))
-        yd[j] -= w / (1 + (beta_out[i] / beta_in[j]))
-    for i in nz_index_out:
-        xd[i] = xd[i] / s_out[i]
-    for i in nz_index_in:
-        yd[i] = yd[i] / s_in[i]
-
-    return np.concatenate((xd, yd))
+    k = args[0]
+    c = args[1]
+    n = len(k)
+    f = np.zeros_like(k, dtype=np.float64)
+    for i in np.arange(n):
+        fx = 0
+        for j in np.arange(n):
+            if i == j:
+                fx += (c[j] - 1) * (x[j] / (1 + x[j] * x[i]))
+            else:
+                fx += (c[j]) * (x[j] / (1 + x[j] * x[i]))
+        if fx:
+            f[i] = k[i] / fx
+    return f
 
 
-@jit(nopython=True, parallel=True)
-def iterative_crema_sparse(beta, args):
+@jit(nopython=True)
+def loglikelihood_cm(x, args):
+    """Returns UBCM loglikelihood function evaluated in x.
+
+    :param x: Evaluating point *x*.
+    :type x: numpy.ndarray
+    :param args: Arguments to define the loglikelihood function.
+        Degrees and classes cardinality sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood value.
+    :rtype: float
+    """
+    k = args[0]
+    c = args[1]
+    n = len(k)
+    f = 0.0
+    for i in np.arange(n):
+        f += c[i] * k[i] * np.log(x[i])
+        for j in np.arange(n):
+            if i == j:
+                f -= (c[i] * (c[i] - 1) * np.log(1 + (x[i]) ** 2)) / 2
+            else:
+                f -= (c[i] * c[j] * np.log(1 + x[i] * x[j])) / 2
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_cm(x, args):
+    """Returns UBCM loglikelihood gradient function evaluated in x.
+
+    :param x: Evaluating point *x*.
+    :type x: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Degrees and classes cardinality sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood gradient.
+    :rtype: float
+    """
+    k = args[0]
+    c = args[1]
+    n = len(k)
+    f = np.zeros_like(k, dtype=np.float64)
+    for i in np.arange(n):
+        f[i] += c[i] * k[i] / x[i]
+        for j in np.arange(n):
+            if i == j:
+                f[i] -= c[i] * (c[j] - 1) * (x[j] / (1 + (x[j] ** 2)))
+            else:
+                f[i] -= c[i] * c[j] * (x[j] / (1 + x[i] * x[j]))
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_cm(x, args):
+    """Returns UBCM loglikelihood hessian function evaluated in x.
+
+    :param x: Evaluating point *x*.
+    :type x: numpy.ndarray
+    :param args: Arguments to define the loglikelihood hessian function.
+        Degrees and classes cardinality sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian matrix.
+    :rtype: numpy.ndarray
+    """
+    k = args[0]
+    c = args[1]
+    n = len(k)
+    f = np.zeros(shape=(n, n), dtype=np.float64)
+    for i in np.arange(n):
+        for j in np.arange(i, n):
+            if i == j:
+                aux_f = -k[i] / (x[i] * x[i]) * c[i]
+                for h in range(n):
+                    if i == h:
+                        aux = 1 + x[h] * x[h]
+                        aux_f += ((x[h] * x[h]) /
+                                  (aux * aux)) * c[i] * (c[h] - 1)
+                    else:
+                        aux = 1 + x[i] * x[h]
+                        aux_f += ((x[h] * x[h]) / (aux * aux)) * c[i] * c[h]
+            else:
+                aux = 1 + x[i] * x[j]
+                aux_f = ((x[j] * x[j] - aux) / (aux * aux)) * c[i] * c[j]
+
+            f[i, j] = aux_f
+            f[j, i] = aux_f
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_cm(x, args):
+    """Returns the diagonal of the UBCM loglikelihood hessian function
+    evaluated in x.
+
+    :param x: Evaluating point *x*.
+    :type x: numpy.ndarray
+    :param args: Arguments to define the loglikelihood hessian function.
+        Degrees and classes cardinality sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian diagonal.
+    :rtype: numpy.ndarray
+    """
+    k = args[0]
+    c = args[1]
+    n = len(k)
+    f = np.zeros(n, dtype=np.float64)
+    for i in np.arange(n):
+        f[i] -= k[i] / (x[i] * x[i]) * c[i]
+        for j in np.arange(n):
+            if i == j:
+                aux = 1 + x[j] * x[j]
+                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[i] * (c[j] - 1)
+            else:
+                aux = 1 + x[i] * x[j]
+                f[i] += ((x[j] * x[j]) / (aux * aux)) * c[i] * c[j]
+    return f
+
+
+def pmatrix_cm(x, args):
+    """Computes and returns the probability matrix induced by UBCM.
+
+    :param x: Solutions of UBCM.
+    :type x: numpy.ndarray
+    :param args: Number of nodes.
+    :type args: (int, )
+    :return: UBCM probability matrix.
+    :rtype: numpy.ndarray
+    """
+    n = args[0]
+    f = np.zeros(shape=(n, n), dtype=np.float64)
+    for i in np.arange(n):
+        for j in np.arange(i + 1, n):
+            aux = x[i] * x[j]
+            aux1 = aux / (1 + aux)
+            f[i, j] = aux1
+            f[j, i] = aux1
+    return f
+
+
+@jit(nopython=True)
+def linsearch_fun_CM(X, args):
+    """Linsearch function for UBCM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: Tuple, step function and arguments.
+    :type args: (func, tuple)
+    :return: Working alpha.
+    :rtype: float
+    """
+    # TODO: change X to xx
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    arg_step_fun = args[1]
+
+    eps2 = 1e-2
+    alfa0 = (eps2 - 1) * x / dx
+    for a in alfa0:
+        if a >= 0:
+            alfa = min(alfa, a)
+
+    i = 0
+    s_old = -step_fun(x, arg_step_fun)
+    while (
+        sufficient_decrease_condition(
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
+        )
+        is False
+        and i < 50
+    ):
+        alfa *= beta
+        i += 1
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_CM_fixed(X):
+    """Linsearch function for UBCM fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :return: Working alpha.
+    :rtype: float
+    """
+    # TODO: change X to xx
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    eps2 = 1e-2
+    alfa0 = (eps2 - 1) * x / dx
+    for a in alfa0:
+        if a >= 0:
+            alfa = min(alfa, a)
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            cond is False
+            and kk < 50
+             ):
+            alfa *= beta
+            kk += 1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+    return alfa
+
+
+@jit(nopython=True)
+def expected_degree_cm(sol):
+    """Computes the expected degrees of UBCM given the solution x.
+
+    :param sol: UBCM solutions.
+    :type sol: numpy.ndarray
+    :return: Expected degrees sequence.
+    :rtype: numpy.ndarray
+    """
+    ex_k = np.zeros_like(sol, dtype=np.float64)
+    n = len(sol)
+    for i in np.arange(n):
+        for j in np.arange(n):
+            if i != j:
+                aux = sol[i] * sol[j]
+                # print("({},{}) p = {}".format(i,j,aux/(1+aux)))
+                ex_k[i] += aux / (1 + aux)
+    return ex_k
+
+# UBCM exponential functions
+# --------------------------
+
+
+@jit(nopython=True)
+def linsearch_fun_CM_new(X, args):
+    """Linsearch function for UBCM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on UBCM exponential version.
+
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: Tuple, step function and arguments.
+    :type args: (func, tuple)
+    :return: Working alpha.
+    :rtype: float
+    """
+    # TODO: change X to xx
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    arg_step_fun = args[1]
+
+    i = 0
+    s_old = -step_fun(x, arg_step_fun)
+    while (
+        sufficient_decrease_condition(
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
+        )
+        is False
+        and i < 50
+    ):
+        alfa *= beta
+        i += 1
+    # print(alfa)
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_CM_new_fixed(X):
+    """Linsearch function for UBCM fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on UBCM exponential version.
+
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :return: Working alpha.
+    :rtype: float
+    """
+    # TODO: change X to xx
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            not cond
+            and kk < 50
+             ):
+            alfa *= beta
+            kk += 1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+    # print(alfa)
+    return alfa
+
+# UECM functions
+# --------------
+
+
+@jit(nopython=True)
+def iterative_ecm(sol, args):
+    """Returns the next UECM iterative step for the fixed-point method.
+
+    :param sol: Previous iterative step.
+    :type sol: numpy.ndarray
+    :param args: Degrees and strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Next iterative step.
+    :rtype: numpy.ndarray
+    """
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+
+    f = np.zeros(2 * n, dtype=np.float64)
+    for i in np.arange(n):
+        fx = 0.0
+        fy = 0.0
+        for j in np.arange(n):
+            if i != j:
+                aux1 = x[i] * x[j]
+                aux2 = y[i] * y[j]
+                fx += (x[j] * aux2) / (1 - aux2 + aux1 * aux2)
+                fy += (aux1 * y[j]) / ((1 - aux2) * (1 - aux2 + aux1 * aux2))
+        if fx:
+            f[i] = k[i] / fx
+        else:
+            f[i] = 0.0
+        if fy:
+            f[i + n] = s[i] / fy
+        else:
+            f[i + n] = 0.0
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_ecm(sol, args):
+    """Returns UECM loglikelihood function evaluated in sol.
+
+    :param sol: Evaluating point *sol*.
+    :type sol: numpy.ndarray
+    :param args: Arguments to define the loglikelihood function.
+        Degrees and strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood value.
+    :rtype: float
+    """
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+    f = 0.0
+    for i in np.arange(n):
+        f += k[i] * np.log(x[i]) + s[i] * np.log(y[i])
+        for j in np.arange(0, i):
+            aux = y[i] * y[j]
+            f += np.log((1 - aux) / (1 - aux + x[i] * x[j] * aux))
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_ecm(sol, args):
+    """Returns DECM loglikelihood gradient function evaluated in sol.
+
+    :param sol: Evaluating point *sol*.
+    :type sol: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient.
+        Degrees and strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood gradient.
+    :rtype: numpy.ndarray
+    """
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+    f = np.zeros(2 * n, dtype=np.float64)
+    for i in np.arange(n):
+        f[i] += k[i] / x[i]
+        f[i + n] += s[i] / y[i]
+        for j in np.arange(n):
+            if i != j:
+                aux1 = x[i] * x[j]
+                aux2 = y[i] * y[j]
+                f[i] -= (x[j] * aux2) / (1 - aux2 + aux1 * aux2)
+                f[i + n] -= (aux1 * y[j]) / (
+                    (1 - aux2) * (1 - aux2 + aux1 * aux2)
+                )
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_ecm(sol, args):
+    """Returns DBCM loglikelihood hessian function evaluated in sol.
+
+    :param sol:.Evaluating point *sol*.
+    :type sol: numpy.ndarray
+    :param args: Arguments to define the loglikelihood hessian.
+        Degrees and strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian matrix.
+    :rtype: numpy.ndarray
+    """
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+    f = np.zeros(shape=(2 * n, 2 * n), dtype=np.float64)
+    for i in np.arange(n):
+
+        for j in np.arange(i, n):
+            if i == j:
+                f1 = -k[i] / (x[i] ** 2)
+                f2 = -s[i] / ((y[i]) ** 2)
+                f3 = 0.0
+                for h in np.arange(n):
+                    if h != i:
+                        aux1 = x[i] * x[h]
+                        aux2 = y[i] * y[h]
+                        aux3 = (1 - aux2) ** 2
+                        aux4 = (1 - aux2 + aux1 * aux2) ** 2
+                        f1 += ((x[h] * aux2) ** 2) / aux4
+                        f2 += (
+                            (
+                                aux1
+                                * y[h]
+                                * (
+                                    aux1 * y[h] * (1 - 2 * aux2)
+                                    - 2 * y[h] * (1 - aux2)
+                                )
+                            )
+                        ) / (aux3 * aux4)
+                        f3 -= (x[h] * y[h]) / aux4
+                f[i, i] = f1
+                f[i + n, i + n] = f2
+                f[i + n, i] = f3
+                f[i, i + n] = f3
+            else:
+                aux1 = x[i] * x[j]
+                aux2 = y[i] * y[j]
+                aux3 = (1 - aux2) ** 2
+                aux4 = (1 - aux2 + aux1 * aux2) ** 2
+
+                aux = -(aux2 * (1 - aux2)) / aux4
+                f[i, j] = aux
+                f[j, i] = aux
+
+                aux = -(x[j] * y[i]) / aux4
+                f[i, j + n] = aux
+                f[j + n, i] = aux
+
+                aux = -(aux1 * (1 - aux2 ** 2 + aux1 * (aux2 ** 2))) / (
+                    aux3 * aux4
+                )
+                f[i + n, j + n] = aux
+                f[j + n, i + n] = aux
+
+                aux = -(x[i] * y[j]) / aux4
+                f[i + n, j] = aux
+                f[j, i + n] = aux
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_ecm(sol, args):
+    """Returns the diagonal of UECM loglikelihood hessian function
+    evaluated in sol.
+
+    :param sol: Evaluating point *sol*.
+    :type sol: numpy.ndarray
+    :param args: Arguments to define the loglikelihood hessian function.
+        Degrees and strengths sequences.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Hessian matrix diagonal.
+    :rtype: numpy.ndarray
+    """
+    k = args[0]
+    s = args[1]
+
+    n = len(k)
+
+    x = sol[:n]
+    y = sol[n:]
+    f = np.zeros(2 * n, dtype=np.float64)
+
+    for i in np.arange(n):
+        f[i] -= k[i] / (x[i] * x[i])
+        f[i + n] -= s[i] / (y[i] * y[i])
+        for j in np.arange(n):
+            if j != i:
+                aux1 = x[i] * x[j]
+                aux2 = y[i] * y[j]
+                aux3 = (1 - aux2) ** 2
+                aux4 = (1 - aux2 + aux1 * aux2) ** 2
+                f[i] += ((x[j] * aux2) ** 2) / aux4
+                f[i + n] += (
+                    aux1
+                    * y[j]
+                    * (aux1 * y[j] * (1 - 2 * aux2) - 2 * y[j] * (1 - aux2))
+                ) / (aux3 * aux4)
+    return f
+
+
+@jit(nopython=True)
+def linsearch_fun_ECM(X, args):
+    """Linsearch function for UECM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: Tuple, step function and arguments.
+    :type args: (func, tuple)
+    :return: Working alpha.
+    :rtype: float
+    """
+    # TODO: change X to xx
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    arg_step_fun = args[1]
+
+    eps2 = 1e-2
+    alfa0 = (eps2 - 1) * x / dx
+    for a in alfa0:
+        if a >= 0:
+            alfa = min(alfa, a)
+
+    nnn = int(len(x) / 2)
+    while True:
+        ind_max_y = (x[nnn:] + alfa * dx[nnn:]).argsort()[-2:][::-1]
+        cond = np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1
+        if cond:
+            break
+        else:
+            alfa *= beta
+
+    i = 0
+    s_old = -step_fun(x, arg_step_fun)
+    while (
+        sufficient_decrease_condition(
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
+        )
+        is False
+        and i < 50
+    ):
+        alfa *= beta
+        i += 1
+
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_ECM_fixed(X):
+    """Linsearch function for UECM fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :return: Working alpha.
+    :rtype: float
+    """
+    # TODO: change X to xx
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    eps2 = 1e-2
+    alfa0 = (eps2 - 1) * x / dx
+    for a in alfa0:
+        if a >= 0:
+            alfa = min(alfa, a)
+
+    nnn = int(len(x) / 2)
+    while True:
+        ind_max_y = (x[nnn:] + alfa * dx[nnn:]).argsort()[-2:][::-1]
+        cond = np.prod(x[nnn:][ind_max_y] + alfa * dx[nnn:][ind_max_y]) < 1
+        if cond:
+            break
+        else:
+            alfa *= beta
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            cond is False
+            and kk < 50
+             ):
+            alfa *= beta
+            kk += 1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+
+    return alfa
+
+
+@jit(nopython=True)
+def expected_ecm(sol):
+    """Computes expected degrees and strengths sequence given solution x and y of UECM.
+
+    :param sol: UECM solutions.
+    :type sol: numpy.ndarray
+    :return: expected degrees and strengths sequence.
+    :rtype: numpy.ndarray
+    """
+    n = int(len(sol) / 2)
+    x = sol[:n]
+    y = sol[n:]
+    ex_ks = np.zeros(2 * n, dtype=np.float64)
+    for i in np.arange(n):
+        for j in np.arange(n):
+            if i != j:
+                aux1 = x[i] * x[j]
+                aux2 = y[i] * y[j]
+                ex_ks[i] += (aux1 * aux2) / (1 - aux2 + aux1 * aux2)
+                ex_ks[i + n] += (aux1 * aux2) / (
+                    (1 - aux2 + aux1 * aux2) * (1 - aux2)
+                )
+    return ex_ks
+
+# UECM exponential functions
+# --------------------------
+
+
+@jit(nopython=True)
+def linsearch_fun_ECM_new(X, args):
+    """Linsearch function for UECM newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on UBCM exponential version.
+
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :param args: Tuple, step function and arguments.
+    :type args: (func, tuple)
+    :return: Working alpha.
+    :rtype: float
+    """
+    # TODO: change X to xx
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
+    step_fun = args[0]
+    arg_step_fun = args[1]
+
+    nnn = int(len(x) / 2)
+    while True:
+        ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
+        cond = np.sum(x[nnn:][ind_min_beta] +
+                      alfa * dx[nnn:][ind_min_beta]) > 1e-14
+        if (
+            cond
+        ):
+            break
+        else:
+            alfa *= beta
+
+    i = 0
+    s_old = -step_fun(x, arg_step_fun)
+    while (
+        sufficient_decrease_condition(
+            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
+        )
+        is False
+        and i < 50
+    ):
+        alfa *= beta
+        i += 1
+
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_ECM_new_fixed(X):
+    """Linsearch function for UECM fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+    This function works on UBCM exponential version.
+
+    :param X: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :return: Working alpha.
+    :rtype: float
+    """
+    # TODO: change X to xx
+    x = X[0]
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
+
+    nnn = int(len(x) / 2)
+    while True:
+        ind_min_beta = (x[nnn:] + alfa * dx[nnn:]).argsort()[:2]
+        cond = np.sum(x[nnn:][ind_min_beta] +
+                      alfa * dx[nnn:][ind_min_beta]) > 1e-14
+        if (
+            cond
+        ):
+            break
+        else:
+            alfa *= beta
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while(
+            (not cond)
+            and kk < 50
+             ):
+            alfa *= beta
+            kk += 1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+
+    return alfa
+
+
+# CREMA UNDIRECTED functions
+# -------------------------
+
+@jit(nopython=True)
+def iterative_crema_undirected(beta, args):
     """Returns the next CReMa iterative step for the fixed-point method.
-    The DBCM pmatrix is computed inside the function.
-    Alternative version not in use.
+    The UBCM pmatrix is pre-compute and explicitly passed.
 
     :param beta: Previous iterative step.
     :type beta: numpy.ndarray
-    :param args: Out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+    :param args: Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Next iterative step.
-    :rtype: numpy.ndarray]
+    :rtype: numpy.ndarray
     """
-    s_out = args[0]
-    s_in = args[1]
-    adj = args[2]
-    # TODO: following 2 lines to delete?
-    # nz_index_out = args[3]
-    # nz_index_in = args[4]
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        f[i] -= w / (1 + (beta[j] / beta[i]))
+        f[j] -= w / (1 + (beta[i] / beta[j]))
+    for i in np.arange(n):
+        if s[i] != 0:
+            f[i] = f[i] / s[i]
+    return f
 
-    aux_n = len(s_out)
 
-    beta_out = beta[:aux_n]
-    beta_in = beta[aux_n:]
+@jit(nopython=True, parallel=True)
+def iterative_crema_undirected_sparse(beta, args):
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The UBCM pmatrix is computed inside the function.
 
-    xd = np.zeros(aux_n, dtype=np.float64)
-    yd = np.zeros(aux_n, dtype=np.float64)
-
+    :param beta: Previous iterative step..
+    :type beta: numpy.ndarray
+    :param args: Strengths sequence and adjacency matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Next iterative step.
+    :rtype: numpy.ndarray
+    """
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
-    y = adj[1]
 
-    x_indices = x.nonzero()[0]
-    y_indices = y.nonzero()[0]
-
-    for i in prange(x_indices.shape[0]):
-        index = x_indices[i]
-        aux = x[index] * y
-        aux_entry = aux / (1 + aux)
-        aux = aux_entry / (1 + (beta_in / (beta_out[index]+np.exp(-100))))
-        xd[index] -= (aux.sum() - aux[index])
-        xd[index] = xd[index] / (s_out[index]+np.exp(-100))
-
-    for j in prange(y_indices.shape[0]):
-        index = y_indices[j]
-        aux = x * y[index]
-        aux_entry = aux / (1 + aux)
-        aux = aux_entry / (1 + (beta_out / (beta_in[index] + np.exp(-100))))
-        yd[j] -= (aux.sum() - aux[index])
-        yd[j] = yd[index] / (s_in[index]+np.exp(-100))
-
-    return np.concatenate((xd, yd))
+    for i in prange(n):
+        aux = x[i] * x
+        aux_value = aux / (1+aux)
+        aux = aux_value / (1 + (beta/beta[i]))
+        f[i] = (-aux.sum() + aux[i])/(s[i] + np.exp(-100))
+    return f
 
 
 @jit(nopython=True)
 def iterative_crema_sparse_2(beta, args):
     """Returns the next CReMa iterative step for the fixed-point method.
-    The DBCM pmatrix is computed inside the function.
+    The UBCM pmatrix is computed inside the function.
     Alternative version not in use.
 
-    :param beta: Previous iterative step.
+    :param beta: Previous iterative step..
     :type beta: numpy.ndarray
-    :param args: Out and in strengths sequences,
-        adjacency matrix, and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+    :param args: Strengths sequence and adjacency matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Next iterative step.
-    :rtype: numpy.ndarray]
+    :rtype: numpy.ndarray
     """
-    s_out = args[0]
-    s_in = args[1]
-    adj = args[2]
-    nz_index_out = args[3]
-    nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[:aux_n]
-    beta_in = beta[aux_n:]
-
-    xd = np.zeros(aux_n, dtype=np.float64)
-    yd = np.zeros(aux_n, dtype=np.float64)
-
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
-    y = adj[1]
 
-    for i in x.nonzero()[0]:
-        for j in y.nonzero()[0]:
-            if i != j:
-                aux = x[i] * y[j]
-                aux_entry = aux / (1 + aux)
-                if aux_entry > 0:
-                    aux = aux_entry / (1 + (beta_in[j] / beta_out[i]))
-                    xd[i] -= aux
-                    aux = aux_entry / (1 + (beta_out[i] / beta_in[j]))
-                    yd[j] -= aux
-    for i in nz_index_out:
-        xd[i] = xd[i] / s_out[i]
-    for i in nz_index_in:
-        yd[i] = yd[i] / s_in[i]
-
-    return np.concatenate((xd, yd))
+    for i in np.arange(n):
+        for j in np.arange(i+1, n):
+            aux = x[i] * x[j]
+            aux_value = aux / (1 + aux)
+            if aux_value > 0:
+                f[i] -= aux_value / (1 + (beta[j] / beta[i]))
+                f[j] -= aux_value / (1 + (beta[i] / beta[j]))
+    for i in np.arange(n):
+        if s[i] != 0:
+            f[i] = f[i] / s[i]
+    return f
 
 
 @jit(nopython=True)
-def loglikelihood_crema(beta, args):
+def loglikelihood_crema_undirected(beta, args):
     """Returns CReMa loglikelihood function evaluated in beta.
-    The DBCM pmatrix is pre-computed and explicitly passed.
+    The UBCM pmatrix is pre-computed and explicitly passed.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood function.
-        Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood value.
     :rtype: float
     """
-    s_out = args[0]
-    s_in = args[1]
-    adj = args[2]
-    nz_index_out = args[3]
-    nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[:aux_n]
-    beta_in = beta[aux_n:]
-
+    s = args[0]
+    adj = args[1]
+    n = len(s)
     f = 0.0
-
     raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
 
-    for i in nz_index_out:
-        f -= s_out[i] * beta_out[i]
-    for i in nz_index_in:
-        f -= s_in[i] * beta_in[i]
-
+    for i in np.arange(n):
+        f -= s[i] * beta[i]
     for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        f += w * np.log(beta_out[i] + beta_in[j])
+        f += w * np.log(beta[i] + beta[j])
 
     return f
 
 
 @jit(nopython=True)
-def loglikelihood_crema_sparse(beta, args):
-    """Returns CReMa loglikelihood function evaluated  in beta.
-    The DBCM pmatrix is computed inside the function.
+def loglikelihood_crema_undirected_sparse(beta, args):
+    """Computes CReMa loglikelihood function evaluated in beta.
+    The UBCM pmatrix is computed inside the function.
     Sparse initialisation version.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood function.
-        Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+        Strengths sequence and adjacency matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood value.
     :rtype: float
     """
-    s_out = args[0]
-    s_in = args[1]
-    adj = args[2]
-    nz_index_out = args[3]
-    nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[:aux_n]
-    beta_in = beta[aux_n:]
-
+    s = args[0]
+    adj = args[1]
+    n = len(s)
     f = 0.0
-
     x = adj[0]
-    y = adj[1]
 
-    for i in nz_index_out:
-        f -= s_out[i] * beta_out[i]
-        for j in nz_index_in:
-            if i != j:
-                aux = x[i] * y[j]
-                aux_entry = aux / (1 + aux)
-                if aux_entry > 0:
-                    f += aux_entry * np.log(beta_out[i] + beta_in[j])
-
-    for i in nz_index_in:
-        f -= s_in[i] * beta_in[i]
-
+    for i in np.arange(n):
+        f -= s[i] * beta[i]
+        for j in np.arange(0, i):
+            aux = x[i] * x[j]
+            aux_value = aux / (1 + aux)
+            if aux_value > 0:
+                f += aux_value * np.log(beta[i] + beta[j])
     return f
 
 
 @jit(nopython=True)
-def loglikelihood_prime_crema(beta, args):
+def loglikelihood_prime_crema_undirected(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
-    The DBCM pmatrix is pre-computed and explicitly passed.
+    The UBCM pmatrix is pre-computed and explicitly passed.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
-        Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood gradient value.
     :rtype: numpy.ndarray
     """
-    s_out = args[0]
-    s_in = args[1]
-    adj = args[2]
-    nz_index_out = args[3]
-    nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[0:aux_n]
-    beta_in = beta[aux_n: 2 * aux_n]
-
-    aux_f_out = np.zeros_like(beta_out, dtype=np.float64)
-    aux_f_in = np.zeros_like(beta_in, dtype=np.float64)
-
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
     raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
-    for i in nz_index_out:
-        aux_f_out[i] -= s_out[i]
-    for i in nz_index_in:
-        aux_f_in[i] -= s_in[i]
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        aux_f_out[i] += w / (beta_out[i] + beta_in[j])
-        aux_f_in[j] += w / (beta_out[i] + beta_in[j])
 
-    return np.concatenate((aux_f_out, aux_f_in))
+    for i in np.arange(n):
+        f[i] -= s[i]
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        aux = beta[i] + beta[j]
+        f[i] += w / aux
+        f[j] += w / aux
+    return f
 
 
 @jit(nopython=True, parallel=True)
-def loglikelihood_prime_crema_sparse(beta, args):
+def loglikelihood_prime_crema_undirected_sparse(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
-    The DBCM pmatrix is pre-computed and explicitly passed.
+    The UBCM pmatrix is pre-computed and explicitly passed.
     Sparse initialization version.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
-        Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
-    :return: Loglikelihood gradient.
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood gradient value.
     :rtype: numpy.ndarray
     """
-    s_out = args[0]
-    s_in = args[1]
-    adj = args[2]
-    nz_index_out = args[3]
-    nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[0:aux_n]
-    beta_in = beta[aux_n: 2 * aux_n]
-
-    aux_F_out = np.zeros_like(beta_out, dtype=np.float64)
-    aux_F_in = np.zeros_like(beta_in, dtype=np.float64)
-
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
-    y = adj[1]
-
-    for i in prange(nz_index_out.shape[0]):
-        index = nz_index_out[i]
-        aux_F_out[index] -= s_out[index]
-        aux = x[index] * y
+    for i in prange(n):
+        f[i] -= s[i]
+        aux = x[i] * x
         aux_value = aux / (1 + aux)
-        aux = aux_value / (beta_out[index] + beta_in)
-        aux_F_out[index] += aux.sum() - aux[index]
-
-    for j in prange(nz_index_in.shape[0]):
-        index = nz_index_in[j]
-        aux_F_in[index] -= s_in[index]
-        aux = x * y[index]
-        aux_value = aux / (1 + aux)
-        aux = aux_value / (beta_out + beta_in[index])
-        aux_F_in[index] += (aux.sum() - aux[index])
-
-    return np.concatenate((aux_F_out, aux_F_in))
+        aux = aux_value/(beta[i] + beta)
+        f[i] += aux.sum() - aux[i]
+    return f
 
 
 @jit(nopython=True)
 def loglikelihood_prime_crema_sparse_2(beta, args):
     """Returns CReMa loglikelihood gradient function evaluated in beta.
-    The DBCM pmatrix is computed inside the function.
+    The UBCM pmatrix is computed inside the function.
     Sparse initialization version.
-    Alternative version not used.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
-        Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood gradient value.
     :rtype: numpy.ndarray
     """
-    s_out = args[0]
-    s_in = args[1]
-    adj = args[2]
-    # TODO: following 2 lines to delete?
-    # nz_index_out = args[3]
-    # nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[0:aux_n]
-    beta_in = beta[aux_n: 2 * aux_n]
-
-    aux_f_out = np.zeros_like(beta_out, dtype=np.float64)
-    aux_f_in = np.zeros_like(beta_in, dtype=np.float64)
-
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
-    y = adj[1]
-
-    for i in x.nonzero()[0]:
-        aux_f_out[i] -= s_out[i]
-        for j in y.nonzero()[0]:
-            if i != j:
-                aux = x[i] * y[j]
-                aux_value = aux / (1 + aux)
-                if aux_value > 0:
-                    aux_f_out[i] += aux_value / (beta_out[i] + beta_in[j])
-                    aux_f_in[j] += aux_value / (beta_out[i] + beta_in[j])
-
-    for j in y.nonzero()[0]:
-        aux_f_in[j] -= s_in[j]
-    return np.concatenate((aux_f_out, aux_f_in))
+    for i in np.arange(n):
+        f[i] -= s[i]
+        for j in np.arange(0, i):
+            aux = x[i] * x[j]
+            aux_value = aux / (1 + aux)
+            if aux_value > 0:
+                aux = beta[i] + beta[j]
+                f[i] += aux_value / aux
+                f[j] += aux_value / aux
+    return f
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_crema(beta, args):
+def loglikelihood_hessian_crema_undirected(beta, args):
     """Returns CReMa loglikelihood hessian function evaluated in beta.
-    The DBCM pmatrix is pre-computed and explicitly passed.
+    The UBCM pmatrix is pre-computed and explicitly passed.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
-    :param args: Arguments to define the loglikelihood hessian function.
-        Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+    :param args: Arguments to define the loglikelihood gradient function.
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
     """
-    # TODO: remove commented lines?
-    s_out = args[0]
-    # s_in = args[1]
-    adj = args[2]
-    # nz_index_out = args[3]
-    # nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[:aux_n]
-    beta_in = beta[aux_n:]
-
-    f = np.zeros(shape=(2 * aux_n, 2 * aux_n), dtype=np.float64)
-
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros(shape=(n, n), dtype=np.float64)
     raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
 
     for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        aux = w / ((beta_out[i] + beta_in[j]) ** 2)
-        f[i, i] += -aux
-        f[i, j + aux_n] = -aux
-        f[j + aux_n, i] = -aux
-        f[j + aux_n, j + aux_n] += -aux
+        aux = -w / ((beta[i] + beta[j]) ** 2)
+        f[i, j] = aux
+        f[j, i] = aux
+        f[i, i] += aux
+        f[j, j] += aux
     return f
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_crema(beta, args):
+def loglikelihood_hessian_diag_crema_undirected(beta, args):
     """Returns the diagonal of CReMa loglikelihood hessian function
     evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
-        Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
-    # TODO: remove commented lines?
-    s_out = args[0]
-    # s_in = args[1]
-    adj = args[2]
-    # nz_index_out = args[3]
-    # nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[:aux_n]
-    beta_in = beta[aux_n:]
-
-    f = np.zeros(2 * aux_n, dtype=np.float64)
-
+    s = args[0]
+    adj = args[1]
+    f = np.zeros_like(s, dtype=np.float64)
     raw_ind = adj[0]
     col_ind = adj[1]
     weigths_val = adj[2]
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        f[i] -= w / ((beta_out[i] + beta_in[j]) ** 2)
-        f[j + aux_n] -= w / ((beta_out[i] + beta_in[j]) ** 2)
 
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        aux = w / ((beta[i] + beta[j]) ** 2)
+        f[i] -= aux
+        f[j] -= aux
     return f
 
 
 @jit(nopython=True, parallel=True)
-def loglikelihood_hessian_diag_crema_sparse(beta, args):
+def loglikelihood_hessian_diag_crema_undirected_sparse(beta, args):
     """Returns the diagonal of CReMa loglikelihood hessian function
-    evaluated in beta. The DBCM pmatrix is computed inside the function.
+    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
     Sparse initialization version.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
-        Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
-    # TODO: remove commented lines?
-    s_out = args[0]
-    # s_in = args[1]
-    adj = args[2]
-    # nz_index_out = args[3]
-    # nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[:aux_n]
-    beta_in = beta[aux_n:]
-
-    f = np.zeros(2 * aux_n, dtype=np.float64)
-
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
-    y = adj[1]
-
-    for i in prange(aux_n):
-        aux = x[i] * y
-        aux_entry = aux / (1 + aux)
-        aux = aux_entry / (((beta_out[i] + beta_in) ** 2) + np.exp(-100))
-        f[i] -= (aux.sum() - aux[i])
-
-        aux = x * y[i]
-        aux_entry = aux / (1 + aux)
-        aux = aux_entry / (((beta_out + beta_in[i]) ** 2) + np.exp(-100))
-        f[i + aux_n] -= (aux.sum() - aux[i])
-
+    for i in prange(n):
+        aux = x[i] * x
+        aux_value = aux / (1 + aux)
+        aux = aux_value / ((beta[i] + beta) ** 2)
+        f[i] -= aux.sum() - aux[i]
     return f
 
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
     """Returns the diagonal of CReMa loglikelihood hessian function
-    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
+    evaluated in beta. The UBCM pmatrix is computed inside the function.
     Sparse initialization version.
     Alternative version not in use.
 
     :param beta: Evaluating point *beta*.
     :type beta: numpy.ndarray
     :param args: Arguments to define the loglikelihood gradient function.
-        Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
+        Strengths sequence and adjacency binary/probability matrix.
+    :type args: (numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood hessian diagonal.
     :rtype: numpy.ndarray
     """
-    # TODO: remove commented lines?
-    s_out = args[0]
-    # s_in = args[1]
-    adj = args[2]
-    # nz_index_out = args[3]
-    # nz_index_in = args[4]
-
-    aux_n = len(s_out)
-
-    beta_out = beta[:aux_n]
-    beta_in = beta[aux_n:]
-
-    f = np.zeros(2 * aux_n, dtype=np.float64)
-
+    s = args[0]
+    adj = args[1]
+    n = len(s)
+    f = np.zeros_like(s, dtype=np.float64)
     x = adj[0]
-    y = adj[1]
-
-    for i in np.arange(aux_n):
-        for j in np.arange(aux_n):
+    for i in np.arange(n):
+        for j in np.arange(0, i):
             if i != j:
-                aux = x[i] * y[j]
-                aux_entry = aux / (1 + aux)
-                if aux_entry > 0:
-                    f[i] -= aux_entry / ((beta_out[i] + beta_in[j]) ** 2)
-                aux = x[j] * y[i]
-                aux_entry = aux / (1 + aux)
-                if aux_entry > 0:
-                    f[i + aux_n] -= aux_entry / (
-                        (beta_out[j] + beta_in[i]) ** 2
-                    )
+                aux = x[i] * x[j]
+                aux_value = aux / (1 + aux)
+                if aux_value > 0:
+                    aux = aux_value / ((beta[i] + beta[j]) ** 2)
+                    f[i] -= aux
+                    f[j] -= aux
     return f
 
 
 @jit(nopython=True)
-def expected_out_strength_crema(sol, adj):
-    """Expected out-strength after CReMa.
-
-    :param sol: CReMa solution
-    :type sol: numpy.ndarray
-    :param adj: Tuple containing the original topology edges list
-         and link related weigths.
-    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)
-    :return: Expected out-strength sequence
-    :rtype: numpy.ndarray
-    """
-    n = int(sol.size / 2)
-    b_out = sol[:n]
-    b_in = sol[n:]
-    s = np.zeros(n)
-
-    raw_ind = adj[0]
-    col_ind = adj[1]
-    weigths_val = adj[2]
-
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        s[i] += w / (b_out[i] + b_in[j])
-    return s
-
-
-@jit(nopython=True)
-def expected_out_strength_crema_sparse(sol, adj):
-    """Expected out-strength after CReMa. Sparse initialisation version.
-
-    :param sol: CReMa solution
-    :type sol: numpy.ndarray
-    :param adj: Tuple containing the binary problem solution.
-    :type adj: (numpy.ndarray, numpy.ndarray)
-    :return: Expected out-strength sequence
-    :rtype: numpy.ndarray
-    """
-    n = int(sol.size / 2)
-    b_out = sol[:n]
-    b_in = sol[n:]
-    s = np.zeros(n)
-
-    x = adj[0]
-    y = adj[1]
-
-    for i in range(n):
-        for j in range(n):
-            if i != j:
-                aux = x[i] * y[j]
-                aux_entry = aux / (1 + aux)
-                if aux_entry > 0:
-                    s[i] += aux_entry / (b_out[i] + b_in[j])
-    return s
-
-
-@jit(nopython=True)
-def expected_in_stregth_crema(sol, adj):
-    """Expected in-strength after CReMa.
-
-    :param sol: CReMa solution
-    :type sol: numpy.ndarray
-    :param adj: Tuple containing the original topology edges list
-         and link related weigths.
-    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)
-    :return: Expected in-strength sequence
-    :rtype: numpy.ndarray
-    """
-    n = int(sol.size / 2)
-    b_out = sol[:n]
-    b_in = sol[n:]
-    s = np.zeros(n)
-
-    raw_ind = adj[0]
-    col_ind = adj[1]
-    weigths_val = adj[2]
-
-    for i, j, w in zip(raw_ind, col_ind, weigths_val):
-        s[j] += w / (b_out[i] + b_in[j])
-
-    return s
-
-
-@jit(nopython=True)
-def expected_in_stregth_crema_sparse(sol, adj):
-    """Expected in-strength after CReMa. Sparse inisialization version.
-
-    :param sol: CReMa solution
-    :type sol: numpy.ndarray
-    :param adj: Tuple containing the original topology edges list
-         and link related weigths.
-    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)
-    :return: Expected in-strength sequence
-    :rtype: numpy.ndarray
-    """
-    n = int(sol.size / 2)
-    b_out = sol[:n]
-    b_in = sol[n:]
-    s = np.zeros(n)
-
-    x = adj[0]
-    y = adj[1]
-
-    for i in range(n):
-        for j in range(n):
-            if i != j:
-                aux = x[j] * y[i]
-                aux_entry = aux / (1 + aux)
-                if aux_entry > 0:
-                    s[i] += aux_entry / (b_out[j] + b_in[i])
-    return s
-
-
-@jit(nopython=True)
-def linsearch_fun_crema(xx, args):
+def linsearch_fun_crema_undirected(X, args):
     """Linsearch function for CReMa newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param xx: Tuple of arguments to find alpha:
+    :param X: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
-        initial alpha, function f.
-    :type xx: (numpy.ndarray, numpy.ndarray,
+        initial alpha, function f
+    :type X: (numpy.ndarray, numpy.ndarray,
         float, float, func)
     :param args: Tuple, step function and arguments.
-    :type args: (function, tuple)
+    :type args: (func, tuple)
     :return: Working alpha.
     :rtype: float
     """
-    x = xx[0]
-    dx = xx[1]
-    beta = xx[2]
-    alfa = xx[3]
-    f = xx[4]
+    # TODO: change X to xx
+    x = X[0]
+    dx = X[1]
+    beta = X[2]
+    alfa = X[3]
+    f = X[4]
     step_fun = args[0]
     arg_step_fun = args[1]
 
     i = 0
     s_old = -step_fun(x, arg_step_fun)
-    cond = sof.sufficient_decrease_condition(s_old,
-                                         -step_fun(x + alfa * dx,
-                                                   arg_step_fun),
-                                         alfa,
-                                         f,
-                                         dx)
-    while ((not cond) and i < 50):
+    while ((not sufficient_decrease_condition(s_old,
+                                              -step_fun(x + alfa * dx,
+                                                        arg_step_fun),
+                                              alfa,
+                                              f,
+                                              dx))
+            and (i < 50)
+           ):
         alfa *= beta
         i += 1
-        cond = sof.sufficient_decrease_condition(s_old,
-                                             -step_fun(x + alfa * dx,
-                                                       arg_step_fun),
-                                             alfa,
-                                             f,
-                                             dx)
+
     return alfa
 
 
 @jit(nopython=True)
-def linsearch_fun_crema_fixed(xx):
+def linsearch_fun_crema_undirected_fixed(X):
     """Linsearch function for CReMa fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param xx: Tuple of arguments to find alpha:
+    :param X: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, step.
-    :type xx: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        float, float, float)
+    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
     :return: Working alpha.
     :rtype: float
     """
-    dx = xx[1]
-    dx_old = xx[2]
-    alfa = xx[3]
-    beta = xx[4]
-    step = xx[5]
+    # TODO: change X to xx
+    dx = X[1]
+    dx_old = X[2]
+    alfa = X[3]
+    beta = X[4]
+    step = X[5]
 
     if step:
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-        while((not cond) and kk < 50):
+        while(
+            (not cond)
+            and (kk < 50)
+             ):
             alfa *= beta
             kk += 1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+
     return alfa
+
+
+@jit(nopython=True)
+def expected_strength_crema_undirected(sol, adj):
+    """Computes the expected strengths of CReMa given its solution beta.
+
+    :param sol: CReMa solutions.
+    :type sol: numpy.ndarray
+    :param adj: adjacency/pmatrix.
+    :type adj: numpy.ndarray
+    :return: expected strengths sequence.
+    :rtype: numpy.ndarray
+    """
+    ex_s = np.zeros_like(sol, dtype=np.float64)
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        aux = w / (sol[i] + sol[j])
+        ex_s[i] += aux
+        ex_s[j] += aux
+    return ex_s
+
+
+@jit(nopython=True)
+def expected_strength_crema_undirected_sparse(sol, adj):
+    """Computes the expected strengths of CReMa given its solution beta and the solutions of UBCM.
+
+    :param sol: CReMa solutions.
+    :type sol: numpy.ndarray
+    :param adj: UBCM solutions.
+    :type adj: numpy.ndarray
+    :return: expected strengths sequence.
+    :rtype: numpy.ndarray
+    """
+    ex_s = np.zeros_like(sol, dtype=np.float64)
+    n = len(sol)
+    x = adj[0]
+    for i in np.arange(n):
+        for j in np.arange(0, i):
+            aux = x[i] * x[j]
+            aux_value = aux / (1 + aux)
+            if aux_value > 0:
+                aux = aux_value / (sol[i] + sol[j])
+                ex_s[i] += aux
+                ex_s[j] += aux
+    return ex_s
 
 # DBCM functions
 # --------------
+
 
 @jit(nopython=True)
 def iterative_dcm(x, args):
@@ -2923,4 +3462,757 @@ def linsearch_fun_DECM_new_fixed(X):
             cond = np.linalg.norm(alfa*dx[dx != np.infty], ord=2) < \
                 np.linalg.norm(dx_old[dx_old != np.infty], ord=2)
 
+    return alfa
+
+# CREMA functions
+# ---------------
+
+
+@jit(nopython=True)
+def iterative_crema_directed(beta, args):
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+
+    :param beta: Previous iterative step.
+    :type beta: numpy.ndarray
+    :param args: Out and in strengths sequences,
+        adjacency binary/probability matrix,
+        and non zero out and in indices
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Next iterative step.
+    :rtype: numpy.ndarray
+    """
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    xd = np.zeros(aux_n, dtype=np.float64)
+    yd = np.zeros(aux_n, dtype=np.float64)
+
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        xd[i] -= w / (1 + (beta_in[j] / beta_out[i]))
+        yd[j] -= w / (1 + (beta_out[i] / beta_in[j]))
+    for i in nz_index_out:
+        xd[i] = xd[i] / s_out[i]
+    for i in nz_index_in:
+        yd[i] = yd[i] / s_in[i]
+
+    return np.concatenate((xd, yd))
+
+
+@jit(nopython=True, parallel=True)
+def iterative_crema_directed_sparse(beta, args):
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The DBCM pmatrix is computed inside the function.
+    Alternative version not in use.
+
+    :param beta: Previous iterative step.
+    :type beta: numpy.ndarray
+    :param args: Out and in strengths sequences,
+        adjacency matrix, and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Next iterative step.
+    :rtype: numpy.ndarray]
+    """
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    # TODO: following 2 lines to delete?
+    # nz_index_out = args[3]
+    # nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    xd = np.zeros(aux_n, dtype=np.float64)
+    yd = np.zeros(aux_n, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    x_indices = x.nonzero()[0]
+    y_indices = y.nonzero()[0]
+
+    for i in prange(x_indices.shape[0]):
+        index = x_indices[i]
+        aux = x[index] * y
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (1 + (beta_in / (beta_out[index]+np.exp(-100))))
+        xd[index] -= (aux.sum() - aux[index])
+        xd[index] = xd[index] / (s_out[index]+np.exp(-100))
+
+    for j in prange(y_indices.shape[0]):
+        index = y_indices[j]
+        aux = x * y[index]
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (1 + (beta_out / (beta_in[index] + np.exp(-100))))
+        yd[j] -= (aux.sum() - aux[index])
+        yd[j] = yd[index] / (s_in[index]+np.exp(-100))
+
+    return np.concatenate((xd, yd))
+
+
+@jit(nopython=True)
+def iterative_crema_directed_sparse_2(beta, args):
+    """Returns the next CReMa iterative step for the fixed-point method.
+    The DBCM pmatrix is computed inside the function.
+    Alternative version not in use.
+
+    :param beta: Previous iterative step.
+    :type beta: numpy.ndarray
+    :param args: Out and in strengths sequences,
+        adjacency matrix, and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Next iterative step.
+    :rtype: numpy.ndarray]
+    """
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    xd = np.zeros(aux_n, dtype=np.float64)
+    yd = np.zeros(aux_n, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in x.nonzero()[0]:
+        for j in y.nonzero()[0]:
+            if i != j:
+                aux = x[i] * y[j]
+                aux_entry = aux / (1 + aux)
+                if aux_entry > 0:
+                    aux = aux_entry / (1 + (beta_in[j] / beta_out[i]))
+                    xd[i] -= aux
+                    aux = aux_entry / (1 + (beta_out[i] / beta_in[j]))
+                    yd[j] -= aux
+    for i in nz_index_out:
+        xd[i] = xd[i] / s_out[i]
+    for i in nz_index_in:
+        yd[i] = yd[i] / s_in[i]
+
+    return np.concatenate((xd, yd))
+
+
+@jit(nopython=True)
+def loglikelihood_crema_directed(beta, args):
+    """Returns CReMa loglikelihood function evaluated in beta.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood value.
+    :rtype: float
+    """
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    f = 0.0
+
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
+    for i in nz_index_out:
+        f -= s_out[i] * beta_out[i]
+    for i in nz_index_in:
+        f -= s_in[i] * beta_in[i]
+
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        f += w * np.log(beta_out[i] + beta_in[j])
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_crema_directed_sparse(beta, args):
+    """Returns CReMa loglikelihood function evaluated  in beta.
+    The DBCM pmatrix is computed inside the function.
+    Sparse initialisation version.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood value.
+    :rtype: float
+    """
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    f = 0.0
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in nz_index_out:
+        f -= s_out[i] * beta_out[i]
+        for j in nz_index_in:
+            if i != j:
+                aux = x[i] * y[j]
+                aux_entry = aux / (1 + aux)
+                if aux_entry > 0:
+                    f += aux_entry * np.log(beta_out[i] + beta_in[j])
+
+    for i in nz_index_in:
+        f -= s_in[i] * beta_in[i]
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_prime_crema_directed(beta, args):
+    """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood gradient value.
+    :rtype: numpy.ndarray
+    """
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[0:aux_n]
+    beta_in = beta[aux_n: 2 * aux_n]
+
+    aux_f_out = np.zeros_like(beta_out, dtype=np.float64)
+    aux_f_in = np.zeros_like(beta_in, dtype=np.float64)
+
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+    for i in nz_index_out:
+        aux_f_out[i] -= s_out[i]
+    for i in nz_index_in:
+        aux_f_in[i] -= s_in[i]
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        aux_f_out[i] += w / (beta_out[i] + beta_in[j])
+        aux_f_in[j] += w / (beta_out[i] + beta_in[j])
+
+    return np.concatenate((aux_f_out, aux_f_in))
+
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_prime_crema_directed_sparse(beta, args):
+    """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialization version.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood gradient.
+    :rtype: numpy.ndarray
+    """
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    nz_index_out = args[3]
+    nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[0:aux_n]
+    beta_in = beta[aux_n: 2 * aux_n]
+
+    aux_F_out = np.zeros_like(beta_out, dtype=np.float64)
+    aux_F_in = np.zeros_like(beta_in, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in prange(nz_index_out.shape[0]):
+        index = nz_index_out[i]
+        aux_F_out[index] -= s_out[index]
+        aux = x[index] * y
+        aux_value = aux / (1 + aux)
+        aux = aux_value / (beta_out[index] + beta_in)
+        aux_F_out[index] += aux.sum() - aux[index]
+
+    for j in prange(nz_index_in.shape[0]):
+        index = nz_index_in[j]
+        aux_F_in[index] -= s_in[index]
+        aux = x * y[index]
+        aux_value = aux / (1 + aux)
+        aux = aux_value / (beta_out + beta_in[index])
+        aux_F_in[index] += (aux.sum() - aux[index])
+
+    return np.concatenate((aux_F_out, aux_F_in))
+
+
+@jit(nopython=True)
+def loglikelihood_prime_crema_directed_sparse_2(beta, args):
+    """Returns CReMa loglikelihood gradient function evaluated in beta.
+    The DBCM pmatrix is computed inside the function.
+    Sparse initialization version.
+    Alternative version not used.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood gradient value.
+    :rtype: numpy.ndarray
+    """
+    s_out = args[0]
+    s_in = args[1]
+    adj = args[2]
+    # TODO: following 2 lines to delete?
+    # nz_index_out = args[3]
+    # nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[0:aux_n]
+    beta_in = beta[aux_n: 2 * aux_n]
+
+    aux_f_out = np.zeros_like(beta_out, dtype=np.float64)
+    aux_f_in = np.zeros_like(beta_in, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in x.nonzero()[0]:
+        aux_f_out[i] -= s_out[i]
+        for j in y.nonzero()[0]:
+            if i != j:
+                aux = x[i] * y[j]
+                aux_value = aux / (1 + aux)
+                if aux_value > 0:
+                    aux_f_out[i] += aux_value / (beta_out[i] + beta_in[j])
+                    aux_f_in[j] += aux_value / (beta_out[i] + beta_in[j])
+
+    for j in y.nonzero()[0]:
+        aux_f_in[j] -= s_in[j]
+    return np.concatenate((aux_f_out, aux_f_in))
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_crema_directed(beta, args):
+    """Returns CReMa loglikelihood hessian function evaluated in beta.
+    The DBCM pmatrix is pre-computed and explicitly passed.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood hessian function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian matrix.
+    :rtype: numpy.ndarray
+    """
+    # TODO: remove commented lines?
+    s_out = args[0]
+    # s_in = args[1]
+    adj = args[2]
+    # nz_index_out = args[3]
+    # nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    f = np.zeros(shape=(2 * aux_n, 2 * aux_n), dtype=np.float64)
+
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        aux = w / ((beta_out[i] + beta_in[j]) ** 2)
+        f[i, i] += -aux
+        f[i, j + aux_n] = -aux
+        f[j + aux_n, i] = -aux
+        f[j + aux_n, j + aux_n] += -aux
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_crema_directed(beta, args):
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian diagonal.
+    :rtype: numpy.ndarray
+    """
+    # TODO: remove commented lines?
+    s_out = args[0]
+    # s_in = args[1]
+    adj = args[2]
+    # nz_index_out = args[3]
+    # nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    f = np.zeros(2 * aux_n, dtype=np.float64)
+
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        f[i] -= w / ((beta_out[i] + beta_in[j]) ** 2)
+        f[j + aux_n] -= w / ((beta_out[i] + beta_in[j]) ** 2)
+
+    return f
+
+
+@jit(nopython=True, parallel=True)
+def loglikelihood_hessian_diag_crema_directed_sparse(beta, args):
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta. The DBCM pmatrix is computed inside the function.
+    Sparse initialization version.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian diagonal.
+    :rtype: numpy.ndarray
+    """
+    # TODO: remove commented lines?
+    s_out = args[0]
+    # s_in = args[1]
+    adj = args[2]
+    # nz_index_out = args[3]
+    # nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    f = np.zeros(2 * aux_n, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in prange(aux_n):
+        aux = x[i] * y
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (((beta_out[i] + beta_in) ** 2) + np.exp(-100))
+        f[i] -= (aux.sum() - aux[i])
+
+        aux = x * y[i]
+        aux_entry = aux / (1 + aux)
+        aux = aux_entry / (((beta_out + beta_in[i]) ** 2) + np.exp(-100))
+        f[i + aux_n] -= (aux.sum() - aux[i])
+
+    return f
+
+
+@jit(nopython=True)
+def loglikelihood_hessian_diag_crema_directed_sparse_2(beta, args):
+    """Returns the diagonal of CReMa loglikelihood hessian function
+    evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
+    Sparse initialization version.
+    Alternative version not in use.
+
+    :param beta: Evaluating point *beta*.
+    :type beta: numpy.ndarray
+    :param args: Arguments to define the loglikelihood gradient function.
+        Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Loglikelihood hessian diagonal.
+    :rtype: numpy.ndarray
+    """
+    # TODO: remove commented lines?
+    s_out = args[0]
+    # s_in = args[1]
+    adj = args[2]
+    # nz_index_out = args[3]
+    # nz_index_in = args[4]
+
+    aux_n = len(s_out)
+
+    beta_out = beta[:aux_n]
+    beta_in = beta[aux_n:]
+
+    f = np.zeros(2 * aux_n, dtype=np.float64)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in np.arange(aux_n):
+        for j in np.arange(aux_n):
+            if i != j:
+                aux = x[i] * y[j]
+                aux_entry = aux / (1 + aux)
+                if aux_entry > 0:
+                    f[i] -= aux_entry / ((beta_out[i] + beta_in[j]) ** 2)
+                aux = x[j] * y[i]
+                aux_entry = aux / (1 + aux)
+                if aux_entry > 0:
+                    f[i + aux_n] -= aux_entry / (
+                        (beta_out[j] + beta_in[i]) ** 2
+                    )
+    return f
+
+
+@jit(nopython=True)
+def expected_out_strength_crema_directed(sol, adj):
+    """Expected out-strength after CReMa.
+
+    :param sol: CReMa solution
+    :type sol: numpy.ndarray
+    :param adj: Tuple containing the original topology edges list
+         and link related weigths.
+    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)
+    :return: Expected out-strength sequence
+    :rtype: numpy.ndarray
+    """
+    n = int(sol.size / 2)
+    b_out = sol[:n]
+    b_in = sol[n:]
+    s = np.zeros(n)
+
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        s[i] += w / (b_out[i] + b_in[j])
+    return s
+
+
+@jit(nopython=True)
+def expected_out_strength_crema_directed_sparse(sol, adj):
+    """Expected out-strength after CReMa. Sparse initialisation version.
+
+    :param sol: CReMa solution
+    :type sol: numpy.ndarray
+    :param adj: Tuple containing the binary problem solution.
+    :type adj: (numpy.ndarray, numpy.ndarray)
+    :return: Expected out-strength sequence
+    :rtype: numpy.ndarray
+    """
+    n = int(sol.size / 2)
+    b_out = sol[:n]
+    b_in = sol[n:]
+    s = np.zeros(n)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                aux = x[i] * y[j]
+                aux_entry = aux / (1 + aux)
+                if aux_entry > 0:
+                    s[i] += aux_entry / (b_out[i] + b_in[j])
+    return s
+
+
+@jit(nopython=True)
+def expected_in_stregth_crema_directed(sol, adj):
+    """Expected in-strength after CReMa.
+
+    :param sol: CReMa solution
+    :type sol: numpy.ndarray
+    :param adj: Tuple containing the original topology edges list
+         and link related weigths.
+    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)
+    :return: Expected in-strength sequence
+    :rtype: numpy.ndarray
+    """
+    n = int(sol.size / 2)
+    b_out = sol[:n]
+    b_in = sol[n:]
+    s = np.zeros(n)
+
+    raw_ind = adj[0]
+    col_ind = adj[1]
+    weigths_val = adj[2]
+
+    for i, j, w in zip(raw_ind, col_ind, weigths_val):
+        s[j] += w / (b_out[i] + b_in[j])
+
+    return s
+
+
+@jit(nopython=True)
+def expected_in_stregth_crema_directed_sparse(sol, adj):
+    """Expected in-strength after CReMa. Sparse inisialization version.
+
+    :param sol: CReMa solution
+    :type sol: numpy.ndarray
+    :param adj: Tuple containing the original topology edges list
+         and link related weigths.
+    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)
+    :return: Expected in-strength sequence
+    :rtype: numpy.ndarray
+    """
+    n = int(sol.size / 2)
+    b_out = sol[:n]
+    b_in = sol[n:]
+    s = np.zeros(n)
+
+    x = adj[0]
+    y = adj[1]
+
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                aux = x[j] * y[i]
+                aux_entry = aux / (1 + aux)
+                if aux_entry > 0:
+                    s[i] += aux_entry / (b_out[j] + b_in[i])
+    return s
+
+
+@jit(nopython=True)
+def linsearch_fun_crema_directed(xx, args):
+    """Linsearch function for CReMa newton and quasinewton methods.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+
+    :param xx: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, function f.
+    :type xx: (numpy.ndarray, numpy.ndarray,
+        float, float, func)
+    :param args: Tuple, step function and arguments.
+    :type args: (function, tuple)
+    :return: Working alpha.
+    :rtype: float
+    """
+    x = xx[0]
+    dx = xx[1]
+    beta = xx[2]
+    alfa = xx[3]
+    f = xx[4]
+    step_fun = args[0]
+    arg_step_fun = args[1]
+
+    i = 0
+    s_old = -step_fun(x, arg_step_fun)
+    cond = sof.sufficient_decrease_condition(s_old,
+                                         -step_fun(x + alfa * dx,
+                                                   arg_step_fun),
+                                         alfa,
+                                         f,
+                                         dx)
+    while ((not cond) and i < 50):
+        alfa *= beta
+        i += 1
+        cond = sof.sufficient_decrease_condition(s_old,
+                                             -step_fun(x + alfa * dx,
+                                                       arg_step_fun),
+                                             alfa,
+                                             f,
+                                             dx)
+    return alfa
+
+
+@jit(nopython=True)
+def linsearch_fun_crema_directed_fixed(xx):
+    """Linsearch function for CReMa fixed-point method.
+    The function returns the step's size, alpha.
+    Alpha determines how much to move on the descending direction
+    found by the algorithm.
+
+    :param xx: Tuple of arguments to find alpha:
+        solution, solution step, tuning parameter beta,
+        initial alpha, step.
+    :type xx: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        float, float, float)
+    :return: Working alpha.
+    :rtype: float
+    """
+    dx = xx[1]
+    dx_old = xx[2]
+    alfa = xx[3]
+    beta = xx[4]
+    step = xx[5]
+
+    if step:
+        kk = 0
+        cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
+        while((not cond) and kk < 50):
+            alfa *= beta
+            kk += 1
+            cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
     return alfa

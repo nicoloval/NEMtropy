@@ -1,10 +1,9 @@
 import numpy as np
 import scipy.sparse
 import scipy
-from numba import jit, prange
-import time
+from numba import jit, prange  # TODO: levare jit
+import time  # TODO:levare
 import os
-from .Directed_new import *
 from . import models_functions as mof
 from . import solver_functions as sof
 from . import ensemble_generator as eg
@@ -83,13 +82,6 @@ def in_strength(a):
     # if the matrix is a scipy sparse matrix
     elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
         return np.sum(a, 0).A1
-
-
-       for j in index_in:
-            if i != j:
-                aux = xout[i] * yin[j]
-                p[i, j] = aux / (1 + aux)
-    return p
 
 
 def edgelist_from_edgelist(edgelist):
@@ -551,7 +543,7 @@ class DirectedGraph:
         self._initialize_problem(model, method)
         x0 = self.x0
 
-        sol = solver(
+        sol = sof.solver(
             x0,
             fun=self.fun,
             fun_jac=self.fun_jac,
@@ -652,7 +644,7 @@ class DirectedGraph:
         elif model in ["decm_new"]:
             self._set_solved_problem_decm_new(solution)
         elif model in ["crema", "crema-sparse"]:
-            self._set_solved_problem_crema(solution)
+            self._set_solved_problem_crema_directed(solution)
 
     def degree_reduction(self):
         """Carries out degree reduction for DBCM.
@@ -694,7 +686,7 @@ class DirectedGraph:
         elif model in ["decm_new"]:
             self._set_initial_guess_decm_new()
         elif model in ["crema", "crema-sparse"]:
-            self._set_initial_guess_crema()
+            self._set_initial_guess_crema_directed()
 
     def _set_initial_guess_dcm(self):
         # The preselected initial guess works best usually.
@@ -801,7 +793,7 @@ class DirectedGraph:
 
         self.x0 = np.concatenate((self.r_x, self.r_y))
 
-    def _set_initial_guess_crema(self):
+    def _set_initial_guess_crema_directed(self):
         # The preselected initial guess works best usually.
         # The suggestion is, if this does not work,
         # trying with random initial conditions several times.
@@ -992,17 +984,17 @@ class DirectedGraph:
             if (self.b_out is not None) and (self.b_in is not None):
                 sol = np.concatenate([self.b_out, self.b_in])
                 if self.is_sparse:
-                    ex_s_out = mof.expected_out_strength_crema_sparse(
+                    ex_s_out = mof.expected_out_strength_crema_directed_sparse(
                         sol, self.adjacency_crema
                     )
-                    ex_s_in = mof.expected_in_stregth_crema_sparse(
+                    ex_s_in = mof.expected_in_stregth_crema_directed_sparse(
                         sol, self.adjacency_crema
                     )
                 else:
-                    ex_s_out = mof.expected_out_strength_crema(
+                    ex_s_out = mof.expected_out_strength_crema_directed(
                         sol, self.adjacency_crema
                     )
-                    ex_s_in = mof.expected_in_stregth_crema(
+                    ex_s_in = mof.expected_in_stregth_crema_directed(
                         sol, self.adjacency_crema
                     )
                 ex_s = np.concatenate([ex_s_out, ex_s_in])
@@ -1104,108 +1096,108 @@ class DirectedGraph:
         mod_met = mod_met.join([model, method])
 
         d_fun = {
-            "dcm-newton": lambda x: -mof.loglikelihoood_prime_dcm(x, self.args),
-            "dcm-quasinewton": lambda x: -mof.loglikelihoood_prime_dcm(
+            "dcm-newton": lambda x: -mof.loglikelihood_prime_dcm(x, self.args),
+            "dcm-quasinewton": lambda x: -mof.loglikelihood_prime_dcm(
                 x,
                 self.args
             ),
             "dcm-fixed-point": lambda x: mof.iterative_dcm(x, self.args),
-            "dcm_new-newton": lambda x: -mof.loglikelihoood_prime_dcm_new(
+            "dcm_new-newton": lambda x: -mof.loglikelihood_prime_dcm_new(
                 x,
                 self.args
             ),
-            "dcm_new-quasinewton": lambda x: -mof.loglikelihoood_prime_dcm_new(
+            "dcm_new-quasinewton": lambda x: -mof.loglikelihood_prime_dcm_new(
                 x,
                 self.args
             ),
             "dcm_new-fixed-point": lambda x: mof.iterative_dcm_new(x, self.args),
-            "crema-newton": lambda x: -mof.loglikelihoood_prime_crema(
+            "crema-newton": lambda x: -mof.loglikelihood_prime_crema_directed(
                 x,
                 self.args
             ),
-            "crema-quasinewton": lambda x: -mof.loglikelihoood_prime_crema(
+            "crema-quasinewton": lambda x: -mof.loglikelihood_prime_crema_directed(
                 x,
                 self.args
             ),
-            "crema-fixed-point": lambda x: -mof.iterative_crema(x, self.args),
-            "decm-newton": lambda x: -mof.loglikelihoood_prime_decm(x, self.args),
-            "decm-quasinewton": lambda x: -mof.loglikelihoood_prime_decm(
+            "crema-fixed-point": lambda x: -mof.iterative_crema_directed(x, self.args),
+            "decm-newton": lambda x: -mof.loglikelihood_prime_decm(x, self.args),
+            "decm-quasinewton": lambda x: -mof.loglikelihood_prime_decm(
                 x,
                 self.args
             ),
             "decm-fixed-point": lambda x: mof.iterative_decm(x, self.args),
-            "decm_new-newton": lambda x: -mof.loglikelihoood_prime_decm_new(
+            "decm_new-newton": lambda x: -mof.loglikelihood_prime_decm_new(
                 x,
                 self.args
             ),
-            "decm_new-quasinewton": lambda x: -mof.loglikelihoood_prime_decm_new(
+            "decm_new-quasinewton": lambda x: -mof.loglikelihood_prime_decm_new(
                 x,
                 self.args
             ),
             "decm_new-fixed-point": lambda x: mof.iterative_decm_new(x, self.args),
-            "crema-sparse-newton": lambda x: -mof.loglikelihoood_prime_crema_sparse(
+            "crema-sparse-newton": lambda x: -mof.loglikelihood_prime_crema_directed_sparse(
                 x,
                 self.args
             ),
             "crema-sparse-quasinewton": lambda x:
-                -mof.loglikelihoood_prime_crema_sparse(
+                -mof.loglikelihood_prime_crema_directed_sparse(
                     x,
                     self.args
                 ),
-            "crema-sparse-fixed-point": lambda x: -mof.iterative_crema_sparse(
+            "crema-sparse-fixed-point": lambda x: -mof.iterative_crema_directed_sparse(
                 x,
                 self.args
             ),
         }
 
         d_fun_jac = {
-            "dcm-newton": lambda x: -mof.loglikelihoood_hessian_dcm(x, self.args),
-            "dcm-quasinewton": lambda x: -mof.loglikelihoood_hessian_diag_dcm(
+            "dcm-newton": lambda x: -mof.loglikelihood_hessian_dcm(x, self.args),
+            "dcm-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_dcm(
                 x,
                 self.args
             ),
             "dcm-fixed-point": None,
-            "dcm_new-newton": lambda x: -mof.loglikelihoood_hessian_dcm_new(
+            "dcm_new-newton": lambda x: -mof.loglikelihood_hessian_dcm_new(
                 x,
                 self.args
             ),
             "dcm_new-quasinewton": lambda x:
-                -mof.loglikelihoood_hessian_diag_dcm_new(
+                -mof.loglikelihood_hessian_diag_dcm_new(
                     x,
                     self.args
                 ),
             "dcm_new-fixed-point": None,
-            "crema-newton": lambda x: -mof.loglikelihoood_hessian_crema(
+            "crema-newton": lambda x: -mof.loglikelihood_hessian_crema_directed(
                 x,
                 self.args
             ),
-            "crema-quasinewton": lambda x: -mof.loglikelihoood_hessian_diag_crema(
+            "crema-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_crema_directed(
                 x,
                 self.args
             ),
             "crema-fixed-point": None,
-            "decm-newton": lambda x: -mof.loglikelihoood_hessian_decm(x, self.args),
-            "decm-quasinewton": lambda x: -mof.loglikelihoood_hessian_diag_decm(
+            "decm-newton": lambda x: -mof.loglikelihood_hessian_decm(x, self.args),
+            "decm-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_decm(
                 x,
                 self.args
             ),
             "decm-fixed-point": None,
-            "decm_new-newton": lambda x: -mof.loglikelihoood_hessian_decm_new(
+            "decm_new-newton": lambda x: -mof.loglikelihood_hessian_decm_new(
                 x,
                 self.args
             ),
             "decm_new-quasinewton": lambda x:
-                -mof.loglikelihoood_hessian_diag_decm_new(
+                -mof.loglikelihood_hessian_diag_decm_new(
                     x,
                     self.args
                 ),
             "decm_new-fixed-point": None,
-            "crema-sparse-newton": lambda x: -mof.loglikelihoood_hessian_crema(
+            "crema-sparse-newton": lambda x: -mof.loglikelihood_hessian_crema_directed(
                 x,
                 self.args
             ),
             "crema-sparse-quasinewton": lambda x:
-                -mof.loglikelihoood_hessian_diag_crema_sparse(
+                -mof.loglikelihood_hessian_diag_crema_directed_sparse(
                     x,
                     self.args
                 ),
@@ -1213,48 +1205,48 @@ class DirectedGraph:
         }
 
         d_fun_step = {
-            "dcm-newton": lambda x: -mof.loglikelihoood_dcm(x, self.args),
-            "dcm-quasinewton": lambda x: -mof.loglikelihoood_dcm(x, self.args),
-            "dcm-fixed-point": lambda x: -mof.loglikelihoood_dcm(x, self.args),
-            "dcm_new-newton": lambda x: -mof.loglikelihoood_dcm_new(x, self.args),
-            "dcm_new-quasinewton": lambda x: -mof.loglikelihoood_dcm_new(
+            "dcm-newton": lambda x: -mof.loglikelihood_dcm(x, self.args),
+            "dcm-quasinewton": lambda x: -mof.loglikelihood_dcm(x, self.args),
+            "dcm-fixed-point": lambda x: -mof.loglikelihood_dcm(x, self.args),
+            "dcm_new-newton": lambda x: -mof.loglikelihood_dcm_new(x, self.args),
+            "dcm_new-quasinewton": lambda x: -mof.loglikelihood_dcm_new(
                 x,
                 self.args
             ),
-            "dcm_new-fixed-point": lambda x: -mof.loglikelihoood_dcm_new(
+            "dcm_new-fixed-point": lambda x: -mof.loglikelihood_dcm_new(
                 x,
                 self.args
             ),
-            "crema-newton": lambda x: -mof.loglikelihoood_crema(x, self.args),
-            "crema-quasinewton": lambda x: -mof.loglikelihoood_crema(
+            "crema-newton": lambda x: -mof.loglikelihood_crema_directed(x, self.args),
+            "crema-quasinewton": lambda x: -mof.loglikelihood_crema_directed(
                 x,
                 self.args
             ),
-            "crema-fixed-point": lambda x: -mof.loglikelihoood_crema(
+            "crema-fixed-point": lambda x: -mof.loglikelihood_crema_directed(
                 x,
                 self.args
             ),
-            "decm-newton": lambda x: -mof.loglikelihoood_decm(x, self.args),
-            "decm-quasinewton": lambda x: -mof.loglikelihoood_decm(x, self.args),
-            "decm-fixed-point": lambda x: -mof.loglikelihoood_decm(x, self.args),
-            "decm_new-newton": lambda x: -mof.loglikelihoood_decm_new(x, self.args),
-            "decm_new-quasinewton": lambda x: -mof.loglikelihoood_decm_new(
+            "decm-newton": lambda x: -mof.loglikelihood_decm(x, self.args),
+            "decm-quasinewton": lambda x: -mof.loglikelihood_decm(x, self.args),
+            "decm-fixed-point": lambda x: -mof.loglikelihood_decm(x, self.args),
+            "decm_new-newton": lambda x: -mof.loglikelihood_decm_new(x, self.args),
+            "decm_new-quasinewton": lambda x: -mof.loglikelihood_decm_new(
                 x,
                 self.args
             ),
-            "decm_new-fixed-point": lambda x: -mof.loglikelihoood_decm_new(
+            "decm_new-fixed-point": lambda x: -mof.loglikelihood_decm_new(
                 x,
                 self.args
             ),
-            "crema-sparse-newton": lambda x: -mof.loglikelihoood_crema_sparse(
+            "crema-sparse-newton": lambda x: -mof.loglikelihood_crema_directed_sparse(
                 x,
                 self.args
             ),
-            "crema-sparse-quasinewton": lambda x: -mof.loglikelihoood_crema_sparse(
+            "crema-sparse-quasinewton": lambda x: -mof.loglikelihood_crema_directed_sparse(
                 x,
                 self.args
             ),
-            "crema-sparse-fixed-point": lambda x: -mof.loglikelihoood_crema_sparse(
+            "crema-sparse-fixed-point": lambda x: -mof.loglikelihood_crema_directed_sparse(
                 x,
                 self.args
             ),
@@ -1270,7 +1262,7 @@ class DirectedGraph:
             )
 
         # TODO: mancano metodi
-        d_pmatrix = {"dcm": pmatrix_dcm, "dcm_new": pmatrix_dcm}
+        d_pmatrix = {"dcm": mof.pmatrix_dcm, "dcm_new": mof.pmatrix_dcm}
 
         # Così basta aggiungere il decm e funziona tutto
         if model in ["dcm", "dcm_new"]:
@@ -1282,12 +1274,12 @@ class DirectedGraph:
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
         args_lin = {
-            "dcm": (mof.loglikelihoood_dcm, self.args),
-            "crema": (mof.loglikelihoood_crema, self.args),
-            "crema-sparse": (mof.loglikelihoood_crema_sparse, self.args),
-            "decm": (mof.loglikelihoood_decm, self.args),
-            "dcm_new": (mof.loglikelihoood_dcm_new, self.args),
-            "decm_new": (mof.loglikelihoood_decm_new, self.args),
+            "dcm": (mof.loglikelihood_dcm, self.args),
+            "crema": (mof.loglikelihood_crema, self.args),
+            "crema-sparse": (mof.loglikelihood_crema_sparse, self.args),
+            "decm": (mof.loglikelihood_decm, self.args),
+            "dcm_new": (mof.loglikelihood_dcm_new, self.args),
+            "decm_new": (mof.loglikelihood_decm_new, self.args),
         }
 
         self.args_lins = args_lin[model]
@@ -1303,18 +1295,18 @@ class DirectedGraph:
                 x,
                 self.args_lins),
             "dcm_new-fixed-point": lambda x: mof.linsearch_fun_DCM_new_fixed(x),
-            "crema-newton": lambda x: mof.linsearch_fun_crema(x, self.args_lins),
-            "crema-quasinewton": lambda x: mof.linsearch_fun_crema(
+            "crema-newton": lambda x: mof.linsearch_fun_crema_directed(x, self.args_lins),
+            "crema-quasinewton": lambda x: mof.linsearch_fun_crema_directed(
                 x,
                 self.args_lins),
-            "crema-fixed-point": lambda x: mof.linsearch_fun_crema_fixed(x),
-            "crema-sparse-newton": lambda x: mof.linsearch_fun_crema(
+            "crema-fixed-point": lambda x: mof.linsearch_fun_crema_directed_fixed(x),
+            "crema-sparse-newton": lambda x: mof.linsearch_fun_crema_directed(
                 x,
                 self.args_lins),
-            "crema-sparse-quasinewton": lambda x: mof.linsearch_fun_crema(
+            "crema-sparse-quasinewton": lambda x: mof.linsearch_fun_crema_directed(
                 x,
                 self.args_lins),
-            "crema-sparse-fixed-point": lambda x: mof.linsearch_fun_crema_fixed(
+            "crema-sparse-fixed-point": lambda x: mof.linsearch_fun_crema_directed_fixed(
                 x),
             "decm-newton": lambda x: mof.linsearch_fun_DECM(
                 x,
@@ -1352,7 +1344,7 @@ class DirectedGraph:
             elif self.regularise == "identity":
                 self.hessian_regulariser = sof.matrix_regulariser_function
 
-    def _solve_problem_crema(
+    def _solve_problem_crema_directed(
         self,
         initial_guess=None,
         model="crema",
@@ -1432,14 +1424,14 @@ class DirectedGraph:
             self.last_model = "crema-sparse"
         else:
             self.last_model = model
- 
+
         self.regularise = regularise
         self.full_return = full_return
         self.initial_guess = initial_guess
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
 
-        sol = solver(
+        sol = sof.solver(
             x0,
             fun=self.fun,
             fun_jac=self.fun_jac,
@@ -1457,9 +1449,9 @@ class DirectedGraph:
             full_return=full_return,
         )
 
-        self._set_solved_problem_crema(sol)
+        self._set_solved_problem_crema_directed(sol)
 
-    def _set_solved_problem_crema(self, solution):
+    def _set_solved_problem_crema_directed(self, solution):
         if self.full_return:
             self.b_out = solution[0][: self.n_nodes]
             self.b_in = solution[0][self.n_nodes:]
@@ -1551,7 +1543,7 @@ class DirectedGraph:
                 eps=eps,
             )
         elif model in ["crema", 'crema-sparse']:
-            self._solve_problem_crema(
+            self._solve_problem_crema_directed(
                 initial_guess=initial_guess,
                 model=model,
                 adjacency=adjacency,
