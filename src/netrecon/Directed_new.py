@@ -10,59 +10,6 @@ warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 
 @jit(nopython=True)
-def iterative_dcm_new_2(theta, args):
-    """Returns the next DBCM iterative step for the fixed-point.
-        It is based on the exponential version of the DBCM.
-        This version only runs on non-zero indices.
-
-    :param theta: Previous iterative step.
-    :type theta: numpy.ndarray
-    :param args: Out and in strengths sequences, adjacency matrix,
-        and non zero out and in indices.
-    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
-        numpy.ndarray, numpy.ndarray)
-    :return: Next iterative step.
-    :rtype: numpy.ndarray
-    """
-    # problem fixed parameters
-    k_out = args[0]
-    k_in = args[1]
-    n = len(k_out)
-    nz_index_out = args[2]
-    nz_index_in = args[3]
-    # nz_index_out = range(n)
-    # nz_index_in = range(n)
-    c = args[4]
-
-    f = np.zeros(2 * n, dtype=np.float64)
-    x = np.exp(-theta)
-
-    for i in nz_index_out:
-        for j in nz_index_in:
-            if j != i:
-                f[i] += c[j] * x[j + n] / (1 + x[i] * x[j + n])
-            else:
-                f[i] += (c[j] - 1) * x[j + n] / (1 + x[i] * x[j + n])
-
-    for j in nz_index_in:
-        for i in nz_index_out:
-            if j != i:
-                f[j + n] += c[i] * x[i] / (1 + x[i] * x[j + n])
-            else:
-                f[j + n] += (c[i] - 1) * x[i] / (1 + x[i] * x[j + n])
-
-    tmp = np.concatenate((k_out, k_in))
-    ff = -np.log(
-        np.array(
-            [tmp[i] / f[i] if tmp[i] != 0 else -np.infty for i in range(2 * n)]
-        )
-    )
-    # ff = -np.log(tmp/f)
-
-    return ff
-
-
-@jit(nopython=True)
 def iterative_dcm_new(theta, args):
     """Returns the next DBCM iterative step for the fixed-point [1]_ [2]_.
         It is based on the exponential version of the DBCM.
@@ -119,6 +66,59 @@ def iterative_dcm_new(theta, args):
     tmp = np.concatenate((k_out, k_in))
     # ff = np.array([tmp[i]/f[i] if tmp[i] != 0 else 0 for i in range(2*n)])
     ff = -np.log(tmp / f)
+
+    return ff
+
+
+@jit(nopython=True)
+def iterative_dcm_new_2(theta, args):
+    """Returns the next DBCM iterative step for the fixed-point.
+        It is based on the exponential version of the DBCM.
+        This version only runs on non-zero indices.
+
+    :param theta: Previous iterative step.
+    :type theta: numpy.ndarray
+    :param args: Out and in strengths sequences, adjacency matrix,
+        and non zero out and in indices.
+    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
+        numpy.ndarray, numpy.ndarray)
+    :return: Next iterative step.
+    :rtype: numpy.ndarray
+    """
+    # problem fixed parameters
+    k_out = args[0]
+    k_in = args[1]
+    n = len(k_out)
+    nz_index_out = args[2]
+    nz_index_in = args[3]
+    # nz_index_out = range(n)
+    # nz_index_in = range(n)
+    c = args[4]
+
+    f = np.zeros(2 * n, dtype=np.float64)
+    x = np.exp(-theta)
+
+    for i in nz_index_out:
+        for j in nz_index_in:
+            if j != i:
+                f[i] += c[j] * x[j + n] / (1 + x[i] * x[j + n])
+            else:
+                f[i] += (c[j] - 1) * x[j + n] / (1 + x[i] * x[j + n])
+
+    for j in nz_index_in:
+        for i in nz_index_out:
+            if j != i:
+                f[j + n] += c[i] * x[i] / (1 + x[i] * x[j + n])
+            else:
+                f[j + n] += (c[i] - 1) * x[i] / (1 + x[i] * x[j + n])
+
+    tmp = np.concatenate((k_out, k_in))
+    ff = -np.log(
+        np.array(
+            [tmp[i] / f[i] if tmp[i] != 0 else -np.infty for i in range(2 * n)]
+        )
+    )
+    # ff = -np.log(tmp/f)
 
     return ff
 
