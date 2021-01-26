@@ -11,13 +11,13 @@ Correzioni tipografiche
 
 ## emiliamno
 
-* Maiuscole e punti nel docstring per descrizione parametri e descrizione funzione.
+* ~~Maiuscole e punti nel docstring per descrizione parametri e descrizione funzione.~~
 
-* max lunghezza linea 79 caratteri
+* ~~max lunghezza linea 79 caratteri~~
 
-* emiliano fa i crema
+* ~~emiliano fa i crema~~
 
-* emiliano tutte le funzioni di linsearch
+* ~~emiliano tutte le funzioni di linsearch~~
 
 ## dopo
 
