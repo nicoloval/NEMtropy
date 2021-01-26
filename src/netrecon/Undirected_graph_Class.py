@@ -1022,7 +1022,7 @@ def linsearch_fun_crema_fixed(X):
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
-            (cond == False)
+            (not cond)
             and (kk < 50)
              ):
             alfa *= beta
@@ -1064,7 +1064,7 @@ def linsearch_fun_CM_new(X, args):
         sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
-        == False
+        is False
         and i < 50
     ):
         alfa *= beta
@@ -1099,7 +1099,7 @@ def linsearch_fun_CM_new_fixed(X):
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
-            cond == False
+            not cond
             and kk < 50
              ):
             alfa *= beta
@@ -1146,7 +1146,7 @@ def linsearch_fun_CM(X, args):
         sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
-        == False
+        is False
         and i < 50
     ):
         alfa *= beta
@@ -1186,7 +1186,7 @@ def linsearch_fun_CM_fixed(X):
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
-            cond == False
+            cond is False
             and kk < 50
              ):
             alfa *= beta
@@ -1239,7 +1239,7 @@ def linsearch_fun_ECM_new(X, args):
         sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
-        == False
+        is False
         and i < 50
     ):
         alfa *= beta
@@ -1287,7 +1287,7 @@ def linsearch_fun_ECM_new_fixed(X):
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
-            (cond == False)
+            (not cond)
             and kk < 50
              ):
             alfa *= beta
@@ -1343,7 +1343,7 @@ def linsearch_fun_ECM(X, args):
         sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
-        == False
+        is False
         and i < 50
     ):
         alfa *= beta
@@ -1393,7 +1393,7 @@ def linsearch_fun_ECM_fixed(X):
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
         while(
-            cond == False
+            cond is False
             and kk < 50
              ):
             alfa *= beta

@@ -35,7 +35,6 @@ class MyTest(unittest.TestCase):
         )
 
         g.solution_error()
-        err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
         n = 1000

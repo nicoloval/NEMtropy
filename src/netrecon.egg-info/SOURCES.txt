@@ -1,5 +1,4 @@
 README.rst
-setup.cfg
 setup.py
 src/netrecon/Directed_graph_Class.py
 src/netrecon/Directed_new.py

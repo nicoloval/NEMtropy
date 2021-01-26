@@ -72,13 +72,13 @@ class MyTest(unittest.TestCase):
         ensemble_error = np.linalg.norm(a_diff, np.inf)
 
         # debug
-        print('\n original degree sequence ', d)
-        print('\n original strength sequence ', s)
-        print('\n ensemble average strength sequence', s_emp)
-        print('\n degree by degree difference vector ', d_diff)
-        print('\n strength by strength difference vector ', s_diff)
-        print('\n empirical error = {}'.format(ensemble_error))
-        print('\n theoretical error = {}'.format(err))
+        # print('\n original degree sequence ', d)
+        # print('\n original strength sequence ', s)
+        # print('\n ensemble average strength sequence', s_emp)
+        # print('\n degree by degree difference vector ', d_diff)
+        # print('\n strength by strength difference vector ', s_diff)
+        # print('\n empirical error = {}'.format(ensemble_error))
+        # print('\n theoretical error = {}'.format(err))
 
         l = os.listdir(output_dir)
         for f in l:

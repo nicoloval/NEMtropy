@@ -1954,7 +1954,7 @@ def linsearch_fun_crema(xx, args):
                                          alfa,
                                          f,
                                          dx)
-    while (cond and i < 50):
+    while ((not cond) and i < 50):
         alfa *= beta
         i += 1
         cond = sufficient_decrease_condition(s_old,
@@ -1990,7 +1990,7 @@ def linsearch_fun_crema_fixed(xx):
     if step:
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-        while(cond and kk < 50):
+        while((not cond) and kk < 50):
             alfa *= beta
             kk += 1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
@@ -2062,7 +2062,7 @@ def linsearch_fun_DCM_new_fixed(X):
     if step:
         kk = 0
         cond = np.linalg.norm(alfa*dx, ord=2) < np.linalg.norm(dx_old, ord=2)
-        while(cond is False
+        while((not cond)
                 and kk < 50):
             alfa *= beta
             kk += 1
@@ -2103,14 +2103,21 @@ def linsearch_fun_DCM(xx, args):
 
     i = 0
     s_old = -step_fun(x, arg_step_fun)
-    while (
-        sufficient_decrease_condition(
-            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
-        )
-        and i < 50
-    ):
+    cond = sufficient_decrease_condition(s_old,
+                                         -step_fun(x + alfa * dx,
+                                                   arg_step_fun),
+                                         alfa,
+                                         f,
+                                         dx)
+    while ((not cond) and (i < 50)):
         alfa *= beta
         i += 1
+        cond = sufficient_decrease_condition(s_old,
+                                             -step_fun(x + alfa * dx,
+                                                       arg_step_fun),
+                                             alfa,
+                                             f,
+                                             dx)
     return alfa
 
 
@@ -2144,7 +2151,7 @@ def linsearch_fun_DCM_fixed(xx):
     if step:
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-        while(cond and kk < 50):
+        while((not cond) and kk < 50):
             alfa *= beta
             kk += 1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
@@ -2257,7 +2264,7 @@ def linsearch_fun_DECM_new_fixed(X):
         kk = 0
         cond = np.linalg.norm(alfa*dx, ord=2) < \
             np.linalg.norm(dx_old, ord=2)
-        while(cond is False
+        while((not cond)
               and kk < 50):
             alfa *= beta
             kk += 1
@@ -2302,10 +2309,10 @@ def linsearch_fun_DECM(xx, args):
     while True:
         ind_yout = np.argmax(x[2 * nnn: 3 * nnn] + alfa * dx[2 * nnn: 3 * nnn])
         ind_yin = np.argmax(x[3 * nnn:] + alfa * dx[3 * nnn:])
-        cond = (x[2 * nnn: 3 * nnn][ind_yout]
-                + alfa * dx[2 * nnn: 3 * nnn][ind_yout]) *\
-               (x[3 * nnn][ind_yin]
-                + alfa * dx[3 * nnn:][ind_yin])
+        cond = ((x[2 * nnn: 3 * nnn][ind_yout]
+                + alfa * dx[2 * nnn: 3 * nnn][ind_yout])
+                * (x[3 * nnn:][ind_yin]
+                + alfa * dx[3 * nnn:][ind_yin]))
         if (cond) < 1:
             break
         else:
@@ -2313,14 +2320,17 @@ def linsearch_fun_DECM(xx, args):
 
     i = 0
     s_old = -step_fun(x, arg_step_fun)
-    while (
-        sufficient_decrease_condition(
-            s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
-        )
-        and i < 50
-    ):
+    cond = sufficient_decrease_condition(s_old,
+                                         -step_fun(x + alfa * dx,
+                                                   arg_step_fun),
+                                         alfa, f, dx)
+    while ((not cond) and i < 50):
         alfa *= beta
         i += 1
+        cond = sufficient_decrease_condition(s_old,
+                                             -step_fun(x + alfa * dx,
+                                                       arg_step_fun),
+                                             alfa, f, dx)
     return alfa
 
 
@@ -2369,7 +2379,7 @@ def linsearch_fun_DECM_fixed(xx):
     if step:
         kk = 0
         cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
-        while(cond and kk < 50):
+        while((not cond) and kk < 50):
             alfa *= beta
             kk += 1
             cond = np.linalg.norm(alfa*dx) < np.linalg.norm(dx_old)
