@@ -2,8 +2,9 @@ import sys
 
 sys.path.append("../")
 import netrecon.graph_classes as sample
-import netrecon.matrix_generator as sample_u
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample_u
+import netrecon.network_functions as ntw_f
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 
@@ -64,7 +65,7 @@ class MyTest(unittest.TestCase):
         x0 = np.random.rand(n)
         g = sample_u.UndirectedGraph(A)
         g.initial_guess = x0
-        g._set_initial_guess_crema()
+        g._set_initial_guess_crema_undirected()
         g.full_return = False
         g._set_solved_problem_crema(g.x0)
         self.assertTrue(g.beta.all() == x0.all())
@@ -96,7 +97,7 @@ class MyTest(unittest.TestCase):
         x0 = np.random.rand(n)
         g = sample_u.UndirectedGraph(A)
         g.initial_guess = x0
-        g._set_initial_guess_crema()
+        g._set_initial_guess_crema_undirected()
         self.assertTrue(g.x0.all() == x0.all())
 
 
@@ -123,24 +124,24 @@ class MyTest(unittest.TestCase):
         self.assertTrue(np.concatenate((g.x, g.y)).all() == x0.all())
 
 
-    def test_dcm_new_uniform(self):
+    def test_dcm_exp_uniform(self):
         n, seed = (4, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         g = sample.DirectedGraph(A)
         g.initial_guess = 'uniform'
-        g._set_initial_guess('dcm_new')
+        g._set_initial_guess('dcm_exp')
         self.assertTrue(np.concatenate((g.r_x, g.r_y)).all() == np.array([1e3,  -np.log(0.5), -np.log(0.5), -np.log(0.5), 1e3,  -np.log(0.5)]).all())
 
 
-    def test_dcm_new(self):
+    def test_dcm_exp(self):
         n, seed = (4, 22)
         A = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
 
         x0 = np.random.rand(2*n)
         g = sample.DirectedGraph(A)
         g.initial_guess = x0
-        g._set_initial_guess('dcm_new')
+        g._set_initial_guess('dcm_exp')
         g._set_solved_problem_dcm(x0)
         self.assertTrue(np.concatenate((g.x, g.y)).all() == x0.all())
 
@@ -172,7 +173,7 @@ class MyTest(unittest.TestCase):
 
 
 
-    def test_decm_new_uniform(self):
+    def test_decm_exp_uniform(self):
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
@@ -181,12 +182,12 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
         g.initial_guess = 'uniform'
-        g._set_initial_guess('decm_new')
+        g._set_initial_guess('decm_exp')
         tester = np.exp(np.ones(4*n))
         self.assertTrue(g.x0.all() == tester.all())
 
 
-    def test_decm_new(self):
+    def test_decm_exp(self):
         n, seed = (4, 22)
         A = mg.random_weighted_matrix_generator_dense(
             n, sym=False, seed=seed, sup_ext=100, intweights=True
@@ -195,7 +196,7 @@ class MyTest(unittest.TestCase):
         x0 = np.random.rand(4*n)
         g = sample.DirectedGraph(A)
         g.initial_guess = x0
-        g._set_initial_guess('decm_new')
+        g._set_initial_guess('decm_exp')
         g._set_solved_problem_decm(x0)
         self.assertTrue(np.concatenate((g.x, g.y,g.out_strength, g.in_strength)).all() == x0.all())
 
@@ -208,8 +209,8 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(A)
         g.initial_guess = 'strengths_minor'
-        g._set_initial_guess_crema()
-        x = np.concatenate((sample.out_strength(A)/(sample.out_strength(A) + 1), sample.in_strength(A)/(sample.in_strength(A) + 1)))
+        g._set_initial_guess_crema_directed()
+        x = np.concatenate((ntw_f.out_strength(A)/(ntw_f.out_strength(A) + 1), ntw_f.in_strength(A)/(ntw_f.in_strength(A) + 1)))
         self.assertTrue(g.x0.all() == x.all())
 
 
@@ -222,7 +223,7 @@ class MyTest(unittest.TestCase):
         x0 = np.random.rand(2*n)
         g = sample.DirectedGraph(A)
         g.initial_guess = x0
-        g._set_initial_guess_crema()
+        g._set_initial_guess_crema_directed()
         g._set_solved_problem_decm(x0)
         self.assertTrue(g.x0.all() == x0.all())
 

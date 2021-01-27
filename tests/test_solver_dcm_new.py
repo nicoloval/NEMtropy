@@ -4,9 +4,10 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-from netrecon.Directed_new import *
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+from netrecon.models_functions import *
+import netrecon.matrix_generator as mg
+import netrecon.solver_functions as sof
 import numpy as np
 import unittest  # test tool
 
@@ -34,15 +35,15 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = 100
         args = g.args
 
-        fun = lambda x: iterative_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: iterative_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -66,8 +67,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -100,15 +101,15 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = 100
         args = g.args
 
-        fun = lambda x: iterative_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: iterative_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -132,8 +133,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -170,15 +171,15 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = 1e3
         args = g.args
 
-        fun = lambda x: iterative_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: iterative_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -202,8 +203,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -241,15 +242,15 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = 1e3
         args = g.args
 
-        fun = lambda x: iterative_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: iterative_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
         
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -273,8 +274,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -310,16 +311,16 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = np.infty
         args = g.args
 
-        fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        fun_jac = lambda x: -loglikelihood_hessian_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (loglikelihood_dcm_new, args))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        fun_jac = lambda x: -loglikelihood_hessian_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (loglikelihood_dcm_exp, args))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -344,8 +345,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -382,16 +383,16 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = np.infty
         args = g.args
 
-        fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        fun_jac = lambda x: -loglikelihood_hessian_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        fun_jac = lambda x: -loglikelihood_hessian_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -416,8 +417,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -457,16 +458,16 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = np.infty
         args = g.args
 
-        fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        fun_jac = lambda x: -loglikelihood_hessian_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        fun_jac = lambda x: -loglikelihood_hessian_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -491,8 +492,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -533,16 +534,16 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = np.infty
         args = g.args
 
-        fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        fun_jac = lambda x: -loglikelihood_hessian_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        fun_jac = lambda x: -loglikelihood_hessian_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -567,8 +568,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -604,16 +605,16 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = np.infty
         args = g.args
 
-        fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (loglikelihood_dcm_new, args))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (loglikelihood_dcm_exp, args))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -638,8 +639,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -684,16 +685,16 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = np.infty
         args = g.args
 
-        fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (loglikelihood_dcm_new, args))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (loglikelihood_dcm_exp, args))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -718,8 +719,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -764,16 +765,16 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = np.infty
         args = g.args
 
-        fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -798,8 +799,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))
@@ -845,16 +846,16 @@ class MyTest(unittest.TestCase):
         x0[x0 == 0] = np.infty
         args = g.args
 
-        fun = lambda x: -loglikelihood_prime_dcm_new(x, args)
-        step_fun = lambda x: -loglikelihood_dcm_new(x, args)
-        fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DCM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
+        step_fun = lambda x: -loglikelihood_dcm_exp(x, args)
+        fun_jac = lambda x: -loglikelihood_hessian_diag_dcm_exp(x, args)
+        lin_fun = lambda x: linsearch_fun_DCM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
         f = fun(x0)
         norm = np.linalg.norm(f)
 
-        theta_sol = sample.solver(
+        theta_sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -879,8 +880,8 @@ class MyTest(unittest.TestCase):
 
         ek = np.concatenate(
             (
-                sample.expected_out_degree_dcm(sol),
-                sample.expected_in_degree_dcm(sol),
+                expected_out_degree_dcm(sol),
+                expected_in_degree_dcm(sol),
             )
         )
         k = np.concatenate((k_out, k_in))

@@ -2,7 +2,8 @@ import sys
 
 sys.path.append("../")
 import netrecon.graph_classes as sample
-import netrecon.Matrix_Generator as mg
+import netrecon.models_functions as mof
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 from scipy.optimize import approx_fprime
@@ -63,9 +64,9 @@ class MyTest(unittest.TestCase):
         n_rd = len(k_out)
         theta = np.random.rand(2 * n_rd)
         f_sample = np.zeros(n_rd * 2)
-        f = lambda x: sample.loglikelihood_dcm(x, g.args)
+        f = lambda x: mof.loglikelihood_dcm(x, g.args)
         f_sample = approx_fprime(theta, f, epsilon=1e-6)
-        f_new = sample.loglikelihood_prime_dcm(theta, g.args)
+        f_new = mof.loglikelihood_prime_dcm(theta, g.args)
 
         # debug
         # print(a)
@@ -102,10 +103,10 @@ class MyTest(unittest.TestCase):
         theta = np.random.rand(2 * n_rd)
         f_sample = np.zeros((n_rd * 2, n_rd * 2))
         for i in range(n_rd * 2):
-            f = lambda x: sample.loglikelihood_prime_dcm(x, g.args)[i]
+            f = lambda x: mof.loglikelihood_prime_dcm(x, g.args)[i]
             f_sample[i, :] = approx_fprime(theta, f, epsilon=1e-6)
 
-        f_new = sample.loglikelihood_hessian_dcm(theta, g.args)
+        f_new = mof.loglikelihood_hessian_dcm(theta, g.args)
 
         """
         for i in range(2*n_rd):
@@ -137,7 +138,7 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, nz_ind_out, nz_ind_in, c)
         x = 0.5 * np.ones(len(k_out) + len(k_in))
         # call loglikelihood function
-        f_sample = sample.loglikelihood_hessian_diag_dcm(x, args)
+        f_sample = mof.loglikelihood_hessian_diag_dcm(x, args)
         # debug
         # print(par)
         # print(f_sample)
@@ -208,8 +209,8 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, nz_ind_out, nz_ind_in, c)
         x = 0.5 * np.ones(len(k_out) + len(k_in))
         # call loglikelihood function
-        f_diag = sample.loglikelihood_hessian_diag_dcm(x, args)
-        f_full = sample.loglikelihood_hessian_dcm(x, args)
+        f_diag = mof.loglikelihood_hessian_diag_dcm(x, args)
+        f_full = mof.loglikelihood_hessian_dcm(x, args)
         f_df = np.diag(f_full)
         # debug
         # print(f_diag, f_full, f_df)

@@ -4,9 +4,9 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-from netrecon.Directed_new import *
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+from netrecon.models_functions import *
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 
@@ -25,7 +25,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(a)
         g._solve_problem(
-            model="dcm_new",
+            model="dcm_exp",
             method="quasinewton",
             max_steps=3000,
             verbose=False,
@@ -33,7 +33,7 @@ class MyTest(unittest.TestCase):
             linsearch=True,
         )
 
-        g.solution_error()
+        g._solution_error()
         err = g.error
         # debug
         # print('\ntest 0: error = {}'.format(err))
@@ -52,7 +52,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(a)
         g._solve_problem(
-            model="dcm_new",
+            model="dcm_exp",
             method="quasinewton",
             max_steps=3000,
             verbose=False,
@@ -60,7 +60,7 @@ class MyTest(unittest.TestCase):
             linsearch=True,
         )
 
-        g.solution_error()
+        g._solution_error()
         err = g.error
         # debug
         # print('\ntest 1: error = {}'.format(err))
@@ -79,7 +79,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(a)
         g._solve_problem(
-            model="dcm_new",
+            model="dcm_exp",
             method="quasinewton",
             max_steps=3000,
             verbose=False,
@@ -87,7 +87,7 @@ class MyTest(unittest.TestCase):
             linsearch=True,
         )
 
-        g.solution_error()
+        g._solution_error()
         err = g.error
         # debug
         print("\ntest 1: error = {}".format(err))
@@ -107,7 +107,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(a)
         g._solve_problem(
-            model="dcm_new",
+            model="dcm_exp",
             method="quasinewton",
             max_steps=3000,
             verbose=False,
@@ -115,7 +115,7 @@ class MyTest(unittest.TestCase):
             linsearch=True,
         )
 
-        g.solution_error()
+        g._solution_error()
         err = g.error
         # debug
         # print('\ntest 3: error = {}'.format(err))
@@ -134,7 +134,7 @@ class MyTest(unittest.TestCase):
 
         g = sample.DirectedGraph(a)
         g._solve_problem(
-            model="dcm_new",
+            model="dcm_exp",
             method="newton",
             max_steps=3000,
             verbose=False,
@@ -142,7 +142,7 @@ class MyTest(unittest.TestCase):
             linsearch=True,
         )
 
-        g.solution_error()
+        g._solution_error()
         err = g.error
         # debug
         print("\ntest emi: error = {}".format(err))
