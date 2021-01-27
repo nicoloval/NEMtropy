@@ -790,10 +790,10 @@ class UndirectedGraph:
             "cm-fixed-point": lambda x: mof.linsearch_fun_CM_fixed(x),
             "crema-newton": lambda x: mof.linsearch_fun_crema_undirected(x, self.args_lins),
             "crema-quasinewton": lambda x: mof.linsearch_fun_crema_undirected(x, self.args_lins),
-            "crema-fixed-point": lambda x: mof.linsearch_fun_crema_fixed(x),
+            "crema-fixed-point": lambda x: mof.linsearch_fun_crema_undirected_fixed(x),
             "crema-sparse-newton": lambda x: mof.linsearch_fun_crema_undirected(x, self.args_lins),
             "crema-sparse-quasinewton": lambda x: mof.linsearch_fun_crema_undirected(x, self.args_lins),
-            "crema-sparse-fixed-point": lambda x: mof.linsearch_fun_crema_fixed(x),
+            "crema-sparse-fixed-point": lambda x: mof.linsearch_fun_crema_undirected_fixed(x),
             "ecm-newton": lambda x: mof.linsearch_fun_ECM(x, self.args_lins),
             "ecm-quasinewton": lambda x: mof.linsearch_fun_ECM(x, self.args_lins),
             "ecm-fixed-point": lambda x: mof.linsearch_fun_ECM_fixed(x),
@@ -917,7 +917,7 @@ class UndirectedGraph:
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
 
-        sol = solver(
+        sol = sof.solver(
             x0,
             fun=self.fun,
             fun_jac=self.fun_jac,

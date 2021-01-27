@@ -1,10 +1,12 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
+import netrecon.graph_classes as sample
+import netrecon.models_functions as mof
+import netrecon.solver_functions as sof
 import numpy as np
 import unittest  # test tool
-import netrecon.Matrix_Generator as mg
+import netrecon.matrix_generator as mg
 
 
 class MyTest(unittest.TestCase):
@@ -28,15 +30,15 @@ class MyTest(unittest.TestCase):
         x0 = 0.9 * np.ones(n * 4)
         args = (k_out, k_in, s_out, s_in)
 
-        fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
-        fun_jac = lambda x: -sample.loglikelihood_hessian_diag_decm_new(
+        fun = lambda x: -mof.loglikelihood_prime_decm_exp(x, args)
+        fun_jac = lambda x: -mof.loglikelihood_hessian_diag_decm_exp(
             x, args
         )
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (sample.loglikelihood_decm_new, args))
-        hes_reg = sample.hessian_regulariser_function
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (mof.loglikelihood_decm_exp, args))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -54,7 +56,7 @@ class MyTest(unittest.TestCase):
         )
         sol = np.exp(-sol)
 
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -84,15 +86,15 @@ class MyTest(unittest.TestCase):
         x0 = 0.9 * np.ones(n * 4)
         args = (k_out, k_in, s_out, s_in)
 
-        fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
-        fun_jac = lambda x: -sample.loglikelihood_hessian_diag_decm_new(
+        fun = lambda x: -mof.loglikelihood_prime_decm_exp(x, args)
+        fun_jac = lambda x: -mof.loglikelihood_hessian_diag_decm_exp(
             x, args
         )
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (sample.loglikelihood_decm_new, args))
-        hes_reg = sample.hessian_regulariser_function
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (mof.loglikelihood_decm_exp, args))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -110,7 +112,7 @@ class MyTest(unittest.TestCase):
         )
         sol = np.exp(-sol)
 
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -140,15 +142,15 @@ class MyTest(unittest.TestCase):
         x0 = 0.9 * np.ones(n * 4)
         args = (k_out, k_in, s_out, s_in)
 
-        fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
-        fun_jac = lambda x: -sample.loglikelihood_hessian_diag_decm_new(
+        fun = lambda x: -mof.loglikelihood_prime_decm_exp(x, args)
+        fun_jac = lambda x: -mof.loglikelihood_hessian_diag_decm_exp(
             x, args
         )
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -166,7 +168,7 @@ class MyTest(unittest.TestCase):
         )
         sol = np.exp(-sol)
 
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -198,15 +200,15 @@ class MyTest(unittest.TestCase):
         x0 = 0.9 * np.ones(n * 4)
         args = (k_out, k_in, s_out, s_in)
 
-        fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
-        fun_jac = lambda x: -sample.loglikelihood_hessian_diag_decm_new(
+        fun = lambda x: -mof.loglikelihood_prime_decm_exp(x, args)
+        fun_jac = lambda x: -mof.loglikelihood_hessian_diag_decm_exp(
             x, args
         )
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -224,7 +226,7 @@ class MyTest(unittest.TestCase):
         )
         sol = np.exp(-sol)
 
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -254,13 +256,13 @@ class MyTest(unittest.TestCase):
         x0 = 0.1 * np.ones(16)
         args = (k_out, k_in, s_out, s_in)
 
-        fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
-        fun_jac = lambda x: -sample.loglikelihood_hessian_decm_new(x, args)
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (sample.loglikelihood_decm_new, args))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -mof.loglikelihood_prime_decm_exp(x, args)
+        fun_jac = lambda x: -mof.loglikelihood_hessian_decm_exp(x, args)
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (mof.loglikelihood_decm_exp, args))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -278,7 +280,7 @@ class MyTest(unittest.TestCase):
         )
         sol = np.exp(-sol)
 
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -309,13 +311,13 @@ class MyTest(unittest.TestCase):
         x0 = 0.1 * np.ones(16)
         args = (k_out, k_in, s_out, s_in)
 
-        fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
-        fun_jac = lambda x: -sample.loglikelihood_hessian_decm_new(x, args)
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (sample.loglikelihood_decm_new, args))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -mof.loglikelihood_prime_decm_exp(x, args)
+        fun_jac = lambda x: -mof.loglikelihood_hessian_decm_exp(x, args)
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (mof.loglikelihood_decm_exp, args))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -333,7 +335,7 @@ class MyTest(unittest.TestCase):
         )
         sol = np.exp(-sol)
 
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -367,13 +369,13 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
         # x0[args == 0] = np.infty
 
-        fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
-        fun_jac = lambda x: -sample.loglikelihood_hessian_decm_new(x, args)
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -mof.loglikelihood_prime_decm_exp(x, args)
+        fun_jac = lambda x: -mof.loglikelihood_hessian_decm_exp(x, args)
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -391,7 +393,7 @@ class MyTest(unittest.TestCase):
         )
         sol = np.exp(-sol)
 
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -425,13 +427,13 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
         x0[np.concatenate(args) == 0] = 1e3
 
-        fun = lambda x: -sample.loglikelihood_prime_decm_new(x, args)
-        fun_jac = lambda x: -sample.loglikelihood_hessian_decm_new(x, args)
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: -mof.loglikelihood_prime_decm_exp(x, args)
+        fun_jac = lambda x: -mof.loglikelihood_hessian_decm_exp(x, args)
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -449,7 +451,7 @@ class MyTest(unittest.TestCase):
         )
         sol = np.exp(-sol)
 
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -481,12 +483,12 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
         x0[np.concatenate(args) == 0] = 1e3
 
-        fun = lambda x: sample.iterative_decm_new(x, args)
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new_fixed(x)
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: mof.iterative_decm_exp(x, args)
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp_fixed(x)
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -503,7 +505,7 @@ class MyTest(unittest.TestCase):
         )
 
         sol = np.exp(-sol)
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -535,12 +537,12 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
         x0[np.concatenate(args) == 0] = 1e3
 
-        fun = lambda x: sample.iterative_decm_new(x, args)
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new_fixed(x)
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: mof.iterative_decm_exp(x, args)
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp_fixed(x)
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -557,7 +559,7 @@ class MyTest(unittest.TestCase):
         )
 
         sol = np.exp(-sol)
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -590,12 +592,12 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
         x0[np.concatenate(args) == 0] = 1e3
 
-        fun = lambda x: sample.iterative_decm_new(x, args)
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: mof.iterative_decm_exp(x, args)
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -612,7 +614,7 @@ class MyTest(unittest.TestCase):
         )
 
         sol = np.exp(-sol)
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug
@@ -645,12 +647,12 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
         x0[np.concatenate(args) == 0] = 1e3
 
-        fun = lambda x: sample.iterative_decm_new(x, args)
-        step_fun = lambda x: -sample.loglikelihood_decm_new(x, args)
-        lin_fun = lambda x: sample.linsearch_fun_DECM_new(x, (step_fun,))
-        hes_reg = sample.hessian_regulariser_function
+        fun = lambda x: mof.iterative_decm_exp(x, args)
+        step_fun = lambda x: -mof.loglikelihood_decm_exp(x, args)
+        lin_fun = lambda x: mof.linsearch_fun_DECM_exp(x, (step_fun,))
+        hes_reg = sof.matrix_regulariser_function
 
-        sol = sample.solver(
+        sol = sof.solver(
             x0,
             fun=fun,
             step_fun=step_fun,
@@ -667,7 +669,7 @@ class MyTest(unittest.TestCase):
         )
 
         sol = np.exp(-sol)
-        ek = sample.expected_decm(sol)
+        ek = mof.expected_decm(sol)
         k = np.concatenate((k_out, k_in, s_out, s_in))
         err = np.max(np.abs(ek - k))
         # debug

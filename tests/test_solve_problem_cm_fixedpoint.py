@@ -1,8 +1,8 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Undirected_graph_Class as sample
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 
@@ -37,7 +37,7 @@ class MyTest(unittest.TestCase):
             initial_guess="random",
         )
 
-        g.solution_error()
+        g._solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
         # print('expected degseq = ',g.expected_dseq)
         # debug
@@ -67,7 +67,7 @@ class MyTest(unittest.TestCase):
             initial_guess="random",
         )
 
-        g.solution_error()
+        g._solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
         # print('expected degseq = ',g.expected_dseq)
         # debug
@@ -99,7 +99,7 @@ class MyTest(unittest.TestCase):
             initial_guess="random",
         )
 
-        g.solution_error()
+        g._solution_error()
         # print('degseq = ', np.concatenate((g.dseq_out, g.dseq_in)))
         # print('expected degseq = ',g.expected_dseq)
         # debug

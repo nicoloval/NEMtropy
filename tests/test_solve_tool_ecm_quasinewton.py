@@ -2,9 +2,9 @@ import sys
 import os
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-import netrecon.Undirected_graph_Class as sample_und
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.graph_classes as sample_und
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest
 
@@ -29,7 +29,7 @@ class MyTest(unittest.TestCase):
             initial_guess="random",
         )
 
-        g.solution_error()
+        g._solution_error()
 
         # test result
         self.assertTrue(g.error < 1e-1)

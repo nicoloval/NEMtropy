@@ -2,9 +2,9 @@ import sys
 import os
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-import netrecon.Undirected_graph_Class as sample_und
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.graph_classes as sample_und
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest
 
@@ -23,14 +23,14 @@ class MyTest(unittest.TestCase):
         g = sample_und.UndirectedGraph(adjacency=network)
 
         g.solve_tool(
-            model="ecm-new",
+            model="ecm_exp",
             method="newton",
             max_steps=1000,
             verbose=False,
             initial_guess="uniform",
         )
 
-        g.solution_error()
+        g._solution_error()
 
         # test result
 

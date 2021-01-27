@@ -2,9 +2,9 @@ import sys
 import os
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-import netrecon.Undirected_graph_Class as sample_und
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.graph_classes as sample_und
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest
 
@@ -25,13 +25,13 @@ class MyTest(unittest.TestCase):
         g.solve_tool(
             model="crema",
             method="fixed-point",
-            initial_guess = "random",
+            initial_guess="random",
             adjacency="dcm",
             max_steps=1000,
             verbose=False,
         )
 
-        g.solution_error()
+        g._solution_error()
 
         # test result
 
@@ -56,7 +56,7 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        g.solution_error()
+        g._solution_error()
 
         # test result
 
@@ -76,12 +76,12 @@ class MyTest(unittest.TestCase):
             model="crema",
             method="fixed-point",
             initial_guess = "random",
-            adjacency="cm-new",
+            adjacency="cm_exp",
             max_steps=1000,
             verbose=False,
         )
 
-        g.solution_error()
+        g._solution_error()
 
         # test result
 
@@ -106,7 +106,7 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        g.solution_error()
+        g._solution_error()
 
         # test result
 

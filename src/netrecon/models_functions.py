@@ -214,7 +214,7 @@ def linsearch_fun_CM(X, args):
     i = 0
     s_old = -step_fun(x, arg_step_fun)
     while (
-        sufficient_decrease_condition(
+        sof.sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         is False
@@ -474,7 +474,7 @@ def linsearch_fun_CM_exp(X, args):
     i = 0
     s_old = -step_fun(x, arg_step_fun)
     while (
-        sufficient_decrease_condition(
+        sof.sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         is False
@@ -786,7 +786,7 @@ def linsearch_fun_ECM(X, args):
     i = 0
     s_old = -step_fun(x, arg_step_fun)
     while (
-        sufficient_decrease_condition(
+        sof.sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         is False
@@ -1131,7 +1131,7 @@ def linsearch_fun_ECM_exp(X, args):
     i = 0
     s_old = -step_fun(x, arg_step_fun)
     while (
-        sufficient_decrease_condition(
+        sof.sufficient_decrease_condition(
             s_old, -step_fun(x + alfa * dx, arg_step_fun), alfa, f, dx
         )
         is False
@@ -1573,7 +1573,7 @@ def linsearch_fun_crema_undirected(X, args):
 
     i = 0
     s_old = -step_fun(x, arg_step_fun)
-    while ((not sufficient_decrease_condition(s_old,
+    while ((not sof.sufficient_decrease_condition(s_old,
                                               -step_fun(x + alfa * dx,
                                                         arg_step_fun),
                                               alfa,

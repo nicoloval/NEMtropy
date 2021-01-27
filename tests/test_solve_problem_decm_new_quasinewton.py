@@ -1,8 +1,8 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 
@@ -20,7 +20,7 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
 
         g._solve_problem(
-            model="decm_new",
+            model="decm_exp",
             method="quasinewton",
             max_steps=3000,
             verbose=False,
@@ -28,7 +28,7 @@ class MyTest(unittest.TestCase):
             linsearch=True,
         )
 
-        g.solution_error()
+        g._solution_error()
         # debug
         # print("\n test 0, no zeros, dimension n = {}, error = {}".format(n, g.error))
 
@@ -46,7 +46,7 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
 
         g._solve_problem(
-            model="decm_new",
+            model="decm_exp",
             method="quasinewton",
             max_steps=3000,
             verbose=False,
@@ -54,7 +54,7 @@ class MyTest(unittest.TestCase):
             linsearch=True,
         )
 
-        g.solution_error()
+        g._solution_error()
         # debug
         # print("\n test 1, zeros, dimension n = {}, error = {}".format(n, g.error))
 
@@ -72,7 +72,7 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
 
         g._solve_problem(
-            model="decm_new",
+            model="decm_exp",
             method="quasinewton",
             max_steps=25000,
             verbose=False,
@@ -80,7 +80,7 @@ class MyTest(unittest.TestCase):
             linsearch=True,
         )
 
-        g.solution_error()
+        g._solution_error()
         # debug
         print(
             "\n test 2, no zeros, dimension n = {}, error = {}".format(
@@ -102,7 +102,7 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
 
         g._solve_problem(
-            model="decm_new",
+            model="decm_exp",
             method="quasinewton",
             max_steps=20000,
             verbose=False,
@@ -110,7 +110,7 @@ class MyTest(unittest.TestCase):
             linsearch=True,
         )
 
-        g.solution_error()
+        g._solution_error()
         # debug
         print(
             "\n test 3, zeros, dimension n = {}, error = {}".format(n, g.error)

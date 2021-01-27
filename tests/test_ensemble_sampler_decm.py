@@ -42,7 +42,7 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
 
         g._solve_problem(
-            model="decm_new",
+            model="decm_exp",
             method="newton",
             max_steps=100,
             verbose=False,

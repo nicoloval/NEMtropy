@@ -2,8 +2,8 @@ import sys
 
 sys.path.append("../")
 import netrecon.graph_classes as sample
-from netrecon.matrix_generator import *
-import netrecon.Matrix_Generator as mg
+from netrecon.models_functions import *
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 from scipy.optimize import approx_fprime
@@ -13,7 +13,7 @@ class MyTest(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_iterative_dcm_new(self):
+    def test_iterative_dcm_exp(self):
 
         n, seed = (3, 42)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -33,26 +33,26 @@ class MyTest(unittest.TestCase):
         g._set_solved_problem(f_sample)
         f_full = np.concatenate((g.x, g.y))
         f_full = -np.log(f_full)
-        f_new = iterative_dcm_new(theta, g.args)
-        g._set_solved_problem_dcm(f_new)
-        f_new_full = np.concatenate((g.x, g.y))
+        f_exp = iterative_dcm_exp(theta, g.args)
+        g._set_solved_problem_dcm(f_exp)
+        f_exp_full = np.concatenate((g.x, g.y))
 
-        # f_new_bis = iterative_dcm_new_bis(theta, g.args)
-        # print('normale ',f_new)
-        # print('bis',f_new_bis)
+        # f_exp_bis = iterative_dcm_exp_bis(theta, g.args)
+        # print('normale ',f_exp)
+        # print('bis',f_exp_bis)
 
         # debug
         # print(a)
         # print(theta, x0)
         # print(g.args)
         # print(f_full)
-        # print(f_new)
-        # print(f_new_full)
+        # print(f_exp)
+        # print(f_exp_full)
 
         # test result
-        self.assertTrue(np.allclose(f_full, f_new_full))
+        self.assertTrue(np.allclose(f_full, f_exp_full))
 
-    def test_loglikelihood_dcm_new(self):
+    def test_loglikelihood_dcm_exp(self):
 
         n, seed = (3, 42)
         # a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -73,7 +73,7 @@ class MyTest(unittest.TestCase):
 
         f_sample = g.step_fun(x0)
         g.last_model = "dcm"
-        f_new = -loglikelihood_dcm_new(theta, g.args)
+        f_exp = -loglikelihood_dcm_exp(theta, g.args)
 
         # debug
         # print(a)
@@ -81,12 +81,12 @@ class MyTest(unittest.TestCase):
         # print(g.args)
         # print(f_sample)
         # print(f_sample)
-        # print(f_new)
+        # print(f_exp)
 
         # test result
-        self.assertTrue(f_sample == f_new)
+        self.assertTrue(f_sample == f_exp)
 
-    def test_loglikelihood_prime_dcm_new(self):
+    def test_loglikelihood_prime_dcm_exp(self):
 
         n, seed = (3, 42)
         # a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -105,22 +105,22 @@ class MyTest(unittest.TestCase):
         nz_index_out = g.args[2]
         nz_index_in = g.args[3]
 
-        f = lambda x: loglikelihood_dcm_new(x, g.args)
+        f = lambda x: loglikelihood_dcm_exp(x, g.args)
         f_sample = approx_fprime(theta, f, epsilon=1e-6)
         g.last_model = "dcm"
-        f_new = loglikelihood_prime_dcm_new(theta, g.args)
+        f_exp = loglikelihood_prime_dcm_exp(theta, g.args)
 
         # debug
         # print(a)
         # print(theta, x0)
         # print(g.args)
         # print(f_sample)
-        # print(f_new)
+        # print(f_exp)
 
         # test result
-        self.assertTrue(np.allclose(f_sample, f_new))
+        self.assertTrue(np.allclose(f_sample, f_exp))
 
-    def test_loglikelihood_hessian_dcm_new(self):
+    def test_loglikelihood_hessian_dcm_exp(self):
 
         n, seed = (3, 42)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -140,22 +140,22 @@ class MyTest(unittest.TestCase):
 
         f_sample = np.zeros((n * 2, n * 2))
         for i in range(n * 2):
-            f = lambda x: loglikelihood_prime_dcm_new(x, g.args)[i]
+            f = lambda x: loglikelihood_prime_dcm_exp(x, g.args)[i]
             f_sample[i, :] = approx_fprime(theta, f, epsilon=1e-6)
 
-        f_new = loglikelihood_hessian_dcm_new(theta, g.args)
+        f_exp = loglikelihood_hessian_dcm_exp(theta, g.args)
 
         # debug
         # print(a)
         # print(theta, x0)
         # print(g.args)
         # print(f_sample)
-        # print(f_new)
+        # print(f_exp)
 
         # test result
-        self.assertTrue(np.allclose(f_sample, f_new))
+        self.assertTrue(np.allclose(f_sample, f_exp))
 
-    def test_loglikelihood_hessian_dcm_new_emi(self):
+    def test_loglikelihood_hessian_dcm_exp_emi(self):
 
         n, s = (50, 1)
         a = mg.random_binary_matrix_generator_custom_density(
@@ -177,22 +177,22 @@ class MyTest(unittest.TestCase):
         theta = np.random.rand(2 * n_rd)
         f_sample = np.zeros((n_rd * 2, n_rd * 2))
         for i in range(n_rd * 2):
-            f = lambda x: loglikelihood_prime_dcm_new(x, g.args)[i]
+            f = lambda x: loglikelihood_prime_dcm_exp(x, g.args)[i]
             f_sample[i, :] = approx_fprime(theta, f, epsilon=1e-6)
 
-        f_new = loglikelihood_hessian_dcm_new(theta, g.args)
+        f_exp = loglikelihood_hessian_dcm_exp(theta, g.args)
 
         # debug
         # print(a)
         # print(theta, x0)
         # print(g.args)
         # print(f_sample)
-        # print(f_new)
+        # print(f_exp)
 
         # test result
-        self.assertTrue(np.allclose(f_sample, f_new))
+        self.assertTrue(np.allclose(f_sample, f_exp))
 
-    def test_loglikelihood_hessian_dcm_new_emi_simmetry(self):
+    def test_loglikelihood_hessian_dcm_exp_emi_simmetry(self):
 
         n, s = (50, 1)
         # n,s =(2, 1)
@@ -215,25 +215,25 @@ class MyTest(unittest.TestCase):
         # print(n_rd/n)
         theta = np.random.rand(2 * n_rd)
 
-        f_new = loglikelihood_hessian_dcm_new(theta, g.args)
+        f_exp = loglikelihood_hessian_dcm_exp(theta, g.args)
 
         for i in range(2 * n_rd):
             for j in range(2 * n_rd):
-                if f_new[i, j] - f_new[j, i] != 0:
+                if f_exp[i, j] - f_exp[j, i] != 0:
                     print(i, j)
         # debug
         # print(a)
         # print(theta, x0)
         # print(g.args)
         # print(f_sample)
-        # print(f_new)
+        # print(f_exp)
 
         # test result
         self.assertTrue(
-            np.allclose(f_new - f_new.T, np.zeros((2 * n_rd, 2 * n_rd)))
+            np.allclose(f_exp - f_exp.T, np.zeros((2 * n_rd, 2 * n_rd)))
         )
 
-    def test_loglikelihood_hessian_dcm_new_simmetry(self):
+    def test_loglikelihood_hessian_dcm_exp_simmetry(self):
 
         n, seed = (3, 42)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -251,7 +251,7 @@ class MyTest(unittest.TestCase):
         nz_index_out = g.args[2]
         nz_index_in = g.args[3]
 
-        f = loglikelihood_hessian_dcm_new(theta, g.args)
+        f = loglikelihood_hessian_dcm_exp(theta, g.args)
         f_t = f.T
 
         # debug
@@ -263,7 +263,7 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(np.allclose(f - f_t, np.zeros((2 * n, 2 * n))))
 
-    def test_loglikelihood_hessian_diag_dcm_new(self):
+    def test_loglikelihood_hessian_diag_dcm_exp(self):
 
         n, seed = (3, 42)
         a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -283,22 +283,22 @@ class MyTest(unittest.TestCase):
 
         f_sample = np.zeros(2 * n)
         for i in range(2 * n):
-            f = lambda x: loglikelihood_prime_dcm_new(x, g.args)[i]
+            f = lambda x: loglikelihood_prime_dcm_exp(x, g.args)[i]
             f_sample[i] = approx_fprime(theta, f, epsilon=1e-6)[i]
         g.last_model = "dcm"
-        f_new = loglikelihood_hessian_diag_dcm_new(theta, g.args)
+        f_exp = loglikelihood_hessian_diag_dcm_exp(theta, g.args)
 
         # debug
         # print(a)
         # print(theta, x0)
         # print(g.args)
         # print(f_sample)
-        # print(f_new)
+        # print(f_exp)
 
         # test result
-        self.assertTrue(np.allclose(f_sample, f_new))
+        self.assertTrue(np.allclose(f_sample, f_exp))
 
-    def test_loglikelihood_hessian_diag_vs_normal_dcm_new(self):
+    def test_loglikelihood_hessian_diag_vs_normal_dcm_exp(self):
 
         n, seed = (3, 42)
         # a = mg.random_binary_matrix_generator_dense(n, sym=False, seed=seed)
@@ -318,8 +318,8 @@ class MyTest(unittest.TestCase):
         nz_index_in = g.args[3]
 
         g.last_model = "dcm"
-        f_diag = loglikelihood_hessian_diag_dcm_new(theta, g.args)
-        f_full = loglikelihood_hessian_dcm_new(theta, g.args)
+        f_diag = loglikelihood_hessian_diag_dcm_exp(theta, g.args)
+        f_full = loglikelihood_hessian_dcm_exp(theta, g.args)
         f_full_d = np.diag(f_full)
 
         # debug
@@ -327,7 +327,7 @@ class MyTest(unittest.TestCase):
         # print(theta, x0)
         # print(g.args)
         # print(f_sample)
-        # print(f_new)
+        # print(f_exp)
 
         # test result
         self.assertTrue(np.allclose(f_diag, f_full_d))

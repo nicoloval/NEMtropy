@@ -1,8 +1,8 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 
@@ -28,7 +28,7 @@ class MyTest(unittest.TestCase):
             initial_guess="uniform",
         )
 
-        g.solution_error()
+        g._solution_error()
         # debug
         # print('\n test 1, no zeros, n = {}, error = {}'.format(n, g.error))
 
@@ -52,7 +52,7 @@ class MyTest(unittest.TestCase):
             initial_guess="uniform",
         )
 
-        g.solution_error()
+        g._solution_error()
         # debug
         # print('\n test 2, zeros, dimension n = {}, error = {}'.format(n, g.error))
 
@@ -77,7 +77,7 @@ class MyTest(unittest.TestCase):
             initial_guess="uniform",
         )
 
-        g.solution_error()
+        g._solution_error()
         # debug
         # print('\n test 3, no zeros, dimension n = {}, error = {}'.format(n, g.error))
 
@@ -103,7 +103,7 @@ class MyTest(unittest.TestCase):
             initial_guess="uniform",
         )
 
-        g.solution_error()
+        g._solution_error()
         # debug
         # print('\n test 4, zeros, dimension n = {}, error = {}'.format(n, g.error))
 
