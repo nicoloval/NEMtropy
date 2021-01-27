@@ -357,14 +357,14 @@ class UndirectedGraph:
         self.r_x = self.r_xy
         if self.last_model == "cm":
             self.x = self.r_x[self.r_invert_dseq]
-        elif self.last_model == "cm-new":
+        elif self.last_model == "cm_exp":
             self.x = np.exp(-self.r_x[self.r_invert_dseq])
 
     def _set_solved_problem(self, solution):
         model = self.last_model
-        if model in ["cm", "cm-new"]:
+        if model in ["cm", "cm_exp"]:
             self._set_solved_problem_cm(solution)
-        elif model in ["ecm", "ecm-new"]:
+        elif model in ["ecm", "ecm_exp"]:
             self._set_solved_problem_ecm(solution)
         elif model in ["crema", "crema-sparse"]:
             self._set_solved_problem_crema_undirected(solution)
@@ -393,9 +393,9 @@ class UndirectedGraph:
         :type model: str
         """
 
-        if model in ["cm", "cm-new"]:
+        if model in ["cm", "cm_exp"]:
             self._set_initial_guess_cm()
-        elif model in ["ecm", "ecm-new"]:
+        elif model in ["ecm", "ecm_exp"]:
             self._set_initial_guess_ecm()
         elif model in ["crema", "crema-sparse"]:
             self._set_initial_guess_crema_undirected()
@@ -441,7 +441,7 @@ class UndirectedGraph:
         if isinstance(self.initial_guess, str):
             if self.last_model == "cm":
                 self.x0 = self.r_x
-            elif self.last_model == "cm-new":
+            elif self.last_model == "cm_exp":
                 self.r_x[self.r_x != 0] = -np.log(self.r_x[self.r_x != 0])
                 self.x0 = self.r_x
         elif isinstance(self.initial_guess, np.ndarray):
@@ -526,7 +526,7 @@ class UndirectedGraph:
         if isinstance(self.initial_guess, str):
             if self.last_model == "ecm":
                 self.x0 = np.concatenate((self.x, self.y))
-            elif self.last_model == "ecm-new":
+            elif self.last_model == "ecm_exp":
                 self.x[self.x != 0] = -np.log(self.x[self.x != 0])
                 self.y[self.y != 0] = -np.log(self.y[self.y != 0])
                 self.x0 = np.concatenate((self.x, self.y))
@@ -534,10 +534,10 @@ class UndirectedGraph:
             self.x0 = np.concatenate((self.x, self.y))
 
     # DA SISTEMARE
-    def solution_error(self):
+    def _solution_error(self):
         """Computes the error given the solutions to the optimisation problem.
         """
-        if self.last_model in ["cm", "cm-new", "crema", "crema-sparse"]:
+        if self.last_model in ["cm", "cm_exp", "crema", "crema-sparse"]:
             if self.x is not None:
                 ex_k = mof.expected_degree_cm(self.x)
                 # print(k, ex_k)
@@ -573,7 +573,7 @@ class UndirectedGraph:
                     self.error = max(self.error_strength, self.error_degree)
 
         # potremmo strutturarlo così per evitare ridondanze
-        elif self.last_model in ["ecm", "ecm-new"]:
+        elif self.last_model in ["ecm", "ecm_exp"]:
             sol = np.concatenate((self.x, self.y))
             ex = mof.expected_ecm(sol)
             k = np.concatenate((self.dseq, self.strength_sequence))
@@ -613,9 +613,9 @@ class UndirectedGraph:
                 self.adjacency_crema,
                 self.nz_index,
             )
-        elif model in ["cm", "cm-new"]:
+        elif model in ["cm", "cm_exp"]:
             self.args = (self.r_dseq, self.r_multiplicity)
-        elif model in ["ecm", "ecm-new"]:
+        elif model in ["ecm", "ecm_exp"]:
             self.args = (self.dseq, self.strength_sequence)
 
     def _initialize_problem(self, model, method):
@@ -660,20 +660,20 @@ class UndirectedGraph:
             "crema-sparse-fixed-point": lambda x: -mof.iterative_crema_undirected_sparse(
                 x, self.args
             ),
-            "cm-new-newton": lambda x: -mof.loglikelihood_prime_cm_new(
+            "cm_exp-newton": lambda x: -mof.loglikelihood_prime_cm_exp(
                 x, self.args
             ),
-            "cm-new-quasinewton": lambda x: -mof.loglikelihood_prime_cm_new(
+            "cm_exp-quasinewton": lambda x: -mof.loglikelihood_prime_cm_exp(
                 x, self.args
             ),
-            "cm-new-fixed-point": lambda x: mof.iterative_cm_new(x, self.args),
-            "ecm-new-newton": lambda x: -mof.loglikelihood_prime_ecm_new(
+            "cm_exp-fixed-point": lambda x: mof.iterative_cm_exp(x, self.args),
+            "ecm_exp-newton": lambda x: -mof.loglikelihood_prime_ecm_exp(
                 x, self.args
             ),
-            "ecm-new-quasinewton": lambda x: -mof.loglikelihood_prime_ecm_new(
+            "ecm_exp-quasinewton": lambda x: -mof.loglikelihood_prime_ecm_exp(
                 x, self.args
             ),
-            "ecm-new-fixed-point": lambda x: mof.iterative_ecm_new(x, self.args),
+            "ecm_exp-fixed-point": lambda x: mof.iterative_ecm_exp(x, self.args),
         }
 
         d_fun_jac = {
@@ -701,20 +701,20 @@ class UndirectedGraph:
                 x, self.args
             ),
             "crema-sparse-fixed-point": None,
-            "cm-new-newton": lambda x: -mof.loglikelihood_hessian_cm_new(
+            "cm_exp-newton": lambda x: -mof.loglikelihood_hessian_cm_exp(
                 x, self.args
             ),
-            "cm-new-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_cm_new(
+            "cm_exp-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_cm_exp(
                 x, self.args
             ),
-            "cm-new-fixed-point": None,
-            "ecm-new-newton": lambda x: -mof.loglikelihood_hessian_ecm_new(
+            "cm_exp-fixed-point": None,
+            "ecm_exp-newton": lambda x: -mof.loglikelihood_hessian_ecm_exp(
                 x, self.args
             ),
-            "ecm-new-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_ecm_new(
+            "ecm_exp-quasinewton": lambda x: -mof.loglikelihood_hessian_diag_ecm_exp(
                 x, self.args
             ),
-            "ecm-new-fixed-point": None,
+            "ecm_exp-fixed-point": None,
         }
 
         d_fun_stop = {
@@ -740,18 +740,18 @@ class UndirectedGraph:
             "crema-sparse-fixed-point": lambda x: -mof.loglikelihood_crema_undirected_sparse(
                 x, self.args
             ),
-            "cm-new-newton": lambda x: -mof.loglikelihood_cm_new(x, self.args),
-            "cm-new-quasinewton": lambda x: -mof.loglikelihood_cm_new(
+            "cm_exp-newton": lambda x: -mof.loglikelihood_cm_exp(x, self.args),
+            "cm_exp-quasinewton": lambda x: -mof.loglikelihood_cm_exp(
                 x, self.args
             ),
-            "cm-new-fixed-point": lambda x: -mof.loglikelihood_cm_new(
+            "cm_exp-fixed-point": lambda x: -mof.loglikelihood_cm_exp(
                 x, self.args
             ),
-            "ecm-new-newton": lambda x: -mof.loglikelihood_ecm_new(x, self.args),
-            "ecm-new-quasinewton": lambda x: -mof.loglikelihood_ecm_new(
+            "ecm_exp-newton": lambda x: -mof.loglikelihood_ecm_exp(x, self.args),
+            "ecm_exp-quasinewton": lambda x: -mof.loglikelihood_ecm_exp(
                 x, self.args
             ),
-            "ecm-new-fixed-point": lambda x: -mof.loglikelihood_ecm_new(
+            "ecm_exp-fixed-point": lambda x: -mof.loglikelihood_ecm_exp(
                 x, self.args
             ),
         }
@@ -766,10 +766,10 @@ class UndirectedGraph:
 
         d_pmatrix = {
             "cm": pmatrix_cm,
-            "cm-new": pmatrix_cm,
+            "cm_exp": pmatrix_cm,
         }
 
-        if model in ["cm", "cm-new"]:
+        if model in ["cm", "cm_exp"]:
             self.args_p = (self.n_nodes, np.nonzero(self.dseq)[0])
             self.fun_pmatrix = lambda x: d_pmatrix[model](x, self.args_p)
 
@@ -778,8 +778,8 @@ class UndirectedGraph:
             "crema": (mof.loglikelihood_crema, self.args),
             "crema-sparse": (mof.loglikelihood_crema_sparse, self.args),
             "ecm": (mof.loglikelihood_ecm, self.args),
-            "cm-new": (mof.loglikelihood_cm_new, self.args),
-            "ecm-new": (mof.loglikelihood_ecm_new, self.args),
+            "cm_exp": (mof.loglikelihood_cm_exp, self.args),
+            "ecm_exp": (mof.loglikelihood_ecm_exp, self.args),
         }
 
         self.args_lins = args_lin[model]
@@ -797,21 +797,21 @@ class UndirectedGraph:
             "ecm-newton": lambda x: mof.linsearch_fun_ECM(x, self.args_lins),
             "ecm-quasinewton": lambda x: mof.linsearch_fun_ECM(x, self.args_lins),
             "ecm-fixed-point": lambda x: mof.linsearch_fun_ECM_fixed(x),
-            "cm-new-newton": lambda x: mof.linsearch_fun_CM_new(x, self.args_lins),
-            "cm-new-quasinewton": lambda x: mof.linsearch_fun_CM_new(x, self.args_lins),
-            "cm-new-fixed-point": lambda x: mof.linsearch_fun_CM_new_fixed(x),
-            "ecm-new-newton": lambda x: mof.linsearch_fun_ECM_new(x, self.args_lins),
-            "ecm-new-quasinewton": lambda x: mof.linsearch_fun_ECM_new(x, self.args_lins),
-            "ecm-new-fixed-point": lambda x: mof.linsearch_fun_ECM_new_fixed(x)
+            "cm_exp-newton": lambda x: mof.linsearch_fun_CM_exp(x, self.args_lins),
+            "cm_exp-quasinewton": lambda x: mof.linsearch_fun_CM_exp(x, self.args_lins),
+            "cm_exp-fixed-point": lambda x: mof.linsearch_fun_CM_exp_fixed(x),
+            "ecm_exp-newton": lambda x: mof.linsearch_fun_ECM_exp(x, self.args_lins),
+            "ecm_exp-quasinewton": lambda x: mof.linsearch_fun_ECM_exp(x, self.args_lins),
+            "ecm_exp-fixed-point": lambda x: mof.linsearch_fun_ECM_exp_fixed(x)
         }
 
         self.fun_linsearch = lins_fun[mod_met]
 
         hess_reg = {
             "cm": hessian_regulariser_function_eigen_based,
-            "cm-new": hessian_regulariser_function,
+            "cm_exp": hessian_regulariser_function,
             "ecm": hessian_regulariser_function_eigen_based,
-            "ecm-new": hessian_regulariser_function,
+            "ecm_exp": hessian_regulariser_function,
             "crema": hessian_regulariser_function,
             "crema-sparse": hessian_regulariser_function,
         }
@@ -961,7 +961,7 @@ class UndirectedGraph:
         if self.last_model == "ecm":
             self.x = self.r_xy[: self.n_nodes]
             self.y = self.r_xy[self.n_nodes:]
-        elif self.last_model == "ecm-new":
+        elif self.last_model == "ecm_exp":
             self.x = np.exp(-self.r_xy[:self.n_nodes])
             self.y = np.exp(-self.r_xy[self.n_nodes:])
 
@@ -970,7 +970,7 @@ class UndirectedGraph:
         model,
         method,
         initial_guess=None,
-        adjacency="cm-new",
+        adjacency="cm_exp",
         method_adjacency="newton",
         initial_guess_adjacency="random",
         max_steps=100,
@@ -988,9 +988,9 @@ class UndirectedGraph:
         :param model: Available models are:
 
             - *cm*: solves UBCM respect to the parameters *x* of the mof.loglikelihood function, it works for uweighted undirected graphs [insert ref].
-            - *cm-new*: differently from the *cm* option, *cm-new* considers the exponents of *x* as parameters [insert ref].
+            - *cm_exp*: differently from the *cm* option, *cm_exp* considers the exponents of *x* as parameters [insert ref].
             - *ecm*: solves UECM respect to the parameters *x* and *y* of the mof.loglikelihood function, it is conceived for weighted undirected graphs [insert ref].
-            - *ecm-new*: differently from the *ecm* option, *ecm-new* considers the exponents of *x* and *y* as parameters [insert ref].
+            - *ecm_exp*: differently from the *ecm* option, *ecm_exp* considers the exponents of *x* and *y* as parameters [insert ref].
             - *crema*: solves CReMa for a weighted undirectd graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
             - *crema-sparse*: alternative implementetio of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
 
@@ -1016,7 +1016,7 @@ class UndirectedGraph:
                 - *strengths*: initial guess of each node is proportianal to its stength;
                 - *strengths_minor*: initial guess of each node is inversely proportional to its strength;
         :type initial_guess: str, optional
-        :param adjacency: Adjacency can be a binary method (defaults is *cm-new*) or an adjacency matrix.
+        :param adjacency: Adjacency can be a binary method (defaults is *cm_exp*) or an adjacency matrix.
         :type adjacency: str or numpy.ndarray, optional
         :param method_adjacency: If adjacency is a *model*, it is the *methdod* used to solve it. Defaults to "newton".
         :type method_adjacency: str, optional
@@ -1036,7 +1036,7 @@ class UndirectedGraph:
         :type eps: float, optional
         """
         # TODO: aggiungere tutti i metodi
-        if model in ["cm", "cm-new", "ecm", "ecm-new"]:
+        if model in ["cm", "cm_exp", "ecm", "ecm_exp"]:
             self._solve_problem(
                 initial_guess=initial_guess,
                 model=model,
@@ -1063,6 +1063,9 @@ class UndirectedGraph:
                 tol=tol,
                 eps=eps,
             )
+        self._solution_error()
+        if verbose:
+            print("\nmin eig = {}".format(self.error))
 
     def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=42):
         """The function sample a given number of graphs in the ensemble
@@ -1092,7 +1095,7 @@ class UndirectedGraph:
         np.random.seed(seed)
         s = [np.random.randint(0, 1000000) for i in range(n)]
 
-        if self.last_model in ["cm", "cm_new"]:
+        if self.last_model in ["cm", "cm_exp"]:
             iter_files = iter(
                 output_dir + "{}.txt".format(i) for i in range(n))
             i = 0
@@ -1104,7 +1107,7 @@ class UndirectedGraph:
                     seed=s[i])
                 i += 1
 
-        elif self.last_model in ["ecm", "ecm_new"]:
+        elif self.last_model in ["ecm", "ecm_exp"]:
             iter_files = iter(
                 output_dir + "{}.txt".format(i) for i in range(n))
             i = 0
@@ -1555,7 +1558,7 @@ class DirectedGraph:
         self.x = self.r_x[self.r_invert_dseq]
         self.y = self.r_y[self.r_invert_dseq]
 
-    def _set_solved_problem_dcm_new(self, solution):
+    def _set_solved_problem_dcm_exp(self, solution):
         if self.full_return:
             # conversion from theta to x
             self.r_xy = np.exp(-solution[0])
@@ -1590,7 +1593,7 @@ class DirectedGraph:
         self.b_out = self.r_xy[2 * self.n_nodes: 3 * self.n_nodes]
         self.b_in = self.r_xy[3 * self.n_nodes:]
 
-    def _set_solved_problem_decm_new(self, solution):
+    def _set_solved_problem_decm_exp(self, solution):
         if self.full_return:
             # conversion from theta to x
             self.r_xy = np.exp(-solution[0])
@@ -1612,12 +1615,12 @@ class DirectedGraph:
         model = self.last_model
         if model in ["dcm"]:
             self._set_solved_problem_dcm(solution)
-        if model in ["dcm_new"]:
-            self._set_solved_problem_dcm_new(solution)
+        if model in ["dcm_exp"]:
+            self._set_solved_problem_dcm_exp(solution)
         elif model in ["decm"]:
             self._set_solved_problem_decm(solution)
-        elif model in ["decm_new"]:
-            self._set_solved_problem_decm_new(solution)
+        elif model in ["decm_exp"]:
+            self._set_solved_problem_decm_exp(solution)
         elif model in ["crema", "crema-sparse"]:
             self._set_solved_problem_crema_directed(solution)
 
@@ -1654,12 +1657,12 @@ class DirectedGraph:
     def _set_initial_guess(self, model):
         if model in ["dcm"]:
             self._set_initial_guess_dcm()
-        if model in ["dcm_new"]:
-            self._set_initial_guess_dcm_new()
+        if model in ["dcm_exp"]:
+            self._set_initial_guess_dcm_exp()
         elif model in ["decm"]:
             self._set_initial_guess_decm()
-        elif model in ["decm_new"]:
-            self._set_initial_guess_decm_new()
+        elif model in ["decm_exp"]:
+            self._set_initial_guess_decm_exp()
         elif model in ["crema", "crema-sparse"]:
             self._set_initial_guess_crema_directed()
 
@@ -1713,7 +1716,7 @@ class DirectedGraph:
 
         self.x0 = np.concatenate((self.r_x, self.r_y))
 
-    def _set_initial_guess_dcm_new(self):
+    def _set_initial_guess_dcm_exp(self):
         # The preselected initial guess works best usually.
         # The suggestion is, if this does not work,
         # trying with random initial conditions several times.
@@ -1867,7 +1870,7 @@ class DirectedGraph:
 
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
 
-    def _set_initial_guess_decm_new(self):
+    def _set_initial_guess_decm_exp(self):
         # The preselected initial guess works best usually.
         # The suggestion is, if this does not work,
         #  trying with random initial conditions several times.
@@ -1936,10 +1939,10 @@ class DirectedGraph:
 
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
 
-    def solution_error(self):
+    def _solution_error(self):
         """Computes the error given the solutions of the optimization problem.
         """
-        if self.last_model in ["dcm_new", "dcm", "crema", "crema-sparse"]:
+        if self.last_model in ["dcm_exp", "dcm", "crema", "crema-sparse"]:
             if (self.x is not None) and (self.y is not None):
                 sol = np.concatenate((self.x, self.y))
                 ex_k_out = mof.expected_out_degree_dcm(sol)
@@ -1988,7 +1991,7 @@ class DirectedGraph:
                     self.error = max(self.error_strength, self.error_degree)
 
         # potremmo strutturarlo così per evitare ridondanze
-        elif self.last_model in ["decm", "decm_new"]:
+        elif self.last_model in ["decm", "decm_exp"]:
             sol = np.concatenate((self.x, self.y, self.b_out, self.b_in))
             ex = mof.expected_decm(sol)
             k = np.concatenate(
@@ -2045,7 +2048,7 @@ class DirectedGraph:
                 self.nz_index_sout,
                 self.nz_index_sin,
             )
-        elif model in ["dcm", "dcm_new"]:
+        elif model in ["dcm", "dcm_exp"]:
             self.args = (
                 self.rnz_dseq_out,
                 self.rnz_dseq_in,
@@ -2053,7 +2056,7 @@ class DirectedGraph:
                 self.nz_index_in,
                 self.r_multiplicity,
             )
-        elif model in ["decm", "decm_new"]:
+        elif model in ["decm", "decm_exp"]:
             self.args = (
                 self.dseq_out,
                 self.dseq_in,
@@ -2077,15 +2080,15 @@ class DirectedGraph:
                 self.args
             ),
             "dcm-fixed-point": lambda x: mof.iterative_dcm(x, self.args),
-            "dcm_new-newton": lambda x: -mof.loglikelihood_prime_dcm_new(
+            "dcm_exp-newton": lambda x: -mof.loglikelihood_prime_dcm_exp(
                 x,
                 self.args
             ),
-            "dcm_new-quasinewton": lambda x: -mof.loglikelihood_prime_dcm_new(
+            "dcm_exp-quasinewton": lambda x: -mof.loglikelihood_prime_dcm_exp(
                 x,
                 self.args
             ),
-            "dcm_new-fixed-point": lambda x: mof.iterative_dcm_new(x, self.args),
+            "dcm_exp-fixed-point": lambda x: mof.iterative_dcm_exp(x, self.args),
             "crema-newton": lambda x: -mof.loglikelihood_prime_crema_directed(
                 x,
                 self.args
@@ -2101,15 +2104,15 @@ class DirectedGraph:
                 self.args
             ),
             "decm-fixed-point": lambda x: mof.iterative_decm(x, self.args),
-            "decm_new-newton": lambda x: -mof.loglikelihood_prime_decm_new(
+            "decm_exp-newton": lambda x: -mof.loglikelihood_prime_decm_exp(
                 x,
                 self.args
             ),
-            "decm_new-quasinewton": lambda x: -mof.loglikelihood_prime_decm_new(
+            "decm_exp-quasinewton": lambda x: -mof.loglikelihood_prime_decm_exp(
                 x,
                 self.args
             ),
-            "decm_new-fixed-point": lambda x: mof.iterative_decm_new(x, self.args),
+            "decm_exp-fixed-point": lambda x: mof.iterative_decm_exp(x, self.args),
             "crema-sparse-newton": lambda x: -mof.loglikelihood_prime_crema_directed_sparse(
                 x,
                 self.args
@@ -2132,16 +2135,16 @@ class DirectedGraph:
                 self.args
             ),
             "dcm-fixed-point": None,
-            "dcm_new-newton": lambda x: -mof.loglikelihood_hessian_dcm_new(
+            "dcm_exp-newton": lambda x: -mof.loglikelihood_hessian_dcm_exp(
                 x,
                 self.args
             ),
-            "dcm_new-quasinewton": lambda x:
-                -mof.loglikelihood_hessian_diag_dcm_new(
+            "dcm_exp-quasinewton": lambda x:
+                -mof.loglikelihood_hessian_diag_dcm_exp(
                     x,
                     self.args
                 ),
-            "dcm_new-fixed-point": None,
+            "dcm_exp-fixed-point": None,
             "crema-newton": lambda x: -mof.loglikelihood_hessian_crema_directed(
                 x,
                 self.args
@@ -2157,16 +2160,16 @@ class DirectedGraph:
                 self.args
             ),
             "decm-fixed-point": None,
-            "decm_new-newton": lambda x: -mof.loglikelihood_hessian_decm_new(
+            "decm_exp-newton": lambda x: -mof.loglikelihood_hessian_decm_exp(
                 x,
                 self.args
             ),
-            "decm_new-quasinewton": lambda x:
-                -mof.loglikelihood_hessian_diag_decm_new(
+            "decm_exp-quasinewton": lambda x:
+                -mof.loglikelihood_hessian_diag_decm_exp(
                     x,
                     self.args
                 ),
-            "decm_new-fixed-point": None,
+            "decm_exp-fixed-point": None,
             "crema-sparse-newton": lambda x: -mof.loglikelihood_hessian_crema_directed(
                 x,
                 self.args
@@ -2183,12 +2186,12 @@ class DirectedGraph:
             "dcm-newton": lambda x: -mof.loglikelihood_dcm(x, self.args),
             "dcm-quasinewton": lambda x: -mof.loglikelihood_dcm(x, self.args),
             "dcm-fixed-point": lambda x: -mof.loglikelihood_dcm(x, self.args),
-            "dcm_new-newton": lambda x: -mof.loglikelihood_dcm_new(x, self.args),
-            "dcm_new-quasinewton": lambda x: -mof.loglikelihood_dcm_new(
+            "dcm_exp-newton": lambda x: -mof.loglikelihood_dcm_exp(x, self.args),
+            "dcm_exp-quasinewton": lambda x: -mof.loglikelihood_dcm_exp(
                 x,
                 self.args
             ),
-            "dcm_new-fixed-point": lambda x: -mof.loglikelihood_dcm_new(
+            "dcm_exp-fixed-point": lambda x: -mof.loglikelihood_dcm_exp(
                 x,
                 self.args
             ),
@@ -2204,12 +2207,12 @@ class DirectedGraph:
             "decm-newton": lambda x: -mof.loglikelihood_decm(x, self.args),
             "decm-quasinewton": lambda x: -mof.loglikelihood_decm(x, self.args),
             "decm-fixed-point": lambda x: -mof.loglikelihood_decm(x, self.args),
-            "decm_new-newton": lambda x: -mof.loglikelihood_decm_new(x, self.args),
-            "decm_new-quasinewton": lambda x: -mof.loglikelihood_decm_new(
+            "decm_exp-newton": lambda x: -mof.loglikelihood_decm_exp(x, self.args),
+            "decm_exp-quasinewton": lambda x: -mof.loglikelihood_decm_exp(
                 x,
                 self.args
             ),
-            "decm_new-fixed-point": lambda x: -mof.loglikelihood_decm_new(
+            "decm_exp-fixed-point": lambda x: -mof.loglikelihood_decm_exp(
                 x,
                 self.args
             ),
@@ -2237,10 +2240,10 @@ class DirectedGraph:
             )
 
         # TODO: mancano metodi
-        d_pmatrix = {"dcm": mof.pmatrix_dcm, "dcm_new": mof.pmatrix_dcm}
+        d_pmatrix = {"dcm": mof.pmatrix_dcm, "dcm_exp": mof.pmatrix_dcm}
 
         # Così basta aggiungere il decm e funziona tutto
-        if model in ["dcm", "dcm_new"]:
+        if model in ["dcm", "dcm_exp"]:
             self.args_p = (
                 self.n_nodes,
                 np.nonzero(self.dseq_out)[0],
@@ -2253,8 +2256,8 @@ class DirectedGraph:
             "crema": (mof.loglikelihood_crema, self.args),
             "crema-sparse": (mof.loglikelihood_crema_sparse, self.args),
             "decm": (mof.loglikelihood_decm, self.args),
-            "dcm_new": (mof.loglikelihood_dcm_new, self.args),
-            "decm_new": (mof.loglikelihood_decm_new, self.args),
+            "dcm_exp": (mof.loglikelihood_dcm_exp, self.args),
+            "decm_exp": (mof.loglikelihood_decm_exp, self.args),
         }
 
         self.args_lins = args_lin[model]
@@ -2263,13 +2266,13 @@ class DirectedGraph:
             "dcm-newton": lambda x: mof.linsearch_fun_DCM(x, self.args_lins),
             "dcm-quasinewton": lambda x: mof.linsearch_fun_DCM(x, self.args_lins),
             "dcm-fixed-point": lambda x: mof.linsearch_fun_DCM_fixed(x),
-            "dcm_new-newton": lambda x: mof.linsearch_fun_DCM_new(
+            "dcm_exp-newton": lambda x: mof.linsearch_fun_DCM_exp(
                 x,
                 self.args_lins),
-            "dcm_new-quasinewton": lambda x: mof.linsearch_fun_DCM_new(
+            "dcm_exp-quasinewton": lambda x: mof.linsearch_fun_DCM_exp(
                 x,
                 self.args_lins),
-            "dcm_new-fixed-point": lambda x: mof.linsearch_fun_DCM_new_fixed(x),
+            "dcm_exp-fixed-point": lambda x: mof.linsearch_fun_DCM_exp_fixed(x),
             "crema-newton": lambda x: mof.linsearch_fun_crema_directed(x, self.args_lins),
             "crema-quasinewton": lambda x: mof.linsearch_fun_crema_directed(
                 x,
@@ -2290,22 +2293,22 @@ class DirectedGraph:
                 x,
                 self.args_lins),
             "decm-fixed-point": lambda x: mof.linsearch_fun_DECM_fixed(x),
-            "decm_new-newton": lambda x: mof.linsearch_fun_DECM_new(
+            "decm_exp-newton": lambda x: mof.linsearch_fun_DECM_exp(
                 x,
                 self.args_lins),
-            "decm_new-quasinewton": lambda x: mof.linsearch_fun_DECM_new(
+            "decm_exp-quasinewton": lambda x: mof.linsearch_fun_DECM_exp(
                 x,
                 self.args_lins),
-            "decm_new-fixed-point": lambda x: mof.linsearch_fun_DECM_new_fixed(x),
+            "decm_exp-fixed-point": lambda x: mof.linsearch_fun_DECM_exp_fixed(x),
         }
 
         self.fun_linsearch = lins_fun[mod_met]
 
         hess_reg = {
             "dcm": sof.matrix_regulariser_function_eigen_based,
-            "dcm_new": sof.matrix_regulariser_function,
+            "dcm_exp": sof.matrix_regulariser_function,
             "decm": sof.matrix_regulariser_function_eigen_based,
-            "decm_new": sof.matrix_regulariser_function,
+            "decm_exp": sof.matrix_regulariser_function,
             "crema": sof.matrix_regulariser_function,
             "crema-sparse": sof.matrix_regulariser_function,
         }
@@ -2463,7 +2466,7 @@ class DirectedGraph:
             - *dcm*: solves DBCM respect to the parameters *x* and "y" of the loglikelihood function, it works for uweighted directed graphs [insert ref].
             - *dcm-new*: differently from the *dcm* option, *dcm-new* considers the exponents of *x* and *y* as parameters [insert ref].
             - *decm*: solves DECM respect to the parameters *a_out*, *a_in*, *b_out* and *b_in* of the loglikelihood function, it is conceived for weighted directed graphs [insert ref].
-            - *decm-new*: differently from the *ecm* option, *ecm-new* considers the exponents of *a_out*, *a_in*, *b_out* and *b_in** as parameters [insert ref].
+            - *decm-new*: differently from the *ecm* option, *ecm_exp* considers the exponents of *a_out*, *a_in*, *b_out* and *b_in** as parameters [insert ref].
             - *crema*: solves CReMa for a weighted directd graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
             - *crema-sparse*: alternative implementetio of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
         :type model: str
@@ -2505,7 +2508,7 @@ class DirectedGraph:
         :type eps: float, optional
         """
         # TODO: aggiungere tutti i metodi
-        if model in ["dcm", "dcm_new", "decm", "decm_new"]:
+        if model in ["dcm", "dcm_exp", "decm", "decm_exp"]:
             self._solve_problem(
                 initial_guess=initial_guess,
                 model=model,
@@ -2532,7 +2535,9 @@ class DirectedGraph:
                 tol=tol,
                 eps=eps,
             )
-
+        self._solution_error()
+        if verbose:
+            print("\nmin eig = {}".format(self.error))
 
     def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=42):
         """The function sample a given number of graphs in the ensemble
@@ -2564,7 +2569,7 @@ class DirectedGraph:
         np.random.seed(seed)
         s = [np.random.randint(0, 1000000) for i in range(n)]
 
-        if self.last_model in ["dcm", "dcm_new"]:
+        if self.last_model in ["dcm", "dcm_exp"]:
             iter_files = iter(
                 output_dir + "{}.txt".format(i) for i in range(n))
             i = 0
@@ -2577,7 +2582,7 @@ class DirectedGraph:
                     seed=s[i])
                 i += 1
 
-        elif self.last_model in ["decm", "decm_new"]:
+        elif self.last_model in ["decm", "decm_exp"]:
             iter_files = iter(
                 output_dir + "{}.txt".format(i) for i in range(n))
             i = 0

@@ -290,7 +290,7 @@ def expected_degree_cm(sol):
 
 
 @jit(nopython=True)
-def iterative_cm_new(x, args):
+def iterative_cm_exp(x, args):
     """Returns the next UBCM iterative step for the fixed-point method.
     It is based on the exponential version of the UBCM.
 
@@ -320,7 +320,7 @@ def iterative_cm_new(x, args):
 
 
 @jit(nopython=True)
-def loglikelihood_cm_new(x, args):
+def loglikelihood_cm_exp(x, args):
     """Returns UBCM loglikelihood function evaluated in x.
     It is based on the exponential version of the UBCM.
 
@@ -348,7 +348,7 @@ def loglikelihood_cm_new(x, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_cm_new(x, args):
+def loglikelihood_prime_cm_exp(x, args):
     """Returns UBCM loglikelihood gradient function evaluated in beta.
     It is based on the exponential version of the UBCM.
 
@@ -378,7 +378,7 @@ def loglikelihood_prime_cm_new(x, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_cm_new(x, args):
+def loglikelihood_hessian_cm_exp(x, args):
     """Returns UBCM loglikelihood hessian function evaluated in beta.
     It is based on the exponential version of the UBCM.
 
@@ -416,7 +416,7 @@ def loglikelihood_hessian_cm_new(x, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_cm_new(x, args):
+def loglikelihood_hessian_diag_cm_exp(x, args):
     """Returns the diagonal of the UBCM loglikelihood hessian function
     evaluated in x.
     It is based on the exponential version of the UBCM.
@@ -446,7 +446,7 @@ def loglikelihood_hessian_diag_cm_new(x, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_CM_new(X, args):
+def linsearch_fun_CM_exp(X, args):
     """Linsearch function for UBCM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
@@ -487,7 +487,7 @@ def linsearch_fun_CM_new(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_CM_new_fixed(X):
+def linsearch_fun_CM_exp_fixed(X):
     """Linsearch function for UBCM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
@@ -878,7 +878,7 @@ def expected_ecm(sol):
 
 
 @jit(nopython=True)
-def iterative_ecm_new(sol, args):
+def iterative_ecm_exp(sol, args):
     """Returns the next DECM iterative step for the fixed-point method.
     It is based on the exponential version of the UECM.
 
@@ -919,7 +919,7 @@ def iterative_ecm_new(sol, args):
 
 
 @jit(nopython=True)
-def loglikelihood_ecm_new(sol, args):
+def loglikelihood_ecm_exp(sol, args):
     """Returns UECM loglikelihood function evaluated in sol.
     It is based on the exponential version of the UECM.
 
@@ -950,7 +950,7 @@ def loglikelihood_ecm_new(sol, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_ecm_new(sol, args):
+def loglikelihood_prime_ecm_exp(sol, args):
     """Returns DECM loglikelihood gradient function evaluated in sol.
     It is based on the exponential version of the UECM.
 
@@ -986,7 +986,7 @@ def loglikelihood_prime_ecm_new(sol, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_ecm_new(sol, args):
+def loglikelihood_hessian_ecm_exp(sol, args):
     """Returns DBCM loglikelihood hessian function evaluated in sol.
     It is based on the exponential version of the UECM.
 
@@ -1055,7 +1055,7 @@ def loglikelihood_hessian_ecm_new(sol, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_ecm_new(sol, args):
+def loglikelihood_hessian_diag_ecm_exp(sol, args):
     """Returns the diagonal of UECM loglikelihood hessian function
     evaluated in sol.
     It is based on the exponential version of the UECM.
@@ -1091,7 +1091,7 @@ def loglikelihood_hessian_diag_ecm_new(sol, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_ECM_new(X, args):
+def linsearch_fun_ECM_exp(X, args):
     """Linsearch function for UECM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
@@ -1144,7 +1144,7 @@ def linsearch_fun_ECM_new(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_ECM_new_fixed(X):
+def linsearch_fun_ECM_exp_fixed(X):
     """Linsearch function for UECM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
@@ -2745,7 +2745,7 @@ def expected_decm(x):
 
 
 @jit(nopython=True)
-def iterative_dcm_new(theta, args):
+def iterative_dcm_exp(theta, args):
     """Returns the next DBCM iterative step for the fixed-point [1]_ [2]_.
         It is based on the exponential version of the DBCM.
         This version only runs on non-zero indices.
@@ -2806,7 +2806,7 @@ def iterative_dcm_new(theta, args):
 
 
 @jit(nopython=True)
-def iterative_dcm_new_2(theta, args):
+def iterative_dcm_exp_2(theta, args):
     """Returns the next DBCM iterative step for the fixed-point.
         It is based on the exponential version of the DBCM.
         This version only runs on non-zero indices.
@@ -2859,7 +2859,7 @@ def iterative_dcm_new_2(theta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_dcm_new(theta, args):
+def loglikelihood_dcm_exp(theta, args):
     """Returns DBCM [1]_ [2]_ loglikelihood function evaluated in theta.
     It is based on the exponential version of the DBCM.
 
@@ -2918,7 +2918,7 @@ def loglikelihood_dcm_new(theta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_prime_dcm_new(theta, args):
+def loglikelihood_prime_dcm_exp(theta, args):
     """Returns DBCM [1]_ [2]_ loglikelihood gradient function evaluated in theta.
     It is based on the exponential version of the DBCM.
 
@@ -2987,7 +2987,7 @@ def loglikelihood_prime_dcm_new(theta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_dcm_new(theta, args):
+def loglikelihood_hessian_dcm_exp(theta, args):
     """Returns DBCM [1]_ [2]_ loglikelihood hessian function evaluated in theta.
     It is based on the exponential version of the DBCM.
 
@@ -3057,7 +3057,7 @@ def loglikelihood_hessian_dcm_new(theta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_dcm_new(theta, args):
+def loglikelihood_hessian_diag_dcm_exp(theta, args):
     """Returns the diagonal of the DBCM [1]_ [2]_ loglikelihood hessian
     function evaluated in theta. It is based on DBCM exponential version.
 
@@ -3130,7 +3130,7 @@ def loglikelihood_hessian_diag_dcm_new(theta, args):
 
 
 @jit(nopython=True)
-def expected_out_degree_dcm_new(sol):
+def expected_out_degree_dcm_exp(sol):
     """Expected out-degrees after the DBCM. It is based on DBCM
     exponential version.
 
@@ -3151,7 +3151,7 @@ def expected_out_degree_dcm_new(sol):
 
 
 @jit(nopython=True)
-def expected_in_degree_dcm_new(theta):
+def expected_in_degree_dcm_exp(theta):
     """Expected in-degrees after the DBCM. It is based on DBCM
     exponential version.
 
@@ -3174,7 +3174,7 @@ def expected_in_degree_dcm_new(theta):
 
 
 @jit(nopython=True)
-def linsearch_fun_DCM_new(X, args):
+def linsearch_fun_DCM_exp(X, args):
     """Linsearch function for DBCM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
@@ -3214,7 +3214,7 @@ def linsearch_fun_DCM_new(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_DCM_new_fixed(X):
+def linsearch_fun_DCM_exp_fixed(X):
     """Linsearch function for DBCM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
@@ -3251,7 +3251,7 @@ def linsearch_fun_DCM_new_fixed(X):
 
 
 @jit(nopython=True)
-def iterative_decm_new(theta, args):
+def iterative_decm_exp(theta, args):
     """Returns the next iterative step for the DECM.
     It is based on the exponential version of the DBCM.
 
@@ -3327,7 +3327,7 @@ def iterative_decm_new(theta, args):
 
 
 @jit(nopython=True)
-def iterative_decm_new_2(theta, args):
+def iterative_decm_exp_2(theta, args):
     """Returns the next iterative step for the DECM.
     It is based on the exponential version of the DBCM.
 
@@ -3385,7 +3385,7 @@ def iterative_decm_new_2(theta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_decm_new(x, args):
+def loglikelihood_decm_exp(x, args):
     """Returns DECM [1]_ loglikelihood function evaluated in theta.
     It is based on the exponential version of the DECM.
 
@@ -3431,7 +3431,7 @@ def loglikelihood_decm_new(x, args):
 
 
 # @jit(nopython=True)
-def loglikelihood_prime_decm_new(theta, args):
+def loglikelihood_prime_decm_exp(theta, args):
     """Returns DECM [1]_ loglikelihood gradient function evaluated in theta.
     It is based on the exponential version of the DECM.
 
@@ -3487,7 +3487,7 @@ def loglikelihood_prime_decm_new(theta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_decm_new(theta, args):
+def loglikelihood_hessian_decm_exp(theta, args):
     """Returns DECM [1]_ loglikelihood hessian function evaluated in theta.
     It is based on the exponential version of the DECM.
 
@@ -3586,7 +3586,7 @@ def loglikelihood_hessian_decm_new(theta, args):
 
 
 @jit(nopython=True)
-def loglikelihood_hessian_diag_decm_new(theta, args):
+def loglikelihood_hessian_diag_decm_exp(theta, args):
     """Returns the diagonal of the DECM [1]_ loglikelihood hessian
     function evaluated in *theta*. It is based on the DECM exponential version.
 
@@ -3655,7 +3655,7 @@ def loglikelihood_hessian_diag_decm_new(theta, args):
 
 
 @jit(nopython=True)
-def expected_decm_new(theta):
+def expected_decm_exp(theta):
     """Expected parameters after the DBCM.
     It returns a concatenated array of out-degrees and in-degrees.
     It is based on DBCM exponential version.
@@ -3719,7 +3719,7 @@ def expected_decm_new(theta):
 
 
 @jit(nopython=True)
-def linsearch_fun_DECM_new(X, args):
+def linsearch_fun_DECM_exp(X, args):
     """Linsearch function for DECM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
@@ -3778,7 +3778,7 @@ def linsearch_fun_DECM_new(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_DECM_new_fixed(X):
+def linsearch_fun_DECM_exp_fixed(X):
     """Linsearch function for DECM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
