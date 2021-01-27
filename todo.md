@@ -31,16 +31,18 @@ Correzioni tipografiche
 * ~~`hessian_regulariser_function_eigen_based` -> `matrix_regulariser_function_eigen_based`
     teniamo il directed~~
 
-* `edgelist_from_edgelist` verisone directed -> __networks functions__
-    *l'ho cambiata in _directed e _undirected verion...*
+* ~~`edgelist_from_edgelist` verisone directed -> __networks functions__
+    *l'ho cambiata in _directed e _undirected verion...*~~
 
 * aggiungere `regularised_eps` al `_solve_problem` dell'undirected
 
-* `solution_error` -> `_solution_error`
+* ~~`solution_error` -> `_solution_error`~~
 
-* sostituire tutte le funzione `*_new` -> `*_exp`
+* ~~sostituire tutte le funzione `*_new` -> `*_exp`~~
 
-* aggiungere `networks_functions.py`
+* ~~aggiungere `networks_functions.py`~~
+
+* aggiungere opzione verbose a `_solution_error`
 
 DOPO
 ----

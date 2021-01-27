@@ -324,7 +324,7 @@ class UndirectedGraph:
         self._initialize_problem(self.last_model, method)
         x0 = self.x0
 
-        sol = solver(
+        sol = sof.solver(
             x0,
             fun=self.fun,
             fun_jac=self.fun_jac,
@@ -765,8 +765,8 @@ class UndirectedGraph:
             )
 
         d_pmatrix = {
-            "cm": pmatrix_cm,
-            "cm_exp": pmatrix_cm,
+            "cm": mof.pmatrix_cm,
+            "cm_exp": mof.pmatrix_cm,
         }
 
         if model in ["cm", "cm_exp"]:
@@ -775,8 +775,8 @@ class UndirectedGraph:
 
         args_lin = {
             "cm": (mof.loglikelihood_cm, self.args),
-            "crema": (mof.loglikelihood_crema, self.args),
-            "crema-sparse": (mof.loglikelihood_crema_sparse, self.args),
+            "crema": (mof.loglikelihood_crema_undirected, self.args),
+            "crema-sparse": (mof.loglikelihood_crema_undirected_sparse, self.args),
             "ecm": (mof.loglikelihood_ecm, self.args),
             "cm_exp": (mof.loglikelihood_cm_exp, self.args),
             "ecm_exp": (mof.loglikelihood_ecm_exp, self.args),
@@ -808,19 +808,19 @@ class UndirectedGraph:
         self.fun_linsearch = lins_fun[mod_met]
 
         hess_reg = {
-            "cm": hessian_regulariser_function_eigen_based,
-            "cm_exp": hessian_regulariser_function,
-            "ecm": hessian_regulariser_function_eigen_based,
-            "ecm_exp": hessian_regulariser_function,
-            "crema": hessian_regulariser_function,
-            "crema-sparse": hessian_regulariser_function,
+            "cm": sof.matrix_regulariser_function_eigen_based,
+            "cm_exp": sof.matrix_regulariser_function,
+            "ecm": sof.matrix_regulariser_function_eigen_based,
+            "ecm_exp": sof.matrix_regulariser_function,
+            "crema": sof.matrix_regulariser_function,
+            "crema-sparse": sof.matrix_regulariser_function,
         }
 
         self.hessian_regulariser = hess_reg[model]
 
         if isinstance(self.regularise, str):
             if self.regularise == "eigenvalues":
-                self.hessian_regulariser = hessian_regulariser_function_eigen_based
+                self.hessian_regulariser = sof.matrix_regulariser_function_eigen_based
             elif self.regularise == "identity":
                 self.hessian_regulariser = hessian_regulariser_function
 
@@ -1309,10 +1309,10 @@ class DirectedGraph:
                     self.is_sparse = True
                 if np.sum(adjacency) == np.sum(adjacency > 0):
                     self.dseq_in = nef.in_degree(adjacency)
-                    self.dseq_out = nef.out_degre(adjacency)
+                    self.dseq_out = nef.out_degree(adjacency)
                 else:
                     self.dseq_in = nef.in_degree(adjacency)
-                    self.dseq_out = nef.out_degre(adjacency)
+                    self.dseq_out = nef.out_degree(adjacency)
                     self.in_strength = nef.in_strength(adjacency).astype(
                         np.float64
                     )
@@ -2253,8 +2253,8 @@ class DirectedGraph:
 
         args_lin = {
             "dcm": (mof.loglikelihood_dcm, self.args),
-            "crema": (mof.loglikelihood_crema, self.args),
-            "crema-sparse": (mof.loglikelihood_crema_sparse, self.args),
+            "crema": (mof.loglikelihood_crema_directed, self.args),
+            "crema-sparse": (mof.loglikelihood_crema_directed_sparse, self.args),
             "decm": (mof.loglikelihood_decm, self.args),
             "dcm_exp": (mof.loglikelihood_dcm_exp, self.args),
             "decm_exp": (mof.loglikelihood_decm_exp, self.args),

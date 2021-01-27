@@ -1,8 +1,8 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-from netrecon.Directed_new import *
+import netrecon.graph_classes as sample
+from netrecon.matrix_generator import *
 import netrecon.Matrix_Generator as mg
 import numpy as np
 import unittest  # test tool

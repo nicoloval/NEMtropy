@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
+import netrecon.graph_classes as sample
 import numpy as np
 import unittest  # test tool
 
