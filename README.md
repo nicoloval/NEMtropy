@@ -22,25 +22,27 @@ bibtex snippet
 ## Currently implemented models
 
 * Undirected 
-    * *UBCM* Undirected Binary Configuration Model[[1]](#1)
-    * *UECM* Undirected Enhanced Configuration Model[[1]](#1)
-    * *CReMa* [[2]](#2)
+    * **UBCM** *Undirected Binary Configuration* Model[[1]](#1)
+    * **UECM** *Undirected Enhanced Configuration* Model[[1]](#1)
+    * **CReMa** [[2]](#2)
 
 * Directed
-    * *DBCM* Directed Binary Configuration Model[[1]](#1)
-    * *DECM* Directed Binary Enhanced Model[[1]](#1)
-    * *CReMa* [[2]](#2)
+    * **DBCM** *Directed Binary Configuration Model* [[1]](#1)
+    * **DECM** *Directed Binary Enhanced Model* [[1]](#1)
+    * **CReMa** [[2]](#2)
 
 _References_
 
-* <a id="2">[1]</a>Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+* <a id="1">[1]</a>
+    Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
     "Unbiased sampling of network ensembles."
     New Journal of Physics 17.2 (2015): 023052.
     https://arxiv.org/abs/1406.1197
-* <a id="3">[2]</a>Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
-        "A faster horse on a safer trail: generalized inference for the efficient reconstruction of weighted networks."
-        New Journal of Physics 22.5 (2020): 053053.
-        https://arxiv.org/abs/1811.09829
+* <a id="2">[2]</a>
+    Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+    "A faster horse on a safer trail: generalized inference for the efficient reconstruction of weighted networks."
+    New Journal of Physics 22.5 (2020): 053053.
+    https://arxiv.org/abs/1811.09829
 
 
 Installation
