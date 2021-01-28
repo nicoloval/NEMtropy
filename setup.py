@@ -9,7 +9,7 @@ with open('HISTORY.rst', encoding='utf-8') as history_file:
 
 
 setup(
-    name="netrecon",
+    name="NEMtropy",
     author="Nicolo' Vallarano, Emiliano Marchese",
     author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
     packages=["NEMtropy"],
