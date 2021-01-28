@@ -89,6 +89,6 @@ bash command from the tests directory:
 
 Credits
 -------
-This is a project by @nicoloval, `Nicolò Vallarano http://www.imtlucca.it/en/nicolo.vallarano/` and @EmilianoMarchese, `Emiliano Marchese https://www.imtlucca.it/en/emiliano.marchese/`, under 
-the supervision of `Tiziano Squartini http://www.imtlucca.it/en/tiziano.squartini/` and  `Mario Zanon http://www.imtlucca.it/it/mario.zanon/`.
+This is a project by [Nicolò Vallarano](http://www.imtlucca.it/en/nicolo.vallarano/)(a.k.a. [nicoloval](https://github.com/nicoloval)) and [Emiliano Marchese](https://www.imtlucca.it/en/emiliano.marchese/) (a.k.a. [EmilianoMarchese](https://github.com/EmilianoMarchese)), under 
+the supervision of [Tiziano Squartini](http://www.imtlucca.it/en/tiziano.squartini/) and  [Mario Zanon](http://www.imtlucca.it/it/mario.zanon/).
 
