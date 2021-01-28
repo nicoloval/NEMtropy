@@ -1,8 +1,8 @@
 from setuptools import setup
 
 
-with open('README.md', "r") as readme_file:
-    long_description = readme_file.read()
+with open('README.md', "r") as fh:
+    long_description = fh.read()
 
 
 setup(
@@ -11,13 +11,15 @@ setup(
     author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
     packages=["NEMtropy"],
     package_dir={'': 'src'},
-    version="1.0.0",
+    version="1.0.1",
     description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
                 " provides the user with a state of the art solver for a range variety"
                 " of Maximum Entropy Networks models derived from the ERGM family."
                 " This module allows you to solve the desired model and generate a"
                 " number of randomized graphs from the original one:"
                 " the so-called graphs ensemble.",
+    long_description=long_description,
+    log_description_content_type="text/markdown",
     license="GNU General Public License v3",
     url="https://github.com/nicoloval/NEMtropy/",
     download_url="https://github.com/nicoloval/NEMtropy/archive/v1.0.0.zip",
