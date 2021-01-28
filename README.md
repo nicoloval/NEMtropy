@@ -16,7 +16,7 @@ NEMtropy builds on the current literature on the matter, improving both in speed
 To explore Maximum-Entropy modeling on networks, checkout [Maximum Entropy Hub](https://meh.imtlucca.it/).
 
 The models implemented in NEMtropy are presented in a forthcoming [paper](arxiv).
-If you use the module for your scientific research, consider citing us:
+If you use the module for your scientific research, please consider citing us:
 
 ```
     bibtex snippet
