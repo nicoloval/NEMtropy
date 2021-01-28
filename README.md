@@ -1,17 +1,21 @@
-![PyPI](https://img.shields.io/pypi/v/menet)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/menet)
+![PyPI](https://img.shields.io/pypi/v/nemtropy)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nemtropy)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 [comment]: # insert arxiv badge
 
-MENet is a Maximum-Entropy toolbox for networks, released as a python3 module. 
+NEMtropy: Network Entropy Maximization, a Toolbox Running On Python
+-------------------------------------------------------------------
 
-MENet provides the user with a state of the art solver for a range variety of Maximum Entropy Networks models derived from the ERGM family.
-From a given network, MENet is able to solve the desired model and to generate a number of randomized graphs from the original one: the so-called _graphs ensemble_.
+NEMtropy is a Maximum-Entropy toolbox for networks, released as a python3 module. 
 
-MENet builds on the current literature on the matter, improving both in speed of convergence and in the scale of the feasible networks.
+NEMtropy provides the user with a state of the art solver for a range variety of Maximum Entropy Networks models derived from the ERGM family.
+This module allows you to solve the desired model and generate a number of randomized graphs from the original one: the so-called _graphs ensemble_.
 
-The models implemented in MENet are presented in a forthcoming [paper](arxiv).
+NEMtropy builds on the current literature on the matter, improving both in speed of convergence and in the scale of the feasible networks.
+To explore Maximum-Entropy modeling on networks, checkout [MEH](https://meh.imtlucca.it/).
+
+The models implemented in NEMtropy are presented in a forthcoming [paper](arxiv).
 If you use the module for your scientific research, consider citing us:
 
 ```
@@ -100,6 +104,8 @@ _Authors_:
 
 _Acknowledgements:_
 
-The module was developed under the supervision of [Tiziano Squartini](http://www.imtlucca.it/en/tiziano.squartini/) and  [Mario Zanon](http://www.imtlucca.it/it/mario.zanon/), at [IMT school of advanced studies Lucca](https://www.imtlucca.it/).
+The module was developed under the supervision of [Tiziano Squartini](http://www.imtlucca.it/en/tiziano.squartini/) and  [Mario Zanon](http://www.imtlucca.it/it/mario.zanon/).
+It was developed at[IMT school of advanced studies Lucca](https://www.imtlucca.it/). 
+
 
 Nicolò Vallarano aknoledges funding from _insert stuff_ 
