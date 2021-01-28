@@ -1,8 +1,8 @@
 import sys
 
 sys.path.append("../")
-import netrecon.graph_classes as sample
-import netrecon.models_functions as mof
+import NEMtropy.graph_classes as sample
+import NEMtropy.models_functions as mof
 import numpy as np
 import unittest  # test tool
 

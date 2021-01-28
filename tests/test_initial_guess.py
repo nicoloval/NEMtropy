@@ -1,10 +1,10 @@
 import sys
 
 sys.path.append("../")
-import netrecon.graph_classes as sample
-import netrecon.graph_classes as sample_u
-import netrecon.network_functions as ntw_f
-import netrecon.matrix_generator as mg
+import NEMtropy.graph_classes as sample
+import NEMtropy.graph_classes as sample_u
+import NEMtropy.network_functions as ntw_f
+import NEMtropy.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 

@@ -4,9 +4,9 @@
 import sys
 
 sys.path.append("../")
-import netrecon.graph_classes as sample
-from netrecon.models_functions import *
-import netrecon.matrix_generator as mg
+import NEMtropy.graph_classes as sample
+from NEMtropy.models_functions import *
+import NEMtropy.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 
