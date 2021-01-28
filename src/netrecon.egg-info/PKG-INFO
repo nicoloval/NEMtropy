@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: netrecon
+Version: 0.1.0
+Summary: bla
+Home-page: https://github.com/nicoloval/classes/
+Author: Nicolo' Vallarano, Emiliano Marchese
+Author-email: nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it
+License: GNU General Public License v3
+Download-URL: https://github.com/nicoloval/classes/archive/master.zip
+Description: UNKNOWN
+Keywords: Network reconstruction,Networks Null Models,Maximum Entrophy Methods
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Network Science Community
+Classifier: Topic :: 
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.8
+Provides-Extra: dev

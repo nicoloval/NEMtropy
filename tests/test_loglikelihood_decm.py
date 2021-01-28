@@ -1,7 +1,8 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
+import netrecon.graph_classes as sample
+import netrecon.models_functions as mof
 import numpy as np
 import unittest  # test tool
 
@@ -24,7 +25,7 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
 
         # call loglikelihood function
-        f_sample = sample.loglikelihood_decm(x0, args)
+        f_sample = mof.loglikelihood_decm(x0, args)
         f_correct = (
             30 * np.log(0.5)
             + 6 * np.log(1 - 0.5 * 0.5)
@@ -54,7 +55,7 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
 
         # call loglikelihood function
-        f_sample = sample.loglikelihood_prime_decm(x0, args)
+        f_sample = mof.loglikelihood_prime_decm(x0, args)
         f_correct = np.array(
             [
                 3.69231,
@@ -95,7 +96,7 @@ class MyTest(unittest.TestCase):
         args = (k_out, k_in, s_out, s_in)
 
         # call loglikelihood function
-        f_sample = sample.loglikelihood_hessian_diag_decm(x0, args)
+        f_sample = mof.loglikelihood_hessian_diag_decm(x0, args)
         f_correct = np.array(
             [
                 -7.95266272,
@@ -137,9 +138,9 @@ class MyTest(unittest.TestCase):
 
         # call loglikelihood function
 
-        f = sample.loglikelihood_decm(x0, args)
-        f_p = sample.loglikelihood_prime_decm(x0, args)
-        f_h = sample.loglikelihood_hessian_diag_decm(x0, args)
+        f = mof.loglikelihood_decm(x0, args)
+        f_p = mof.loglikelihood_prime_decm(x0, args)
+        f_h = mof.loglikelihood_hessian_diag_decm(x0, args)
 
         # print(f)
         # print(f_p)
@@ -168,7 +169,7 @@ class MyTest(unittest.TestCase):
 
         # call loglikelihood function
 
-        f_h = sample.loglikelihood_hessian_decm(x0, args)
+        f_h = mof.loglikelihood_hessian_decm(x0, args)
         f_h_round = np.round(x0, 5)
 
         f_correct = np.array(
@@ -378,7 +379,7 @@ class MyTest(unittest.TestCase):
 
         # call loglikelihood function
 
-        f = x0 - sample.iterative_decm(x0, args)
+        f = x0 - mof.iterative_decm(x0, args)
         f_correct = np.array(
             [
                 -3.7115928,

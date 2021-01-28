@@ -1,8 +1,8 @@
 import sys
 import os
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 import random
@@ -42,7 +42,7 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
 
         g._solve_problem(
-            model="decm_new",
+            model="decm_exp",
             method="newton",
             max_steps=100,
             verbose=False,
@@ -55,7 +55,7 @@ class MyTest(unittest.TestCase):
         b_out = g.b_out
         b_in = g.b_in
 
-        g.solution_error()
+        # g._solution_error()
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))

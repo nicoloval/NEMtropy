@@ -1,10 +1,10 @@
 import sys
 
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
+import netrecon.graph_classes as sample
 import numpy as np
 import unittest  # test tool
-import netrecon.Matrix_Generator as mg
+import netrecon.matrix_generator as mg
 
 
 class MyTest(unittest.TestCase):
@@ -33,7 +33,7 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        g.solution_error()
+        # g._solution_error()
         # debug
         # print(g.r_dseq_out)
         # print(g.r_dseq_in)
@@ -59,14 +59,14 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
 
         g.solve_tool(
-            model="dcm_new",
+            model="dcm_exp",
             method="quasinewton",
             initial_guess="uniform",
             max_steps=200,
             verbose=False,
         )
 
-        g.solution_error()
+        # g._solution_error()
         # debug
         # print(g.r_dseq_out)
         # print(g.r_dseq_in)
@@ -98,7 +98,7 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        g.solution_error()
+        # g._solution_error()
         # debug
         # print(g.r_dseq_out)
         # print(g.r_dseq_in)
@@ -123,14 +123,14 @@ class MyTest(unittest.TestCase):
         g = sample.DirectedGraph(A)
 
         g.solve_tool(
-            model="decm_new",
+            model="decm_exp",
             method="quasinewton",
             initial_guess="uniform",
             max_steps=200,
             verbose=False,
         )
 
-        g.solution_error()
+        # g._solution_error()
         # debug
         # print(g.r_dseq_out)
         # print(g.r_dseq_in)

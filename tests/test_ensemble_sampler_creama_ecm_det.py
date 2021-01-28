@@ -1,8 +1,8 @@
 import sys
 import os
 sys.path.append("../")
-import netrecon.Undirected_graph_Class as sample
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 import random
@@ -26,7 +26,7 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(adjacency=network)
 
         g.solve_tool(
-            model="CReAMa",
+            model="crema",
             method="quasinewton",
             initial_guess="random",
             adjacency=network_bin,
@@ -34,12 +34,12 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        g.solution_error()
+        # g._solution_error()
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
         n_sample = 500
-        output_dir = "sample_creama_ecm_det/"
+        output_dir = "sample_crema_ecm_det/"
         # random.seed(100)
         g.ensemble_sampler(n=n_sample, output_dir=output_dir, seed=42)
 

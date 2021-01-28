@@ -1,8 +1,8 @@
 import sys
 import os
 sys.path.append("../")
-import netrecon.Directed_graph_Class as sample
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 import random
@@ -32,7 +32,7 @@ class MyTest(unittest.TestCase):
             initial_guess="uniform",
         )
 
-        g.solution_error()
+        # g._solution_error()
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
@@ -82,17 +82,17 @@ class MyTest(unittest.TestCase):
 
 
         # debug
-        print('original dseq',d_out,d_in)
-        print('original dseq out sum ',g.dseq_out.sum())
-        print('original dseq in sum ',g.dseq_in.sum())
-        print('ensemble average dseq out', d_out_emp)
-        print('ensemble average dseq in', d_in_emp)
-        print('ensemble dseq out sum ',np.array([d_out_emp[key] for key in d_out_emp.keys()]).sum())
-        print('ensemble dseq in sum ',np.array([d_in_emp[key] for key in d_in_emp.keys()]).sum())
-        print(d_out_diff)
-        print(d_in_diff)
-        print('empirical error', ensemble_error)
-        print('theoretical error', err)
+        # print('original dseq',d_out,d_in)
+        # print('original dseq out sum ',g.dseq_out.sum())
+        # print('original dseq in sum ',g.dseq_in.sum())
+        # print('ensemble average dseq out', d_out_emp)
+        # print('ensemble average dseq in', d_in_emp)
+        # print('ensemble dseq out sum ',np.array([d_out_emp[key] for key in d_out_emp.keys()]).sum())
+        # print('ensemble dseq in sum ',np.array([d_in_emp[key] for key in d_in_emp.keys()]).sum())
+        # print(d_out_diff)
+        # print(d_in_diff)
+        # print('empirical error', ensemble_error)
+        # print('theoretical error', err)
 
 
         l = os.listdir(output_dir)

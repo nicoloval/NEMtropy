@@ -43,6 +43,7 @@ setup(
                 "setuptools==47.1.0",
                 "twine==3.2.0",
                 "tox==3.20.1",
+                "powerlaw==1.4.4",
                 ],
         },
 )

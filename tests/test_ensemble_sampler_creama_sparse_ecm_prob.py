@@ -1,8 +1,8 @@
 import sys
 import os
 sys.path.append("../")
-import netrecon.Undirected_graph_Class as sample
-import netrecon.Matrix_Generator as mg
+import netrecon.graph_classes as sample
+import netrecon.matrix_generator as mg
 import numpy as np
 import unittest  # test tool
 import random
@@ -24,7 +24,7 @@ class MyTest(unittest.TestCase):
         g = sample.UndirectedGraph(adjacency=network)
 
         g.solve_tool(
-            model="CReAMa-sparse",
+            model="crema-sparse",
             method="quasinewton",
             initial_guess="random",
             adjacency="cm",
@@ -32,12 +32,12 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        g.solution_error()
+        # g._solution_error()
         err = g.error
 
         # print('\ntest 5: error = {}'.format(g.error))
         n_sample = 50
-        output_dir = "sample_creama_ecm_prob/"
+        output_dir = "sample_crema_ecm_prob/"
         # random.seed(100)
         g.ensemble_sampler(n=n_sample, output_dir=output_dir, seed=42)
 
@@ -72,13 +72,13 @@ class MyTest(unittest.TestCase):
         ensemble_error = np.linalg.norm(a_diff, np.inf)
 
         # debug
-        print('\n original degree sequence ', d)
-        print('\n original strength sequence ', s)
-        print('\n ensemble average strength sequence', s_emp)
-        print('\n degree by degree difference vector ', d_diff)
-        print('\n strength by strength difference vector ', s_diff)
-        print('\n empirical error = {}'.format(ensemble_error))
-        print('\n theoretical error = {}'.format(err))
+        # print('\n original degree sequence ', d)
+        # print('\n original strength sequence ', s)
+        # print('\n ensemble average strength sequence', s_emp)
+        # print('\n degree by degree difference vector ', d_diff)
+        # print('\n strength by strength difference vector ', s_diff)
+        # print('\n empirical error = {}'.format(ensemble_error))
+        # print('\n theoretical error = {}'.format(err))
 
         l = os.listdir(output_dir)
         for f in l:
