@@ -12,21 +12,27 @@ setup(
     name="netrecon",
     author="Nicolo' Vallarano, Emiliano Marchese",
     author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
-    packages=["netrecon"],
+    packages=["NEMtropy"],
     package_dir={'': 'src'},
-    version="0.1.0",
-    description="bla",
+    version="1.0.0",
+    description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
+                "provides the user with a state of the art solver for a range variety"
+                " of Maximum Entropy Networks models derived from the ERGM family."
+                "This module allows you to solve the desired model and generate a"
+                "number of randomized graphs from the original one:"
+                "the so-called graphs ensemble.",
     license="GNU General Public License v3",
-    url = "https://github.com/nicoloval/classes/",
-    download_url = "https://github.com/nicoloval/classes/archive/master.zip",
-    keywords = ['Network reconstruction', 'Networks Null Models', 'Maximum Entrophy Methods'],
+    url="https://github.com/nicoloval/NEMtropy/",
+    download_url="https://github.com/nicoloval/NEMtropy/archive/v1.0.0.zip",
+    keywords=['Network reconstruction', 'Networks Null Models',
+              'Maximum Entrophy Methods'],
     classifiers=[
-    'Development Status :: 3 - Alpha',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
-    'Intended Audience :: Network Science Community',      # Define that your audience are developers
+    'Development Status :: % - Stable',
+    'Intended Audience :: Network Science Community',
     'Topic :: ',
-    'License :: OSI Approved :: MIT License',   # Again, pick a license
-    'Programming Language :: Python :: 3',      #Specify which pyhton versions that you want to support
-    'Programming Language :: Python :: 3.5',
+    'License :: OSI Approved :: GNU License',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
                 ],
     install_requires=["numpy==1.19.5",
