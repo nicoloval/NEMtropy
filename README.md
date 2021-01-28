@@ -23,17 +23,22 @@ If you use the module for your scientific research, consider citing us:
 ```
 
 ## Currently Implemented Models
-The main feature of MENet is to randomized a given network, following a variety of models from the ERGM family:
+The main feature of NEMtropy is (but not limited to) *network randomization*. 
+The specific kind of network to randomize and property to preserve defines the model you need:
 
-* Undirected 
-    * **UBCM** *Undirected Binary Configuration* Model[[1]](#1)
-    * **UECM** *Undirected Enhanced Configuration* Model[[1]](#1)
-    * **CReMa** [[2]](#2)
+* **UBCM** *Undirected Binary Configuration* Model[[1]](#1)
+* **UECM** *Undirected Enhanced Configuration* Model[[1]](#1)
+* **DBCM** *Directed Binary Configuration Model* [[1]](#1)
+* **DECM** *Directed Binary Enhanced Model* [[1]](#1)
+* **CReMa** [[2]](#2)
 
-* Directed
-    * **DBCM** *Directed Binary Configuration Model* [[1]](#1)
-    * **DECM** *Directed Binary Enhanced Model* [[1]](#1)
-    * **CReMa** [[2]](#2)
+The following table may helps you identify the model that fits your needs in function of the type of network you are working with;
+for in-depth discussion please see the references.
+
+[...] | Undirected Graph | Directed Graph
+----- | ---------------- | -------------- 
+**Binary Graph** | *UBCM* | *DBCM* 
+**Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa*
 
 _References_
 
