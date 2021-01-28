@@ -1,11 +1,8 @@
 from setuptools import setup
 
 
-with open('README.rst', encoding='utf-8') as readme_file:
-    readme = readme_file.read()
-
-with open('HISTORY.rst', encoding='utf-8') as history_file:
-    history = history_file.read()
+with open('README.md', "r") as readme_file:
+    long_description = readme_file.read()
 
 
 setup(
@@ -16,24 +13,21 @@ setup(
     package_dir={'': 'src'},
     version="1.0.0",
     description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
-                "provides the user with a state of the art solver for a range variety"
+                " provides the user with a state of the art solver for a range variety"
                 " of Maximum Entropy Networks models derived from the ERGM family."
-                "This module allows you to solve the desired model and generate a"
-                "number of randomized graphs from the original one:"
-                "the so-called graphs ensemble.",
+                " This module allows you to solve the desired model and generate a"
+                " number of randomized graphs from the original one:"
+                " the so-called graphs ensemble.",
     license="GNU General Public License v3",
     url="https://github.com/nicoloval/NEMtropy/",
     download_url="https://github.com/nicoloval/NEMtropy/archive/v1.0.0.zip",
     keywords=['Network reconstruction', 'Networks Null Models',
               'Maximum Entrophy Methods'],
     classifiers=[
-    'Development Status :: % - Stable',
-    'Intended Audience :: Network Science Community',
-    'Topic :: ',
-    'License :: OSI Approved :: GNU License',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
+                'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+                'Programming Language :: Python :: 3',
+                'Programming Language :: Python :: 3.7',
+                'Programming Language :: Python :: 3.8',
                 ],
     install_requires=["numpy==1.19.5",
                       "numba==0.52",
