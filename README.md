@@ -26,8 +26,8 @@ If you use the module for your scientific research, consider citing us:
 The main feature of NEMtropy is (but not limited to) *network randomization*. 
 The specific kind of network to randomize and property to preserve defines the model you need:
 
-* **UBCM** *Undirected Binary Configuration* Model[[1]](#1)
-* **UECM** *Undirected Enhanced Configuration* Model[[1]](#1)
+* **UBCM** *Undirected Binary Configuration Model* [[1]](#1)
+* **UECM** *Undirected Enhanced Configuration Model* [[1]](#1)
 * **DBCM** *Directed Binary Configuration Model* [[1]](#1)
 * **DECM** *Directed Binary Enhanced Model* [[1]](#1)
 * **CReMa** [[2]](#2)
