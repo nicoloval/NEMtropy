@@ -13,7 +13,7 @@ NEMtropy provides the user with a state of the art solver for a range variety of
 This module allows you to solve the desired model and generate a number of randomized graphs from the original one: the so-called _graphs ensemble_.
 
 NEMtropy builds on the current literature on the matter, improving both in speed of convergence and in the scale of the feasible networks.
-To explore Maximum-Entropy modeling on networks, checkout [MEH](https://meh.imtlucca.it/).
+To explore Maximum-Entropy modeling on networks, checkout [Maximum Entropy Hub](https://meh.imtlucca.it/).
 
 The models implemented in NEMtropy are presented in a forthcoming [paper](arxiv).
 If you use the module for your scientific research, consider citing us:
