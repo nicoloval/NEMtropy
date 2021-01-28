@@ -87,15 +87,19 @@ bash command from the tests directory:
     $ bash run_all.sh
 ```
 
+__P.S.__ _at the moment there may be some problems with the DECM solver functions_
+
 Credits
 -------
 
-_authors_:
+_Authors_:
 
 [Nicolò Vallarano](http://www.imtlucca.it/en/nicolo.vallarano/)(a.k.a. [nicoloval](https://github.com/nicoloval))
 
 [Emiliano Marchese](https://www.imtlucca.it/en/emiliano.marchese/) (a.k.a. [EmilianoMarchese](https://github.com/EmilianoMarchese))
 
+_Acknowledgements:_
+
 The module was developed under the supervision of [Tiziano Squartini](http://www.imtlucca.it/en/tiziano.squartini/) and  [Mario Zanon](http://www.imtlucca.it/it/mario.zanon/), at [IMT school of advanced studies Lucca](https://www.imtlucca.it/).
 
-Nicolò Vallarano aknoledge funding from _insert stuff_ 
+Nicolò Vallarano aknoledges funding from _insert stuff_ 
