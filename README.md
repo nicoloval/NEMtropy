@@ -4,7 +4,7 @@
 
 [comment]: # insert arxiv badge
 
-NEMtropy: Network Entropy Maximization, a Toolbox Running On Python
+NEMtropy: Network Entropy Maximization, a Toolbox Running On PYthon
 -------------------------------------------------------------------
 
 NEMtropy is a Maximum-Entropy toolbox for networks, released as a python3 module. 
