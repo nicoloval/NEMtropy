@@ -105,7 +105,8 @@ _Authors_:
 _Acknowledgements:_
 
 The module was developed under the supervision of [Tiziano Squartini](http://www.imtlucca.it/en/tiziano.squartini/) and  [Mario Zanon](http://www.imtlucca.it/it/mario.zanon/).
-It was developed at[IMT school of advanced studies Lucca](https://www.imtlucca.it/). 
+It was developed at[IMT school of advanced studies Lucca] (https://www.imtlucca.it/). 
 
+_Fundings_
 
 Nicolò Vallarano aknoledges funding from _insert stuff_ 
