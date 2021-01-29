@@ -1,7 +1,7 @@
 from setuptools import setup
 
 
-with open('README.md', "r") as fh:
+with open('README.md', "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 
@@ -11,7 +11,7 @@ setup(
     author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
     packages=["NEMtropy"],
     package_dir={'': 'src'},
-    version="1.0.1",
+    version="1.0.2",
     description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
                 " provides the user with a state of the art solver for a range variety"
                 " of Maximum Entropy Networks models derived from the ERGM family."
@@ -19,7 +19,7 @@ setup(
                 " number of randomized graphs from the original one:"
                 " the so-called graphs ensemble.",
     long_description=long_description,
-    log_description_content_type="text/markdown",
+    long_description_content_type="text/markdown",
     license="GNU General Public License v3",
     url="https://github.com/nicoloval/NEMtropy/",
     download_url="https://github.com/nicoloval/NEMtropy/archive/v1.0.0.zip",

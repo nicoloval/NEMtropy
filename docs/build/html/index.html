@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEMtropy documentation &#8212; NEMtropy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How to install the NEMtropy package" href="install.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="How to install the NEMtropy package"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">NEMtropy 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">NEMtropy documentation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nemtropy-documentation">
+<h1>NEMtropy documentation<a class="headerlink" href="#nemtropy-documentation" title="Permalink to this headline">¶</a></h1>
+<p>NEMtropy is a Maximum-Entropy toolbox for networks, released as a python3 module.</p>
+<p>NEMtropy provides the user with a state of the art solver for a range variety of Maximum Entropy Networks models derived from the ERGM family.
+This module allows you to solve the desired model and generate a number of randomized graphs from the original one: the so-called <em>graphs ensemble</em>.</p>
+<p>NEMtropy builds on the current literature on the matter, improving both in speed of convergence and in the scale of the feasible networks.
+To explore Maximum-Entropy modeling on networks, checkout [Maximum Entropy Hub](<a class="reference external" href="https://meh.imtlucca.it/">https://meh.imtlucca.it/</a>).</p>
+</div>
+<div class="section" id="basic-functionalities">
+<h1>Basic functionalities<a class="headerlink" href="#basic-functionalities" title="Permalink to this headline">¶</a></h1>
+<p>To install:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">NEMtropy</span>
+</pre></div>
+</div>
+<p>To import the module:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">NEMtropy</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h1>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
+<p>This package has been developed for Python 3.5 but it should be compatible with other versions. It works on numpy arrays and it uses numba and multiprocessing to speed up the computation. Feel free to send an inquiry (and please do it!) if you find any incompatibility.</p>
+<div class="section" id="guide">
+<h2>Guide<a class="headerlink" href="#guide" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">How to install the NEMtropy package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="NEMtropy.html">Classes and Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="NEMtropy.html#module-NEMtropy.graph_classes">Graph classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NEMtropy.html#module-NEMtropy.ensemble_generator">Ensemble generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NEMtropy.html#module-NEMtropy.matrix_generator">Matrix generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NEMtropy.html#model-specific-functions">Model specific functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NEMtropy.html#module-NEMtropy.solver_functions">Solver functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NEMtropy.html#module-NEMtropy.network_functions">Network functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">GNU GENERAL PUBLIC LICENSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contacts.html">Contacts</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p>:ref:<a href="#id1"><span class="problematic" id="id2">`</span></a>modindex’</p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">NEMtropy documentation</a></li>
+<li><a class="reference internal" href="#basic-functionalities">Basic functionalities</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a><ul>
+<li><a class="reference internal" href="#guide">Guide</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="next chapter">How to install the NEMtropy package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="How to install the NEMtropy package"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">NEMtropy 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">NEMtropy documentation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Emiliano Marchese and Nicolo&#39; Vallarano.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

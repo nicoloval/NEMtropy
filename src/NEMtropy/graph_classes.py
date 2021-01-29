@@ -35,17 +35,6 @@ class UndirectedGraph:
         degree_sequence=None,
         strength_sequence=None,
     ):
-        """Initilizes all the necessary attribitus for Undirected graph class.
-
-        :param adjacency: Adjacency matrix, defaults to None.
-        :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional
-        :param edgelist: edgelist, defaults to None.
-        :type edgelist: numpy.ndarray, list, optional
-        :param degree_sequence: degrees sequence, defaults to None.
-        :type degree_sequence: numpy.ndarray, optional
-        :param strength_sequence: strengths sequence, defaults to None.
-        :type strength_sequence: numpy.ndarray, optional
-        """
         self.n_nodes = None
         self.n_edges = None
         self.adjacency = None
@@ -387,11 +376,6 @@ class UndirectedGraph:
         self.is_reduced = True
 
     def _set_initial_guess(self, model):
-        """Calls the proper set initial guess function given the selected *model*.
-
-        :param model: Selected model.
-        :type model: str
-        """
 
         if model in ["cm", "cm_exp"]:
             self._set_initial_guess_cm()
@@ -401,11 +385,6 @@ class UndirectedGraph:
             self._set_initial_guess_crema_undirected()
 
     def _set_initial_guess_cm(self):
-        """Sets the initial guess for UBCM given the choice made by the user.
-
-        :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.
-        :raises TypeError: raises type error if the selected *initial_guess* is wrong.
-        """
 
         if ~self.is_reduced:
             self.degree_reduction()
@@ -448,11 +427,6 @@ class UndirectedGraph:
             self.x0 = self.r_x
 
     def _set_initial_guess_crema_undirected(self):
-        """Sets the initial guess for CReMa given the choice made by the user.
-
-        :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.
-        :raises TypeError: raises type error if the selected *initial_guess* is wrong.
-        """
 
         if isinstance(self.initial_guess, np.ndarray):
             self.beta = self.initial_guess
@@ -481,11 +455,7 @@ class UndirectedGraph:
         self.x0 = self.beta
 
     def _set_initial_guess_ecm(self):
-        """Sets the initial guess for UECM given the choice made by the user.
 
-        :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.
-        :raises TypeError: raises type error if the selected *initial_guess* is wrong.
-        """
         if isinstance(self.initial_guess, np.ndarray):
             self.x = self.initial_guess[:self.n_nodes]
             self.y = self.initial_guess[self.n_nodes:]
@@ -535,8 +505,7 @@ class UndirectedGraph:
 
     # DA SISTEMARE
     def _solution_error(self):
-        """Computes the error given the solutions to the optimisation problem.
-        """
+        
         if self.last_model in ["cm", "cm_exp", "crema", "crema-sparse"]:
             if self.x is not None:
                 ex_k = mof.expected_degree_cm(self.x)
@@ -601,11 +570,6 @@ class UndirectedGraph:
             self.error = max(self.error_strength, self.error_degree)
 
     def _set_args(self, model):
-        """Sets up functions arguments given for the selected *model*.
-
-        :param model: model name.
-        :type model: str
-        """
 
         if model in ["crema", "crema-sparse"]:
             self.args = (
@@ -619,14 +583,6 @@ class UndirectedGraph:
             self.args = (self.dseq, self.strength_sequence)
 
     def _initialize_problem(self, model, method):
-        """Initialises all the functions and parameters necessary used by the selected 'model' and 'method'.
-
-        :param model: model name.
-        :type model: str
-        :param method: method name.
-        :type method: str
-        :raises ValueError: Raise an error if model/method choice is not valid.
-        """
 
         self._set_initial_guess(model)
 
@@ -1186,17 +1142,7 @@ class DirectedGraph:
         degree_sequence=None,
         strength_sequence=None,
     ):
-        """Initilizes all the necessary attribites for Directed graph class.
 
-        :param adjacency: Adjacency matrix, defaults to None.
-        :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional
-        :param edgelist: edgelist, defaults to None.
-        :type edgelist: numpy.ndarray, list, optional
-        :param degree_sequence: degrees sequence, defaults to None.
-        :type degree_sequence: numpy.ndarray, optional
-        :param strength_sequence: strengths sequence, defaults to None.
-        :type strength_sequence: numpy.ndarray, optional
-        """
         self.n_nodes = None
         self.n_edges = None
         self.adjacency = None
@@ -1272,17 +1218,7 @@ class DirectedGraph:
         degree_sequence=None,
         strength_sequence=None,
     ):
-        """Initilizes all the necessary attribitus for Directed graph class.
 
-        :param adjacency: Adjacency matrix, defaults to None.
-        :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional
-        :param edgelist: edgelist, defaults to None.
-        :type edgelist: numpy.ndarray, list, optional
-        :param degree_sequence: degrees sequence, defaults to None.
-        :type degree_sequence: numpy.ndarray, optional
-        :param strength_sequence: strengths sequence, defaults to None.
-        :type strength_sequence: numpy.ndarray, optional
-        """
         if adjacency is not None:
             if not isinstance(
                 adjacency, (list, np.ndarray)
@@ -1940,8 +1876,7 @@ class DirectedGraph:
         self.x0 = np.concatenate((self.x, self.y, self.b_out, self.b_in))
 
     def _solution_error(self):
-        """Computes the error given the solutions of the optimization problem.
-        """
+
         if self.last_model in ["dcm_exp", "dcm", "crema", "crema-sparse"]:
             if (self.x is not None) and (self.y is not None):
                 sol = np.concatenate((self.x, self.y))
