@@ -60,14 +60,14 @@ Installation
 Menet can be installed via pip. You can get it from your terminal:
 
 ```
-    $ pip install menet
+    $ pip install NEMtropy
 ```
 
 If you already install the package and wish to upgrade it,
 you can simply type from your terminal:
 
 ```
-    $ pip install menet --upgrade
+    $ pip install NEMtropy --upgrade
 ```
 
 Development
