@@ -5,43 +5,31 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Classes and Functions &#8212; NEMtropy 1.0.0 documentation</title>
+    <title>Classes and Functions &#8212; NEMtropy 1.0.2 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
-    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="GNU GENERAL PUBLIC LICENSE" href="license.html" />
-    <link rel="prev" title="How to install the NEMtropy package" href="install.html" /> 
+    <link rel="prev" title="How to install the NEMtropy package" href="install.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="license.html" title="GNU GENERAL PUBLIC LICENSE"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="install.html" title="How to install the NEMtropy package"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">NEMtropy 1.0.0 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Classes and Functions</a></li> 
-      </ul>
-    </div>  
+  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="classes-and-functions">
@@ -53,17 +41,6 @@
 <em class="property">class </em><code class="sig-prename descclassname">NEMtropy.graph_classes.</code><code class="sig-name descname">DirectedGraph</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">adjacency</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">edgelist</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">degree_sequence</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">strength_sequence</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/graph_classes.html#DirectedGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.graph_classes.DirectedGraph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Directed graph instance can be initialised with
 adjacency matrix, edgelist, degree sequence or strengths sequence.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adjacency</strong> (<em>numpy.ndarray</em><em>, </em><em>list</em><em>, </em><em>scipy.sparse_matrix</em><em>, </em><em>optional</em>) – Adjacency matrix, defaults to None.</p></li>
-<li><p><strong>edgelist</strong> (<em>numpy.ndarray</em><em>, </em><em>list</em><em>, </em><em>optional</em>) – edgelist, defaults to None.</p></li>
-<li><p><strong>degree_sequence</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – degrees sequence, defaults to None.</p></li>
-<li><p><strong>strength_sequence</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – strengths sequence, defaults to None.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Initilizes all the necessary attribites for Directed graph class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -212,17 +189,6 @@ matrix, edgelist, degrees sequence or strengths sequence.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>adjacency</strong> (<em>numpy.ndarray</em><em>, </em><em>list</em><em> or </em><em>scipy.sparse_matrix</em><em>, </em><em>optional</em>) – Adjacency matrix, defaults to None.</p></li>
-<li><p><strong>edgelist</strong> (<em>numpy.ndarray</em><em>, </em><em>list</em><em>, </em><em>optional</em>) – edgelist, defaults to None.</p></li>
-<li><p><strong>degree_sequence</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – degrees sequence, defaults to None.</p></li>
-<li><p><strong>strength_sequence</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – strengths sequence, defaults to None.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Initilizes all the necessary attribitus for Undirected graph class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>adjacency</strong> (<em>numpy.ndarray</em><em>, </em><em>list</em><em>, </em><em>scipy.sparse_matrix</em><em>, </em><em>optional</em>) – Adjacency matrix, defaults to None.</p></li>
 <li><p><strong>edgelist</strong> (<em>numpy.ndarray</em><em>, </em><em>list</em><em>, </em><em>optional</em>) – edgelist, defaults to None.</p></li>
 <li><p><strong>degree_sequence</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – degrees sequence, defaults to None.</p></li>
 <li><p><strong>strength_sequence</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – strengths sequence, defaults to None.</p></li>
@@ -1182,8 +1148,2412 @@ defaults to 0.1.</p></li>
 </dd></dl>
 
 </div>
-<div class="section" id="model-specific-functions">
-<h2>Model specific functions<a class="headerlink" href="#model-specific-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-NEMtropy.models_functions">
+<span id="model-specific-functions"></span><h2>Model specific functions<a class="headerlink" href="#module-NEMtropy.models_functions" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_decm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_decm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_decm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_decm" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Expected parameters after the DECM.</dt><dd><p>It returns a concatenated array of out-degrees, in-degrees,
+out-strengths, in-strengths.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>numpy.ndarray</em>) – DECM solution.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Expected parameters sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_decm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_decm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_decm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_decm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected parameters after the DBCM.
+It returns a concatenated array of out-degrees and in-degrees.
+It is based on DBCM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>theta</strong> – DBCM solution.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DBCM expected parameters sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_degree_cm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_degree_cm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_degree_cm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_degree_cm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the expected degrees of UBCM given the solution x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sol</strong> (<em>numpy.ndarray</em>) – UBCM solutions.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Expected degrees sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_ecm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_ecm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_ecm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_ecm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes expected degrees and strengths sequence given solution x and y of UECM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sol</strong> (<em>numpy.ndarray</em>) – UECM solutions.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>expected degrees and strengths sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_in_degree_dcm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_in_degree_dcm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_in_degree_dcm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_in_degree_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected in-degree after the DBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sol</strong> (<em>numpy.ndarray</em>) – DBCM solution.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Expected in-degree sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_in_degree_dcm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_in_degree_dcm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_in_degree_dcm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_in_degree_dcm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected in-degrees after the DBCM. It is based on DBCM
+exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sol</strong> (<em>numpy.ndarray</em>) – DBCM solution.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>In-degrees DBCM expectation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_in_stregth_crema_directed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_in_stregth_crema_directed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">adj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_in_stregth_crema_directed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_in_stregth_crema_directed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected in-strength after CReMa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – CReMa solution</p></li>
+<li><p><strong>adj</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Tuple containing the original topology edges list
+and link related weigths.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Expected in-strength sequence</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_in_stregth_crema_directed_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_in_stregth_crema_directed_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">adj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_in_stregth_crema_directed_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_in_stregth_crema_directed_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected in-strength after CReMa. Sparse inisialization version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – CReMa solution</p></li>
+<li><p><strong>adj</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Tuple containing the original topology edges list
+and link related weigths.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Expected in-strength sequence</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_out_degree_dcm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_out_degree_dcm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_out_degree_dcm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_out_degree_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected out-degree after the DBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sol</strong> (<em>numpy.ndarray</em>) – DBCM solution.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Expected out-degree sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_out_degree_dcm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_out_degree_dcm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_out_degree_dcm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_out_degree_dcm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected out-degrees after the DBCM. It is based on DBCM
+exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sol</strong> (<em>numpy.ndarray</em>) – DBCM solution.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Out-degrees DBCM expectation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_out_strength_crema_directed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_out_strength_crema_directed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">adj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_out_strength_crema_directed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_out_strength_crema_directed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected out-strength after CReMa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – CReMa solution</p></li>
+<li><p><strong>adj</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Tuple containing the original topology edges list
+and link related weigths.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Expected out-strength sequence</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_out_strength_crema_directed_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_out_strength_crema_directed_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">adj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_out_strength_crema_directed_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_out_strength_crema_directed_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected out-strength after CReMa. Sparse initialisation version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – CReMa solution</p></li>
+<li><p><strong>adj</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Tuple containing the binary problem solution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Expected out-strength sequence</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_strength_crema_undirected">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_strength_crema_undirected</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">adj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_strength_crema_undirected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_strength_crema_undirected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the expected strengths of CReMa given its solution beta.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – CReMa solutions.</p></li>
+<li><p><strong>adj</strong> (<em>numpy.ndarray</em>) – adjacency/pmatrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>expected strengths sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.expected_strength_crema_undirected_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">expected_strength_crema_undirected_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">adj</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#expected_strength_crema_undirected_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.expected_strength_crema_undirected_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the expected strengths of CReMa given its solution beta and the solutions of UBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – CReMa solutions.</p></li>
+<li><p><strong>adj</strong> (<em>numpy.ndarray</em>) – UBCM solutions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>expected strengths sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_cm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_cm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_cm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_cm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next UBCM iterative step for the fixed-point method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_cm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_cm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_cm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_cm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next UBCM iterative step for the fixed-point method.
+It is based on the exponential version of the UBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_crema_directed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_crema_directed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_crema_directed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_crema_directed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next CReMa iterative step for the fixed-point method.
+The DBCM pmatrix is pre-computed and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Out and in strengths sequences,
+adjacency binary/probability matrix,
+and non zero out and in indices</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_crema_directed_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_crema_directed_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_crema_directed_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_crema_directed_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next CReMa iterative step for the fixed-point method.
+The DBCM pmatrix is computed inside the function.
+Alternative version not in use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Out and in strengths sequences,
+adjacency matrix, and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_crema_directed_sparse_2">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_crema_directed_sparse_2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_crema_directed_sparse_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_crema_directed_sparse_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next CReMa iterative step for the fixed-point method.
+The DBCM pmatrix is computed inside the function.
+Alternative version not in use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Out and in strengths sequences,
+adjacency matrix, and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_crema_sparse_2">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_crema_sparse_2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_crema_sparse_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_crema_sparse_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next CReMa iterative step for the fixed-point method.
+The UBCM pmatrix is computed inside the function.
+Alternative version not in use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Previous iterative step..</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Strengths sequence and adjacency matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_crema_undirected">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_crema_undirected</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_crema_undirected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_crema_undirected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next CReMa iterative step for the fixed-point method.
+The UBCM pmatrix is pre-compute and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Strengths sequence and adjacency binary/probability matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_crema_undirected_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_crema_undirected_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_crema_undirected_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_crema_undirected_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next CReMa iterative step for the fixed-point method.
+The UBCM pmatrix is computed inside the function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Previous iterative step..</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Strengths sequence and adjacency matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_dcm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_dcm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_dcm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next DBCM iterative step for the fixed-point method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Out and in strengths sequences, non zero out and in indices,
+and classes cardinalities sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_dcm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_dcm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_dcm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_dcm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Returns the next DBCM iterative step for the fixed-point <a href="#id42"><span class="problematic" id="id1">[1]_</span></a> <a href="#id43"><span class="problematic" id="id2">[2]_</span></a>.</dt><dd><p>It is based on the exponential version of the DBCM.
+This version only runs on non-zero indices.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets">1</span></dt>
+<dd><p>Squartini, Tiziano, and Diego Garlaschelli.
+“Analytical maximum-likelihood method to detect patterns
+in real networks.”
+New Journal of Physics 13.8 (2011): 083001.
+<a class="reference external" href="https://arxiv.org/abs/1103.0701">https://arxiv.org/abs/1103.0701</a></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets">2</span></dt>
+<dd><p>Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+“Unbiased sampling of network ensembles.”
+New Journal of Physics 17.2 (2015): 023052.
+<a class="reference external" href="https://arxiv.org/abs/1406.1197">https://arxiv.org/abs/1406.1197</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_dcm_exp_2">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_dcm_exp_2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_dcm_exp_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_dcm_exp_2" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Returns the next DBCM iterative step for the fixed-point.</dt><dd><p>It is based on the exponential version of the DBCM.
+This version only runs on non-zero indices.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_decm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_decm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_decm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_decm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next iterative step for the DECM Model.</p>
+<p>:param : Previous iterative step.
+:type : numpy.ndarray
+:param args: Out and in degrees sequences, and out and in strengths</p>
+<blockquote>
+<div><p>sequences.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Next iterative step.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_decm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_decm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_decm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_decm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next iterative step for the DECM.
+It is based on the exponential version of the DBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Out and in degrees sequences, and out and in strengths
+sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_decm_exp_2">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_decm_exp_2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_decm_exp_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_decm_exp_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next iterative step for the DECM.
+It is based on the exponential version of the DBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Out and in degrees sequences, and out and in strengths
+sequences..</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_ecm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_ecm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_ecm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_ecm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next UECM iterative step for the fixed-point method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Degrees and strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.iterative_ecm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">iterative_ecm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#iterative_ecm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.iterative_ecm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the next DECM iterative step for the fixed-point method.
+It is based on the exponential version of the UECM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – Previous iterative step.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Degrees and strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Next iterative step.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_CM">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_CM</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_CM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_CM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for UBCM newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>func</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_CM_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_CM_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_CM_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_CM_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for UBCM newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.
+This function works on UBCM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>func</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_CM_exp_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_CM_exp_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_CM_exp_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_CM_exp_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for UBCM fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.
+This function works on UBCM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_CM_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_CM_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_CM_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_CM_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for UBCM fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_DCM">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_DCM</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xx</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_DCM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_DCM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for DBCM newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>func</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_DCM_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_DCM_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_DCM_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_DCM_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for DBCM newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.
+This function works on DBCM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>func</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_DCM_exp_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_DCM_exp_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_DCM_exp_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_DCM_exp_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for DBCM fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.
+This function works on DBCM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_DCM_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_DCM_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xx</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_DCM_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_DCM_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for DBCM fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>xx</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_DECM">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_DECM</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xx</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_DECM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_DECM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for DECM newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>func</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_DECM_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_DECM_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_DECM_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_DECM_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for DECM newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.
+This function works on DECM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>func</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_DECM_exp_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_DECM_exp_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_DECM_exp_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_DECM_exp_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for DECM fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.
+This function works on DECM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_DECM_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_DECM_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xx</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_DECM_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_DECM_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for DECM fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_ECM">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_ECM</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_ECM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_ECM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for UECM newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>func</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_ECM_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_ECM_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_ECM_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_ECM_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for UECM newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.
+This function works on UBCM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>func</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_ECM_exp_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_ECM_exp_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_ECM_exp_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_ECM_exp_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for UECM fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.
+This function works on UBCM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_ECM_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_ECM_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_ECM_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_ECM_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for UECM fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_crema_directed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_crema_directed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xx</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_crema_directed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_crema_directed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for CReMa newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xx</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>function</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_crema_directed_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_crema_directed_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xx</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_crema_directed_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_crema_directed_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for CReMa fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>xx</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_crema_undirected">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_crema_undirected</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_crema_undirected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_crema_undirected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for CReMa newton and quasinewton methods.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>float</em><em>, </em><em>float</em><em>, </em><em>func</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, function f</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>func</em><em>, </em><em>tuple</em><em>)</em>) – Tuple, step function and arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.linsearch_fun_crema_undirected_fixed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">linsearch_fun_crema_undirected_fixed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#linsearch_fun_crema_undirected_fixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.linsearch_fun_crema_undirected_fixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linsearch function for CReMa fixed-point method.
+The function returns the step’s size, alpha.
+Alpha determines how much to move on the descending direction
+found by the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>int</em><em>)</em>) – Tuple of arguments to find alpha:
+solution, solution step, tuning parameter beta,
+initial alpha, step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Working alpha.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_cm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_cm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_cm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_cm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns UBCM loglikelihood function evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_cm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_cm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_cm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_cm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns UBCM loglikelihood function evaluated in x.
+It is based on the exponential version of the UBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_crema_directed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_crema_directed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_crema_directed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_crema_directed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood function evaluated in beta.
+The DBCM pmatrix is pre-computed and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_crema_directed_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_crema_directed_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_crema_directed_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_crema_directed_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood function evaluated  in beta.
+The DBCM pmatrix is computed inside the function.
+Sparse initialisation version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_crema_undirected">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_crema_undirected</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_crema_undirected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_crema_undirected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood function evaluated in beta.
+The UBCM pmatrix is pre-computed and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Strengths sequence and adjacency binary/probability matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_crema_undirected_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_crema_undirected_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_crema_undirected_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_crema_undirected_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes CReMa loglikelihood function evaluated in beta.
+The UBCM pmatrix is computed inside the function.
+Sparse initialisation version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Strengths sequence and adjacency matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_dcm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_dcm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_dcm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DBCM loglikelihood function evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in degrees sequences, non zero out and in indices,
+and classes cardinality sequence.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_dcm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_dcm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_dcm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_dcm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DBCM <a href="#id44"><span class="problematic" id="id5">[1]_</span></a> <a href="#id45"><span class="problematic" id="id6">[2]_</span></a> loglikelihood function evaluated in theta.
+It is based on the exponential version of the DBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>theta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in degrees sequences, and non zero out and in indices,
+and classes cardinalities sequence.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id7"><span class="brackets">1</span></dt>
+<dd><p>Squartini, Tiziano, and Diego Garlaschelli.
+“Analytical maximum-likelihood method to detect patterns
+in real networks.”
+New Journal of Physics 13.8 (2011): 083001.
+<a class="reference external" href="https://arxiv.org/abs/1103.0701">https://arxiv.org/abs/1103.0701</a></p>
+</dd>
+<dt class="label" id="id9"><span class="brackets">2</span></dt>
+<dd><p>Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+“Unbiased sampling of network ensembles.”
+New Journal of Physics 17.2 (2015): 023052.
+<a class="reference external" href="https://arxiv.org/abs/1406.1197">https://arxiv.org/abs/1406.1197</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_decm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_decm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_decm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_decm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DECM loglikelihood function evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in degrees sequences, and out and in strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_decm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_decm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_decm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_decm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DECM <a href="#id46"><span class="problematic" id="id11">[1]_</span></a> loglikelihood function evaluated in theta.
+It is based on the exponential version of the DECM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>theta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in degrees sequences, and out and in strengths sequences</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id12"><span class="brackets">1</span></dt>
+<dd><p>Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+“A faster horse on a safer trail: generalized inference for the
+efficient reconstruction of weighted networks.”
+New Journal of Physics 22.5 (2020): 053053.
+<a class="reference external" href="https://arxiv.org/abs/1811.09829">https://arxiv.org/abs/1811.09829</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_ecm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_ecm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_ecm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_ecm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns UECM loglikelihood function evaluated in sol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>sol</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Degrees and strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_ecm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_ecm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_ecm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_ecm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns UECM loglikelihood function evaluated in sol.
+It is based on the exponential version of the UECM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>sol</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Degrees and strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_cm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_cm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_cm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_cm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns UBCM loglikelihood hessian function evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian function.
+Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_cm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_cm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_cm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_cm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns UBCM loglikelihood hessian function evaluated in beta.
+It is based on the exponential version of the UBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian function.
+Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_crema_directed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_crema_directed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_crema_directed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_crema_directed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood hessian function evaluated in beta.
+The DBCM pmatrix is pre-computed and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian function.
+Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_crema_undirected">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_crema_undirected</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_crema_undirected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_crema_undirected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood hessian function evaluated in beta.
+The UBCM pmatrix is pre-computed and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Strengths sequence and adjacency binary/probability matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_dcm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_dcm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_dcm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DBCM loglikelihood hessian function evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Tuple containing out and in degrees sequences,
+non zero out and in indices, and classes cardinality sequence.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_dcm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_dcm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_dcm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_dcm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DBCM <a href="#id47"><span class="problematic" id="id13">[1]_</span></a> <a href="#id48"><span class="problematic" id="id14">[2]_</span></a> loglikelihood hessian function evaluated in theta.
+It is based on the exponential version of the DBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>theta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in degrees sequences, and non zero out and in indices,
+and the sequence of classes cardinalities.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id15"><span class="brackets">1</span></dt>
+<dd><p>Squartini, Tiziano, and Diego Garlaschelli.
+“Analytical maximum-likelihood method to detect patterns</p>
+<blockquote>
+<div><p>in real networks.”</p>
+</div></blockquote>
+<p>New Journal of Physics 13.8 (2011): 083001.
+<a class="reference external" href="https://arxiv.org/abs/1103.0701">https://arxiv.org/abs/1103.0701</a></p>
+</dd>
+<dt class="label" id="id17"><span class="brackets">2</span></dt>
+<dd><p>Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+“Unbiased sampling of network ensembles.”
+New Journal of Physics 17.2 (2015): 023052.
+<a class="reference external" href="https://arxiv.org/abs/1406.1197">https://arxiv.org/abs/1406.1197</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_decm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_decm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_decm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_decm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DECM loglikelihood hessian function evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian.
+Out and in degrees sequences, and out and in strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_decm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_decm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_decm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_decm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DECM <a href="#id49"><span class="problematic" id="id19">[1]_</span></a> loglikelihood hessian function evaluated in theta.
+It is based on the exponential version of the DECM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>theta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in degrees sequences, and out and in strengths sequences..</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id20"><span class="brackets">1</span></dt>
+<dd><p>Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+“A faster horse on a safer trail: generalized inference for the
+efficient reconstruction of weighted networks.”
+New Journal of Physics 22.5 (2020): 053053.
+<a class="reference external" href="https://arxiv.org/abs/1811.09829">https://arxiv.org/abs/1811.09829</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_cm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_cm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_cm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_cm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of the UBCM loglikelihood hessian function
+evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian function.
+Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_cm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_cm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_cm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_cm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of the UBCM loglikelihood hessian function
+evaluated in x.
+It is based on the exponential version of the UBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian function.
+Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_crema_directed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_crema_directed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_crema_directed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_crema_directed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of CReMa loglikelihood hessian function
+evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_crema_directed_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_crema_directed_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_crema_directed_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_crema_directed_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of CReMa loglikelihood hessian function
+evaluated in beta. The DBCM pmatrix is computed inside the function.
+Sparse initialization version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_crema_directed_sparse_2">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_crema_directed_sparse_2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_crema_directed_sparse_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_crema_directed_sparse_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of CReMa loglikelihood hessian function
+evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
+Sparse initialization version.
+Alternative version not in use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_crema_sparse_2">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_crema_sparse_2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_crema_sparse_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_crema_sparse_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of CReMa loglikelihood hessian function
+evaluated in beta. The UBCM pmatrix is computed inside the function.
+Sparse initialization version.
+Alternative version not in use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Strengths sequence and adjacency binary/probability matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_crema_undirected">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_crema_undirected</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_crema_undirected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_crema_undirected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of CReMa loglikelihood hessian function
+evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Strengths sequence and adjacency binary/probability matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_crema_undirected_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_crema_undirected_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_crema_undirected_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_crema_undirected_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of CReMa loglikelihood hessian function
+evaluated in beta. The DBCM pmatrix is pre-computed and explicitly passed.
+Sparse initialization version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Strengths sequence and adjacency binary/probability matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_dcm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_dcm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_dcm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of DBCM loglikelihood hessian function
+evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian function.
+Out and in degrees sequences, non zero out and in indices,
+and classes cardinality sequence.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_dcm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_dcm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_dcm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_dcm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of the DBCM <a href="#id50"><span class="problematic" id="id22">[1]_</span></a> <a href="#id51"><span class="problematic" id="id23">[2]_</span></a> loglikelihood hessian
+function evaluated in theta. It is based on DBCM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>theta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in degrees sequences, and non zero out and in indices,
+and the sequence of classes cardinalities.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id24"><span class="brackets">1</span></dt>
+<dd><p>Squartini, Tiziano, and Diego Garlaschelli.
+“Analytical maximum-likelihood method to detect patterns</p>
+<blockquote>
+<div><p>in real networks.”</p>
+</div></blockquote>
+<p>New Journal of Physics 13.8 (2011): 083001.
+<a class="reference external" href="https://arxiv.org/abs/1103.0701">https://arxiv.org/abs/1103.0701</a></p>
+</dd>
+<dt class="label" id="id26"><span class="brackets">2</span></dt>
+<dd><p>Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+“Unbiased sampling of network ensembles.”
+New Journal of Physics 17.2 (2015): 023052.
+<a class="reference external" href="https://arxiv.org/abs/1406.1197">https://arxiv.org/abs/1406.1197</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_decm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_decm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_decm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_decm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of DECM loglikelihood hessian function
+evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian.
+Out and in degrees sequences, and out and in strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_decm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_decm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_decm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_decm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of the DECM <a href="#id52"><span class="problematic" id="id28">[1]_</span></a> loglikelihood hessian
+function evaluated in <em>theta</em>. It is based on the DECM exponential version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>theta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian.
+Out and in degrees sequences, and out and in strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood hessian diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id29"><span class="brackets">1</span></dt>
+<dd><p>Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+“A faster horse on a safer trail: generalized inference for the
+efficient reconstruction of weighted networks.”
+New Journal of Physics 22.5 (2020): 053053.
+<a class="reference external" href="https://arxiv.org/abs/1811.09829">https://arxiv.org/abs/1811.09829</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_ecm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_ecm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_ecm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_ecm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of UECM loglikelihood hessian function
+evaluated in sol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>sol</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian function.
+Degrees and strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Hessian matrix diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_diag_ecm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_diag_ecm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_diag_ecm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_diag_ecm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the diagonal of UECM loglikelihood hessian function
+evaluated in sol.
+It is based on the exponential version of the UECM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>sol</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood hessian function.
+Degrees and strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Hessian matrix diagonal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_ecm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_ecm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_ecm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_ecm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DBCM loglikelihood hessian function evaluated in sol.</p>
+<p>:param sol:.Evaluating point <em>sol</em>.
+:type sol: numpy.ndarray
+:param args: Arguments to define the loglikelihood hessian.</p>
+<blockquote>
+<div><p>Degrees and strengths sequences.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_hessian_ecm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_hessian_ecm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_hessian_ecm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_hessian_ecm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DBCM loglikelihood hessian function evaluated in sol.
+It is based on the exponential version of the UECM.</p>
+<p>:param sol:.Evaluating point <em>sol</em>.
+:type sol: numpy.ndarray
+:param args: Arguments to define the loglikelihood hessian.</p>
+<blockquote>
+<div><p>Degrees and strengths sequences.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Loglikelihood hessian matrix.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_cm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_cm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_cm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_cm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns UBCM loglikelihood gradient function evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_cm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_cm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_cm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_cm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns UBCM loglikelihood gradient function evaluated in beta.
+It is based on the exponential version of the UBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Degrees and classes cardinality sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_crema_directed">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_crema_directed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_crema_directed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_crema_directed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood gradient function evaluated in beta.
+The DBCM pmatrix is pre-computed and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_crema_directed_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_crema_directed_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_crema_directed_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_crema_directed_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood gradient function evaluated in beta.
+The DBCM pmatrix is pre-computed and explicitly passed.
+Sparse initialization version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_crema_directed_sparse_2">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_crema_directed_sparse_2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_crema_directed_sparse_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_crema_directed_sparse_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood gradient function evaluated in beta.
+The DBCM pmatrix is computed inside the function.
+Sparse initialization version.
+Alternative version not used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Out and in strengths sequences, adjacency matrix,
+and non zero out and in indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_crema_sparse_2">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_crema_sparse_2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_crema_sparse_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_crema_sparse_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood gradient function evaluated in beta.
+The UBCM pmatrix is computed inside the function.
+Sparse initialization version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Strengths sequence and adjacency binary/probability matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_crema_undirected">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_crema_undirected</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_crema_undirected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_crema_undirected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood gradient function evaluated in beta.
+The UBCM pmatrix is pre-computed and explicitly passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Strengths sequence and adjacency binary/probability matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_crema_undirected_sparse">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_crema_undirected_sparse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_crema_undirected_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_crema_undirected_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns CReMa loglikelihood gradient function evaluated in beta.
+The UBCM pmatrix is pre-computed and explicitly passed.
+Sparse initialization version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>beta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient function.
+Strengths sequence and adjacency binary/probability matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_dcm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_dcm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_dcm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DBCM loglikelihood gradient function evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient.
+Out and in degrees sequences, non zero out and in indices,
+and classes cardinality sequence.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_dcm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_dcm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_dcm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_dcm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DBCM <a href="#id53"><span class="problematic" id="id31">[1]_</span></a> <a href="#id54"><span class="problematic" id="id32">[2]_</span></a> loglikelihood gradient function evaluated in theta.
+It is based on the exponential version of the DBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>theta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient.
+Out and in degrees sequences, and non zero out and in indices,
+and the sequence of classes cardinalities.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id33"><span class="brackets">1</span></dt>
+<dd><p>Squartini, Tiziano, and Diego Garlaschelli.
+“Analytical maximum-likelihood method to detect patterns
+in real networks.”
+New Journal of Physics 13.8 (2011): 083001.
+<a class="reference external" href="https://arxiv.org/abs/1103.0701">https://arxiv.org/abs/1103.0701</a></p>
+</dd>
+<dt class="label" id="id35"><span class="brackets">2</span></dt>
+<dd><p>Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+“Unbiased sampling of network ensembles.”
+New Journal of Physics 17.2 (2015): 023052.
+<a class="reference external" href="https://arxiv.org/abs/1406.1197">https://arxiv.org/abs/1406.1197</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_decm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_decm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_decm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_decm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DECM loglikelihood gradient function evaluated in x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>x</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient.
+Out and in degrees sequences, and out and in strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_decm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_decm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_decm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_decm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DECM <a href="#id55"><span class="problematic" id="id37">[1]_</span></a> loglikelihood gradient function evaluated in theta.
+It is based on the exponential version of the DECM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>theta</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>,
+</em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood function.
+Out and in degrees sequences, and out and in strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="id38"><span class="brackets">1</span></dt>
+<dd><p>Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+“A faster horse on a safer trail: generalized inference for the
+efficient reconstruction of weighted networks.”
+New Journal of Physics 22.5 (2020): 053053.
+<a class="reference external" href="https://arxiv.org/abs/1811.09829">https://arxiv.org/abs/1811.09829</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_ecm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_ecm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_ecm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_ecm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DECM loglikelihood gradient function evaluated in sol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>sol</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient.
+Degrees and strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.loglikelihood_prime_ecm_exp">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">loglikelihood_prime_ecm_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sol</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#loglikelihood_prime_ecm_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.loglikelihood_prime_ecm_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns DECM loglikelihood gradient function evaluated in sol.
+It is based on the exponential version of the UECM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sol</strong> (<em>numpy.ndarray</em>) – Evaluating point <em>sol</em>.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Arguments to define the loglikelihood gradient.
+Degrees and strengths sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loglikelihood gradient.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.pmatrix_cm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">pmatrix_cm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#pmatrix_cm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.pmatrix_cm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes and returns the probability matrix induced by UBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Solutions of UBCM.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>int</em><em>, </em><em>)</em>) – Number of nodes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>UBCM probability matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="NEMtropy.models_functions.pmatrix_dcm">
+<code class="sig-prename descclassname">NEMtropy.models_functions.</code><code class="sig-name descname">pmatrix_dcm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/NEMtropy/models_functions.html#pmatrix_dcm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#NEMtropy.models_functions.pmatrix_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes and returns the probability matrix induced by DBCM.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – DBCM solution.</p></li>
+<li><p><strong>args</strong> (<em>(</em><em>int</em><em>, </em><em>numpy.ndarray</em><em>, </em><em>numpy.ndarray</em><em>)</em>) – Problem dimension, out and in indices of non-zero nodes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DBCM probability matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-NEMtropy.solver_functions">
 <span id="solver-functions"></span><h2>Solver functions<a class="headerlink" href="#module-NEMtropy.solver_functions" title="Permalink to this headline">¶</a></h2>
@@ -1243,7 +3613,7 @@ fixed-point algorithm.</p>
 <li><p><strong>linsearch_fun</strong> (<em>function</em>) – Function to compute the linsearch</p></li>
 <li><p><strong>hessian_regulariser</strong> (<em>function</em>) – Function to regularise fun hessian</p></li>
 <li><p><strong>fun_jac</strong> (<em>function</em><em>, </em><em>optional</em>) – Function to compute the hessian of fun, defaults to None</p></li>
-<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – The solver stops when <a href="#id1"><span class="problematic" id="id2">|</span></a>fun|&lt;tol, defaults to 1e-6</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – The solver stops when <a href="#id40"><span class="problematic" id="id41">|</span></a>fun|&lt;tol, defaults to 1e-6</p></li>
 <li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em>) – The solver stops when the difference between two consecutive
 steps is less than eps, defaults to 1e-10</p></li>
 <li><p><strong>max_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of steps the solver takes, defaults to 100</p></li>
@@ -1447,38 +3817,47 @@ index to label dictionary</p>
 </div>
 
 
-            <div class="clearer"></div>
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Classes and Functions</a><ul>
-<li><a class="reference internal" href="#module-NEMtropy.graph_classes">Graph classes</a></li>
-<li><a class="reference internal" href="#module-NEMtropy.ensemble_generator">Ensemble generator</a></li>
-<li><a class="reference internal" href="#module-NEMtropy.matrix_generator">Matrix generator</a></li>
-<li><a class="reference internal" href="#model-specific-functions">Model specific functions</a></li>
-<li><a class="reference internal" href="#module-NEMtropy.solver_functions">Solver functions</a></li>
-<li><a class="reference internal" href="#module-NEMtropy.network_functions">Network functions</a></li>
+<h1 class="logo"><a href="index.html">NEMtropy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">How to install the NEMtropy package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classes and Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-NEMtropy.graph_classes">Graph classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NEMtropy.ensemble_generator">Ensemble generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NEMtropy.matrix_generator">Matrix generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NEMtropy.models_functions">Model specific functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NEMtropy.solver_functions">Solver functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-NEMtropy.network_functions">Network functions</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">GNU GENERAL PUBLIC LICENSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contacts.html">Contacts</a></li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="install.html"
-                        title="previous chapter">How to install the NEMtropy package</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="license.html"
-                        title="next chapter">GNU GENERAL PUBLIC LICENSE</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/NEMtropy.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="install.html" title="previous chapter">How to install the NEMtropy package</a></li>
+      <li>Next: <a href="license.html" title="next chapter">GNU GENERAL PUBLIC LICENSE</a></li>
+  </ul></li>
+</ul>
+</div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -1489,32 +3868,32 @@ index to label dictionary</p>
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="license.html" title="GNU GENERAL PUBLIC LICENSE"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="install.html" title="How to install the NEMtropy package"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">NEMtropy 1.0.0 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Classes and Functions</a></li> 
-      </ul>
+    <div class="footer">
+      &copy;2021, Emiliano Marchese and Nicolo' Vallarano.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/NEMtropy.rst.txt"
+          rel="nofollow">Page source</a>
     </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2021, Emiliano Marchese and Nicolo&#39; Vallarano.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
-    </div>
+
+    
+
+    
   </body>
 </html>

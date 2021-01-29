@@ -22,7 +22,7 @@ Matrix generator
 Model specific functions
 ------------------------
 
-.. automodule:: NEMtropy.model_functions
+.. automodule:: NEMtropy.models_functions
     :members:
 
 Solver functions

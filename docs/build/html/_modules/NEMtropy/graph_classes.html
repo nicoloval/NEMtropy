@@ -5,36 +5,29 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEMtropy.graph_classes &#8212; NEMtropy 1.0.0 documentation</title>
+    <title>NEMtropy.graph_classes &#8212; NEMtropy 1.0.2 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
-    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
-    
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">NEMtropy 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">NEMtropy.graph_classes</a></li> 
-      </ul>
-    </div>  
+  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for NEMtropy.graph_classes</h1><div class="highlight"><pre>
@@ -75,17 +68,6 @@
         <span class="n">degree_sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">strength_sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initilizes all the necessary attribitus for Undirected graph class.</span>
-
-<span class="sd">        :param adjacency: Adjacency matrix, defaults to None.</span>
-<span class="sd">        :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional</span>
-<span class="sd">        :param edgelist: edgelist, defaults to None.</span>
-<span class="sd">        :type edgelist: numpy.ndarray, list, optional</span>
-<span class="sd">        :param degree_sequence: degrees sequence, defaults to None.</span>
-<span class="sd">        :type degree_sequence: numpy.ndarray, optional</span>
-<span class="sd">        :param strength_sequence: strengths sequence, defaults to None.</span>
-<span class="sd">        :type strength_sequence: numpy.ndarray, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_edges</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adjacency</span> <span class="o">=</span> <span class="kc">None</span>
@@ -427,11 +409,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_reduced</span> <span class="o">=</span> <span class="kc">True</span></div>
 
     <span class="k">def</span> <span class="nf">_set_initial_guess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calls the proper set initial guess function given the selected *model*.</span>
-
-<span class="sd">        :param model: Selected model.</span>
-<span class="sd">        :type model: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;cm_exp&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_initial_guess_cm</span><span class="p">()</span>
@@ -441,11 +418,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_initial_guess_crema_undirected</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_set_initial_guess_cm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sets the initial guess for UBCM given the choice made by the user.</span>
-
-<span class="sd">        :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.</span>
-<span class="sd">        :raises TypeError: raises type error if the selected *initial_guess* is wrong.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">is_reduced</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">degree_reduction</span><span class="p">()</span>
@@ -488,11 +460,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_x</span>
 
     <span class="k">def</span> <span class="nf">_set_initial_guess_crema_undirected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sets the initial guess for CReMa given the choice made by the user.</span>
-
-<span class="sd">        :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.</span>
-<span class="sd">        :raises TypeError: raises type error if the selected *initial_guess* is wrong.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_guess</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_guess</span>
@@ -521,11 +488,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span>
 
     <span class="k">def</span> <span class="nf">_set_initial_guess_ecm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sets the initial guess for UECM given the choice made by the user.</span>
 
-<span class="sd">        :raises ValueError: raises value error if the selected *initial_guess* is not among the exisisting ones.</span>
-<span class="sd">        :raises TypeError: raises type error if the selected *initial_guess* is wrong.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_guess</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_guess</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_guess</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">:]</span>
@@ -575,8 +538,7 @@
 
     <span class="c1"># DA SISTEMARE</span>
     <span class="k">def</span> <span class="nf">_solution_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Computes the error given the solutions to the optimisation problem.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_model</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;cm_exp&quot;</span><span class="p">,</span> <span class="s2">&quot;crema&quot;</span><span class="p">,</span> <span class="s2">&quot;crema-sparse&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">ex_k</span> <span class="o">=</span> <span class="n">mof</span><span class="o">.</span><span class="n">expected_degree_cm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
@@ -641,11 +603,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_strength</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_degree</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sets up functions arguments given for the selected *model*.</span>
-
-<span class="sd">        :param model: model name.</span>
-<span class="sd">        :type model: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;crema&quot;</span><span class="p">,</span> <span class="s2">&quot;crema-sparse&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="p">(</span>
@@ -659,14 +616,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dseq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strength_sequence</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_initialize_problem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialises all the functions and parameters necessary used by the selected &#39;model&#39; and &#39;method&#39;.</span>
-
-<span class="sd">        :param model: model name.</span>
-<span class="sd">        :type model: str</span>
-<span class="sd">        :param method: method name.</span>
-<span class="sd">        :type method: str</span>
-<span class="sd">        :raises ValueError: Raise an error if model/method choice is not valid.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_initial_guess</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
@@ -1226,17 +1175,7 @@
         <span class="n">degree_sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">strength_sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initilizes all the necessary attribites for Directed graph class.</span>
 
-<span class="sd">        :param adjacency: Adjacency matrix, defaults to None.</span>
-<span class="sd">        :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional</span>
-<span class="sd">        :param edgelist: edgelist, defaults to None.</span>
-<span class="sd">        :type edgelist: numpy.ndarray, list, optional</span>
-<span class="sd">        :param degree_sequence: degrees sequence, defaults to None.</span>
-<span class="sd">        :type degree_sequence: numpy.ndarray, optional</span>
-<span class="sd">        :param strength_sequence: strengths sequence, defaults to None.</span>
-<span class="sd">        :type strength_sequence: numpy.ndarray, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_edges</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adjacency</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1312,17 +1251,7 @@
         <span class="n">degree_sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">strength_sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initilizes all the necessary attribitus for Directed graph class.</span>
 
-<span class="sd">        :param adjacency: Adjacency matrix, defaults to None.</span>
-<span class="sd">        :type adjacency: numpy.ndarray, list, scipy.sparse_matrix, optional</span>
-<span class="sd">        :param edgelist: edgelist, defaults to None.</span>
-<span class="sd">        :type edgelist: numpy.ndarray, list, optional</span>
-<span class="sd">        :param degree_sequence: degrees sequence, defaults to None.</span>
-<span class="sd">        :type degree_sequence: numpy.ndarray, optional</span>
-<span class="sd">        :param strength_sequence: strengths sequence, defaults to None.</span>
-<span class="sd">        :type strength_sequence: numpy.ndarray, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">adjacency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
                 <span class="n">adjacency</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
@@ -1980,8 +1909,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_in</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_solution_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Computes the error given the solutions of the optimization problem.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_model</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;dcm_exp&quot;</span><span class="p">,</span> <span class="s2">&quot;dcm&quot;</span><span class="p">,</span> <span class="s2">&quot;crema&quot;</span><span class="p">,</span> <span class="s2">&quot;crema-sparse&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="n">sol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
@@ -2682,12 +2610,39 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;insert a model&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 
-            <div class="clearer"></div>
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">NEMtropy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">How to install the NEMtropy package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../NEMtropy.html">Classes and Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">GNU GENERAL PUBLIC LICENSE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contacts.html">Contacts</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -2698,27 +2653,29 @@
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">NEMtropy 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">NEMtropy.graph_classes</a></li> 
-      </ul>
+    <div class="footer">
+      &copy;2021, Emiliano Marchese and Nicolo' Vallarano.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
     </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2021, Emiliano Marchese and Nicolo&#39; Vallarano.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
-    </div>
+
+    
+
+    
   </body>
 </html>
