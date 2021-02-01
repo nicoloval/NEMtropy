@@ -1,8 +1,7 @@
 ![PyPI](https://img.shields.io/pypi/v/nemtropy)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nemtropy)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
-[comment]: # insert arxiv badge
+[![ArXiv](https://img.shields.io/badge/ArXiv-2101.12625-red)](https://arxiv.org/abs/2101.12625)
 
 NEMtropy: Network Entropy Maximization, a Toolbox Running On PYthon
 -------------------------------------------------------------------
@@ -15,11 +14,18 @@ This module allows you to solve the desired model and generate a number of rando
 NEMtropy builds on the current literature on the matter, improving both in speed of convergence and in the scale of the feasible networks.
 To explore Maximum-Entropy modeling on networks, checkout [Maximum Entropy Hub](https://meh.imtlucca.it/).
 
-The models implemented in NEMtropy are presented in a forthcoming [paper](arxiv).
+The models implemented in NEMtropy are presented in a forthcoming [paper](https://arxiv.org/abs/2101.12625) on arXiv.
 If you use the module for your scientific research, please consider citing us:
 
 ```
-    bibtex snippet
+    @misc{vallarano2021fast,
+          title={Fast and scalable likelihood maximization for Exponential Random Graph Models}, 
+          author={Nicolò Vallarano and Matteo Bruno and Emiliano Marchese and Giuseppe Trapani and Fabio Saracco and Tiziano Squartini and Giulio Cimini and Mario Zanon},
+          year={2021},
+          eprint={2101.12625},
+          archivePrefix={arXiv},
+          primaryClass={physics.data-an}
+    }
 ```
 
 ## Currently Implemented Models
