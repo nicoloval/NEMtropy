@@ -3,6 +3,7 @@ import numpy as np
 # Stops Numba Warning for experimental feature
 from numba.core.errors import NumbaExperimentalFeatureWarning
 import warnings
+import sys
 
 warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
@@ -297,6 +298,9 @@ def ensemble_sampler_crema_ecm_prob_graph(
     with mp.Pool(processes=cpu_n) as pool:
         edges_list = pool.starmap(is_a_link_crema_ecm_prob, iter_)
 
+    # removing None
+    edges_list[:] = (value for value in edges_list if value is not None)
+
     # edgelist writing
     with open(outfile_name, "w") as outfile:
         outfile.write(
@@ -352,8 +356,7 @@ def ensemble_sampler_crema_sparse_ecm_prob_graph(
         edges_list = pool.starmap(is_a_link_crema_sparse_ecm_prob, iter_)
 
     # removing None
-    # commented cause there should be no None
-    # edges_list[:] = (value for value in edges_list if value is not None)
+    edges_list[:] = (value for value in edges_list if value is not None)
 
     # debug
     # print(edges_list)
@@ -413,6 +416,9 @@ def ensemble_sampler_crema_decm_prob_graph(
 
     # debug
     # print(edges_list)
+
+    # removing None
+    edges_list[:] = (value for value in edges_list if value is not None)
 
     # edgelist writing
     with open(outfile_name, "w") as outfile:
@@ -529,8 +535,8 @@ def ensemble_sampler_crema_sparse_decm_prob_graph(
     with mp.Pool(processes=cpu_n) as pool:
         edges_list = pool.starmap(is_a_link_crema_sparse_decm_prob, iter_)
 
-    # debug
-    # print(edges_list)
+    # removing None
+    edges_list[:] = (value for value in edges_list if value is not None)
 
     # edgelist writing
     with open(outfile_name, "w") as outfile:
