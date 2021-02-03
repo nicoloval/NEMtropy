@@ -1,4 +1,0 @@
-#!/home/nico/Dropbox/projects/network_reconstruction/nemtropy/tests/tenv/bin/python3
-# EASY-INSTALL-SCRIPT: 'numba==0.52.0','pycc'
-__requires__ = 'numba==0.52.0'
-__import__('pkg_resources').run_script('numba==0.52.0', 'pycc')
