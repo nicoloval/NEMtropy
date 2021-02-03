@@ -35,7 +35,7 @@ The specific kind of network to randomize and property to preserve defines the m
 * **UBCM** *Undirected Binary Configuration Model* [[1]](#1)
 * **UECM** *Undirected Enhanced Configuration Model* [[1]](#1)
 * **DBCM** *Directed Binary Configuration Model* [[1]](#1)
-* **DECM** *Directed Binary Enhanced Model* [[1]](#1)
+* **DECM** *Directed Enhanced Coonfiguration Model* [[1]](#1)
 * **CReMa** [[2]](#2)
 
 The following table may helps you identify the model that fits your needs in function of the type of network you are working with;
