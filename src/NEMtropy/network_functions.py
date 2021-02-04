@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.sparse
 import scipy
+from numba import jit
+from scipy.sparse import csr_matrix
 # Stops Numba Warning for experimental feature
 from numba.core.errors import NumbaExperimentalFeatureWarning
 import warnings
@@ -10,13 +12,158 @@ warnings.simplefilter(
     category=NumbaExperimentalFeatureWarning)
 
 
+def build_graph_from_edgelist(edgelist,
+                              is_directed,
+                              is_sparse=False,
+                              is_weighted=False):
+    """Generates adjacency matrix given edgelist.
+
+    :param edgelist: Edgelist.
+    :type edgelist: numpy.ndarray
+    :param is_directed: True if edge direction is informative.
+    :type is_directed: bool
+    :param is_sparse: If true the output is a sparse matrix.
+    :type is_sparse: bool
+    :param is_weighted: True if the edgelist is weighted
+    :type is_weighted: bool
+    :return: Adjacency matrix.
+    :rtype: numpy.ndarray or scipy.sparse.csr_matrix
+    """
+    if not isinstance(edgelist, np.ndarray):
+        raise TypeError("edgelist must be an numpy.ndarray.")
+    if is_sparse:
+        if is_weighted:
+            adjacency = build_graph_sparse_weighted(edgelist, is_directed)
+        else:
+            adjacency = build_graph_sparse(edgelist, is_directed)
+    else:
+        if is_weighted:
+            adjacency = build_graph_fast_weighted(edgelist, is_directed)
+        else:
+            adjacency = build_graph_fast(edgelist, is_directed)
+    return adjacency
+
+
+@jit(nopython=True)
+def build_graph_fast(edgelist, is_directed):
+    """Generates adjacency matrix given edgelist, numpy array format
+    is used.
+
+    :param edgelist: Edgelist.
+    :type edgelist: numpy.ndarray
+    :param is_directed: True if edge direction is informative.
+    :type is_directed: bool
+    :return: Adjacency matrix.
+    :rtype: numpy.ndarray
+    """
+    if is_directed:
+        n_nodes = len(set(edgelist[:, 0]) | set(edgelist[:, 1]))
+        adj = np.zeros((n_nodes, n_nodes))
+        for edges in edgelist:
+            i = int(edges[0])
+            j = int(edges[1])
+            adj[i, j] = 1
+    else:
+        n_nodes = len(set(edgelist[:, 0]) | set(edgelist[:, 1]))
+        adj = np.zeros((n_nodes, n_nodes))
+        for edges in edgelist:
+            i = int(edges[0])
+            j = int(edges[1])
+            adj[i, j] = 1
+            adj[j, i] = 1
+    return adj
+
+
+def build_graph_sparse(edgelist, is_directed):
+    """Generates adjacency matrix given edgelist, scipy sparse format
+    is used.
+
+    :param edgelist: Edgelist.
+    :type edgelist: numpy.ndarray
+    :param is_sparse: True if edge direction is informative.
+    :type is_sparse: bool
+    :return: Adjacency matrix.
+    :rtype: scipy.sparse.csr_matrix
+    """
+    n_nodes = set(edgelist[:, 0]) | set(edgelist[:, 1])
+    if is_directed:
+        row = edgelist[:, 0].astype(int)
+        columns = edgelist[:, 1].astype(int)
+        data = np.ones(n_nodes, dtype=int)
+        adj = csr_matrix((data, (row, columns)), shape=(n_nodes, n_nodes))
+    else:
+        row = np.concatenate([edgelist[:, 0], edgelist[:, 1]]).astype(int)
+        columns = np.concatenate([edgelist[:, 1], edgelist[:, 0]]).astype(int)
+        data = np.ones(2*n_nodes, dtype=int)
+        adj = csr_matrix((data, (row, columns)), shape=(n_nodes, n_nodes))
+    return adj
+
+
+@jit(nopython=True)
+def build_graph_fast_weighted(edgelist, is_directed):
+    """Generates weighted adjacency matrix given edgelist,
+    numpy array format is used.
+
+    :param edgelist: Edgelist.
+    :type edgelist: numpy.ndarray
+    :param is_directed: True if edge direction is informative.
+    :type is_directed: bool
+    :return: Adjacency matrix.
+    :rtype: numpy.ndarray
+    """
+    if is_directed:
+        n_nodes = len(set(edgelist[:, 0]) | set(edgelist[:, 1]))
+        adj = np.zeros((n_nodes, n_nodes))
+        for edges in edgelist:
+            i = int(edges[0])
+            j = int(edges[1])
+            w = edges[2]
+            adj[i, j] = w
+    else:
+        n_nodes = len(set(edgelist[:, 0]) | set(edgelist[:, 1]))
+        adj = np.zeros((n_nodes, n_nodes))
+        for edges in edgelist:
+            i = int(edges[0])
+            j = int(edges[1])
+            w = edges[2]
+            adj[i, j] = w
+            adj[j, i] = w
+    return adj
+
+
+def build_graph_sparse_weighted(edgelist, is_directed):
+    """Generates weighted adjacency matrix given edgelist,
+    scipy sparse format is used.
+
+    :param edgelist: Edgelist.
+    :type edgelist: numpy.ndarray
+    :param is_sparse: True if edge direction is informative.
+    :type is_sparse: bool
+    :return: Adjacency matrix.
+    :rtype: scipy.sparse.csr_matrix
+    """
+    n_nodes = set(edgelist[:, 0]) | set(edgelist[:, 1])
+    if is_directed:
+        row = edgelist[:, 0].astype(int)
+        columns = edgelist[:, 1].astype(int)
+        data = edgelist[:, 2]
+        adj = csr_matrix((data, (row, columns)), shape=(n_nodes, n_nodes))
+    else:
+        row = np.concatenate([edgelist[:, 0], edgelist[:, 1]]).astype(int)
+        columns = np.concatenate([edgelist[:, 1], edgelist[:, 0]]).astype(int)
+        data = np.concatenate([edgelist[:, 2], edgelist[:, 2]])
+        adj = csr_matrix((data, (row, columns)), shape=(n_nodes, n_nodes))
+    return adj
+
+
+
 def out_degree(a):
     """Returns matrix *a* out degrees sequence.
 
     :param a: Adjacency matrix
     :type a: numpy.ndarray, scipy.sparse.csr.csr_matrix,
         scipy.sparse.coo.coo_matrix
-    :return: Out degree sequence
+    :return: Out degree sequence.
     :rtype: numpy.ndarray
     """
     # if the matrix is a numpy array
