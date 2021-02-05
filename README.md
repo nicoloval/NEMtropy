@@ -113,7 +113,7 @@ adjacency matrix by running the NEMtropy build graph function.
 ```
 
 These collection of random adjacency matrices (stored as edgelists)
-can be used as a benchmark null model: it is enough to compute the expected value
+can be used as a null model: it is enough to compute the expected value
 of the selected network features in the adjacency matrices previously generated
 and then to compare it with its value in the original network.
 
