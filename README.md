@@ -116,6 +116,10 @@ These collection of random adjacency matrices can be used as a null model:
 it is enough to compute the expected value of the selected network feature 
 on the ensemble of matrices and to compare it with its original value.
 
+To learn more, please read the two ipython notebooks in the examples directory:
+one is a study case on a [directed graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Directed%20Graphs.ipynb), 
+while the other is on an [undirected graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Undirected%20Graphs.ipynb).
+
 Development
 -----------
 Please work on a feature branch and create a pull request to the development 
