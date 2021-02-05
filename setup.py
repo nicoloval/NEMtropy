@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 with open('README.md', "r", encoding="utf-8") as fh:
@@ -9,7 +9,7 @@ setup(
     name="NEMtropy",
     author="Nicolo' Vallarano, Emiliano Marchese",
     author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
-    packages=["NEMtropy"],
+    packages=find_packages(),
     package_dir={'': 'src'},
     version="1.0.3",
     description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
@@ -22,7 +22,7 @@ setup(
     long_description_content_type="text/markdown",
     license="GNU General Public License v3",
     url="https://github.com/nicoloval/NEMtropy/",
-    download_url="https://github.com/nicoloval/NEMtropy/archive/v1.0.0.zip",
+    download_url="https://github.com/nicoloval/NEMtropy/archive/v1.0.3.zip",
     keywords=['Network reconstruction', 'Networks Null Models',
               'Maximum Entrophy Methods'],
     classifiers=[
@@ -36,10 +36,10 @@ setup(
     install_requires=["numpy>=1.17",
                       "numba>=0.47",
                       "scipy>=1.4",
+                      "networkx>=2.4",
                       ],
     extras_require={
         "dev": [
-                "networkx>=2.4",
                 "pytest>=6.0.1",
                 "flake8>=3.8.3",
                 "wheel>=0.35.1",
