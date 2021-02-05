@@ -112,10 +112,9 @@ adjacency matrix by running the NEMtropy build graph function.
                                     is_weighted = False)
 ```
 
-These collection of random adjacency matrices (stored as edgelists)
-can be used as a null model: it is enough to compute the expected value
-of the selected network features in the adjacency matrices previously generated
-and then to compare it with its value in the original network.
+These collection of random adjacency matrices can be used as a null model:
+it is enough to compute the expected value of the selected network feature 
+on the ensemble of matrices and to compare it with its original value.
 
 Development
 -----------
