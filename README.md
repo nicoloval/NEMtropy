@@ -28,6 +28,14 @@ If you use the module for your scientific research, please consider citing us:
     }
 ```
 
+#### Table Of Contents
+- [Currently Implemented Models](#currently-implemented-models)
+- [Installation](#installation)
+- [A Simple Example](#simple-example)
+- [Development](#development)
+- [Testing](#testing)
+- [Credits](#credits)
+
 ## Currently Implemented Models
 The main feature of NEMtropy is (but not limited to) *network randomization*. 
 The specific kind of network to randomize and property to preserve defines the model you need:
