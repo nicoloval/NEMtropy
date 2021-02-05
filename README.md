@@ -63,7 +63,7 @@ _References_
 Installation
 ------------
 
-Menet can be installed via pip. You can get it from your terminal:
+NEMtropy can be installed via pip. You can get it from your terminal:
 
 ```
     $ pip install NEMtropy
@@ -75,6 +75,47 @@ you can simply type from your terminal:
 ```
     $ pip install NEMtropy --upgrade
 ```
+
+Simple Example
+--------------
+As an example we solve the UBCM for zachary karate club network.
+
+```
+    import networkx as nx
+    from NEMtropy import UndirectedGraph
+
+    G = nx.karate_club_graph()
+    adj_kar = nx.to_numpy_array(G)
+    graph = UndirectedGraph(adj_kar)
+
+    graph.solve_tool(model="cm_exp",
+                 method="newton",
+                 initial_guess="random")
+```
+
+Given the UBCM model, we can generate ten random copies of zachary's karate club.
+
+```
+    graph.ensemble_sampler(10, cpu_n=2, output_dir="sample/")
+```
+
+These copies are saved as an edgelist, each edgelist can be converted to an
+adjacency matrix by running the NEMtropy build graph function.
+
+```
+    from NEMtropy.network_functions import build_graph_from_edgelist
+
+    edgelist_ens = np.loadtxt("sample/0.txt")
+    ens_adj = build_graph_from_edgelist(edgelist = edgelist_ens,
+                                    is_directed = False,
+                                    is_sparse = False,
+                                    is_weighted = False)
+```
+
+These collection of random adjacency matrices (stored as edgelists)
+can be used as a null model: it is enough to compute the expected value
+of a certain network features on the adjacency matrices previously generated
+and then compare it with its original value.
 
 Development
 -----------
