@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
 Name: NEMtropy
-Version: 1.0.2
+Version: 1.0.3
 Summary: NEMtropy is a Maximum-Entropy toolbox for networks, it provides the user with a state of the art solver for a range variety of Maximum Entropy Networks models derived from the ERGM family. This module allows you to solve the desired model and generate a number of randomized graphs from the original one: the so-called graphs ensemble.
 Home-page: https://github.com/nicoloval/NEMtropy/
 Author: Nicolo' Vallarano, Emiliano Marchese
 Author-email: nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it
 License: GNU General Public License v3
-Download-URL: https://github.com/nicoloval/NEMtropy/archive/v1.0.0.zip
+Download-URL: https://github.com/nicoloval/NEMtropy/archive/v1.0.3.zip
 Description: ![PyPI](https://img.shields.io/pypi/v/nemtropy)
         ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nemtropy)
         [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -36,6 +36,14 @@ Description: ![PyPI](https://img.shields.io/pypi/v/nemtropy)
                   primaryClass={physics.data-an}
             }
         ```
+        
+        #### Table Of Contents
+        - [Currently Implemented Models](#currently-implemented-models)
+        - [Installation](#installation)
+        - [A Simple Example](#simple-example)
+        - [Development](#development)
+        - [Testing](#testing)
+        - [Credits](#credits)
         
         ## Currently Implemented Models
         The main feature of NEMtropy is (but not limited to) *network randomization*. 
@@ -72,7 +80,7 @@ Description: ![PyPI](https://img.shields.io/pypi/v/nemtropy)
         Installation
         ------------
         
-        Menet can be installed via pip. You can get it from your terminal:
+        NEMtropy can be installed via pip. You can get it from your terminal:
         
         ```
             $ pip install NEMtropy
@@ -84,6 +92,50 @@ Description: ![PyPI](https://img.shields.io/pypi/v/nemtropy)
         ```
             $ pip install NEMtropy --upgrade
         ```
+        
+        Simple Example
+        --------------
+        As an example we solve the UBCM for zachary karate club network.
+        
+        ```
+            import networkx as nx
+            from NEMtropy import UndirectedGraph
+        
+            G = nx.karate_club_graph()
+            adj_kar = nx.to_numpy_array(G)
+            graph = UndirectedGraph(adj_kar)
+        
+            graph.solve_tool(model="cm_exp",
+                         method="newton",
+                         initial_guess="random")
+        ```
+        
+        Given the UBCM model, we can generate ten random copies of zachary's karate club.
+        
+        ```
+            graph.ensemble_sampler(10, cpu_n=2, output_dir="sample/")
+        ```
+        
+        These copies are saved as an edgelist, each edgelist can be converted to an
+        adjacency matrix by running the NEMtropy build graph function.
+        
+        ```
+            from NEMtropy.network_functions import build_graph_from_edgelist
+        
+            edgelist_ens = np.loadtxt("sample/0.txt")
+            ens_adj = build_graph_from_edgelist(edgelist = edgelist_ens,
+                                            is_directed = False,
+                                            is_sparse = False,
+                                            is_weighted = False)
+        ```
+        
+        These collection of random adjacency matrices can be used as a null model:
+        it is enough to compute the expected value of the selected network feature 
+        on the ensemble of matrices and to compare it with its original value.
+        
+        To learn more, please read the two ipython notebooks in the examples directory:
+        one is a study case on a [directed graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Directed%20Graphs.ipynb), 
+        while the other is on an [undirected graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Undirected%20Graphs.ipynb).
         
         Development
         -----------
@@ -131,6 +183,8 @@ Keywords: Network reconstruction,Networks Null Models,Maximum Entrophy Methods
 Platform: UNKNOWN
 Classifier: License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
 Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
 Classifier: Programming Language :: Python :: 3.7
 Classifier: Programming Language :: Python :: 3.8
 Description-Content-Type: text/markdown

@@ -12,3 +12,15 @@ src/NEMtropy.egg-info/SOURCES.txt
 src/NEMtropy.egg-info/dependency_links.txt
 src/NEMtropy.egg-info/requires.txt
 src/NEMtropy.egg-info/top_level.txt
+src/nemtropy/__init__.py
+src/nemtropy/ensemble_generator.py
+src/nemtropy/graph_classes.py
+src/nemtropy/matrix_generator.py
+src/nemtropy/models_functions.py
+src/nemtropy/network_functions.py
+src/nemtropy/solver_functions.py
+src/nemtropy.egg-info/PKG-INFO
+src/nemtropy.egg-info/SOURCES.txt
+src/nemtropy.egg-info/dependency_links.txt
+src/nemtropy.egg-info/requires.txt
+src/nemtropy.egg-info/top_level.txt
