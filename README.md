@@ -100,7 +100,7 @@ For <code>python3.5</code> users the correct command is the following:
     $ pip install --prefer-binary numba
 ```
 
-It avoids an error in <code>llvmlite</code>.
+It avoids an error in <code>llvmlite</code> due to the absence of its wheel in <code>python3.5</code>.
 
 Simple Example
 --------------
