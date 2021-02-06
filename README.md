@@ -84,6 +84,24 @@ you can simply type from your terminal:
     $ pip install NEMtropy --upgrade
 ```
 
+Dependencies
+------------
+
+NEMtropy uses ==numba== library. It can be installed via pip by running
+in your terminal the following command:
+
+```
+    $ pip install numba
+```
+
+For ==python3.5== users the correct command is the following:
+
+```
+    $ pip install --prefer-binary numba
+```
+
+It avoids an error in ==llvmlite==.
+
 Simple Example
 --------------
 As an example we solve the UBCM for zachary karate club network.

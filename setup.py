@@ -33,8 +33,8 @@ setup(
                 'Programming Language :: Python :: 3.7',
                 'Programming Language :: Python :: 3.8',
                 ],
-    install_requires=["numpy>=1.17",
-                      "numba>=0.47",
+    install_requires=[
+                      "numpy>=1.17",
                       "scipy>=1.4",
                       "networkx>=2.4",
                       ],
