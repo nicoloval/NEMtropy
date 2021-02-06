@@ -87,7 +87,7 @@ you can simply type from your terminal:
 Dependencies
 ------------
 
-NEMtropy uses ==numba== library. It can be installed via pip by running
+NEMtropy uses <code>numba<code> library. It can be installed via pip by running
 in your terminal the following command:
 
 ```
