@@ -87,20 +87,20 @@ you can simply type from your terminal:
 Dependencies
 ------------
 
-NEMtropy uses <code>numba<code> library. It can be installed via pip by running
+NEMtropy uses <code>numba</code> library. It can be installed via pip by running
 in your terminal the following command:
 
 ```
     $ pip install numba
 ```
 
-For ==python3.5== users the correct command is the following:
+For <code>python3.5</code> users the correct command is the following:
 
 ```
     $ pip install --prefer-binary numba
 ```
 
-It avoids an error in ==llvmlite==.
+It avoids an error in <code>llvmlite</code>.
 
 Simple Example
 --------------
