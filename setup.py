@@ -11,7 +11,7 @@ setup(
     author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
     packages=find_packages(),
     package_dir={'': 'src'},
-    version="1.0.3",
+    version="1.0.4",
     description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
                 " provides the user with a state of the art solver for a range variety"
                 " of Maximum Entropy Networks models derived from the ERGM family."
