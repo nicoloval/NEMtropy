@@ -31,6 +31,7 @@ If you use the module for your scientific research, please consider citing us:
 #### Table Of Contents
 - [Currently Implemented Models](#currently-implemented-models)
 - [Installation](#installation)
+- [Dependencies](#dependencies)
 - [A Simple Example](#simple-example)
 - [Development](#development)
 - [Testing](#testing)
