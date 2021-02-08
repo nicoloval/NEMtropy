@@ -1,22 +1,23 @@
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>NEMtropy.models_functions &#8212; NEMtropy 1.0.2 documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
-  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -26,8 +27,6 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          
-
           <div class="body" role="main">
             
   <h1>Source code for NEMtropy.models_functions</h1><div class="highlight"><pre>
@@ -664,10 +663,9 @@
 <span class="k">def</span> <span class="nf">loglikelihood_hessian_ecm</span><span class="p">(</span><span class="n">sol</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns DBCM loglikelihood hessian function evaluated in sol.</span>
 
-<span class="sd">    :param sol:.Evaluating point *sol*.</span>
+<span class="sd">    :param sol: Evaluating point *sol*.</span>
 <span class="sd">    :type sol: numpy.ndarray</span>
-<span class="sd">    :param args: Arguments to define the loglikelihood hessian.</span>
-<span class="sd">        Degrees and strengths sequences.</span>
+<span class="sd">    :param args: Arguments to define the loglikelihood hessian. Degrees and strengths sequences.</span>
 <span class="sd">    :type args: (numpy.ndarray, numpy.ndarray)</span>
 <span class="sd">    :return: Loglikelihood hessian matrix.</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
@@ -1023,7 +1021,7 @@
     <span class="sd">&quot;&quot;&quot;Returns DBCM loglikelihood hessian function evaluated in sol.</span>
 <span class="sd">    It is based on the exponential version of the UECM.</span>
 
-<span class="sd">    :param sol:.Evaluating point *sol*.</span>
+<span class="sd">    :param sol: Evaluating point *sol*.</span>
 <span class="sd">    :type sol: numpy.ndarray</span>
 <span class="sd">    :param args: Arguments to define the loglikelihood hessian.</span>
 <span class="sd">        Degrees and strengths sequences.</span>
@@ -2118,12 +2116,14 @@
 <span class="k">def</span> <span class="nf">iterative_decm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns the next iterative step for the DECM Model.</span>
 
-<span class="sd">    :param : Previous iterative step.</span>
-<span class="sd">    :type : numpy.ndarray</span>
+<span class="sd">    :param: Previous iterative step.</span>
+<span class="sd">    :type: numpy.ndarray</span>
 <span class="sd">    :param args: Out and in degrees sequences, and out and in strengths</span>
 <span class="sd">        sequences.</span>
+
 <span class="sd">    :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,</span>
 <span class="sd">        numpy.ndarray, numpy.ndarray)</span>
+
 <span class="sd">    :return: Next iterative step.</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2893,7 +2893,7 @@
 
 <div class="viewcode-block" id="loglikelihood_dcm_exp"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.models_functions.loglikelihood_dcm_exp">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">loglikelihood_dcm_exp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns DBCM [1]_ [2]_ loglikelihood function evaluated in theta.</span>
+    <span class="sd">&quot;&quot;&quot;Returns DBCM [*]_ [*]_ loglikelihood function evaluated in theta.</span>
 <span class="sd">    It is based on the exponential version of the DBCM.</span>
 
 <span class="sd">    :param theta: Evaluating point *theta*.</span>
@@ -2907,13 +2907,13 @@
 <span class="sd">    :rtype: float</span>
 
 <span class="sd">    .. rubric: References</span>
-<span class="sd">    .. [1] Squartini, Tiziano, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Squartini, Tiziano, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;Analytical maximum-likelihood method to detect patterns</span>
 <span class="sd">        in real networks.&quot;</span>
 <span class="sd">        New Journal of Physics 13.8 (2011): 083001.</span>
 <span class="sd">        `https://arxiv.org/abs/1103.0701 &lt;https://arxiv.org/abs/1103.0701&gt;`_</span>
 
-<span class="sd">    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;Unbiased sampling of network ensembles.&quot;</span>
 <span class="sd">        New Journal of Physics 17.2 (2015): 023052.</span>
 <span class="sd">        `https://arxiv.org/abs/1406.1197 &lt;https://arxiv.org/abs/1406.1197&gt;`_</span>
@@ -2952,7 +2952,7 @@
 
 <div class="viewcode-block" id="loglikelihood_prime_dcm_exp"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.models_functions.loglikelihood_prime_dcm_exp">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">loglikelihood_prime_dcm_exp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns DBCM [1]_ [2]_ loglikelihood gradient function evaluated in theta.</span>
+    <span class="sd">&quot;&quot;&quot;Returns DBCM [*]_ [*]_ loglikelihood gradient function evaluated in theta.</span>
 <span class="sd">    It is based on the exponential version of the DBCM.</span>
 
 <span class="sd">    :param theta: Evaluating point *theta*.</span>
@@ -2966,13 +2966,13 @@
 <span class="sd">    :rtype: numpy.ndarray</span>
 
 <span class="sd">    .. rubric: References</span>
-<span class="sd">    .. [1] Squartini, Tiziano, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Squartini, Tiziano, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;Analytical maximum-likelihood method to detect patterns</span>
 <span class="sd">        in real networks.&quot;</span>
 <span class="sd">        New Journal of Physics 13.8 (2011): 083001.</span>
 <span class="sd">        `https://arxiv.org/abs/1103.0701 &lt;https://arxiv.org/abs/1103.0701&gt;`_</span>
 
-<span class="sd">    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;Unbiased sampling of network ensembles.&quot;</span>
 <span class="sd">        New Journal of Physics 17.2 (2015): 023052.</span>
 <span class="sd">        `https://arxiv.org/abs/1406.1197 &lt;https://arxiv.org/abs/1406.1197&gt;`_</span>
@@ -3021,7 +3021,7 @@
 
 <div class="viewcode-block" id="loglikelihood_hessian_dcm_exp"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.models_functions.loglikelihood_hessian_dcm_exp">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">loglikelihood_hessian_dcm_exp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns DBCM [1]_ [2]_ loglikelihood hessian function evaluated in theta.</span>
+    <span class="sd">&quot;&quot;&quot;Returns DBCM [*]_ [*]_ loglikelihood hessian function evaluated in theta.</span>
 <span class="sd">    It is based on the exponential version of the DBCM.</span>
 
 <span class="sd">    :param theta: Evaluating point *theta*.</span>
@@ -3035,19 +3035,17 @@
 <span class="sd">    :rtype: numpy.ndarray</span>
 
 <span class="sd">    .. rubric: References</span>
-<span class="sd">    .. [1] Squartini, Tiziano, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Squartini, Tiziano, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;Analytical maximum-likelihood method to detect patterns</span>
-<span class="sd">         in real networks.&quot;</span>
+<span class="sd">        in real networks.&quot;</span>
 <span class="sd">        New Journal of Physics 13.8 (2011): 083001.</span>
 <span class="sd">        `https://arxiv.org/abs/1103.0701 &lt;https://arxiv.org/abs/1103.0701&gt;`_</span>
 
-<span class="sd">    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;Unbiased sampling of network ensembles.&quot;</span>
 <span class="sd">        New Journal of Physics 17.2 (2015): 023052.</span>
 <span class="sd">        `https://arxiv.org/abs/1406.1197 &lt;https://arxiv.org/abs/1406.1197&gt;`_</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">k_out</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">k_in</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">nz_out_index</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">nz_in_index</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
@@ -3091,7 +3089,7 @@
 
 <div class="viewcode-block" id="loglikelihood_hessian_diag_dcm_exp"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.models_functions.loglikelihood_hessian_diag_dcm_exp">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">loglikelihood_hessian_diag_dcm_exp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the diagonal of the DBCM [1]_ [2]_ loglikelihood hessian</span>
+    <span class="sd">&quot;&quot;&quot;Returns the diagonal of the DBCM [*]_ [*]_ loglikelihood hessian</span>
 <span class="sd">    function evaluated in theta. It is based on DBCM exponential version.</span>
 
 <span class="sd">    :param theta: Evaluating point *theta*.</span>
@@ -3105,13 +3103,13 @@
 <span class="sd">    :rtype: numpy.ndarray</span>
 
 <span class="sd">    .. rubric: References</span>
-<span class="sd">    .. [1] Squartini, Tiziano, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Squartini, Tiziano, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;Analytical maximum-likelihood method to detect patterns</span>
-<span class="sd">         in real networks.&quot;</span>
+<span class="sd">        in real networks.&quot;</span>
 <span class="sd">        New Journal of Physics 13.8 (2011): 083001.</span>
 <span class="sd">        `https://arxiv.org/abs/1103.0701 &lt;https://arxiv.org/abs/1103.0701&gt;`_</span>
 
-<span class="sd">    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;Unbiased sampling of network ensembles.&quot;</span>
 <span class="sd">        New Journal of Physics 17.2 (2015): 023052.</span>
 <span class="sd">        `https://arxiv.org/abs/1406.1197 &lt;https://arxiv.org/abs/1406.1197&gt;`_</span>
@@ -3419,7 +3417,7 @@
 
 <div class="viewcode-block" id="loglikelihood_decm_exp"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.models_functions.loglikelihood_decm_exp">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">loglikelihood_decm_exp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns DECM [1]_ loglikelihood function evaluated in theta.</span>
+    <span class="sd">&quot;&quot;&quot;Returns DECM [*]_ loglikelihood function evaluated in theta.</span>
 <span class="sd">    It is based on the exponential version of the DECM.</span>
 
 <span class="sd">    :param theta: Evaluating point *theta*.</span>
@@ -3432,7 +3430,7 @@
 <span class="sd">    :rtype: float</span>
 
 <span class="sd">    .. rubric: References</span>
-<span class="sd">    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;A faster horse on a safer trail: generalized inference for the</span>
 <span class="sd">        efficient reconstruction of weighted networks.&quot;</span>
 <span class="sd">        New Journal of Physics 22.5 (2020): 053053.</span>
@@ -3465,7 +3463,7 @@
 
 <span class="c1"># @jit(nopython=True)</span>
 <div class="viewcode-block" id="loglikelihood_prime_decm_exp"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.models_functions.loglikelihood_prime_decm_exp">[docs]</a><span class="k">def</span> <span class="nf">loglikelihood_prime_decm_exp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns DECM [1]_ loglikelihood gradient function evaluated in theta.</span>
+    <span class="sd">&quot;&quot;&quot;Returns DECM [*]_ loglikelihood gradient function evaluated in theta.</span>
 <span class="sd">    It is based on the exponential version of the DECM.</span>
 
 <span class="sd">    :param theta: Evaluating point *theta*.</span>
@@ -3478,7 +3476,7 @@
 <span class="sd">    :rtype: numpy.ndarray</span>
 
 <span class="sd">    .. rubric: References</span>
-<span class="sd">    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;A faster horse on a safer trail: generalized inference for the</span>
 <span class="sd">        efficient reconstruction of weighted networks.&quot;</span>
 <span class="sd">        New Journal of Physics 22.5 (2020): 053053.</span>
@@ -3521,7 +3519,7 @@
 
 <div class="viewcode-block" id="loglikelihood_hessian_decm_exp"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.models_functions.loglikelihood_hessian_decm_exp">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">loglikelihood_hessian_decm_exp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns DECM [1]_ loglikelihood hessian function evaluated in theta.</span>
+    <span class="sd">&quot;&quot;&quot;Returns DECM [*]_ loglikelihood hessian function evaluated in theta.</span>
 <span class="sd">    It is based on the exponential version of the DECM.</span>
 
 <span class="sd">    :param theta: Evaluating point *theta*.</span>
@@ -3534,7 +3532,7 @@
 <span class="sd">    :rtype: numpy.ndarray</span>
 
 <span class="sd">    .. rubric: References</span>
-<span class="sd">    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;A faster horse on a safer trail: generalized inference for the</span>
 <span class="sd">        efficient reconstruction of weighted networks.&quot;</span>
 <span class="sd">        New Journal of Physics 22.5 (2020): 053053.</span>
@@ -3620,7 +3618,7 @@
 
 <div class="viewcode-block" id="loglikelihood_hessian_diag_decm_exp"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.models_functions.loglikelihood_hessian_diag_decm_exp">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">loglikelihood_hessian_diag_decm_exp</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the diagonal of the DECM [1]_ loglikelihood hessian</span>
+    <span class="sd">&quot;&quot;&quot;Returns the diagonal of the DECM [*]_ loglikelihood hessian</span>
 <span class="sd">    function evaluated in *theta*. It is based on the DECM exponential version.</span>
 
 <span class="sd">    :param theta: Evaluating point *theta*.</span>
@@ -3633,7 +3631,7 @@
 <span class="sd">    :rtype: numpy.ndarray</span>
 
 <span class="sd">    .. rubric: References</span>
-<span class="sd">    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.</span>
+<span class="sd">    .. [*] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.</span>
 <span class="sd">        &quot;A faster horse on a safer trail: generalized inference for the</span>
 <span class="sd">        efficient reconstruction of weighted networks.&quot;</span>
 <span class="sd">        New Journal of Physics 22.5 (2020): 053053.</span>
@@ -4621,7 +4619,6 @@
 </pre></div>
 
           </div>
-          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -4654,23 +4651,17 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
+  <h3>Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -4679,8 +4670,8 @@
       &copy;2021, Emiliano Marchese and Nicolo' Vallarano.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
       
     </div>
 

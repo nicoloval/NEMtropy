@@ -107,7 +107,7 @@ def solver(
     :type hessian_regulariser: function
     :param fun_jac: Function to compute the hessian of fun, defaults to None
     :type fun_jac: function, optional
-    :param tol: The solver stops when |fun|<tol, defaults to 1e-6
+    :param tol: The solver stops when \|fun|<tol, defaults to 1e-6
     :type tol: float, optional
     :param eps: The solver stops when the difference between two consecutive
         steps is less than eps, defaults to 1e-10

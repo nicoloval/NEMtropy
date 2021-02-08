@@ -631,10 +631,9 @@ def loglikelihood_prime_ecm(sol, args):
 def loglikelihood_hessian_ecm(sol, args):
     """Returns DBCM loglikelihood hessian function evaluated in sol.
 
-    :param sol:.Evaluating point *sol*.
+    :param sol: Evaluating point *sol*.
     :type sol: numpy.ndarray
-    :param args: Arguments to define the loglikelihood hessian.
-        Degrees and strengths sequences.
+    :param args: Arguments to define the loglikelihood hessian. Degrees and strengths sequences.
     :type args: (numpy.ndarray, numpy.ndarray)
     :return: Loglikelihood hessian matrix.
     :rtype: numpy.ndarray
@@ -990,7 +989,7 @@ def loglikelihood_hessian_ecm_exp(sol, args):
     """Returns DBCM loglikelihood hessian function evaluated in sol.
     It is based on the exponential version of the UECM.
 
-    :param sol:.Evaluating point *sol*.
+    :param sol: Evaluating point *sol*.
     :type sol: numpy.ndarray
     :param args: Arguments to define the loglikelihood hessian.
         Degrees and strengths sequences.
@@ -2085,12 +2084,14 @@ def linsearch_fun_DCM_fixed(xx):
 def iterative_decm(x, args):
     """Returns the next iterative step for the DECM Model.
 
-    :param : Previous iterative step.
-    :type : numpy.ndarray
+    :param: Previous iterative step.
+    :type: numpy.ndarray
     :param args: Out and in degrees sequences, and out and in strengths
         sequences.
+
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
         numpy.ndarray, numpy.ndarray)
+
     :return: Next iterative step.
     :rtype: numpy.ndarray
     """
@@ -2860,7 +2861,7 @@ def iterative_dcm_exp_2(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_dcm_exp(theta, args):
-    """Returns DBCM [1]_ [2]_ loglikelihood function evaluated in theta.
+    """Returns DBCM [*]_ [*]_ loglikelihood function evaluated in theta.
     It is based on the exponential version of the DBCM.
 
     :param theta: Evaluating point *theta*.
@@ -2874,13 +2875,13 @@ def loglikelihood_dcm_exp(theta, args):
     :rtype: float
 
     .. rubric: References
-    .. [1] Squartini, Tiziano, and Diego Garlaschelli.
+    .. [*] Squartini, Tiziano, and Diego Garlaschelli.
         "Analytical maximum-likelihood method to detect patterns
         in real networks."
         New Journal of Physics 13.8 (2011): 083001.
         `https://arxiv.org/abs/1103.0701 <https://arxiv.org/abs/1103.0701>`_
 
-    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+    .. [*] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
         "Unbiased sampling of network ensembles."
         New Journal of Physics 17.2 (2015): 023052.
         `https://arxiv.org/abs/1406.1197 <https://arxiv.org/abs/1406.1197>`_
@@ -2919,7 +2920,7 @@ def loglikelihood_dcm_exp(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_prime_dcm_exp(theta, args):
-    """Returns DBCM [1]_ [2]_ loglikelihood gradient function evaluated in theta.
+    """Returns DBCM [*]_ [*]_ loglikelihood gradient function evaluated in theta.
     It is based on the exponential version of the DBCM.
 
     :param theta: Evaluating point *theta*.
@@ -2933,13 +2934,13 @@ def loglikelihood_prime_dcm_exp(theta, args):
     :rtype: numpy.ndarray
 
     .. rubric: References
-    .. [1] Squartini, Tiziano, and Diego Garlaschelli.
+    .. [*] Squartini, Tiziano, and Diego Garlaschelli.
         "Analytical maximum-likelihood method to detect patterns
         in real networks."
         New Journal of Physics 13.8 (2011): 083001.
         `https://arxiv.org/abs/1103.0701 <https://arxiv.org/abs/1103.0701>`_
 
-    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+    .. [*] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
         "Unbiased sampling of network ensembles."
         New Journal of Physics 17.2 (2015): 023052.
         `https://arxiv.org/abs/1406.1197 <https://arxiv.org/abs/1406.1197>`_
@@ -2988,7 +2989,7 @@ def loglikelihood_prime_dcm_exp(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_dcm_exp(theta, args):
-    """Returns DBCM [1]_ [2]_ loglikelihood hessian function evaluated in theta.
+    """Returns DBCM [*]_ [*]_ loglikelihood hessian function evaluated in theta.
     It is based on the exponential version of the DBCM.
 
     :param theta: Evaluating point *theta*.
@@ -3002,19 +3003,17 @@ def loglikelihood_hessian_dcm_exp(theta, args):
     :rtype: numpy.ndarray
 
     .. rubric: References
-    .. [1] Squartini, Tiziano, and Diego Garlaschelli.
+    .. [*] Squartini, Tiziano, and Diego Garlaschelli.
         "Analytical maximum-likelihood method to detect patterns
-         in real networks."
+        in real networks."
         New Journal of Physics 13.8 (2011): 083001.
         `https://arxiv.org/abs/1103.0701 <https://arxiv.org/abs/1103.0701>`_
 
-    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+    .. [*] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
         "Unbiased sampling of network ensembles."
         New Journal of Physics 17.2 (2015): 023052.
         `https://arxiv.org/abs/1406.1197 <https://arxiv.org/abs/1406.1197>`_
     """
-
-    k_out = args[0]
     k_in = args[1]
     nz_out_index = args[2]
     nz_in_index = args[3]
@@ -3058,7 +3057,7 @@ def loglikelihood_hessian_dcm_exp(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_dcm_exp(theta, args):
-    """Returns the diagonal of the DBCM [1]_ [2]_ loglikelihood hessian
+    """Returns the diagonal of the DBCM [*]_ [*]_ loglikelihood hessian
     function evaluated in theta. It is based on DBCM exponential version.
 
     :param theta: Evaluating point *theta*.
@@ -3072,13 +3071,13 @@ def loglikelihood_hessian_diag_dcm_exp(theta, args):
     :rtype: numpy.ndarray
 
     .. rubric: References
-    .. [1] Squartini, Tiziano, and Diego Garlaschelli.
+    .. [*] Squartini, Tiziano, and Diego Garlaschelli.
         "Analytical maximum-likelihood method to detect patterns
-         in real networks."
+        in real networks."
         New Journal of Physics 13.8 (2011): 083001.
         `https://arxiv.org/abs/1103.0701 <https://arxiv.org/abs/1103.0701>`_
 
-    .. [2] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+    .. [*] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
         "Unbiased sampling of network ensembles."
         New Journal of Physics 17.2 (2015): 023052.
         `https://arxiv.org/abs/1406.1197 <https://arxiv.org/abs/1406.1197>`_
@@ -3386,7 +3385,7 @@ def iterative_decm_exp_2(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_decm_exp(x, args):
-    """Returns DECM [1]_ loglikelihood function evaluated in theta.
+    """Returns DECM [*]_ loglikelihood function evaluated in theta.
     It is based on the exponential version of the DECM.
 
     :param theta: Evaluating point *theta*.
@@ -3399,7 +3398,7 @@ def loglikelihood_decm_exp(x, args):
     :rtype: float
 
     .. rubric: References
-    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+    .. [*] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
         "A faster horse on a safer trail: generalized inference for the
         efficient reconstruction of weighted networks."
         New Journal of Physics 22.5 (2020): 053053.
@@ -3432,7 +3431,7 @@ def loglikelihood_decm_exp(x, args):
 
 # @jit(nopython=True)
 def loglikelihood_prime_decm_exp(theta, args):
-    """Returns DECM [1]_ loglikelihood gradient function evaluated in theta.
+    """Returns DECM [*]_ loglikelihood gradient function evaluated in theta.
     It is based on the exponential version of the DECM.
 
     :param theta: Evaluating point *theta*.
@@ -3445,7 +3444,7 @@ def loglikelihood_prime_decm_exp(theta, args):
     :rtype: numpy.ndarray
 
     .. rubric: References
-    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+    .. [*] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
         "A faster horse on a safer trail: generalized inference for the
         efficient reconstruction of weighted networks."
         New Journal of Physics 22.5 (2020): 053053.
@@ -3488,7 +3487,7 @@ def loglikelihood_prime_decm_exp(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_decm_exp(theta, args):
-    """Returns DECM [1]_ loglikelihood hessian function evaluated in theta.
+    """Returns DECM [*]_ loglikelihood hessian function evaluated in theta.
     It is based on the exponential version of the DECM.
 
     :param theta: Evaluating point *theta*.
@@ -3501,7 +3500,7 @@ def loglikelihood_hessian_decm_exp(theta, args):
     :rtype: numpy.ndarray
 
     .. rubric: References
-    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+    .. [*] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
         "A faster horse on a safer trail: generalized inference for the
         efficient reconstruction of weighted networks."
         New Journal of Physics 22.5 (2020): 053053.
@@ -3587,7 +3586,7 @@ def loglikelihood_hessian_decm_exp(theta, args):
 
 @jit(nopython=True)
 def loglikelihood_hessian_diag_decm_exp(theta, args):
-    """Returns the diagonal of the DECM [1]_ loglikelihood hessian
+    """Returns the diagonal of the DECM [*]_ loglikelihood hessian
     function evaluated in *theta*. It is based on the DECM exponential version.
 
     :param theta: Evaluating point *theta*.
@@ -3600,7 +3599,7 @@ def loglikelihood_hessian_diag_decm_exp(theta, args):
     :rtype: numpy.ndarray
 
     .. rubric: References
-    .. [1] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
+    .. [*] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli.
         "A faster horse on a safer trail: generalized inference for the
         efficient reconstruction of weighted networks."
         New Journal of Physics 22.5 (2020): 053053.

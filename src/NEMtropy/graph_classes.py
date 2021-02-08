@@ -2411,17 +2411,22 @@ class DirectedGraph:
             - *fixed-point*: uses a fixed-point method to find parameters maximising loglikelihood function.
         :type method: str
         :param initial_guess: Starting point solution may affect the results of the optization process. The user can provid an initial guess or choose between the following options:
+
             - **Binary Models**:
+
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
                 - *degrees*: initial guess of each node is proportianal to its degree;
                 - *degrees_minor*: initial guess of each node is inversely proportional to its degree;
                 - *chung_lu*: initial guess given by Chung-Lu formula;
+
             - **Weighted Models**:
+
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
                 - *strengths*: initial guess of each node is proportianal to its stength;
                 - *strengths_minor*: initial guess of each node is inversely proportional to its strength;
+
         :type initial_guess: str, optional
         :param adjacency: Adjacency can be a binary method (defaults is *dcm-new*) or an adjacency matrix.
         :type adjacency: str or numpy.ndarray, optional
