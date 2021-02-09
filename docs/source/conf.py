@@ -13,7 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
-#sys.path.append('../src/')
+sys.path.append('../src/')
 
 
 # -- Project information -----------------------------------------------------
@@ -70,4 +70,5 @@ master_doc = 'index'
 # Show also documentation for _init_
 autoclass_content = 'both'
 
-autodoc_mock_imports = ['numpy', 'scipy', 'numba', 'multiprocessing']
+autodoc_mock_imports = ['numpy', 'scipy', 'numba',
+                        'multiprocessing', 'powerlaw', 'newtworkx']
