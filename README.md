@@ -148,6 +148,8 @@ To learn more, please read the two ipython notebooks in the examples directory:
 one is a study case on a [directed graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Directed%20Graphs.ipynb), 
 while the other is on an [undirected graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Undirected%20Graphs.ipynb).
 
+You can find all the available NEMtropy functions in the [documentation](https://nemtropy.readthedocs.io/en/master/index.html).
+
 Development
 -----------
 Please work on a feature branch and create a pull request to the development 
