@@ -9,7 +9,7 @@ setup(
     name="NEMtropy",
     author="Nicolo' Vallarano, Emiliano Marchese",
     author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
-    packages=find_packages(),
+    packages=["NEMtropy"],
     package_dir={'': 'src'},
     version="1.0.4",
     description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
