@@ -1,0 +1,921 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEMtropy.ensemble_generator &#8212; NEMtropy 1.0.4 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">NEMtropy 1.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">NEMtropy.ensemble_generator</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for NEMtropy.ensemble_generator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1"># Stops Numba Warning for experimental feature</span>
+<span class="kn">from</span> <span class="nn">numba.core.errors</span> <span class="kn">import</span> <span class="n">NumbaExperimentalFeatureWarning</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">NumbaExperimentalFeatureWarning</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ensemble_sampler_cm_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_cm_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_cm_graph</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single undirected binary graph after UBCM.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param x: UBCM solution</span>
+<span class="sd">    :type x: numpy.ndarray</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">),</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">xj</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">xi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">xj</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_cm</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># removing None</span>
+    <span class="n">edges_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">edges_list</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="ensemble_sampler_ecm_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_ecm_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_ecm_graph</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single undirected weighted graph after ECM.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+<span class="sd">        The function is parallelyzed.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param x: ECM degrees solution</span>
+<span class="sd">    :type x: numpy.ndarray</span>
+<span class="sd">    :param y: ECM strengths solution</span>
+<span class="sd">    :type y: numpy.ndarray</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">),</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">xj</span><span class="p">,</span> <span class="n">yj</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">xj</span><span class="p">,</span> <span class="n">yj</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_ecm</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># removing None</span>
+    <span class="n">edges_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">edges_list</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="ensemble_sampler_dcm_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_dcm_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_dcm_graph</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single directed binary graph after DBCM.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+<span class="sd">        The function is parallelyzed.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param x: DBCM out-degrees parameters solution</span>
+<span class="sd">    :type x: numpy.ndarray</span>
+<span class="sd">    :param y: DBCM in-degrees parameters solution</span>
+<span class="sd">    :type y: numpy.ndarray</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(((</span><span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">),</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">yj</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">xi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">yj</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                 <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_dcm</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># removing None</span>
+    <span class="n">edges_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">edges_list</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="ensemble_sampler_decm_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_decm_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_decm_graph</span><span class="p">(</span>
+        <span class="n">outfile_name</span><span class="p">,</span>
+        <span class="n">a_out</span><span class="p">,</span> <span class="n">a_in</span><span class="p">,</span>
+        <span class="n">b_out</span><span class="p">,</span> <span class="n">b_in</span><span class="p">,</span>
+        <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single directed weighted graph after DECM.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+<span class="sd">        The function is parallelyzed.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param a_out: DECM out-degrees parameters solution</span>
+<span class="sd">    :type a_out: numpy.ndarray</span>
+<span class="sd">    :param a_in: DECM in-degrees parameters solution</span>
+<span class="sd">    :type a_in: numpy.ndarray</span>
+<span class="sd">    :param b_out: DECM out-strengths parameters solution</span>
+<span class="sd">    :type b_out: numpy.ndarray</span>
+<span class="sd">    :param b_in: DECM in-strengths parameters solution</span>
+<span class="sd">    :type b_in: numpy.ndarray</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a_out</span><span class="p">))</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">((</span>
+                    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">a_out_i</span><span class="p">,</span> <span class="n">b_out_i</span><span class="p">),</span>
+                    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">a_in_j</span><span class="p">,</span> <span class="n">b_in_j</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a_out_i</span><span class="p">,</span> <span class="n">b_out_i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">a_out</span><span class="p">,</span> <span class="n">b_out</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">a_in_j</span><span class="p">,</span> <span class="n">b_in_j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">a_in</span><span class="p">,</span> <span class="n">b_in</span><span class="p">)</span>
+                 <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_decm</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># removing None</span>
+    <span class="n">edges_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">edges_list</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="ensemble_sampler_crema_ecm_det_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_crema_ecm_det_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_crema_ecm_det_graph</span><span class="p">(</span>
+        <span class="n">outfile_name</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">adj</span><span class="p">,</span>
+        <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single undirected weighted graph after CReMa,</span>
+<span class="sd">        given a fixed, complete network topology.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+<span class="sd">        The function is parallelyzed.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param beta: CReMa solution</span>
+<span class="sd">    :type beta: numpy.ndarray</span>
+<span class="sd">    :param adj: Edges list: out-nodes array, in-nodes array and links weights.</span>
+<span class="sd">    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="p">(</span><span class="n">row_inds</span><span class="p">,</span> <span class="n">col_inds</span><span class="p">,</span> <span class="n">weigths_value</span><span class="p">)</span> <span class="o">=</span> <span class="n">adj</span>
+    <span class="k">del</span> <span class="n">weigths_value</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">beta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">beta</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">row_inds</span><span class="p">,</span> <span class="n">col_inds</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_crema_ecm_det</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="ensemble_sampler_crema_ecm_prob_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_crema_ecm_prob_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_crema_ecm_prob_graph</span><span class="p">(</span>
+        <span class="n">outfile_name</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">adj</span><span class="p">,</span>
+        <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single undirected weighted graph after CReMa,</span>
+<span class="sd">        given a probabilistic network topology.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+<span class="sd">        The function is parallelyzed.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param beta: CReMa solution</span>
+<span class="sd">    :type beta: numpy.ndarray</span>
+<span class="sd">    :param adj: Edges list:</span>
+<span class="sd">         out-nodes array, in-nodes array and links probabilities.</span>
+<span class="sd">    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="p">(</span><span class="n">row_inds</span><span class="p">,</span> <span class="n">col_inds</span><span class="p">,</span> <span class="n">weigths_value</span><span class="p">)</span> <span class="o">=</span> <span class="n">adj</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">beta</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">beta</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="n">w_prob</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w_prob</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">row_inds</span><span class="p">,</span> <span class="n">col_inds</span><span class="p">,</span> <span class="n">weigths_value</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_crema_ecm_prob</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># removing None</span>
+    <span class="n">edges_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">edges_list</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="ensemble_sampler_crema_sparse_ecm_prob_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_crema_sparse_ecm_prob_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_crema_sparse_ecm_prob_graph</span><span class="p">(</span>
+        <span class="n">outfile_name</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">adj</span><span class="p">,</span>
+        <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single undirected weighted graph after CReMa,</span>
+<span class="sd">        given a probabilistic network topology.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+<span class="sd">        The function is parallelyzed.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param beta: CReMa solution</span>
+<span class="sd">    :type beta: numpy.ndarray</span>
+<span class="sd">    :param adj: Edges list:</span>
+<span class="sd">         out-nodes array, in-nodes array and links probabilities.</span>
+<span class="sd">    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">adj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">beta</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">beta</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span>
+    <span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_crema_sparse_ecm_prob</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># removing None</span>
+    <span class="n">edges_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">edges_list</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># debug</span>
+    <span class="c1"># print(edges_list)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="ensemble_sampler_crema_decm_prob_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_crema_decm_prob_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_crema_decm_prob_graph</span><span class="p">(</span>
+        <span class="n">outfile_name</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">adj</span><span class="p">,</span>
+        <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single directed weighted graph after CReMa,</span>
+<span class="sd">        given a probabilistic network topology.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+<span class="sd">        The function is parallelyzed.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param beta: CReMa solution</span>
+<span class="sd">    :type beta: numpy.ndarray</span>
+<span class="sd">    :param adj: Edges list:</span>
+<span class="sd">         out-nodes array, in-nodes array and links probabilities.</span>
+<span class="sd">    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">b_out</span><span class="p">,</span> <span class="n">b_in</span> <span class="o">=</span> <span class="n">beta</span>
+
+    <span class="p">(</span><span class="n">row_inds</span><span class="p">,</span> <span class="n">col_inds</span><span class="p">,</span> <span class="n">weigths_value</span><span class="p">)</span> <span class="o">=</span> <span class="n">adj</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">b_out</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">b_in</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="n">w_prob</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w_prob</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">row_inds</span><span class="p">,</span> <span class="n">col_inds</span><span class="p">,</span> <span class="n">weigths_value</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_crema_decm_prob</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># debug</span>
+    <span class="c1"># print(edges_list)</span>
+
+    <span class="c1"># removing None</span>
+    <span class="n">edges_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">edges_list</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="ensemble_sampler_crema_decm_det_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_crema_decm_det_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_crema_decm_det_graph</span><span class="p">(</span>
+        <span class="n">outfile_name</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">adj</span><span class="p">,</span>
+        <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single directed weighted graph after CReMa,</span>
+<span class="sd">        given a fixed, complete network topology.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+<span class="sd">        The function is parallelyzed.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param beta: CReMa solution</span>
+<span class="sd">    :type beta: numpy.ndarray</span>
+<span class="sd">    :param adj: Edges list:</span>
+<span class="sd">         out-nodes array, in-nodes array and links weights.</span>
+<span class="sd">    :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">b_out</span><span class="p">,</span> <span class="n">b_in</span> <span class="o">=</span> <span class="n">beta</span>
+
+    <span class="p">(</span><span class="n">row_inds</span><span class="p">,</span> <span class="n">col_inds</span><span class="p">,</span> <span class="n">weigths_value</span><span class="p">)</span> <span class="o">=</span> <span class="n">adj</span>
+    <span class="k">del</span> <span class="n">weigths_value</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">b_out</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">b_in</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">row_inds</span><span class="p">,</span> <span class="n">col_inds</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_crema_decm_det</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># debug</span>
+    <span class="c1"># print(edges_list)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="ensemble_sampler_crema_sparse_decm_prob_graph"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.ensemble_sampler_crema_sparse_decm_prob_graph">[docs]</a><span class="k">def</span> <span class="nf">ensemble_sampler_crema_sparse_decm_prob_graph</span><span class="p">(</span>
+        <span class="n">outfile_name</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">adj</span><span class="p">,</span>
+        <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Produce a single directed weighted graph after the</span>
+<span class="sd">        sparse version of CReMa, given a probabilistic network topology.</span>
+<span class="sd">        The graph is saved as an edges list on a file.</span>
+<span class="sd">        The function is parallelyzed.</span>
+
+<span class="sd">    :param outfile_name: Name of the file where to save the graph on.</span>
+<span class="sd">    :type outfile_name: str</span>
+<span class="sd">    :param beta: CReMa solution</span>
+<span class="sd">    :type beta: numpy.ndarray</span>
+<span class="sd">    :param adj: Tuple of DBCM out-degrees parameters and</span>
+<span class="sd">        in-degrees parameters solution.</span>
+<span class="sd">    :type adj: (numpy.ndarray, numpy.ndarray)</span>
+<span class="sd">    :param cpu_n: Number of cpus to use, defaults to 2</span>
+<span class="sd">    :type cpu_n: int, optional</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: The `outfile_name` input parameter</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">b_out</span><span class="p">,</span> <span class="n">b_in</span> <span class="o">=</span> <span class="n">beta</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">adj</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># put together inputs for pool</span>
+    <span class="n">iter_</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">b_out</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+            <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">b_in</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span>
+    <span class="p">)</span>
+
+    <span class="c1"># compute existing edges</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">cpu_n</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">edges_list</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">is_a_link_crema_sparse_decm_prob</span><span class="p">,</span> <span class="n">iter_</span><span class="p">)</span>
+
+    <span class="c1"># removing None</span>
+    <span class="n">edges_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">edges_list</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># edgelist writing</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">))</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outfile_name</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_cm"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_cm">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_cm</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns an undirected link</span>
+<span class="sd">        between two given nodes after the UBCM.</span>
+
+<span class="sd">    :param args_1: Tuple containing node 1 and related parameter solution.</span>
+<span class="sd">    :type args_1: (int, float)</span>
+<span class="sd">    :param args_2: Tuple containing node 2 and related parameter solution.</span>
+<span class="sd">    :type args_2: (int, float)</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the couple of nodes,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">xj</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">()</span>
+    <span class="n">xij</span> <span class="o">=</span> <span class="n">xi</span><span class="o">*</span><span class="n">xj</span>
+    <span class="n">p_ensemble</span> <span class="o">=</span> <span class="n">xij</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">xij</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">p_ensemble</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_ecm"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_ecm">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_ecm</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns an undirected link with related weight</span>
+<span class="sd">        between two given nodes after the ECM.</span>
+
+<span class="sd">    :param args_1: Tuple containing node 1, degree parameter solution</span>
+<span class="sd">        and strength parameter solution.</span>
+<span class="sd">    :type args_1: (int, float, float)</span>
+<span class="sd">    :param args_2: Tuple containing node 2, degree parameter solution</span>
+<span class="sd">        and strength parameter solution.</span>
+<span class="sd">    :type args_2: (int, float, float)</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the triplet of nodes and weight,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># q-ensemble source: &quot;Unbiased sampling of network ensembles&quot;, WUNs</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">xj</span><span class="p">,</span> <span class="n">yj</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">()</span>
+    <span class="n">xij</span> <span class="o">=</span> <span class="n">xi</span><span class="o">*</span><span class="n">xj</span>
+    <span class="n">yij</span> <span class="o">=</span> <span class="n">yi</span><span class="o">*</span><span class="n">yj</span>
+    <span class="n">p_ensemble</span> <span class="o">=</span> <span class="n">xij</span><span class="o">*</span><span class="n">yij</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">yij</span> <span class="o">+</span> <span class="n">xij</span><span class="o">*</span><span class="n">yij</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">p_ensemble</span><span class="p">:</span>
+        <span class="n">q_ensemble</span> <span class="o">=</span> <span class="n">yij</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">geometric</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">q_ensemble</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_dcm"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_dcm">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_dcm</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns a directed link</span>
+<span class="sd">        between two given nodes after the DBCM.</span>
+
+<span class="sd">    :param args_1: Tuple containing out node and out-degree parameter solution.</span>
+<span class="sd">    :type args_1: (int, float)</span>
+<span class="sd">    :param args_2: Tuple containing in node and in-degree parameter solution.</span>
+<span class="sd">    :type args_2: (int, float)</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the couple of nodes,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">yj</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">()</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">xi</span><span class="o">*</span><span class="n">yj</span>
+    <span class="n">p_ensemble</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tmp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">p_ensemble</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_decm"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_decm">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_decm</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns an directed link with related weight</span>
+<span class="sd">        between two given nodes after the DECM.</span>
+
+<span class="sd">    :param args_1: Tuple containing out node, out-degree parameter solution</span>
+<span class="sd">        and out-strength parameter solution.</span>
+<span class="sd">    :type args_1: (int, float, float)</span>
+<span class="sd">    :param args_2: Tuple containing in node, in-degree parameter solution</span>
+<span class="sd">        and in-strength parameter solution.</span>
+<span class="sd">    :type args_2: (int, float, float)</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the triplet of nodes and weight,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># q-ensemble source:</span>
+    <span class="c1"># &quot;Fast and scalable resolution of the likelihood maximization problem</span>
+    <span class="c1"># for Exponential Random Graph models&quot;</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">a_out_i</span><span class="p">,</span> <span class="n">b_out_i</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">a_in_j</span><span class="p">,</span> <span class="n">b_in_j</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">()</span>
+    <span class="n">aij</span> <span class="o">=</span> <span class="n">a_out_i</span> <span class="o">*</span> <span class="n">a_in_j</span>
+    <span class="n">bij</span> <span class="o">=</span> <span class="n">b_out_i</span> <span class="o">*</span> <span class="n">b_in_j</span>
+    <span class="n">p_ensemble</span> <span class="o">=</span> <span class="n">aij</span><span class="o">*</span><span class="n">bij</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">bij</span> <span class="o">+</span> <span class="n">aij</span><span class="o">*</span><span class="n">bij</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">p_ensemble</span><span class="p">:</span>
+        <span class="n">q_ensemble</span> <span class="o">=</span> <span class="n">bij</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">geometric</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">q_ensemble</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_crema_ecm_det"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_crema_ecm_det">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_crema_ecm_det</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns an undirected link with related weight</span>
+<span class="sd">        between two given nodes after the CReMa undirected</span>
+<span class="sd">        for a deterministic topology.</span>
+
+<span class="sd">    :param args_1: Tuple containing node 1, and strength parameter solution.</span>
+<span class="sd">    :type args_1: (int, float)</span>
+<span class="sd">    :param args_2: Tuple containing node 2, and strength parameter solution.</span>
+<span class="sd">    :type args_2: (int, float)</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the triplet of nodes and weight,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Q-ensemble source: &quot;A faster Horse on a safer trail&quot;.</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">beta_i</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">beta_j</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+
+    <span class="n">q_ensemble</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">beta_i</span> <span class="o">+</span> <span class="n">beta_j</span><span class="p">)</span>
+    <span class="n">w_link</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">q_ensemble</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w_link</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_crema_ecm_prob"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_crema_ecm_prob">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_crema_ecm_prob</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">p_ensemble</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns an undirected link with related weight</span>
+<span class="sd">        between two given nodes after the CReMa undirected</span>
+<span class="sd">        for probabilistic o topology.</span>
+
+<span class="sd">    :param args_1: Tuple containing node 1, and strength parameter solution.</span>
+<span class="sd">    :type args_1: (int, float)</span>
+<span class="sd">    :param args_2: Tuple containing node 2, and strength parameter solution.</span>
+<span class="sd">    :type args_2: (int, float)</span>
+<span class="sd">    :param p_ensemble: Probability the link exists</span>
+<span class="sd">    :type p_ensemble: float</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the triplet of nodes and weight,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Q-ensemble source: &quot;A faster Horse on a safer trail&quot;.</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">beta_i</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">beta_j</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">p_ensemble</span><span class="p">:</span>
+        <span class="n">q_ensemble</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">beta_i</span> <span class="o">+</span> <span class="n">beta_j</span><span class="p">)</span>
+        <span class="n">w_link</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">q_ensemble</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w_link</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_crema_sparse_ecm_prob"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_crema_sparse_ecm_prob">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_crema_sparse_ecm_prob</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns an undirected link with related weight</span>
+<span class="sd">        between two given nodes after the CReMa undirected</span>
+<span class="sd">        for probabilistic o topology.</span>
+<span class="sd">        Function for the sparse version of CReMa.</span>
+
+<span class="sd">    :param args_1: Tuple containing node 1, strength parameter solution and</span>
+<span class="sd">        degree parameter solution from the probabilistic model.</span>
+<span class="sd">    :type args_1: (int, float)</span>
+<span class="sd">    :param args_2: Tuple containing node 2, strength parameter solution and</span>
+<span class="sd">        degree parameter solution from the probabilistic model</span>
+<span class="sd">    :type args_2: (int, float)</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the triplet of nodes and weight,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Q-ensemble source: &quot;A faster Horse on a safer trail&quot;.</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">beta_i</span><span class="p">,</span> <span class="n">x_i</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">beta_j</span><span class="p">,</span> <span class="n">x_j</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">()</span>
+    <span class="n">p_ensemble</span> <span class="o">=</span> <span class="n">x_i</span><span class="o">*</span><span class="n">x_j</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">x_j</span><span class="o">*</span><span class="n">x_i</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">p_ensemble</span><span class="p">:</span>
+        <span class="n">q_ensemble</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">beta_i</span> <span class="o">+</span> <span class="n">beta_j</span><span class="p">)</span>
+        <span class="n">w_link</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">q_ensemble</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w_link</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_crema_decm_det"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_crema_decm_det">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_crema_decm_det</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns a directed link with related weight</span>
+<span class="sd">        between two given nodes after the CReMa undirected for a deterministic</span>
+<span class="sd">         topology.</span>
+
+<span class="sd">    :param args_1: Tuple containing out node and out-strength parameter</span>
+<span class="sd">        solution.</span>
+<span class="sd">    :type args_1: (int, float)</span>
+<span class="sd">    :param args_2: Tuple containing in node and in-strength parameter solution.</span>
+<span class="sd">    :type args_2: (int, float)</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the triplet of nodes and weight,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Q-ensemble source: &quot;A faster Horse on a safer trail&quot;.</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">b_out_i</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">b_in_j</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+
+    <span class="n">q_ensemble</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">b_out_i</span> <span class="o">+</span> <span class="n">b_in_j</span><span class="p">)</span>
+    <span class="n">w_link</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">q_ensemble</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w_link</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_crema_decm_prob"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_crema_decm_prob">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_crema_decm_prob</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">p_ensemble</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns a directed link with related weight</span>
+<span class="sd">        between two given nodes after the CReMa directed</span>
+<span class="sd">        for a probabilistic topology.</span>
+
+<span class="sd">    :param args_1: Tuple containing out node and out-strength parameter</span>
+<span class="sd">        solution.</span>
+<span class="sd">    :type args_1: (int, float)</span>
+<span class="sd">    :param args_2: Tuple containing in node and in-strength parameter solution.</span>
+<span class="sd">    :type args_2: (int, float)</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the triplet of nodes and weight,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Q-ensemble source: &quot;A faster Horse on a safer trail&quot;.</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">b_out_i</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">b_in_j</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">p_ensemble</span><span class="p">:</span>
+        <span class="n">q_ensemble</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">b_out_i</span> <span class="o">+</span> <span class="n">b_in_j</span><span class="p">)</span>
+        <span class="n">w_link</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">q_ensemble</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w_link</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_a_link_crema_sparse_decm_prob"><a class="viewcode-back" href="../../NEMtropy.html#NEMtropy.ensemble_generator.is_a_link_crema_sparse_decm_prob">[docs]</a><span class="k">def</span> <span class="nf">is_a_link_crema_sparse_decm_prob</span><span class="p">(</span><span class="n">args_1</span><span class="p">,</span> <span class="n">args_2</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The function randomly returns a directed link with related weight</span>
+<span class="sd">        between two given nodes after the CReMa directed</span>
+<span class="sd">        for a probabilistic topology.</span>
+<span class="sd">        Function for the sparse version of CReMa.</span>
+
+<span class="sd">    :param args_1: Tuple containing out node, out-strength parameter solution</span>
+<span class="sd">        and out-degree parameter solution from the probabilistic model</span>
+<span class="sd">    :type args_1: (int, float, float)</span>
+<span class="sd">    :param args_2: Tuple containing in node and in-strength parameter solution</span>
+<span class="sd">        and in-degree parameter solution from the probabilistic model</span>
+<span class="sd">    :type args_2: (int, float, float)</span>
+<span class="sd">    :param seed: Random seed, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+<span class="sd">    :return: If the links exists returns the triplet of nodes and weight,</span>
+<span class="sd">        otherwise returns None</span>
+<span class="sd">    :rtype: (int, int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Q-ensemble source: &quot;A faster Horse on a safer trail&quot;.</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">b_out_i</span><span class="p">,</span> <span class="n">x_i</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_1</span>
+    <span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">b_in_j</span><span class="p">,</span> <span class="n">x_j</span><span class="p">)</span> <span class="o">=</span> <span class="n">args_2</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">()</span>
+    <span class="n">p_ensemble</span> <span class="o">=</span> <span class="n">x_i</span><span class="o">*</span><span class="n">x_j</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">x_j</span><span class="o">*</span><span class="n">x_i</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">p_ensemble</span><span class="p">:</span>
+        <span class="n">q_ensemble</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">b_out_i</span> <span class="o">+</span> <span class="n">b_in_j</span><span class="p">)</span>
+        <span class="n">w_link</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">q_ensemble</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">w_link</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">NEMtropy 1.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">NEMtropy.ensemble_generator</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Emiliano Marchese and Nicolo&#39; Vallarano.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>
