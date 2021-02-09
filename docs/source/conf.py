@@ -72,4 +72,5 @@ master_doc = 'index'
 autoclass_content = 'both'
 
 autodoc_mock_imports = ['numpy', 'scipy', 'numba',
-                        'multiprocessing', 'powerlaw', 'newtworkx']
+                        'multiprocessing', 'powerlaw',
+                        'newtworkx', 'sphinx_rtd_theme']
