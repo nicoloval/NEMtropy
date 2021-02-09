@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
 Name: NEMtropy
-Version: 1.0.3
+Version: 1.0.5
 Summary: NEMtropy is a Maximum-Entropy toolbox for networks, it provides the user with a state of the art solver for a range variety of Maximum Entropy Networks models derived from the ERGM family. This module allows you to solve the desired model and generate a number of randomized graphs from the original one: the so-called graphs ensemble.
 Home-page: https://github.com/nicoloval/NEMtropy/
 Author: Nicolo' Vallarano, Emiliano Marchese
 Author-email: nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it
 License: GNU General Public License v3
-Download-URL: https://github.com/nicoloval/NEMtropy/archive/v1.0.3.zip
+Download-URL: https://github.com/nicoloval/NEMtropy/archive/1.0.5.zip
 Description: ![PyPI](https://img.shields.io/pypi/v/nemtropy)
         ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nemtropy)
         [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -40,6 +40,7 @@ Description: ![PyPI](https://img.shields.io/pypi/v/nemtropy)
         #### Table Of Contents
         - [Currently Implemented Models](#currently-implemented-models)
         - [Installation](#installation)
+        - [Dependencies](#dependencies)
         - [A Simple Example](#simple-example)
         - [Development](#development)
         - [Testing](#testing)
@@ -52,7 +53,7 @@ Description: ![PyPI](https://img.shields.io/pypi/v/nemtropy)
         * **UBCM** *Undirected Binary Configuration Model* [[1]](#1)
         * **UECM** *Undirected Enhanced Configuration Model* [[1]](#1)
         * **DBCM** *Directed Binary Configuration Model* [[1]](#1)
-        * **DECM** *Directed Enhanced Coonfiguration Model* [[1]](#1)
+        * **DECM** *Directed Enhanced Configuration Model* [[1]](#1)
         * **CReMa** [[2]](#2)
         
         The following table may helps you identify the model that fits your needs in function of the type of network you are working with;
@@ -92,6 +93,25 @@ Description: ![PyPI](https://img.shields.io/pypi/v/nemtropy)
         ```
             $ pip install NEMtropy --upgrade
         ```
+        
+        Dependencies
+        ------------
+        
+        NEMtropy uses <code>numba</code> library. It can be installed via pip by running
+        in your terminal the following command:
+        
+        ```
+            $ pip install numba
+        ```
+        
+        For <code>python3.5</code> users the correct command is the following:
+        
+        ```
+            $ pip install --prefer-binary numba
+        ```
+        
+        It avoids an error during the installation of <code>llvmlite</code> due to 
+        the absence of its wheel in <code>python3.5</code>.
         
         Simple Example
         --------------

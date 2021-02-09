@@ -88,11 +88,11 @@ you can simply type from your terminal:
 Dependencies
 ------------
 
-NEMtropy uses <code>numba</code> library. It can be installed via pip by running
-in your terminal the following command:
+NEMtropy uses <code>numba</code> and <code>powerlaw</code> libraries. They can be installed via pip by running in your terminal the following command:
 
 ```
     $ pip install numba
+    $ pip install powerlaw
 ```
 
 For <code>python3.5</code> users the correct command is the following:
