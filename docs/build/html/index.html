@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEMtropy documentation &#8212; NEMtropy 1.0.4 documentation</title>
+    <title>NEMtropy documentation &#8212; NEMtropy 1.0.5 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     
@@ -30,7 +30,7 @@
         <li class="right" >
           <a href="install.html" title="How to install"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">NEMtropy 1.0.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="#">NEMtropy 1.0.5 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">NEMtropy documentation</a></li> 
       </ul>
     </div>  
@@ -116,39 +116,98 @@ efficient reconstruction of weighted networks.” New Journal of
 Physics 22.5 (2020): 053053. <a class="reference external" href="https://arxiv.org/abs/1811.09829">https://arxiv.org/abs/1811.09829</a></p></li>
 </ul>
 </div>
-<div class="section" id="basic-functionalities">
-<h1>Basic functionalities<a class="headerlink" href="#basic-functionalities" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>NEMtropy can be installed via pip. You can get it from your terminal:</p>
-<dl class="simple">
-<dt><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a></dt><dd><p>$ pip install NEMtropy</p>
-</dd>
-</dl>
-<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
-<p>If you already install the package and wish to upgrade it,
-you can simply type from your terminal:</p>
-<dl class="simple">
-<dt><a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a></dt><dd><p>$ pip install NEMtropy –upgrade</p>
-</dd>
-</dl>
-<p><a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install NEMtropy
+</pre></div>
+</div>
+<p>If you already install the package and wish to upgrade it, you can
+simply type from your terminal:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install NEMtropy --upgrade
+</pre></div>
+</div>
 </div>
 <div class="section" id="dependencies">
 <h1>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
-<p>NEMtropy uses &lt;code&gt;numba&lt;/code&gt; library. It can be installed via pip by running
-in your terminal the following command:</p>
-<dl class="simple">
-<dt><a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a></dt><dd><p>$ pip install numba</p>
-</dd>
-</dl>
-<p><a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p>
-<p>For &lt;code&gt;python3.5&lt;/code&gt; users the correct command is the following:</p>
-<dl class="simple">
-<dt><a href="#id25"><span class="problematic" id="id26">``</span></a><a href="#id27"><span class="problematic" id="id28">`</span></a></dt><dd><p>$ pip install –prefer-binary numba</p>
-</dd>
-</dl>
-<p><a href="#id29"><span class="problematic" id="id30">``</span></a><a href="#id31"><span class="problematic" id="id32">`</span></a></p>
-<p>It avoids an error during the installation of &lt;code&gt;llvmlite&lt;/code&gt; due to
-the absence of its wheel in &lt;code&gt;python3.5&lt;/code&gt;.</p>
+<p>NEMtropy uses &lt;code&gt;numba&lt;/code&gt; and &lt;code&gt;powerlaw&lt;/code&gt; libraries.
+They can be installed via pip by running in your terminal the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install numba
+$ pip install powerlaw
+</pre></div>
+</div>
+<p>For python3.5 users the correct command is the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install --prefer-binary numba
+</pre></div>
+</div>
+<p>It avoids an error during the installation of llvmlite due to the
+absence of its wheel in python3.5.</p>
+</div>
+<div class="section" id="simple-example">
+<h1>Simple Example<a class="headerlink" href="#simple-example" title="Permalink to this headline">¶</a></h1>
+<p>As an example we solve the UBCM for zachary karate club network.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">NEMtropy</span> <span class="kn">import</span> <span class="n">UndirectedGraph</span>
+
+<span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">karate_club_graph</span><span class="p">()</span>
+<span class="n">adj_kar</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_numpy_array</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">UndirectedGraph</span><span class="p">(</span><span class="n">adj_kar</span><span class="p">)</span>
+
+<span class="n">graph</span><span class="o">.</span><span class="n">solve_tool</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;cm_exp&quot;</span><span class="p">,</span>
+             <span class="n">method</span><span class="o">=</span><span class="s2">&quot;newton&quot;</span><span class="p">,</span>
+             <span class="n">initial_guess</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Given the UBCM model, we can generate ten random copies of zachary’s
+karate club.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">graph</span><span class="o">.</span><span class="n">ensemble_sampler</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">cpu_n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;sample/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These copies are saved as an edgelist, each edgelist can be converted to
+an adjacency matrix by running the NEMtropy build graph function.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">NEMtropy.network_functions</span> <span class="kn">import</span> <span class="n">build_graph_from_edgelist</span>
+
+<span class="n">edgelist_ens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;sample/0.txt&quot;</span><span class="p">)</span>
+<span class="n">ens_adj</span> <span class="o">=</span> <span class="n">build_graph_from_edgelist</span><span class="p">(</span><span class="n">edgelist</span> <span class="o">=</span> <span class="n">edgelist_ens</span><span class="p">,</span>
+                                <span class="n">is_directed</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                <span class="n">is_sparse</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                <span class="n">is_weighted</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These collection of random adjacency matrices can be used as a null
+model: it is enough to compute the expected value of the selected
+network feature on the ensemble of matrices and to compare it with its
+original value.</p>
+<p>To learn more, please read the two ipython notebooks in the examples
+directory: one is a study case on a <a class="reference external" href="https://github.com/nicoloval/NEMtropy/blob/master/examples/Directed%20Graphs.ipynb">directed
+graph</a>,
+while the other is on an <a class="reference external" href="https://github.com/nicoloval/NEMtropy/blob/master/examples/Undirected%20Graphs.ipynb">undirected
+graph</a>.</p>
+</div>
+<div class="section" id="development">
+<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
+<p>Please work on a feature branch and create a pull request to the
+development branch. If necessary to merge manually do so without fast
+forward:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git merge --no-ff myfeature
+</pre></div>
+</div>
+<p>To build a development environment run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python3 -m venv venv
+$ source venv/bin/activate
+$ pip install -e &#39;.[dev]&#39;
+</pre></div>
+</div>
+</div>
+<div class="section" id="testing">
+<h1>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h1>
+<p>If you want to test the package integrity, you can run the following
+bash command from the tests directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ bash run_all.sh
+</pre></div>
+</div>
+<p><strong>P.S.</strong> <em>at the moment there may be some problems with the DECM solver
+functions</em></p>
 <div class="section" id="guide">
 <h2>Guide<a class="headerlink" href="#guide" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -190,8 +249,11 @@ the absence of its wheel in &lt;code&gt;python3.5&lt;/code&gt;.</p>
   <ul>
 <li><a class="reference internal" href="#">NEMtropy documentation</a></li>
 <li><a class="reference internal" href="#currently-implemented-models">Currently Implemented Models</a></li>
-<li><a class="reference internal" href="#basic-functionalities">Basic functionalities</a></li>
-<li><a class="reference internal" href="#dependencies">Dependencies</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#simple-example">Simple Example</a></li>
+<li><a class="reference internal" href="#development">Development</a></li>
+<li><a class="reference internal" href="#testing">Testing</a><ul>
 <li><a class="reference internal" href="#guide">Guide</a></li>
 </ul>
 </li>
@@ -234,7 +296,7 @@ the absence of its wheel in &lt;code&gt;python3.5&lt;/code&gt;.</p>
         <li class="right" >
           <a href="install.html" title="How to install"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">NEMtropy 1.0.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="#">NEMtropy 1.0.5 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">NEMtropy documentation</a></li> 
       </ul>
     </div>
