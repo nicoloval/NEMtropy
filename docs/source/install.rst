@@ -1,4 +1,4 @@
-How to install the NEMtropy package
+How to install
 =====================================
 
 Simply install it via pip on your machine:
