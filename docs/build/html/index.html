@@ -42,26 +42,113 @@
             
   <div class="section" id="nemtropy-documentation">
 <h1>NEMtropy documentation<a class="headerlink" href="#nemtropy-documentation" title="Permalink to this headline">¶</a></h1>
-<p>NEMtropy is a Maximum-Entropy toolbox for networks, released as a python3 module.</p>
-<p>NEMtropy provides the user with a state of the art solver for a range variety of Maximum Entropy Networks models derived from the ERGM family.
-This module allows you to solve the desired model and generate a number of randomized graphs from the original one: the so-called <em>graphs ensemble</em>.</p>
-<p>NEMtropy builds on the current literature on the matter, improving both in speed of convergence and in the scale of the feasible networks.
-To explore Maximum-Entropy modeling on networks, checkout [Maximum Entropy Hub](<a class="reference external" href="https://meh.imtlucca.it/">https://meh.imtlucca.it/</a>).</p>
+<p>NEMtropy is a Maximum-Entropy toolbox for networks, released as a
+python3 module.</p>
+<p>NEMtropy provides the user with a state of the art solver for a range
+variety of Maximum Entropy Networks models derived from the ERGM family.
+This module allows you to solve the desired model and generate a number
+of randomized graphs from the original one: the so-called <em>graphs
+ensemble</em>.</p>
+<p>NEMtropy builds on the current literature on the matter, improving both
+in speed of convergence and in the scale of the feasible networks. To
+explore Maximum-Entropy modeling on networks, checkout <a class="reference external" href="https://meh.imtlucca.it/">Maximum Entropy
+Hub</a>.</p>
+<p>The models implemented in NEMtropy are presented in a forthcoming
+<a class="reference external" href="https://arxiv.org/abs/2101.12625">paper</a> on arXiv. If you use the
+module for your scientific research, please consider citing us:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@misc</span><span class="p">{</span><span class="n">vallarano2021fast</span><span class="p">,</span>
+      <span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="n">Fast</span> <span class="ow">and</span> <span class="n">scalable</span> <span class="n">likelihood</span> <span class="n">maximization</span> <span class="k">for</span> <span class="n">Exponential</span> <span class="n">Random</span> <span class="n">Graph</span> <span class="n">Models</span><span class="p">},</span>
+      <span class="n">author</span><span class="o">=</span><span class="p">{</span><span class="n">Nicolò</span> <span class="n">Vallarano</span> <span class="ow">and</span> <span class="n">Matteo</span> <span class="n">Bruno</span> <span class="ow">and</span> <span class="n">Emiliano</span> <span class="n">Marchese</span> <span class="ow">and</span> <span class="n">Giuseppe</span> <span class="n">Trapani</span> <span class="ow">and</span> <span class="n">Fabio</span> <span class="n">Saracco</span> <span class="ow">and</span> <span class="n">Tiziano</span> <span class="n">Squartini</span> <span class="ow">and</span> <span class="n">Giulio</span> <span class="n">Cimini</span> <span class="ow">and</span> <span class="n">Mario</span> <span class="n">Zanon</span><span class="p">},</span>
+      <span class="n">year</span><span class="o">=</span><span class="p">{</span><span class="mi">2021</span><span class="p">},</span>
+      <span class="n">eprint</span><span class="o">=</span><span class="p">{</span><span class="mf">2101.12625</span><span class="p">},</span>
+      <span class="n">archivePrefix</span><span class="o">=</span><span class="p">{</span><span class="n">arXiv</span><span class="p">},</span>
+      <span class="n">primaryClass</span><span class="o">=</span><span class="p">{</span><span class="n">physics</span><span class="o">.</span><span class="n">data</span><span class="o">-</span><span class="n">an</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="currently-implemented-models">
+<h1>Currently Implemented Models<a class="headerlink" href="#currently-implemented-models" title="Permalink to this headline">¶</a></h1>
+<p>The main feature of NEMtropy is (but not limited to) <em>network
+randomization</em>. The specific kind of network to randomize and property
+to preserve defines the model you need:</p>
+<ul class="simple">
+<li><p><strong>UBCM</strong> <em>Undirected Binary Configuration Model</em> <a class="reference external" href="#1">[1]</a></p></li>
+<li><p><strong>UECM</strong> <em>Undirected Enhanced Configuration Model</em> <a class="reference external" href="#1">[1]</a></p></li>
+<li><p><strong>DBCM</strong> <em>Directed Binary Configuration Model</em> <a class="reference external" href="#1">[1]</a></p></li>
+<li><p><strong>DECM</strong> <em>Directed Enhanced Configuration Model</em> <a class="reference external" href="#1">[1]</a></p></li>
+<li><p><strong>CReMa</strong> <a class="reference external" href="#2">[2]</a></p></li>
+</ul>
+<p>The following table may helps you identify the model that fits your
+needs in function of the type of network you are working with; for
+in-depth discussion please see the references.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 36%" />
+<col style="width: 33%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>[…]</p></th>
+<th class="head"><p>Undirected Graph</p></th>
+<th class="head"><p>Directed Graph</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Binary Graph</strong></p></td>
+<td><p><em>UBCM</em></p></td>
+<td><p><em>DBCM</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Weighted Graph</strong></p></td>
+<td><p><em>UECM</em>, <em>CReMa</em></p></td>
+<td><p><em>DECM</em>, <em>CReMa</em></p></td>
+</tr>
+</tbody>
+</table>
+<p><em>References</em></p>
+<ul class="simple">
+<li><p>[1] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
+“Unbiased sampling of network ensembles.” New Journal of Physics 17.2
+(2015): 023052. <a class="reference external" href="https://arxiv.org/abs/1406.1197">https://arxiv.org/abs/1406.1197</a></p></li>
+<li><p>[2] Parisi, Federica, Tiziano Squartini, and Diego Garlaschelli. “A
+faster horse on a safer trail: generalized inference for the
+efficient reconstruction of weighted networks.” New Journal of
+Physics 22.5 (2020): 053053. <a class="reference external" href="https://arxiv.org/abs/1811.09829">https://arxiv.org/abs/1811.09829</a></p></li>
+</ul>
 </div>
 <div class="section" id="basic-functionalities">
 <h1>Basic functionalities<a class="headerlink" href="#basic-functionalities" title="Permalink to this headline">¶</a></h1>
-<p>To install:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">NEMtropy</span>
-</pre></div>
-</div>
-<p>To import the module:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">NEMtropy</span>
-</pre></div>
-</div>
+<p>NEMtropy can be installed via pip. You can get it from your terminal:</p>
+<dl class="simple">
+<dt><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a></dt><dd><p>$ pip install NEMtropy</p>
+</dd>
+</dl>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<p>If you already install the package and wish to upgrade it,
+you can simply type from your terminal:</p>
+<dl class="simple">
+<dt><a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a></dt><dd><p>$ pip install NEMtropy –upgrade</p>
+</dd>
+</dl>
+<p><a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
 </div>
 <div class="section" id="dependencies">
 <h1>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
-<p>This package has been developed for Python 3.5 but it should be compatible with other versions. It works on numpy arrays and it uses numba and multiprocessing to speed up the computation. Feel free to send an inquiry (and please do it!) if you find any incompatibility.</p>
+<p>NEMtropy uses &lt;code&gt;numba&lt;/code&gt; library. It can be installed via pip by running
+in your terminal the following command:</p>
+<dl class="simple">
+<dt><a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a></dt><dd><p>$ pip install numba</p>
+</dd>
+</dl>
+<p><a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p>
+<p>For &lt;code&gt;python3.5&lt;/code&gt; users the correct command is the following:</p>
+<dl class="simple">
+<dt><a href="#id25"><span class="problematic" id="id26">``</span></a><a href="#id27"><span class="problematic" id="id28">`</span></a></dt><dd><p>$ pip install –prefer-binary numba</p>
+</dd>
+</dl>
+<p><a href="#id29"><span class="problematic" id="id30">``</span></a><a href="#id31"><span class="problematic" id="id32">`</span></a></p>
+<p>It avoids an error during the installation of &lt;code&gt;llvmlite&lt;/code&gt; due to
+the absence of its wheel in &lt;code&gt;python3.5&lt;/code&gt;.</p>
 <div class="section" id="guide">
 <h2>Guide<a class="headerlink" href="#guide" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -102,6 +189,7 @@ To explore Maximum-Entropy modeling on networks, checkout [Maximum Entropy Hub](
   <h3><a href="#">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">NEMtropy documentation</a></li>
+<li><a class="reference internal" href="#currently-implemented-models">Currently Implemented Models</a></li>
 <li><a class="reference internal" href="#basic-functionalities">Basic functionalities</a></li>
 <li><a class="reference internal" href="#dependencies">Dependencies</a><ul>
 <li><a class="reference internal" href="#guide">Guide</a></li>
