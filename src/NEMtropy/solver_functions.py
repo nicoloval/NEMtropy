@@ -3,13 +3,6 @@ import scipy.sparse
 import scipy
 from numba import jit
 import time
-# Stops Numba Warning for experimental feature
-from numba.core.errors import NumbaExperimentalFeatureWarning
-import warnings
-
-warnings.simplefilter(
-    action='ignore',
-    category=NumbaExperimentalFeatureWarning)
 
 
 def matrix_regulariser_function(b, eps):

@@ -3,11 +3,6 @@ import scipy.sparse
 import scipy
 import networkx as nx
 import powerlaw as plw
-# Stops Numba Warning for experimental feature
-from numba.core.errors import NumbaExperimentalFeatureWarning
-import warnings
-
-warnings.simplefilter('ignore', category=NumbaExperimentalFeatureWarning)
 
 
 def random_binary_matrix_generator_dense(n, sym=False, seed=None):

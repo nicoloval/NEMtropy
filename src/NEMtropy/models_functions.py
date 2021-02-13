@@ -1,13 +1,6 @@
 import numpy as np
 from numba import jit, prange
 from . import solver_functions as sof
-# Stops Numba Warning for experimental feature
-from numba.core.errors import NumbaExperimentalFeatureWarning
-import warnings
-
-warnings.simplefilter(
-    action='ignore',
-    category=NumbaExperimentalFeatureWarning)
 
 
 # UBCM functions

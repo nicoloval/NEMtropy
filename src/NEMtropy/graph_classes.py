@@ -6,13 +6,6 @@ from . import models_functions as mof
 from . import solver_functions as sof
 from . import network_functions as nef
 from . import ensemble_generator as eg
-# Stops Numba Warning for experimental feature
-from numba.core.errors import NumbaExperimentalFeatureWarning
-import warnings
-
-warnings.simplefilter(
-    action='ignore',
-    category=NumbaExperimentalFeatureWarning)
 
 
 class UndirectedGraph:

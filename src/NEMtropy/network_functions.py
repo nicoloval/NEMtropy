@@ -3,13 +3,6 @@ import scipy.sparse
 import scipy
 from numba import jit
 from scipy.sparse import csr_matrix
-# Stops Numba Warning for experimental feature
-from numba.core.errors import NumbaExperimentalFeatureWarning
-import warnings
-
-warnings.simplefilter(
-    action='ignore',
-    category=NumbaExperimentalFeatureWarning)
 
 
 def build_graph_from_edgelist(edgelist,
