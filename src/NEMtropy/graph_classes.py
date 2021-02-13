@@ -2392,9 +2392,9 @@ class DirectedGraph:
 
         :param model: Available models are:
             - *dcm*: solves DBCM respect to the parameters *x* and "y" of the loglikelihood function, it works for uweighted directed graphs [insert ref].
-            - *dcm-new*: differently from the *dcm* option, *dcm-new* considers the exponents of *x* and *y* as parameters [insert ref].
+            - *dcm_exp*: differently from the *dcm* option, *dcm_exp* considers the exponents of *x* and *y* as parameters [insert ref].
             - *decm*: solves DECM respect to the parameters *a_out*, *a_in*, *b_out* and *b_in* of the loglikelihood function, it is conceived for weighted directed graphs [insert ref].
-            - *decm-new*: differently from the *ecm* option, *ecm_exp* considers the exponents of *a_out*, *a_in*, *b_out* and *b_in** as parameters [insert ref].
+            - *decm_exp*: differently from the *decm* option, *decm_exp* considers the exponents of *a_out*, *a_in*, *b_out* and *b_in** as parameters [insert ref].
             - *crema*: solves CReMa for a weighted directd graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
             - *crema-sparse*: alternative implementetio of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
         :type model: str
@@ -2421,7 +2421,7 @@ class DirectedGraph:
                 - *strengths_minor*: initial guess of each node is inversely proportional to its strength;
 
         :type initial_guess: str, optional
-        :param adjacency: Adjacency can be a binary method (defaults is *dcm-new*) or an adjacency matrix.
+        :param adjacency: Adjacency can be a binary method (defaults is *dcm_exp*) or an adjacency matrix.
         :type adjacency: str or numpy.ndarray, optional
         :param method_adjacency: If adjacency is a *model*, it is the *methdod* used to solve it. Defaults to "newton".
         :type method_adjacency: str, optional
