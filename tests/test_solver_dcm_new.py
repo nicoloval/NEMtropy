@@ -334,7 +334,7 @@ class MyTest(unittest.TestCase):
             regularise=True,
             full_return=False,
             linsearch=True,
-            hessian_regulariser = hes_reg,
+            hessian_regulariser=hes_reg,
         )
 
         g._set_solved_problem_dcm(theta_sol)
