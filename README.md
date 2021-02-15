@@ -46,14 +46,17 @@ The specific kind of network to randomize and property to preserve defines the m
 * **DBCM** *Directed Binary Configuration Model* [[1]](#1)
 * **DECM** *Directed Enhanced Configuration Model* [[1]](#1)
 * **CReMa** [[2]](#2)
+* **BiCM** *Bipartite Configuration Model* [[3]](#3)
 
 The following table may helps you identify the model that fits your needs in function of the type of network you are working with;
 for in-depth discussion please see the references.
 
-[...] | Undirected Graph | Directed Graph
------ | ---------------- | -------------- 
-**Binary Graph** | *UBCM* | *DBCM* 
-**Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa*
+[...] | Undirected Graph | Directed Graph | Bipartite Graph
+----- | ---------------- | -------------- | --------------
+**Binary Graph** | *UBCM* | *DBCM* | *BiCM*
+**Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa* | -
+
+The BiCM module is also available as [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
 
 _References_
 
@@ -67,6 +70,11 @@ _References_
     "A faster horse on a safer trail: generalized inference for the efficient reconstruction of weighted networks."
     New Journal of Physics 22.5 (2020): 053053.
     https://arxiv.org/abs/1811.09829
+* <a id="3">[3]</a>
+    Saracco, Fabio, Riccardo Di Clemente, Andrea Gabrielli, and Tiziano Squartini.
+	"Randomizing bipartite networks: the case of the World Trade Web." 
+	Scientific reports 5, no. 1 (2015): 1-18.
+    https://doi.org/10.1038/srep10595
 
 
 Installation
@@ -183,11 +191,13 @@ Credits
 
 _Authors_:
 
-[Nicolò Vallarano](http://www.imtlucca.it/en/nicolo.vallarano/)(a.k.a. [nicoloval](https://github.com/nicoloval))
+[Nicolò Vallarano](http://www.imtlucca.it/en/nicolo.vallarano/) (a.k.a. [nicoloval](https://github.com/nicoloval))
 
 [Emiliano Marchese](https://www.imtlucca.it/en/emiliano.marchese/) (a.k.a. [EmilianoMarchese](https://github.com/EmilianoMarchese))
 
+[Matteo Bruno](https://www.imtlucca.it/en/matteo.bruno/) (BiCM) (a.k.a. [mat701](https://github.com/mat701))
+
 _Acknowledgements:_
 
-The module was developed under the supervision of [Tiziano Squartini](http://www.imtlucca.it/en/tiziano.squartini/), [Mario Zanon](http://www.imtlucca.it/it/mario.zanon/), and [Giulio Cimini](https://www.fisica.uniroma2.it/elenco-telefonico/ciminigi/).
+The module was developed under the supervision of [Tiziano Squartini](http://www.imtlucca.it/en/tiziano.squartini/), [Fabio Saracco](http://www.imtlucca.it/en/fabio.saracco/), [Mario Zanon](http://www.imtlucca.it/it/mario.zanon/), and [Giulio Cimini](https://www.fisica.uniroma2.it/elenco-telefonico/ciminigi/).
 It was developed at [IMT school of advanced studies Lucca](https://www.imtlucca.it/), and financed by the research project Optimized Reconstruction of Complex networkS - ORCS.
