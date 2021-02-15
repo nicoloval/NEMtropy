@@ -3011,7 +3011,7 @@ def loglikelihood_hessian_dcm_exp(theta, args):
     nz_out_index = args[2]
     nz_in_index = args[3]
     c = args[4]
-    n = len(k_out)
+    n = len(k_in)
 
     out = np.zeros((2 * n, 2 * n))  # hessian matrix
     x = np.exp(-theta)
