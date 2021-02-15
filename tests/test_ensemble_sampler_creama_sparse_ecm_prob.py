@@ -163,8 +163,8 @@ class MyTest(unittest.TestCase):
         # print('\n ensemble average strength sequence', s_emp)
         # print('\n degree by degree difference vector ', d_diff)
         # print('\n strength by strength difference vector ', s_diff)
-        print('\n empirical error = {}'.format(ensemble_error))
-        print('\n theoretical error = {}'.format(err))
+        # print('\n empirical error = {}'.format(ensemble_error))
+        # print('\n theoretical error = {}'.format(err))
 
         l = os.listdir(output_dir)
         for f in l:

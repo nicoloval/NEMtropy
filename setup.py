@@ -7,11 +7,11 @@ with open('README.md', "r", encoding="utf-8") as fh:
 
 setup(
     name="NEMtropy",
-    author="Nicolo' Vallarano, Emiliano Marchese",
-    author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it',
+    author="Nicolo' Vallarano, Emiliano Marchese, Matteo Bruno",
+    author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it, matteo.bruno@imtlucca.it',
     packages=["NEMtropy"],
     package_dir={'': 'src'},
-    version="1.0.6",
+    version="2.0.0",
     description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
                 " provides the user with a state of the art solver for a range variety"
                 " of Maximum Entropy Networks models derived from the ERGM family."
@@ -22,7 +22,7 @@ setup(
     long_description_content_type="text/markdown",
     license="GNU General Public License v3",
     url="https://github.com/nicoloval/NEMtropy/",
-    download_url="https://github.com/nicoloval/NEMtropy/archive/v1.0.6.zip",
+    download_url="https://github.com/nicoloval/NEMtropy/archive/v2.0.0.zip",
     keywords=['Network reconstruction', 'Networks Null Models',
               'Maximum Entrophy Methods'],
     classifiers=[
