@@ -56,6 +56,8 @@ for in-depth discussion please see the references.
 **Binary Graph** | *UBCM* | *DBCM* | *BiCM*
 **Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa* | -
 
+The BiCM module is also available as [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
+
 _References_
 
 * <a id="1">[1]</a>
@@ -173,8 +175,6 @@ To build a development environment run:
     $ pip install -e '.[dev]'
 ```
 
-The BiCM module is also available as [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
-
 Testing
 -------
 If you want to test the package integrity, you can run the following 
@@ -195,7 +195,7 @@ _Authors_:
 
 [Emiliano Marchese](https://www.imtlucca.it/en/emiliano.marchese/) (a.k.a. [EmilianoMarchese](https://github.com/EmilianoMarchese))
 
-[Matteo Bruno](BiCM)(https://www.imtlucca.it/en/matteo.bruno/) (a.k.a. [mat701](https://github.com/mat701))
+[Matteo Bruno](https://www.imtlucca.it/en/matteo.bruno/) (BiCM) (a.k.a. [mat701](https://github.com/mat701))
 
 _Acknowledgements:_
 
