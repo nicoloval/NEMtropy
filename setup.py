@@ -38,6 +38,7 @@ setup(
                       "scipy>=1.4",
                       "networkx>=2.4",
                       "powerlaw>=1.4"
+                      "tqdm>=4.56.2"
                       ],
     extras_require={
         "dev": [
