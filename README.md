@@ -93,6 +93,13 @@ you can simply type from your terminal:
     $ pip install NEMtropy --upgrade
 ```
 
+Please pay attention you require also ```numba``` package to make NEMtropy works.
+You can install it as well from the terminal:
+
+```
+    $ pip install numba
+```
+
 Dependencies
 ------------
 
