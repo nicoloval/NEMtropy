@@ -1991,10 +1991,10 @@ def linsearch_fun_DCM(xx, args):
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, func)
     :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
     :return: Working alpha.
@@ -2072,6 +2072,7 @@ def linsearch_fun_DCM_fixed(xx):
 
 # DECM functions
 # --------------
+
 
 @jit(nopython=True)
 def iterative_decm(x, args):
@@ -2567,10 +2568,10 @@ def linsearch_fun_DECM(xx, args):
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, func)
     :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
     :return: Working alpha.
@@ -2627,10 +2628,10 @@ def linsearch_fun_DECM_fixed(xx):
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, int)
     :return: Working alpha.
     :rtype: float
     """
@@ -3147,8 +3148,8 @@ def expected_in_degree_dcm_exp(theta):
     """Expected in-degrees after the DBCM. It is based on DBCM
     exponential version.
 
-    :param sol: DBCM solution.
-    :type sol: numpy.ndarray
+    :param theta: DBCM solution.
+    :type theta: numpy.ndarray
     :return: In-degrees DBCM expectation.
     :rtype: numpy.ndarray
     """
@@ -3381,8 +3382,8 @@ def loglikelihood_decm_exp(x, args):
     """Returns DECM [*]_ loglikelihood function evaluated in theta.
     It is based on the exponential version of the DECM.
 
-    :param theta: Evaluating point *theta*.
-    :type theta: numpy.ndarray
+    :param x: Evaluating point *theta*.
+    :type x: numpy.ndarray
     :param args: Arguments to define the loglikelihood function.
         Out and in degrees sequences, and out and in strengths sequences
     :type args: (numpy.ndarray, numpy.ndarray, numpy.ndarray,
@@ -3653,7 +3654,7 @@ def expected_decm_exp(theta):
     It is based on DBCM exponential version.
 
     :param theta: DBCM solution.
-    :type x: numpy.ndarray
+    :type theta: numpy.ndarray
     :return: DBCM expected parameters sequence.
     :rtype: numpy.ndarray
     """
