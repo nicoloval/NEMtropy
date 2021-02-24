@@ -52,14 +52,16 @@ def build_graph_fast(edgelist, is_directed):
     if is_directed:
         n_nodes = len(set(edgelist[:, 0]) | set(edgelist[:, 1]))
         adj = np.zeros((n_nodes, n_nodes))
-        for edges in edgelist:
+        for ii in np.arange(edgelist.shape[0]):
+            edges = edgelist[ii]
             i = int(edges[0])
             j = int(edges[1])
             adj[i, j] = 1
     else:
         n_nodes = len(set(edgelist[:, 0]) | set(edgelist[:, 1]))
         adj = np.zeros((n_nodes, n_nodes))
-        for edges in edgelist:
+        for ii in np.arange(edgelist.shape[0]):
+            edges = edgelist[ii]
             i = int(edges[0])
             j = int(edges[1])
             adj[i, j] = 1
@@ -107,7 +109,8 @@ def build_graph_fast_weighted(edgelist, is_directed):
     if is_directed:
         n_nodes = len(set(edgelist[:, 0]) | set(edgelist[:, 1]))
         adj = np.zeros((n_nodes, n_nodes))
-        for edges in edgelist:
+        for ii in np.arange(edgelist.shape[0]):
+            edges = edgelist[ii]
             i = int(edges[0])
             j = int(edges[1])
             w = edges[2]
@@ -115,7 +118,8 @@ def build_graph_fast_weighted(edgelist, is_directed):
     else:
         n_nodes = len(set(edgelist[:, 0]) | set(edgelist[:, 1]))
         adj = np.zeros((n_nodes, n_nodes))
-        for edges in edgelist:
+        for ii in np.arange(edgelist.shape[0]):
+            edges = edgelist[ii]
             i = int(edges[0])
             j = int(edges[1])
             w = edges[2]
