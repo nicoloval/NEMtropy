@@ -1,15 +1,15 @@
 import numpy as np
-import scipy.sparse
 import scipy
+import scipy.sparse
 from numba import jit
-import numbers
 from scipy.sparse import csr_matrix
 
 
-def build_graph_from_edgelist(edgelist,
-                              is_directed,
-                              is_sparse=False,
-                              is_weighted=False):
+def build_adjacency_from_edgelist(
+        edgelist,
+        is_directed,
+        is_sparse=False,
+        is_weighted=False):
     """Generates adjacency matrix given edgelist.
 
     :param edgelist: Edgelist.
@@ -27,19 +27,19 @@ def build_graph_from_edgelist(edgelist,
         raise TypeError("edgelist must be an numpy.ndarray.")
     if is_sparse:
         if is_weighted:
-            adjacency = build_graph_sparse_weighted(edgelist, is_directed)
+            adjacency = build_adjacency_sparse_weighted(edgelist, is_directed)
         else:
-            adjacency = build_graph_sparse(edgelist, is_directed)
+            adjacency = build_adjacency_sparse(edgelist, is_directed)
     else:
         if is_weighted:
-            adjacency = build_graph_fast_weighted(edgelist, is_directed)
+            adjacency = build_adjacency_fast_weighted(edgelist, is_directed)
         else:
-            adjacency = build_graph_fast(edgelist, is_directed)
+            adjacency = build_adjacency_fast(edgelist, is_directed)
     return adjacency
 
 
 @jit(nopython=True)
-def build_graph_fast(edgelist, is_directed):
+def build_adjacency_fast(edgelist, is_directed):
     """Generates adjacency matrix given edgelist, numpy array format
     is used.
 
@@ -70,7 +70,7 @@ def build_graph_fast(edgelist, is_directed):
     return adj
 
 
-def build_graph_sparse(edgelist, is_directed):
+def build_adjacency_sparse(edgelist, is_directed):
     """Generates adjacency matrix given edgelist, scipy sparse format
     is used.
 
@@ -90,13 +90,13 @@ def build_graph_sparse(edgelist, is_directed):
     else:
         row = np.concatenate([edgelist[:, 0], edgelist[:, 1]]).astype(int)
         columns = np.concatenate([edgelist[:, 1], edgelist[:, 0]]).astype(int)
-        data = np.ones(2*n_nodes, dtype=int)
+        data = np.ones(2 * n_nodes, dtype=int)
         adj = csr_matrix((data, (row, columns)), shape=(n_nodes, n_nodes))
     return adj
 
 
 @jit(nopython=True)
-def build_graph_fast_weighted(edgelist, is_directed):
+def build_adjacency_fast_weighted(edgelist, is_directed):
     """Generates weighted adjacency matrix given edgelist,
     numpy array format is used.
 
@@ -129,7 +129,7 @@ def build_graph_fast_weighted(edgelist, is_directed):
     return adj
 
 
-def build_graph_sparse_weighted(edgelist, is_directed):
+def build_adjacency_sparse_weighted(edgelist, is_directed):
     """Generates weighted adjacency matrix given edgelist,
     scipy sparse format is used.
 
@@ -152,7 +152,6 @@ def build_graph_sparse_weighted(edgelist, is_directed):
         data = np.concatenate([edgelist[:, 2], edgelist[:, 2]])
         adj = csr_matrix((data, (row, columns)), shape=(n_nodes, n_nodes))
     return adj
-
 
 
 def out_degree(a):
@@ -431,6 +430,7 @@ def edgelist_from_edgelist_directed(edgelist):
         )
     return edgelist_new, out_degree, in_degree, nodes_dict
 
+
 # Bipartite networks functions
 
 
@@ -459,7 +459,9 @@ def sample_bicm(avg_mat):
     if not isinstance(avg_mat, np.ndarray):
         avg_mat = np.array(avg_mat)
     dim1, dim2 = avg_mat.shape
-    return np.array(avg_mat > np.reshape(np.random.sample(dim1 * dim2), (dim1, dim2)), dtype=int)
+    return np.array(
+        avg_mat > np.reshape(np.random.sample(dim1 * dim2), (dim1, dim2)),
+        dtype=int)
 
 
 def sample_bicm_edgelist(x, y):
@@ -510,13 +512,15 @@ def edgelist_from_biadjacency(biadjacency):
         coords = biadjacency.nonzero()
         if np.sum(biadjacency.data != 1) > 0:
             raise ValueError('Only binary matrices')
-        return np.array(list(zip(coords[0], coords[1])), dtype=np.dtype([('rows', int), ('columns', int)])),\
-               np.array(biadjacency.sum(1)).flatten(), np.array(biadjacency.sum(0)).flatten()
+        return np.array(list(zip(coords[0], coords[1])),
+                        dtype=np.dtype([('rows', int), ('columns', int)])), \
+               np.array(biadjacency.sum(1)).flatten(), np.array(
+            biadjacency.sum(0)).flatten()
     else:
         if np.sum(biadjacency[biadjacency != 0] != 1) > 0:
             raise ValueError('Only binary matrices')
         return np.array(edgelist_from_biadjacency_fast(biadjacency),
-                        dtype=np.dtype([('rows', int), ('columns', int)])),\
+                        dtype=np.dtype([('rows', int), ('columns', int)])), \
                np.sum(biadjacency, axis=1), np.sum(biadjacency, axis=0)
 
 
@@ -525,13 +529,15 @@ def biadjacency_from_edgelist(edgelist, fmt='array'):
     Build the biadjacency matrix of a bipartite network from its edgelist.
     Returns a matrix of the type specified by ``fmt``, by default a numpy array.
     """
-    edgelist, rows_deg, cols_deg, rows_dict, cols_dict = edgelist_from_edgelist_bipartite(edgelist)
+    edgelist, rows_deg, cols_deg, rows_dict, cols_dict = edgelist_from_edgelist_bipartite(
+        edgelist)
     if fmt == 'array':
         biadjacency = np.zeros((len(rows_deg), len(cols_deg)), dtype=int)
         for edge in edgelist:
             biadjacency[edge[0], edge[1]] = 1
     elif fmt == 'sparse':
-        biadjacency = scipy.sparse.coo_matrix((np.ones(len(edgelist)), (edgelist['rows'], edgelist['columns'])))
+        biadjacency = scipy.sparse.coo_matrix(
+            (np.ones(len(edgelist)), (edgelist['rows'], edgelist['columns'])))
     elif not isinstance(format, str):
         raise TypeError('format must be a string (either "array" or "sparse")')
     else:
@@ -546,7 +552,8 @@ def edgelist_from_edgelist_bipartite(edgelist):
     Returns also two dictionaries that keep track of the nodes.
     """
     edgelist = np.array(list(set([tuple(edge) for edge in edgelist])))
-    out = np.zeros(np.shape(edgelist)[0], dtype=np.dtype([('source', object), ('target', object)]))
+    out = np.zeros(np.shape(edgelist)[0],
+                   dtype=np.dtype([('source', object), ('target', object)]))
     out['source'] = edgelist[:, 0]
     out['target'] = edgelist[:, 1]
     edgelist = out
@@ -556,8 +563,10 @@ def edgelist_from_edgelist_bipartite(edgelist):
     cols_dict = dict(enumerate(unique_cols))
     inv_rows_dict = {v: k for k, v in rows_dict.items()}
     inv_cols_dict = {v: k for k, v in cols_dict.items()}
-    edgelist_new = [(inv_rows_dict[edge[0]], inv_cols_dict[edge[1]]) for edge in edgelist]
-    edgelist_new = np.array(edgelist_new, dtype=np.dtype([('rows', int), ('columns', int)]))
+    edgelist_new = [(inv_rows_dict[edge[0]], inv_cols_dict[edge[1]]) for edge
+                    in edgelist]
+    edgelist_new = np.array(edgelist_new,
+                            dtype=np.dtype([('rows', int), ('columns', int)]))
     return edgelist_new, rows_degs, cols_degs, rows_dict, cols_dict
 
 
@@ -570,7 +579,8 @@ def adjacency_list_from_edgelist_bipartite(edgelist, convert_type=True):
     Returns also two dictionaries that keep track of the nodes and the two degree sequences.
     """
     if convert_type:
-        edgelist, rows_degs, cols_degs, rows_dict, cols_dict = edgelist_from_edgelist_bipartite(edgelist)
+        edgelist, rows_degs, cols_degs, rows_dict, cols_dict = edgelist_from_edgelist_bipartite(
+            edgelist)
     adj_list = {}
     inv_adj_list = {}
     for edge in edgelist:
@@ -594,15 +604,18 @@ def adjacency_list_from_adjacency_list_bipartite(old_adj_list):
     Returns also two dictionaries that keep track of the nodes and the two degree sequences.
     """
     rows_dict = dict(enumerate(np.unique(list(old_adj_list.keys()))))
-    cols_dict = dict(enumerate(np.unique([el for mylist in old_adj_list.values() for el in mylist])))
+    cols_dict = dict(enumerate(
+        np.unique([el for mylist in old_adj_list.values() for el in mylist])))
     inv_rows_dict = {v: k for k, v in rows_dict.items()}
     inv_cols_dict = {v: k for k, v in cols_dict.items()}
     adj_list = {}
     inv_adj_list = {}
     for k in old_adj_list:
-        adj_list.setdefault(inv_rows_dict[k], set()).update({inv_cols_dict[val] for val in old_adj_list[k]})
+        adj_list.setdefault(inv_rows_dict[k], set()).update(
+            {inv_cols_dict[val] for val in old_adj_list[k]})
         for val in old_adj_list[k]:
-            inv_adj_list.setdefault(inv_cols_dict[val], set()).add(inv_rows_dict[k])
+            inv_adj_list.setdefault(inv_cols_dict[val], set()).add(
+                inv_rows_dict[k])
     rows_degs = np.array([len(adj_list[k]) for k in adj_list])
     cols_degs = np.array([len(inv_adj_list[k]) for k in inv_adj_list])
     return adj_list, inv_adj_list, rows_degs, cols_degs, rows_dict, cols_dict
@@ -627,7 +640,8 @@ def adjacency_list_from_biadjacency(biadjacency):
     inv_adj_list = {}
     for edge_i in range(len(coords[0])):
         adj_list.setdefault(coords[0][edge_i], set()).add(coords[1][edge_i])
-        inv_adj_list.setdefault(coords[1][edge_i], set()).add(coords[0][edge_i])
+        inv_adj_list.setdefault(coords[1][edge_i], set()).add(
+            coords[0][edge_i])
     rows_degs = np.array([len(adj_list[k]) for k in adj_list])
     cols_degs = np.array([len(inv_adj_list[k]) for k in inv_adj_list])
     return adj_list, inv_adj_list, rows_degs, cols_degs
