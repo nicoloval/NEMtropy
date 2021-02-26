@@ -23,7 +23,7 @@ setup(
     long_description_content_type="text/markdown",
     license="GNU General Public License v3",
     url="https://github.com/nicoloval/NEMtropy/",
-    download_url="https://github.com/nicoloval/NEMtropy/archive/v2.0.0.zip",
+    download_url="https://github.com/nicoloval/NEMtropy/archive/v2.0.2.zip",
     keywords=['Network reconstruction', 'Networks Null Models',
               'Maximum Entrophy Methods'],
     classifiers=[
