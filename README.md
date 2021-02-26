@@ -117,6 +117,7 @@ Simple Example
 As an example we solve the UBCM for zachary karate club network.
 
 ```
+    import numpy as np
     import networkx as nx
     from NEMtropy import UndirectedGraph
 
