@@ -2,6 +2,7 @@ import numpy as np
 import scipy.sparse
 import scipy
 from numba import jit
+import numbers
 from scipy.sparse import csr_matrix
 
 
@@ -255,31 +256,34 @@ def strength(a):
 
 
 def edgelist_from_edgelist_undirected(edgelist):
-    """Creates a new edgelist with the indexes of the nodes instead of the names. Returns also a dictionary that keep track of the nodes and, depending on the type of graph, degree and strengths sequences.
+    """Creates a new edgelist with the indexes of the nodes instead of the
+     names. Returns also a dictionary that keep track of the nodes and,
+      depending on the type of graph, degree and strengths sequences.
 
     :param edgelist: edgelist.
     :type edgelist: numpy.ndarray or list
-    :return: edgelist, degrees sequence, strengths sequence and new labels to old labels dictionary.
+    :return: edgelist, degrees sequence, strengths sequence and
+     new labels to old labels dictionary.
     :rtype: (numpy.ndarray, numpy.ndarray, numpy.ndarray, dict)
     """
     edgelist = [tuple(item) for item in edgelist]
     if len(edgelist[0]) == 2:
-        nodetype = type(edgelist[0][0])
+        # nodetype = type(edgelist[0][0])
         edgelist = np.array(
             edgelist,
-            dtype=np.dtype([("source", nodetype), ("target", nodetype)]),
+            dtype=np.dtype([("source", object), ("target", object)]),
         )
     else:
-        nodetype = type(edgelist[0][0])
-        weigthtype = type(edgelist[0][2])
+        # nodetype = type(edgelist[0][0])
+        # weigthtype = type(edgelist[0][2])
         # Vorrei mettere una condizione sul weighttype che deve essere numerico
         edgelist = np.array(
             edgelist,
             dtype=np.dtype(
                 [
-                    ("source", nodetype),
-                    ("target", nodetype),
-                    ("weigth", weigthtype),
+                    ("source", object),
+                    ("target", object),
+                    ("weigth", object),
                 ]
             ),
         )
@@ -306,7 +310,7 @@ def edgelist_from_edgelist_undirected(edgelist):
         edgelist_new = np.array(
             edgelist_new,
             dtype=np.dtype(
-                [("source", int), ("target", int), ("weigth", weigthtype)]
+                [("source", int), ("target", int), ("weight", np.float64)]
             ),
         )
     if len(edgelist[0]) == 3:
@@ -314,10 +318,10 @@ def edgelist_from_edgelist_undirected(edgelist):
             (edgelist_new["source"], edgelist_new["target"])
         )
         aux_weights = np.concatenate(
-            (edgelist_new["weigth"], edgelist_new["weigth"])
+            (edgelist_new["weight"], edgelist_new["weight"])
         )
         strength_seq = np.array(
-            [aux_weights[aux_edgelist == i].sum() for i in unique_nodes]
+            [aux_weights[aux_edgelist == i].sum() for i in nodes_dict]
         )
         return edgelist_new, degree_seq, strength_seq, nodes_dict
     return edgelist_new, degree_seq, nodes_dict
@@ -338,28 +342,29 @@ def edgelist_from_edgelist_directed(edgelist):
     # TODO: inserire esempio edgelist pesata edgelist binaria
     # nel docstring
     # edgelist = list(zip(*edgelist))
+    edgelist = [tuple(item) for item in edgelist]
     if len(edgelist[0]) == 2:
-        nodetype = type(edgelist[0][0])
+        # nodetype = type(edgelist[0][0])
         edgelist = np.array(
             edgelist,
             dtype=np.dtype(
                 [
-                    ("source", nodetype),
-                    ("target", nodetype)
+                    ("source", object),
+                    ("target", object)
                 ]
             ),
         )
     else:
-        nodetype = type(edgelist[0][0])
-        weigthtype = type(edgelist[0][2])
+        # nodetype = type(edgelist[0][0])
+        # weigthtype = type(edgelist[0][2])
         # Vorrei mettere una condizione sul weighttype che deve essere numerico
         edgelist = np.array(
             edgelist,
             dtype=np.dtype(
                 [
-                    ("source", nodetype),
-                    ("target", nodetype),
-                    ("weigth", weigthtype),
+                    ("source", object),
+                    ("target", object),
+                    ("weigth", object),
                 ]
             ),
         )
@@ -388,7 +393,7 @@ def edgelist_from_edgelist_directed(edgelist):
         edgelist_new = np.array(
             edgelist_new,
             dtype=np.dtype(
-                [("source", int), ("target", int), ("weigth", weigthtype)]
+                [("source", int), ("target", int), ("weigth", np.float64)]
             ),
         )
     out_indices, out_counts = np.unique(
@@ -400,8 +405,8 @@ def edgelist_from_edgelist_directed(edgelist):
     out_degree[out_indices] = out_counts
     in_degree[in_indices] = in_counts
     if len(edgelist[0]) == 3:
-        out_strength = np.zeros_like(unique_nodes, dtype=weigthtype)
-        in_strength = np.zeros_like(unique_nodes, dtype=weigthtype)
+        out_strength = np.zeros_like(unique_nodes, dtype=np.float64)
+        in_strength = np.zeros_like(unique_nodes, dtype=np.float64)
         out_counts_strength = np.array(
             [
                 edgelist_new[edgelist_new["source"] == i]["weigth"].sum()
