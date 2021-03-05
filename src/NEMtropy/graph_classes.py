@@ -778,7 +778,7 @@ class UndirectedGraph:
             if self.regularise == "eigenvalues":
                 self.hessian_regulariser = sof.matrix_regulariser_function_eigen_based
             elif self.regularise == "identity":
-                self.hessian_regulariser = hessian_regulariser_function
+                self.hessian_regulariser = sof.hessian_regulariser_function
 
     def _solve_problem_crema_undirected(
         self,
@@ -1020,8 +1020,7 @@ class UndirectedGraph:
                 eps=eps,
             )
         self._solution_error()
-        if verbose:
-            print("\nmin eig = {}".format(self.error))
+        print("\nsolution error = {}".format(self.error))
 
     def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=42):
         """The function sample a given number of graphs in the ensemble
@@ -2476,8 +2475,7 @@ class DirectedGraph:
                 eps=eps,
             )
         self._solution_error()
-        if verbose:
-            print("\nmin eig = {}".format(self.error))
+        print("\nsolution error = {}".format(self.error))
 
     def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=42):
         """The function sample a given number of graphs in the ensemble
