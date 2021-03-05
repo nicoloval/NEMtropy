@@ -924,8 +924,8 @@ class UndirectedGraph:
     def solve_tool(
         self,
         model,
-        method,
-        initial_guess=None,
+        method='newton',
+        initial_guess='random',
         adjacency="cm_exp",
         method_adjacency="newton",
         initial_guess_adjacency="random",
@@ -2380,8 +2380,8 @@ class DirectedGraph:
     def solve_tool(
         self,
         model,
-        method,
-        initial_guess=None,
+        method='newton',
+        initial_guess='random',
         adjacency=None,
         method_adjacency='newton',
         initial_guess_adjacency="random",

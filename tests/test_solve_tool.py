@@ -27,8 +27,6 @@ class MyTest(unittest.TestCase):
 
         g.solve_tool(
             model="dcm",
-            method="quasinewton",
-            initial_guess="uniform",
             max_steps=200,
             verbose=False,
         )
