@@ -42,8 +42,8 @@ myGraph = BipartiteGraph()
 myGraph.set_edgelist(edgelist_names)
 
 
-# And now let's simply compute the bicm2! This should run instantly. The solver checks that the solution is correct automatically.
-print('And now let\'s simply compute the bicm2! This should run instantly. The solver checks that the solution is correct automatically.')
+# And now let's simply compute the BiCM! This should run instantly. The solver checks that the solution is correct automatically.
+print('And now let\'s simply compute the BiCM! This should run instantly. The solver checks that the solution is correct automatically.')
 myGraph.solve_tool()
 dict_x, dict_y = myGraph.get_bicm_fitnesses()
 print('Yielded data type is:', type(dict_x))

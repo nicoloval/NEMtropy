@@ -778,7 +778,7 @@ class UndirectedGraph:
             if self.regularise == "eigenvalues":
                 self.hessian_regulariser = sof.matrix_regulariser_function_eigen_based
             elif self.regularise == "identity":
-                self.hessian_regulariser = hessian_regulariser_function
+                self.hessian_regulariser = sof.matrix_regulariser_function
 
     def _solve_problem_crema_undirected(
         self,
@@ -2654,7 +2654,6 @@ class BipartiteGraph:
         self.v_adj_list = None
         self.projection_method = 'poisson'
         self.threads_num = 1
-        self.progress_bar = True
         self.rows_pvals = None
         self.cols_pvals = None
         self.is_rows_projected = False
@@ -2806,9 +2805,8 @@ class BipartiteGraph:
         """
         Internal method to set the initial point of the solver.
         """
-        if self.initial_guess is None:
-            self.r_x = self.r_rows_deg / (
-                np.sqrt(self.r_n_edges))  # This +1 increases the stability of the solutions.
+        if self.initial_guess is None: # Chung-Lu approximation
+            self.r_x = self.r_rows_deg / (np.sqrt(self.r_n_edges))
             self.r_y = self.r_cols_deg / (np.sqrt(self.r_n_edges))
         elif self.initial_guess == 'random':
             self.r_x = np.random.rand(self.r_n_rows).astype(np.float64)
@@ -3027,7 +3025,8 @@ class BipartiteGraph:
     @staticmethod
     def check_sol(biad_mat, avg_bicm, return_error=False, in_place=False):
         """
-        This function prints the rows sums differences between two matrices, that originally are the biadjacency matrix and its bicm2 average matrix.
+        Static method.
+        This function prints the rows sums differences between two matrices, that originally are the biadjacency matrix and its bicm average matrix.
         The intended use of this is to check if an average matrix is actually a solution for a bipartite configuration model.
 
         If return_error is set to True, it returns 1 if the sum of the differences is bigger than 1.
@@ -3069,15 +3068,14 @@ class BipartiteGraph:
         else:
             return
 
-    @staticmethod
-    def check_sol_light(x, y, rows_deg, cols_deg, return_error=False):
+    def check_sol_light(self, return_error=False):
         """
         Light version of the check_sol function, working only on the fitnesses and the degree sequences.
         """
         error = 0
         rows_error_vec = []
-        for i in range(len(x)):
-            row_avgs = x[i] * y / (1 + x[i] * y)
+        for i in range(self.r_n_rows):
+            row_avgs = self.r_x[i] * self.r_y / (1 + self.r_x[i] * self.r_y)
             if error == 0:
                 if np.any(row_avgs < 0):
                     print('Warning: negative link probabilities')
@@ -3085,11 +3083,12 @@ class BipartiteGraph:
                 if np.any(row_avgs > 1):
                     print('Warning: link probabilities > 1')
                     error = 1
-            rows_error_vec.append(np.sum(row_avgs) - rows_deg[i])
+            rows_error_vec.append(np.sum(self.cols_multiplicity * row_avgs) - self.r_rows_deg[i])
         rows_error_vec = np.abs(rows_error_vec)
         err_rows = np.max(rows_error_vec)
         print('max rows error =', err_rows)
-        cols_error_vec = np.abs([(x * y[j] / (1 + x * y[j])).sum() - cols_deg[j] for j in range(len(y))])
+        cols_error_vec = np.abs([(self.rows_multiplicity * self.r_x * self.r_y[j] / (1 + self.r_x * self.r_y[j])).sum()
+                                 - self.r_cols_deg[j] for j in range(self.r_n_cols)])
         err_cols = np.max(cols_error_vec)
         print('max columns error =', err_cols)
         tot_err = np.sum(rows_error_vec) + np.sum(cols_error_vec)
@@ -3120,10 +3119,7 @@ class BipartiteGraph:
         if self.biadjacency is not None and self.avg_mat is not None:
             return self.check_sol(self.biadjacency, self.avg_mat, return_error=return_error, in_place=in_place)
         else:
-            return self.check_sol_light(self.x[self.nonfixed_rows], self.y[self.nonfixed_cols],
-                                        self.rows_deg[self.nonfixed_rows] - self.full_cols_num,
-                                        self.cols_deg[self.nonfixed_cols] - self.full_rows_num,
-                                        return_error=return_error)
+            return self.check_sol_light(return_error=return_error)
 
     def _set_solved_problem(self, solution):
         """
@@ -3283,10 +3279,6 @@ class BipartiteGraph:
         :param bool print_error: Print the final error of the solution
         :param bool exp: if this is set to true the solver works with the reparameterization $x_i = e^{-\theta_i}$,
             $y_\alpha = e^{-\theta_\alpha}$. It might be slightly faster but also might not converge.
-        :param full_return: If True the algorithm returns more statistics than the obtained solution, defaults to False.
-        :type full_return: bool, optional
-        :param eps: parameter controlling the tolerance of the difference between two iterations, defaults to 1e-8.
-        :type eps: float, optional
         """
         if not self.is_initialized:
             print('Graph is not initialized. I can\'t compute the BiCM.')
@@ -3321,6 +3313,41 @@ class BipartiteGraph:
                 print('Solver did not converge.')
         self.is_randomized = True
 
+    def solve_bicm(
+            self,
+            method='newton',
+            initial_guess=None,
+            light_mode=None,
+            tolerance=None,
+            tol=1e-8,
+            eps=1e-8,
+            max_steps=None,
+            verbose=False,
+            linsearch=True,
+            regularise=None,
+            print_error=True,
+            full_return=False,
+            exp=False):
+        """
+        Deprecated method, replaced by solve_tool
+        """
+        if tolerance is not None:
+            tol = tolerance
+        print('solve_bicm has been deprecated, calling solve_tool instead')
+        self.solve_tool(
+            method=method,
+            initial_guess=initial_guess,
+            light_mode=light_mode,
+            tol=tol,
+            eps=eps,
+            max_steps=max_steps,
+            verbose=verbose,
+            linsearch=linsearch,
+            regularise=regularise,
+            print_error=print_error,
+            full_return=full_return,
+            exp=exp)
+
     def get_bicm_matrix(self):
         """Get the matrix of probabilities of the BiCM.
         If the BiCM has not been computed, it also computes it with standard settings.
@@ -3351,7 +3378,11 @@ class BipartiteGraph:
             self.solve_tool()
         return self.dict_x, self.dict_y
 
-    def _pval_calculator(self, v_list_key, x, y):
+    def get_fitnesses(self):
+        """See get_bicm_fitnesses."""
+        self.get_bicm_fitnesses()
+
+    def pval_calculator(self, v_list_key, x, y):
         """
         Calculate the p-values of the v-motifs numbers of one vertices and all its neighbours.
 
@@ -3382,12 +3413,13 @@ class BipartiteGraph:
                 temp_pvals_dict[neighbor] = max(min(pval, 1), 0)
         return temp_pvals_dict
 
-    def _pval_calculator_poibin(self, deg_couple, deg_dict, x, y):
+    def pval_calculator_poibin(self, deg_couple, deg_dict, degs, x, y):
         """
         Calculate the p-values of the v-motifs numbers of all nodes with a given couple degrees.
 
         :param tuple deg_couple: the couple of degrees considered.
-        :param dict deg_dict: the dictionary containing for each degree the list of nodes of that degree.
+        :param tuple deg_couple: the couple of degrees considered.
+        :param tuple deg_couple: the couple of degrees considered.
         :param numpy.ndarray x: the fitnesses of the layer of the desired projection.
         :param numpy.ndarray y: the fitnesses of the opposite layer.
         :returns: a list containing 3-tuples with the two nodes considered and their p-value.
@@ -3432,7 +3464,7 @@ class BipartiteGraph:
             pval_adj_list = dict()
             if self.threads_num > 1:
                 with Pool(processes=self.threads_num) as pool:
-                    partial_function = partial(self._pval_calculator, x=x, y=y)
+                    partial_function = partial(self.pval_calculator, x=x, y=y)
                     if self.progress_bar:
                         pvals_dicts = pool.map(partial_function, tqdm(v_list_keys))
                     else:
@@ -3443,10 +3475,10 @@ class BipartiteGraph:
             else:
                 if self.progress_bar:
                     for k in tqdm(v_list_keys):
-                        pval_adj_list[k] = self._pval_calculator(k, x=x, y=y)
+                        pval_adj_list[k] = self.pval_calculator(k, x=x, y=y)
                 else:
                     for k in v_list_keys:
-                        pval_adj_list[k] = self._pval_calculator(k, x=x, y=y)
+                        pval_adj_list[k] = self.pval_calculator(k, x=x, y=y)
         else:
             if self.rows_projection:
                 degs = self.rows_deg
@@ -3465,7 +3497,7 @@ class BipartiteGraph:
                 print('Calculating p-values...')
             if self.threads_num > 1:
                 with Pool(processes=self.threads_num) as pool:
-                    partial_function = partial(self._pval_calculator_poibin, deg_dict=deg_dict, x=x, y=y)
+                    partial_function = partial(self.pval_calculator_poibin, deg_dict=deg_dict, degs=degs, x=x, y=y)
                     if self.progress_bar:
                         pvals_dicts = pool.map(partial_function, tqdm(deg_couples))
                     else:
@@ -3475,11 +3507,11 @@ class BipartiteGraph:
                 if self.progress_bar:
                     for deg_couple in tqdm(deg_couples):
                         pvals_dicts.append(
-                            self._pval_calculator_poibin(deg_couple, deg_dict=deg_dict, x=x, y=y))
+                            self.pval_calculator_poibin(deg_couple, deg_dict=deg_dict, degs=degs, x=x, y=y))
                 else:
                     for deg_couple in v_list_coupled:
                         pvals_dicts.append(
-                            self._pval_calculator_poibin(deg_couple, deg_dict=deg_dict, x=x, y=y))
+                            self.pval_calculator_poibin(deg_couple, deg_dict=deg_dict, degs=degs, x=x, y=y))
             pval_adj_list = {k: dict() for k in self.v_adj_list}
             for pvals_dict in pvals_dicts:
                 for node in pvals_dict:
@@ -3539,7 +3571,7 @@ class BipartiteGraph:
             multiplier = 2 * alpha / (self.n_cols * (self.n_cols - 1))
         try:
             eff_fdr_pos = np.where(sorted_pvals <= (np.arange(1, len(sorted_pvals) + 1) * alpha * multiplier))[0][-1]
-        except IndexError:
+        except:
             print('No V-motifs will be validated. Try increasing alpha')
             eff_fdr_pos = 0
         eff_fdr_th = eff_fdr_pos * multiplier
@@ -3567,12 +3599,13 @@ class BipartiteGraph:
                         projected_adj_list[node] = []
                     projected_adj_list[node].append(neighbor)
         return projected_adj_list
-        #     return np.array([(v[0], v[1]) for v in self.rows_pvals if v[2] <= eff_fdr_th])
-        # else:
-        #     eff_fdr_th = nef.pvals_validator([v[2] for v in self.cols_pvals], self.n_cols, alpha=alpha)
-        #     return np.array([(v[0], v[1]) for v in self.cols_pvals if v[2] <= eff_fdr_th])
 
-    def get_rows_projection(self, alpha=0.05, method='poisson', threads_num=None, progress_bar=True):
+    def get_rows_projection(self,
+                            alpha=0.05,
+                            method='poisson',
+                            threads_num=None,
+                            progress_bar=True,
+                            fmt='adjacency_list'):
         """Get the projected network on the rows layer of the graph.
 
         :param alpha: threshold for the validation of the projected edges.
@@ -3584,23 +3617,36 @@ class BipartiteGraph:
             the computation is not parallelized.
         :type threads_num: int, optional
         :param bool progress_bar: Show the progress bar
-        :returns: edgelist of the projected network on the rows layer
-        :rtype: numpy.array
+        :param str fmt: the desired format for the output
+        :returns: the projected network on the rows layer, in the format specified by fmt
         """
         if not self.is_rows_projected:
             self.compute_projection(rows=True, alpha=alpha, method=method, threads_num=threads_num,
                                     progress_bar=progress_bar)
+
+        if fmt == 'matrix':
+            return nef.adjacency_matrix_from_adjacency_list(self.projected_rows_adj_list, fmt='array')
+        elif fmt == 'sparse':
+            return nef.adjacency_matrix_from_adjacency_list(self.projected_rows_adj_list, fmt='sparse')
         if self.rows_dict is None:
-            return self.projected_rows_adj_list
+            adj_list_to_return = self.projected_rows_adj_list
         else:
             adj_list_to_return = {}
             for node in self.projected_rows_adj_list:
                 adj_list_to_return[self.rows_dict[node]] = []
                 for neighbor in self.projected_rows_adj_list[node]:
                     adj_list_to_return[self.rows_dict[node]].append(self.rows_dict[neighbor])
+        if fmt == 'adjacency_list':
             return adj_list_to_return
+        elif fmt == 'edgelist':
+            nef.edgelist_from_adjacency_list_bipartite(adj_list_to_return)
 
-    def get_cols_projection(self, alpha=0.05, method='poisson', threads_num=4, progress_bar=True):
+    def get_cols_projection(self,
+                            alpha=0.05,
+                            method='poisson',
+                            threads_num=None,
+                            progress_bar=True,
+                            fmt='adjacency_list'):
         """Get the projected network on the columns layer of the graph.
 
         :param alpha: threshold for the validation of the projected edges.
@@ -3612,12 +3658,16 @@ class BipartiteGraph:
             the computation is not parallelized.
         :type threads_num: int, optional
         :param bool progress_bar: Show the progress bar
-        :returns: edgelist of the projected network on the columns layer
-        :rtype: numpy.array
+        :param str fmt: the desired format for the output
+        :returns: the projected network on the columns layer, in the format specified by fmt
         """
         if not self.is_cols_projected:
             self.compute_projection(rows=False,
                                     alpha=alpha, method=method, threads_num=threads_num, progress_bar=progress_bar)
+        if fmt == 'biadjacency':
+            return nef.biadjacency_from_adjacency_list(self.projected_rows_adj_list, fmt='array')
+        elif fmt == 'sparse':
+            return nef.biadjacency_from_adjacency_list(self.projected_rows_adj_list, fmt='sparse')
         if self.cols_dict is None:
             return self.projected_cols_adj_list
         else:
@@ -3626,7 +3676,10 @@ class BipartiteGraph:
                 adj_list_to_return[self.cols_dict[node]] = []
                 for neighbor in self.projected_cols_adj_list[node]:
                     adj_list_to_return[self.cols_dict[node]].append(self.cols_dict[neighbor])
+        if fmt == 'adjacency_list':
             return adj_list_to_return
+        elif fmt == 'edgelist':
+            nef.edgelist_from_adjacency_list_bipartite(adj_list_to_return)
 
     def set_biadjacency_matrix(self, biadjacency):
         """Set the biadjacency matrix of the graph.
