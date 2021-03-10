@@ -177,7 +177,7 @@ class UndirectedGraph:
             elif len(degree_sequence) > 0:
                 try:
                     int(degree_sequence[0])
-                except:
+                except (ValueError, TypeError):
                     raise TypeError(
                         "The degree sequence must contain numeric values."
                     )
@@ -198,7 +198,7 @@ class UndirectedGraph:
                     elif len(strength_sequence):
                         try:
                             int(strength_sequence[0])
-                        except:
+                        except (ValueError, TypeError):
                             raise TypeError(
                                 "The strength sequence must contain numeric"
                                 "values."
@@ -230,7 +230,7 @@ class UndirectedGraph:
             elif len(strength_sequence):
                 try:
                     int(strength_sequence[0])
-                except:
+                except (ValueError, TypeError):
                     raise TypeError(
                         "The strength sequence must contain numeric values."
                     )
@@ -246,7 +246,7 @@ class UndirectedGraph:
     def set_adjacency_matrix(self, adjacency):
         """Initialises graph given the adjacency matrix.
 
-        :param adjacency: ajdacency matrix.
+        :param adjacency: adjacency matrix.
         :type adjacency: numpy.ndarray, list, scipy.sparse_matrix
         """
         if self.is_initialized:
@@ -286,7 +286,7 @@ class UndirectedGraph:
             self._initialize_graph(degree_sequence=degree_sequence)
 
     def clean_edges(self):
-        """Deletes all the initialiased attributes.
+        """Deletes all the initialised attributes.
         """
         self.adjacency = None
         self.edgelist = None
@@ -295,7 +295,7 @@ class UndirectedGraph:
 
     def _solve_problem(
         self,
-        initial_guess=None,
+        initial_guess='random',
         model="cm",
         method="quasinewton",
         max_steps=100,
@@ -715,9 +715,9 @@ class UndirectedGraph:
             self.fun = d_fun[mod_met]
             self.fun_jac = d_fun_jac[mod_met]
             self.step_fun = d_fun_stop[mod_met]
-        except:
+        except KeyError:
             raise ValueError(
-                'Method must be "newton","quasi-newton", or "fixed-point".'
+                'Method must be "newton","quasinewton", or "fixed-point".'
             )
 
         d_pmatrix = {
@@ -782,7 +782,7 @@ class UndirectedGraph:
 
     def _solve_problem_crema_undirected(
         self,
-        initial_guess=None,
+        initial_guess='random',
         model="crema",
         adjacency="cm",
         method="quasinewton",
@@ -925,7 +925,7 @@ class UndirectedGraph:
         self,
         model,
         method,
-        initial_guess=None,
+        initial_guess='random',
         adjacency="cm_exp",
         method_adjacency="newton",
         initial_guess_adjacency="random",
@@ -943,12 +943,12 @@ class UndirectedGraph:
 
         :param model: Available models are:
 
-            - *cm*: solves UBCM respect to the parameters *x* of the mof.loglikelihood function, it works for uweighted undirected graphs [insert ref].
+            - *cm*: solves UBCM respect to the parameters *x* of the mof.loglikelihood function, it works for unweighted undirected graphs [insert ref].
             - *cm_exp*: differently from the *cm* option, *cm_exp* considers the exponents of *x* as parameters [insert ref].
             - *ecm*: solves UECM respect to the parameters *x* and *y* of the mof.loglikelihood function, it is conceived for weighted undirected graphs [insert ref].
             - *ecm_exp*: differently from the *ecm* option, *ecm_exp* considers the exponents of *x* and *y* as parameters [insert ref].
-            - *crema*: solves CReMa for a weighted undirectd graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
-            - *crema-sparse*: alternative implementetio of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
+            - *crema*: solves CReMa for a weighted undirected graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
+            - *crema-sparse*: alternative implementation of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
 
         :type model: str
         :param method: Available methods to solve the given *model* are:
@@ -958,23 +958,23 @@ class UndirectedGraph:
             - *fixed-point*: uses a fixed-point method to find parameters maximising mof.loglikelihood function.
 
         :type method: str
-        :param initial_guess: Starting point solution may affect the results of the optization process. The user can provid an initial guess or choose between the following options:
+        :param initial_guess: Starting point solution may affect the results of the optimization process. The user can provide an initial guess or choose between the following options:
 
             - **Binary Models**:
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
-                - *degrees*: initial guess of each node is proportianal to its degree;
+                - *degrees*: initial guess of each node is proportional to its degree;
                 - *degrees_minor*: initial guess of each node is inversely proportional to its degree;
                 - *chung_lu*: initial guess given by Chung-Lu formula;
             - **Weighted Models**:
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
-                - *strengths*: initial guess of each node is proportianal to its stength;
+                - *strengths*: initial guess of each node is proportional to its strength;
                 - *strengths_minor*: initial guess of each node is inversely proportional to its strength;
         :type initial_guess: str, optional
         :param adjacency: Adjacency can be a binary method (defaults is *cm_exp*) or an adjacency matrix.
         :type adjacency: str or numpy.ndarray, optional
-        :param method_adjacency: If adjacency is a *model*, it is the *methdod* used to solve it. Defaults to "newton".
+        :param method_adjacency: If adjacency is a *model*, it is the *method* used to solve it. Defaults to "newton".
         :type method_adjacency: str, optional
         :param initial_guess_adjacency: If adjacency is a *model*, it is the chosen initial guess. Defaults to "random".
         :type initial_guess_adjacency: str, optional
@@ -1304,7 +1304,7 @@ class DirectedGraph:
             elif len(degree_sequence) > 0:
                 try:
                     int(degree_sequence[0])
-                except:  # TODO: bare exception
+                except (ValueError, TypeError):
                     raise TypeError(
                         "The degree sequence must contain numeric values."
                     )
@@ -1330,7 +1330,7 @@ class DirectedGraph:
                     elif len(strength_sequence):
                         try:
                             int(strength_sequence[0])
-                        except:  # TODO: bare exception to check
+                        except (ValueError, TypeError):
                             raise TypeError(
                                 ("The strength sequence must contain"
                                  " numeric values.")
@@ -1366,7 +1366,7 @@ class DirectedGraph:
             elif len(strength_sequence):
                 try:
                     int(strength_sequence[0])
-                except:  # TODO: bare exception
+                except (ValueError, TypeError):
                     raise TypeError(
                         "The strength sequence must contain numeric values."
                     )
@@ -1402,8 +1402,8 @@ class DirectedGraph:
     def set_edgelist(self, edgelist):
         """Initializes a graph from the edgelist.
 
-        :param adjacency: Edgelist
-        :type adjacency: numpy.ndarray, list
+        :param edgelist: Edgelist
+        :type edgelist: numpy.ndarray, list
         """
         if self.is_initialized:
             print(
@@ -1416,8 +1416,8 @@ class DirectedGraph:
     def set_degree_sequences(self, degree_sequence):
         """Initializes graph from the degrees sequence.
 
-        :param adjacency: Degrees sequence
-        :type adjacency: numpy.ndarray
+        :param degree_sequence: Degrees sequence
+        :type degree_sequence: numpy.ndarray
         """
         if self.is_initialized:
             print(
@@ -1437,7 +1437,7 @@ class DirectedGraph:
 
     def _solve_problem(
         self,
-        initial_guess=None,  # TODO:aggiungere un default a initial guess
+        initial_guess='random',
         model="dcm",
         method="quasinewton",
         max_steps=100,
@@ -1907,7 +1907,7 @@ class DirectedGraph:
                     ex_s_out = mof.expected_out_strength_crema_directed(
                         sol, self.adjacency_crema
                     )
-                    ex_s_in = mof.expected_in_stregth_crema_directed(
+                    ex_s_in = mof.expected_in_strength_crema_directed(
                         sol, self.adjacency_crema
                     )
                 ex_s = np.concatenate([ex_s_out, ex_s_in])
@@ -2169,7 +2169,7 @@ class DirectedGraph:
             self.fun = d_fun[mod_met]
             self.fun_jac = d_fun_jac[mod_met]
             self.step_fun = d_fun_step[mod_met]
-        except:  # TODO: remove bare excpets
+        except KeyError:
             raise ValueError(
                 'Method must be "newton","quasinewton", or "fixed-point".'
             )
@@ -2259,7 +2259,7 @@ class DirectedGraph:
 
     def _solve_problem_crema_directed(
         self,
-        initial_guess=None,
+        initial_guess='random',
         model="crema",
         adjacency="dcm",
         method="quasinewton",
@@ -2381,7 +2381,7 @@ class DirectedGraph:
         self,
         model,
         method,
-        initial_guess=None,
+        initial_guess='random',
         adjacency=None,
         method_adjacency='newton',
         initial_guess_adjacency="random",
@@ -2398,25 +2398,25 @@ class DirectedGraph:
         The graph should be initialized.
 
         :param model: Available models are:
-            - *dcm*: solves DBCM respect to the parameters *x* and "y" of the loglikelihood function, it works for uweighted directed graphs [insert ref].
+            - *dcm*: solves DBCM with respect to the parameters *x* and "y" of the loglikelihood function, it works for unweighted directed graphs [insert ref].
             - *dcm_exp*: differently from the *dcm* option, *dcm_exp* considers the exponents of *x* and *y* as parameters [insert ref].
             - *decm*: solves DECM respect to the parameters *a_out*, *a_in*, *b_out* and *b_in* of the loglikelihood function, it is conceived for weighted directed graphs [insert ref].
             - *decm_exp*: differently from the *decm* option, *decm_exp* considers the exponents of *a_out*, *a_in*, *b_out* and *b_in** as parameters [insert ref].
-            - *crema*: solves CReMa for a weighted directd graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
-            - *crema-sparse*: alternative implementetio of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
+            - *crema*: solves CReMa for a weighted directed graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* parameter.
+            - *crema-sparse*: alternative implementation of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoiding memory problems for large graphs.
         :type model: str
         :param method: Available methods to solve the given *model* are:
             - *newton*: uses Newton-Rhapson method to solve the selected model, it can be memory demanding for *crema* because it requires the computation of the entire Hessian matrix. This method is not available for *creama-sparse*.
             - *quasinewton*: uses Newton-Rhapson method with Hessian matrix approximated by its principal diagonal to find parameters maximising loglikelihood function.
             - *fixed-point*: uses a fixed-point method to find parameters maximising loglikelihood function.
         :type method: str
-        :param initial_guess: Starting point solution may affect the results of the optization process. The user can provid an initial guess or choose between the following options:
+        :param initial_guess: Starting point solution may affect the results of the optimization process. The user can provide an initial guess or choose between the following options:
 
             - **Binary Models**:
 
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
-                - *degrees*: initial guess of each node is proportianal to its degree;
+                - *degrees*: initial guess of each node is proportional to its degree;
                 - *degrees_minor*: initial guess of each node is inversely proportional to its degree;
                 - *chung_lu*: initial guess given by Chung-Lu formula;
 
@@ -2424,13 +2424,13 @@ class DirectedGraph:
 
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
-                - *strengths*: initial guess of each node is proportianal to its stength;
+                - *strengths*: initial guess of each node is proportional to its strength;
                 - *strengths_minor*: initial guess of each node is inversely proportional to its strength;
 
         :type initial_guess: str, optional
         :param adjacency: Adjacency can be a binary method (defaults is *dcm_exp*) or an adjacency matrix.
         :type adjacency: str or numpy.ndarray, optional
-        :param method_adjacency: If adjacency is a *model*, it is the *methdod* used to solve it. Defaults to "newton".
+        :param method_adjacency: If adjacency is a *model*, it is the *method* used to solve it. Defaults to "newton".
         :type method_adjacency: str, optional
         :param initial_guess_adjacency: If adjacency is a *model*, it is the chosen initial guess. Defaults to "random".
         :type initial_guess_adjacency: str, optional
@@ -2442,12 +2442,12 @@ class DirectedGraph:
         :type verbose: bool, optional
         :param linsearch: If True the linsearch function is active, defaults to True.
         :type linsearch: bool, optional
-        :param tol: parameter controlling the tollerance of the norm the gradient function, defaults to 1e-8.
+        :param tol: parameter controlling the tolerance of the norm the gradient function, defaults to 1e-8.
         :type tol: float, optional
-        :param eps: parameter controlling the tollerance of the difference between two iterations, defaults to 1e-8.
+        :param eps: parameter controlling the tolerance of the difference between two iterations, defaults to 1e-8.
         :type eps: float, optional
         """
-        # TODO: aggiungere tutti i metodi
+        # TODO: add all methods
         if model in ["dcm", "dcm_exp", "decm", "decm_exp"]:
             self._solve_problem(
                 initial_guess=initial_guess,
@@ -2480,9 +2480,9 @@ class DirectedGraph:
             print("\nmin eig = {}".format(self.error))
 
     def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=42):
-        """The function sample a given number of graphs in the ensemble
-        generated from the last model solved. Each grpah is an edgelist
-        written in the output directory as `.txt` file.
+        """The function samples a given number of graphs in the ensemble
+        generated from the last model solved. Each graph is an edgelist
+        written in the output directory as a `.txt` file.
         The function is parallelised and can run on multiple cpus.
 
         :param n: Number of graphs to sample.
@@ -2682,6 +2682,7 @@ class BipartiteGraph:
         self.full_rows_num = None
         self.full_rows_num = None
         self.solution_converged = None
+        self.progress_bar = None
 
     def _initialize_graph(self, biadjacency=None, adjacency_list=None, edgelist=None, degree_sequences=None):
         """
@@ -3571,7 +3572,7 @@ class BipartiteGraph:
             multiplier = 2 * alpha / (self.n_cols * (self.n_cols - 1))
         try:
             eff_fdr_pos = np.where(sorted_pvals <= (np.arange(1, len(sorted_pvals) + 1) * alpha * multiplier))[0][-1]
-        except:
+        except IndexError:
             print('No V-motifs will be validated. Try increasing alpha')
             eff_fdr_pos = 0
         eff_fdr_th = eff_fdr_pos * multiplier

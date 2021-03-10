@@ -174,27 +174,26 @@ def pmatrix_cm(x, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_CM(X, args):
+def linsearch_fun_CM(xx, args):
     """Linsearch function for UBCM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, func)
     :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
+    x = xx[0]
+    dx = xx[1]
+    beta = xx[2]
+    alfa = xx[3]
+    f = xx[4]
     step_fun = args[0]
     arg_step_fun = args[1]
 
@@ -219,26 +218,25 @@ def linsearch_fun_CM(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_CM_fixed(X):
+def linsearch_fun_CM_fixed(xx):
     """Linsearch function for UBCM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, int)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
+    x = xx[0]
+    dx = xx[1]
+    dx_old = xx[2]
+    alfa = xx[3]
+    beta = xx[4]
+    step = xx[5]
 
     eps2 = 1e-2
     alfa0 = (eps2 - 1) * x / dx
@@ -439,28 +437,27 @@ def loglikelihood_hessian_diag_cm_exp(x, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_CM_exp(X, args):
+def linsearch_fun_CM_exp(xx, args):
     """Linsearch function for UBCM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
     This function works on UBCM exponential version.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, func)
     :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
+    x = xx[0]
+    dx = xx[1]
+    beta = xx[2]
+    alfa = xx[3]
+    f = xx[4]
     step_fun = args[0]
     arg_step_fun = args[1]
 
@@ -480,26 +477,25 @@ def linsearch_fun_CM_exp(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_CM_exp_fixed(X):
+def linsearch_fun_CM_exp_fixed(xx):
     """Linsearch function for UBCM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
     This function works on UBCM exponential version.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, int)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
+    dx = xx[1]
+    dx_old = xx[2]
+    alfa = xx[3]
+    beta = xx[4]
+    step = xx[5]
 
     if step:
         kk = 0
@@ -736,27 +732,26 @@ def loglikelihood_hessian_diag_ecm(sol, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_ECM(X, args):
+def linsearch_fun_ECM(xx, args):
     """Linsearch function for UECM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, func)
     :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
+    x = xx[0]
+    dx = xx[1]
+    beta = xx[2]
+    alfa = xx[3]
+    f = xx[4]
     step_fun = args[0]
     arg_step_fun = args[1]
 
@@ -791,26 +786,25 @@ def linsearch_fun_ECM(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_ECM_fixed(X):
+def linsearch_fun_ECM_fixed(xx):
     """Linsearch function for UECM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, int)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
+    x = xx[0]
+    dx = xx[1]
+    dx_old = xx[2]
+    alfa = xx[3]
+    beta = xx[4]
+    step = xx[5]
 
     eps2 = 1e-2
     alfa0 = (eps2 - 1) * x / dx
@@ -1083,28 +1077,27 @@ def loglikelihood_hessian_diag_ecm_exp(sol, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_ECM_exp(X, args):
+def linsearch_fun_ECM_exp(xx, args):
     """Linsearch function for UECM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
     This function works on UBCM exponential version.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, func)
     :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
+    x = xx[0]
+    dx = xx[1]
+    beta = xx[2]
+    alfa = xx[3]
+    f = xx[4]
     step_fun = args[0]
     arg_step_fun = args[1]
 
@@ -1136,27 +1129,26 @@ def linsearch_fun_ECM_exp(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_ECM_exp_fixed(X):
+def linsearch_fun_ECM_exp_fixed(xx):
     """Linsearch function for UECM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
     This function works on UBCM exponential version.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, int)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
+    x = xx[0]
+    dx = xx[1]
+    dx_old = xx[2]
+    alfa = xx[3]
+    beta = xx[4]
+    step = xx[5]
 
     nnn = int(len(x) / 2)
     while True:
@@ -1538,28 +1530,27 @@ def loglikelihood_hessian_diag_crema_sparse_2(beta, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_crema_undirected(X, args):
+def linsearch_fun_crema_undirected(xx, args):
     """Linsearch function for CReMa newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray,
+    :type xx: (numpy.ndarray, numpy.ndarray,
         float, float, func)
     :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
+    x = xx[0]
+    dx = xx[1]
+    beta = xx[2]
+    alfa = xx[3]
+    f = xx[4]
     step_fun = args[0]
     arg_step_fun = args[1]
 
@@ -1580,25 +1571,24 @@ def linsearch_fun_crema_undirected(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_crema_undirected_fixed(X):
+def linsearch_fun_crema_undirected_fixed(xx):
     """Linsearch function for CReMa fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, int)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
+    dx = xx[1]
+    dx_old = xx[2]
+    alfa = xx[3]
+    beta = xx[4]
+    step = xx[5]
 
     if step:
         kk = 0
@@ -3167,28 +3157,27 @@ def expected_in_degree_dcm_exp(theta):
 
 
 @jit(nopython=True)
-def linsearch_fun_DCM_exp(X, args):
+def linsearch_fun_DCM_exp(xx, args):
     """Linsearch function for DBCM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
     This function works on DBCM exponential version.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, func)
     :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
+    x = xx[0]
+    dx = xx[1]
+    beta = xx[2]
+    alfa = xx[3]
+    f = xx[4]
     step_fun = args[0]
     arg_step_fun = args[1]
 
@@ -3207,26 +3196,25 @@ def linsearch_fun_DCM_exp(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_DCM_exp_fixed(X):
+def linsearch_fun_DCM_exp_fixed(xx):
     """Linsearch function for DBCM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
     This function works on DBCM exponential version.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, int)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
+    dx = xx[1]
+    dx_old = xx[2]
+    alfa = xx[3]
+    beta = xx[4]
+    step = xx[5]
 
     if step:
         kk = 0
@@ -3712,28 +3700,27 @@ def expected_decm_exp(theta):
 
 
 @jit(nopython=True)
-def linsearch_fun_DECM_exp(X, args):
+def linsearch_fun_DECM_exp(xx, args):
     """Linsearch function for DECM newton and quasinewton methods.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
     This function works on DECM exponential version.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, function f
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, func)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, func)
     :param args: Tuple, step function and arguments.
     :type args: (func, tuple)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    beta = X[2]
-    alfa = X[3]
-    f = X[4]
+    x = xx[0]
+    dx = xx[1]
+    beta = xx[2]
+    alfa = xx[3]
+    f = xx[4]
     step_fun = args[0]
     arg_step_fun = args[1]
 
@@ -3771,27 +3758,26 @@ def linsearch_fun_DECM_exp(X, args):
 
 
 @jit(nopython=True)
-def linsearch_fun_DECM_exp_fixed(X):
+def linsearch_fun_DECM_exp_fixed(xx):
     """Linsearch function for DECM fixed-point method.
     The function returns the step's size, alpha.
     Alpha determines how much to move on the descending direction
     found by the algorithm.
     This function works on DECM exponential version.
 
-    :param X: Tuple of arguments to find alpha:
+    :param xx: Tuple of arguments to find alpha:
         solution, solution step, tuning parameter beta,
         initial alpha, step.
-    :type X: (numpy.ndarray, numpy.ndarray, float, float, int)
+    :type xx: (numpy.ndarray, numpy.ndarray, float, float, int)
     :return: Working alpha.
     :rtype: float
     """
-    # TODO: change X to xx
-    x = X[0]
-    dx = X[1]
-    dx_old = X[2]
-    alfa = X[3]
-    beta = X[4]
-    step = X[5]
+    x = xx[0]
+    dx = xx[1]
+    dx_old = xx[2]
+    alfa = xx[3]
+    beta = xx[4]
+    step = xx[5]
 
     # Mettere il check sulle y
     nnn = int(len(x) / 4)
@@ -3808,7 +3794,7 @@ def linsearch_fun_DECM_exp_fixed(X):
                 + alfa * dx[2 * nnn: 3 * nnn][ind_yout]) + \
             (x[3 * nnn:][ind_yin]
              + alfa * dx[3 * nnn:][ind_yin])
-        if (cond) > tmp * 0.01:
+        if cond > tmp * 0.01:
             break
         else:
             alfa *= beta
@@ -4448,13 +4434,13 @@ def expected_out_strength_crema_directed_sparse(sol, adj):
 
 
 @jit(nopython=True)
-def expected_in_stregth_crema_directed(sol, adj):
+def expected_in_strength_crema_directed(sol, adj):
     """Expected in-strength after CReMa.
 
     :param sol: CReMa solution
     :type sol: numpy.ndarray
     :param adj: Tuple containing the original topology edges list
-         and link related weigths.
+         and link related weights.
     :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)
     :return: Expected in-strength sequence
     :rtype: numpy.ndarray
@@ -4476,12 +4462,12 @@ def expected_in_stregth_crema_directed(sol, adj):
 
 @jit(nopython=True)
 def expected_in_stregth_crema_directed_sparse(sol, adj):
-    """Expected in-strength after CReMa. Sparse inisialization version.
+    """Expected in-strength after CReMa. Sparse initialization version.
 
     :param sol: CReMa solution
     :type sol: numpy.ndarray
     :param adj: Tuple containing the original topology edges list
-         and link related weigths.
+         and link related weights.
     :type adj: (numpy.ndarray, numpy.ndarray, numpy.ndarray)
     :return: Expected in-strength sequence
     :rtype: numpy.ndarray
