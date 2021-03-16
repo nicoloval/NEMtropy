@@ -143,13 +143,13 @@ adjacency matrix by running the NEMtropy build graph function.
     from NEMtropy.network_functions import build_graph_from_edgelist
 
     edgelist_ens = np.loadtxt("sample/0.txt")
-    ens_adj = build_graph_from_edgelist(edgelist = edgelist_ens,
-                                    is_directed = False,
-                                    is_sparse = False,
-                                    is_weighted = False)
+    ens_adj = build_adjacency_from_edgelist(edgelist = edgelist_ens,
+                                            is_directed = False,
+                                            is_sparse = False,
+                                            is_weighted = False)
 ```
 
-These collection of random adjacency matrices can be used as a null model:
+These collections of random adjacency matrices can be used as a null model:
 it is enough to compute the expected value of the selected network feature 
 on the ensemble of matrices and to compare it with its original value.
 
@@ -162,7 +162,7 @@ You can find complete documentation about NEMtropy library in [docs](https://nem
 Development
 -----------
 Please work on a feature branch and create a pull request to the development 
-branch. If necessary to merge manually do so without fast forward:
+branch. If necessary to merge manually do so without fast-forward:
 
 ```
     $ git merge --no-ff myfeature
@@ -179,7 +179,7 @@ To build a development environment run:
 Testing
 -------
 If you want to test the package integrity, you can run the following 
-bash command from the tests directory:
+bash command from the tests' directory:
 
 ```
     $ bash run_all.sh
