@@ -1022,7 +1022,7 @@ class UndirectedGraph:
         self._solution_error()
         print("\nsolution error = {}".format(self.error))
 
-    def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=42):
+    def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=None):
         """The function sample a given number of graphs in the ensemble
         generated from the last model solved. Each grpah is an edgelist
         written in the output directory as `.txt` file.
@@ -2477,7 +2477,7 @@ class DirectedGraph:
         self._solution_error()
         print("\nsolution error = {}".format(self.error))
 
-    def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=42):
+    def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=None):
         """The function sample a given number of graphs in the ensemble
         generated from the last model solved. Each grpah is an edgelist
         written in the output directory as `.txt` file.
