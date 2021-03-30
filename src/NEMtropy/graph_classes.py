@@ -88,6 +88,7 @@ class UndirectedGraph:
         self.relative_error_strength = None
         self.full_return = False
         self.last_model = None
+        self.solution_array
 
         # function
         self.args = None
@@ -334,16 +335,16 @@ class UndirectedGraph:
 
     def _set_solved_problem_cm(self, solution):
         if self.full_return:
-            self.r_xy = solution[0]
+            self.solution_array = solution[0]
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
             self.diff_seq = solution[4]
             self.alfa_seq = solution[5]
         else:
-            self.r_xy = solution
+            self.solution_array = solution
 
-        self.r_x = self.r_xy
+        self.r_x = self.solution_array
         if self.last_model == "cm":
             self.x = self.r_x[self.r_invert_dseq]
         elif self.last_model == "cm_exp":
@@ -903,23 +904,25 @@ class UndirectedGraph:
         else:
             self.beta = solution
 
+        self.solution_array = self.beta
+
     def _set_solved_problem_ecm(self, solution):
         if self.full_return:
-            self.r_xy = solution[0]
+            self.solution_array = solution[0]
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
             self.diff_seq = solution[4]
             self.alfa_seq = solution[5]
         else:
-            self.r_xy = solution
+            self.solution_array = solution
 
         if self.last_model == "ecm":
-            self.x = self.r_xy[: self.n_nodes]
-            self.y = self.r_xy[self.n_nodes:]
+            self.x = self.solution_array[: self.n_nodes]
+            self.y = self.solution_array[self.n_nodes:]
         elif self.last_model == "ecm_exp":
-            self.x = np.exp(-self.r_xy[:self.n_nodes])
-            self.y = np.exp(-self.r_xy[self.n_nodes:])
+            self.x = np.exp(-self.solution_array[:self.n_nodes])
+            self.y = np.exp(-self.solution_array[self.n_nodes:])
 
     def solve_tool(
         self,
@@ -1120,6 +1123,12 @@ class UndirectedGraph:
         else:
             raise ValueError("insert a model")
 
+    def model_loglikelihood(self):
+        """Returns the loglikelihood of the solution of last model executed.
+        """
+        return self.step_fun(self.solution_array)
+
+
 
 class DirectedGraph:
     """Directed graph instance can be initialised with
@@ -1188,7 +1197,7 @@ class DirectedGraph:
         # reduced solutions
         self.r_x = None
         self.r_y = None
-        self.r_xy = None
+        self.solution_array = None
         # Problem (reduced) residuals
         self.residuals = None
         self.final_result = None
@@ -1478,17 +1487,17 @@ class DirectedGraph:
 
     def _set_solved_problem_dcm(self, solution):
         if self.full_return:
-            self.r_xy = solution[0]
+            self.solution_array = solution[0]
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
             self.diff_seq = solution[4]
             self.alfa_seq = solution[5]
         else:
-            self.r_xy = solution
+            self.solution_array = solution
 
-        self.r_x = self.r_xy[: self.rnz_n_out]
-        self.r_y = self.r_xy[self.rnz_n_out:]
+        self.r_x = self.solution_array[: self.rnz_n_out]
+        self.r_y = self.solution_array[self.rnz_n_out:]
 
         self.x = self.r_x[self.r_invert_dseq]
         self.y = self.r_y[self.r_invert_dseq]
@@ -1496,7 +1505,7 @@ class DirectedGraph:
     def _set_solved_problem_dcm_exp(self, solution):
         if self.full_return:
             # conversion from theta to x
-            self.r_xy = np.exp(-solution[0])
+            self.solution_array = np.exp(-solution[0])
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
@@ -1504,34 +1513,34 @@ class DirectedGraph:
             self.alfa_seq = solution[5]
         else:
             # conversion from theta to x
-            self.r_xy = np.exp(-solution)
+            self.solution_array = np.exp(-solution)
 
-        self.r_x = self.r_xy[: self.rnz_n_out]
-        self.r_y = self.r_xy[self.rnz_n_out:]
+        self.r_x = self.solution_array[: self.rnz_n_out]
+        self.r_y = self.solution_array[self.rnz_n_out:]
 
         self.x = self.r_x[self.r_invert_dseq]
         self.y = self.r_y[self.r_invert_dseq]
 
     def _set_solved_problem_decm(self, solution):
         if self.full_return:
-            self.r_xy = solution[0]
+            self.solution_array = solution[0]
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
             self.diff_seq = solution[4]
             self.alfa_seq = solution[5]
         else:
-            self.r_xy = solution
+            self.solution_array = solution
 
-        self.x = self.r_xy[: self.n_nodes]
-        self.y = self.r_xy[self.n_nodes: 2 * self.n_nodes]
-        self.b_out = self.r_xy[2 * self.n_nodes: 3 * self.n_nodes]
-        self.b_in = self.r_xy[3 * self.n_nodes:]
+        self.x = self.solution_array[: self.n_nodes]
+        self.y = self.solution_array[self.n_nodes: 2 * self.n_nodes]
+        self.b_out = self.solution_array[2 * self.n_nodes: 3 * self.n_nodes]
+        self.b_in = self.solution_array[3 * self.n_nodes:]
 
     def _set_solved_problem_decm_exp(self, solution):
         if self.full_return:
             # conversion from theta to x
-            self.r_xy = np.exp(-solution[0])
+            self.solution_array = np.exp(-solution[0])
             self.comput_time = solution[1]
             self.n_steps = solution[2]
             self.norm_seq = solution[3]
@@ -1539,12 +1548,12 @@ class DirectedGraph:
             self.alfa_seq = solution[5]
         else:
             # conversion from theta to x
-            self.r_xy = np.exp(-solution)
+            self.solution_array = np.exp(-solution)
 
-        self.x = self.r_xy[: self.n_nodes]
-        self.y = self.r_xy[self.n_nodes: 2 * self.n_nodes]
-        self.b_out = self.r_xy[2 * self.n_nodes: 3 * self.n_nodes]
-        self.b_in = self.r_xy[3 * self.n_nodes:]
+        self.x = self.solution_array[: self.n_nodes]
+        self.y = self.solution_array[self.n_nodes: 2 * self.n_nodes]
+        self.b_out = self.solution_array[2 * self.n_nodes: 3 * self.n_nodes]
+        self.b_in = self.solution_array[3 * self.n_nodes:]
 
     def _set_solved_problem(self, solution):
         model = self.last_model
@@ -2376,6 +2385,8 @@ class DirectedGraph:
             self.b_out = solution[: self.n_nodes]
             self.b_in = solution[self.n_nodes:]
 
+        self.solution_array = solution
+
     def solve_tool(
         self,
         model,
@@ -2579,6 +2590,11 @@ class DirectedGraph:
         else:
             raise ValueError("insert a model")
 
+    def model_loglikelihood(self):
+        """Returns the loglikelihood of the solution of last model executed.
+        """
+        return self.step_fun(self.solution_array)
+
 
 class BipartiteGraph:
     """Bipartite Graph class for undirected binary bipartite networks.
@@ -2639,7 +2655,7 @@ class BipartiteGraph:
         self.y = None
         self.r_x = None
         self.r_y = None
-        self.r_xy = None
+        self.solution_array = None
         self.dict_x = None
         self.dict_y = None
         self.theta_x = None
@@ -2681,6 +2697,7 @@ class BipartiteGraph:
         self.full_rows_num = None
         self.full_rows_num = None
         self.solution_converged = None
+        self.solution_array = None
 
     def _initialize_graph(self, biadjacency=None, adjacency_list=None, edgelist=None, degree_sequences=None):
         """
@@ -3137,15 +3154,15 @@ class BipartiteGraph:
             self.r_theta_xy = solution
             self.r_theta_x = self.r_theta_xy[:self.r_n_rows]
             self.r_theta_y = self.r_theta_xy[self.r_n_rows:]
-            self.r_xy = np.exp(- self.r_theta_xy)
+            self.solution_array = np.exp(- self.r_theta_xy)
             self.r_x = np.exp(- self.r_theta_x)
             self.r_y = np.exp(- self.r_theta_y)
             self.theta_x[self.nonfixed_rows] = self.r_theta_x[self.r_invert_rows_deg]
             self.theta_y[self.nonfixed_cols] = self.r_theta_y[self.r_invert_cols_deg]
         else:
-            self.r_xy = solution
-            self.r_x = self.r_xy[:self.r_n_rows]
-            self.r_y = self.r_xy[self.r_n_rows:]
+            self.solution_array = solution
+            self.r_x = self.solution_array[:self.r_n_rows]
+            self.r_y = self.solution_array[self.r_n_rows:]
         if self.x is None:
             self.x = np.zeros(self.n_rows)
         if self.y is None:
@@ -3686,3 +3703,9 @@ class BipartiteGraph:
         self.rows_deg = None
         self.cols_deg = None
         self.is_initialized = False
+
+
+    def model_loglikelihood(self):
+        """Returns the loglikelihood of the solution of last model executed.
+        """
+        return self.step_fun(self.solution_array)
