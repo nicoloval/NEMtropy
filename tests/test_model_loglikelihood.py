@@ -5,6 +5,7 @@ import NEMtropy.graph_classes as sample
 import numpy as np
 import unittest  # test tool
 import NEMtropy.matrix_generator as mg
+import NEMtropy.models_functions as mof
 
 
 class MyTest(unittest.TestCase):
@@ -30,6 +31,7 @@ class MyTest(unittest.TestCase):
             max_steps=200,
             verbose=False,
         )
+        l = -mof.loglikelihood_dcm(g.solution_array, g.args)
 
         # g._solution_error()
         # debug
@@ -40,7 +42,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 0: error = {}'.format(g.error))
 
         # test result
-        self.assertTrue(g.error < 1e-1)
+        self.assertTrue(l == g.model_loglikelihood())
 
     def test_dcm_new(self):
         """test with 3 classes of cardinality 1
@@ -63,6 +65,7 @@ class MyTest(unittest.TestCase):
             max_steps=200,
             verbose=False,
         )
+        l = -mof.loglikelihood_dcm_exp(g.solution_array, g.args)
 
         # g._solution_error()
         # debug
@@ -71,10 +74,13 @@ class MyTest(unittest.TestCase):
         # print(g.rnz_dseq_out)
         # print(g.rnz_dseq_in)
         # print('\ntest 0: error = {}'.format(g.error))
+        # print(l)
+        # print(g.model_loglikelihood())
 
         # test result
-        self.assertTrue(g.error < 1e-1)
+        self.assertTrue(l == g.model_loglikelihood())
 
+    @unittest.skip("")
     def test_decm(self):
         """test with 3 classes of cardinality 1
         and no zero degrees
@@ -96,6 +102,8 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
+        l = -mof.loglikelihood_decm(g.solution_array, g.args)
+
         # g._solution_error()
         # debug
         # print(g.r_dseq_out)
@@ -105,7 +113,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 0: error = {}'.format(g.error))
 
         # test result
-        self.assertTrue(g.error < 1e-1)
+        self.assertTrue(l == g.model_loglikelihood())
 
     def test_decm_new(self):
         """test with 3 classes of cardinality 1
@@ -127,6 +135,7 @@ class MyTest(unittest.TestCase):
             max_steps=200,
             verbose=False,
         )
+        l = -mof.loglikelihood_decm_exp(g.solution_array, g.args)
 
         # g._solution_error()
         # debug
@@ -137,7 +146,7 @@ class MyTest(unittest.TestCase):
         # print('\ntest 0: error = {}'.format(g.error))
 
         # test result
-        self.assertTrue(g.error < 1e-1)
+        self.assertTrue(l == g.model_loglikelihood())
 
 
 if __name__ == "__main__":
