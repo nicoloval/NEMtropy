@@ -19,11 +19,11 @@ sys.path.append('../src/')
 # -- Project information -----------------------------------------------------
 
 project = 'NEMtropy'
-copyright = "2021, Emiliano Marchese and Nicolo' Vallarano"
-author = "Emiliano Marchese, Nicolo' Vallarano"
+copyright = "2021, Emiliano Marchese, Nicolo' Vallarano and Matteo Bruno"
+author = "Emiliano Marchese, Nicolo' Vallarano, Matteo Bruno"
 
 # The full version, including alpha/beta/rc tags
-release = '2.0.1'
+release = '2.0.3'
 
 
 # -- General configuration ---------------------------------------------------

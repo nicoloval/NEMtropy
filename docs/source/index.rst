@@ -42,18 +42,21 @@ to preserve defines the model you need:
 -  **DBCM** *Directed Binary Configuration Model* `[1] <#1>`__
 -  **DECM** *Directed Enhanced Configuration Model* `[1] <#1>`__
 -  **CReMa** `[2] <#2>`__
+-  **BiCM** *Bipartite Configuration Model* `[3] <#3>`__
 
 The following table may helps you identify the model that fits your
 needs in function of the type of network you are working with; for
 in-depth discussion please see the references.
 
-+----------------------+--------------------+-------------------+
-| [...]                | Undirected Graph   | Directed Graph    |
-+======================+====================+===================+
-| **Binary Graph**     | *UBCM*             | *DBCM*            |
-+----------------------+--------------------+-------------------+
-| **Weighted Graph**   | *UECM*, *CReMa*    | *DECM*, *CReMa*   |
-+----------------------+--------------------+-------------------+
++----------------------+--------------------+-------------------+-------------------+
+| [...]                | Undirected Graph   | Directed Graph    | Bipartite Graph   |
++======================+====================+===================+===================+
+| **Binary Graph**     | *UBCM*             | *DBCM*            | *BiCM*            |
++----------------------+--------------------+-------------------+-------------------+
+| **Weighted Graph**   | *UECM*, *CReMa*    | *DECM*, *CReMa*   | -                 |
++----------------------+--------------------+-------------------+-------------------+
+
+The BiCM module is also available as `a standalone package <https://github.com/mat701/BiCM>`__, find its docs `here <https://bipartite-configuration-model.readthedocs.io/en/latest/>`__.
 
 *References*
 
@@ -64,6 +67,9 @@ in-depth discussion please see the references.
    faster horse on a safer trail: generalized inference for the
    efficient reconstruction of weighted networks." New Journal of
    Physics 22.5 (2020): 053053. https://arxiv.org/abs/1811.09829
+-  [3] Saracco, Fabio, Riccardo Di Clemente, Andrea Gabrielli, and Tiziano Squartini.
+   "Randomizing bipartite networks: the case of the World Trade Web."
+   Scientific reports 5, no. 1 (2015): 1-18. https://doi.org/10.1038/srep10595
 
 
 Installation

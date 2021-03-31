@@ -178,7 +178,7 @@ class UndirectedGraph:
             elif len(degree_sequence) > 0:
                 try:
                     int(degree_sequence[0])
-                except:
+                except (ValueError, TypeError):
                     raise TypeError(
                         "The degree sequence must contain numeric values."
                     )
@@ -199,7 +199,7 @@ class UndirectedGraph:
                     elif len(strength_sequence):
                         try:
                             int(strength_sequence[0])
-                        except:
+                        except (ValueError, TypeError):
                             raise TypeError(
                                 "The strength sequence must contain numeric"
                                 "values."
@@ -231,7 +231,7 @@ class UndirectedGraph:
             elif len(strength_sequence):
                 try:
                     int(strength_sequence[0])
-                except:
+                except (ValueError, TypeError):
                     raise TypeError(
                         "The strength sequence must contain numeric values."
                     )
@@ -247,7 +247,7 @@ class UndirectedGraph:
     def set_adjacency_matrix(self, adjacency):
         """Initialises graph given the adjacency matrix.
 
-        :param adjacency: ajdacency matrix.
+        :param adjacency: adjacency matrix.
         :type adjacency: numpy.ndarray, list, scipy.sparse_matrix
         """
         if self.is_initialized:
@@ -287,7 +287,7 @@ class UndirectedGraph:
             self._initialize_graph(degree_sequence=degree_sequence)
 
     def clean_edges(self):
-        """Deletes all the initialiased attributes.
+        """Deletes all the initialised attributes.
         """
         self.adjacency = None
         self.edgelist = None
@@ -296,7 +296,7 @@ class UndirectedGraph:
 
     def _solve_problem(
         self,
-        initial_guess=None,
+        initial_guess='random',
         model="cm",
         method="quasinewton",
         max_steps=100,
@@ -716,9 +716,9 @@ class UndirectedGraph:
             self.fun = d_fun[mod_met]
             self.fun_jac = d_fun_jac[mod_met]
             self.step_fun = d_fun_stop[mod_met]
-        except:
+        except KeyError:
             raise ValueError(
-                'Method must be "newton","quasi-newton", or "fixed-point".'
+                'Method must be "newton","quasinewton", or "fixed-point".'
             )
 
         d_pmatrix = {
@@ -779,11 +779,12 @@ class UndirectedGraph:
             if self.regularise == "eigenvalues":
                 self.hessian_regulariser = sof.matrix_regulariser_function_eigen_based
             elif self.regularise == "identity":
-                self.hessian_regulariser = sof.hessian_regulariser_function
+                self.hessian_regulariser = sof.matrix_regulariser_function
+                
 
     def _solve_problem_crema_undirected(
         self,
-        initial_guess=None,
+        initial_guess='random',
         model="crema",
         adjacency="cm",
         method="quasinewton",
@@ -946,12 +947,12 @@ class UndirectedGraph:
 
         :param model: Available models are:
 
-            - *cm*: solves UBCM respect to the parameters *x* of the mof.loglikelihood function, it works for uweighted undirected graphs [insert ref].
+            - *cm*: solves UBCM respect to the parameters *x* of the mof.loglikelihood function, it works for unweighted undirected graphs [insert ref].
             - *cm_exp*: differently from the *cm* option, *cm_exp* considers the exponents of *x* as parameters [insert ref].
             - *ecm*: solves UECM respect to the parameters *x* and *y* of the mof.loglikelihood function, it is conceived for weighted undirected graphs [insert ref].
             - *ecm_exp*: differently from the *ecm* option, *ecm_exp* considers the exponents of *x* and *y* as parameters [insert ref].
-            - *crema*: solves CReMa for a weighted undirectd graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
-            - *crema-sparse*: alternative implementetio of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
+            - *crema*: solves CReMa for a weighted undirected graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
+            - *crema-sparse*: alternative implementation of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
 
         :type model: str
         :param method: Available methods to solve the given *model* are:
@@ -961,23 +962,23 @@ class UndirectedGraph:
             - *fixed-point*: uses a fixed-point method to find parameters maximising mof.loglikelihood function.
 
         :type method: str
-        :param initial_guess: Starting point solution may affect the results of the optization process. The user can provid an initial guess or choose between the following options:
+        :param initial_guess: Starting point solution may affect the results of the optimization process. The user can provide an initial guess or choose between the following options:
 
             - **Binary Models**:
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
-                - *degrees*: initial guess of each node is proportianal to its degree;
+                - *degrees*: initial guess of each node is proportional to its degree;
                 - *degrees_minor*: initial guess of each node is inversely proportional to its degree;
                 - *chung_lu*: initial guess given by Chung-Lu formula;
             - **Weighted Models**:
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
-                - *strengths*: initial guess of each node is proportianal to its stength;
+                - *strengths*: initial guess of each node is proportional to its strength;
                 - *strengths_minor*: initial guess of each node is inversely proportional to its strength;
         :type initial_guess: str, optional
         :param adjacency: Adjacency can be a binary method (defaults is *cm_exp*) or an adjacency matrix.
         :type adjacency: str or numpy.ndarray, optional
-        :param method_adjacency: If adjacency is a *model*, it is the *methdod* used to solve it. Defaults to "newton".
+        :param method_adjacency: If adjacency is a *model*, it is the *method* used to solve it. Defaults to "newton".
         :type method_adjacency: str, optional
         :param initial_guess_adjacency: If adjacency is a *model*, it is the chosen initial guess. Defaults to "random".
         :type initial_guess_adjacency: str, optional
@@ -1312,7 +1313,7 @@ class DirectedGraph:
             elif len(degree_sequence) > 0:
                 try:
                     int(degree_sequence[0])
-                except:  # TODO: bare exception
+                except (ValueError, TypeError):
                     raise TypeError(
                         "The degree sequence must contain numeric values."
                     )
@@ -1338,7 +1339,7 @@ class DirectedGraph:
                     elif len(strength_sequence):
                         try:
                             int(strength_sequence[0])
-                        except:  # TODO: bare exception to check
+                        except (ValueError, TypeError):
                             raise TypeError(
                                 ("The strength sequence must contain"
                                  " numeric values.")
@@ -1374,7 +1375,7 @@ class DirectedGraph:
             elif len(strength_sequence):
                 try:
                     int(strength_sequence[0])
-                except:  # TODO: bare exception
+                except (ValueError, TypeError):
                     raise TypeError(
                         "The strength sequence must contain numeric values."
                     )
@@ -1410,8 +1411,8 @@ class DirectedGraph:
     def set_edgelist(self, edgelist):
         """Initializes a graph from the edgelist.
 
-        :param adjacency: Edgelist
-        :type adjacency: numpy.ndarray, list
+        :param edgelist: Edgelist
+        :type edgelist: numpy.ndarray, list
         """
         if self.is_initialized:
             print(
@@ -1424,8 +1425,8 @@ class DirectedGraph:
     def set_degree_sequences(self, degree_sequence):
         """Initializes graph from the degrees sequence.
 
-        :param adjacency: Degrees sequence
-        :type adjacency: numpy.ndarray
+        :param degree_sequence: Degrees sequence
+        :type degree_sequence: numpy.ndarray
         """
         if self.is_initialized:
             print(
@@ -1445,7 +1446,7 @@ class DirectedGraph:
 
     def _solve_problem(
         self,
-        initial_guess=None,  # TODO:aggiungere un default a initial guess
+        initial_guess='random',
         model="dcm",
         method="quasinewton",
         max_steps=100,
@@ -1915,7 +1916,7 @@ class DirectedGraph:
                     ex_s_out = mof.expected_out_strength_crema_directed(
                         sol, self.adjacency_crema
                     )
-                    ex_s_in = mof.expected_in_stregth_crema_directed(
+                    ex_s_in = mof.expected_in_strength_crema_directed(
                         sol, self.adjacency_crema
                     )
                 ex_s = np.concatenate([ex_s_out, ex_s_in])
@@ -2177,7 +2178,7 @@ class DirectedGraph:
             self.fun = d_fun[mod_met]
             self.fun_jac = d_fun_jac[mod_met]
             self.step_fun = d_fun_step[mod_met]
-        except:  # TODO: remove bare excpets
+        except KeyError:
             raise ValueError(
                 'Method must be "newton","quasinewton", or "fixed-point".'
             )
@@ -2267,7 +2268,7 @@ class DirectedGraph:
 
     def _solve_problem_crema_directed(
         self,
-        initial_guess=None,
+        initial_guess='random',
         model="crema",
         adjacency="dcm",
         method="quasinewton",
@@ -2408,25 +2409,25 @@ class DirectedGraph:
         The graph should be initialized.
 
         :param model: Available models are:
-            - *dcm*: solves DBCM respect to the parameters *x* and "y" of the loglikelihood function, it works for uweighted directed graphs [insert ref].
+            - *dcm*: solves DBCM with respect to the parameters *x* and "y" of the loglikelihood function, it works for unweighted directed graphs [insert ref].
             - *dcm_exp*: differently from the *dcm* option, *dcm_exp* considers the exponents of *x* and *y* as parameters [insert ref].
             - *decm*: solves DECM respect to the parameters *a_out*, *a_in*, *b_out* and *b_in* of the loglikelihood function, it is conceived for weighted directed graphs [insert ref].
             - *decm_exp*: differently from the *decm* option, *decm_exp* considers the exponents of *a_out*, *a_in*, *b_out* and *b_in** as parameters [insert ref].
-            - *crema*: solves CReMa for a weighted directd graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* paramenter.
-            - *crema-sparse*: alternative implementetio of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoing memory problems for large graphs.
+            - *crema*: solves CReMa for a weighted directed graphs. In order to compute beta parameters, it requires information about the binary structure of the network. These can be provided by the user by using *adjacency* parameter.
+            - *crema-sparse*: alternative implementation of *crema* for large graphs. The *creama-sparse* model doesn't compute the binary probability matrix avoiding memory problems for large graphs.
         :type model: str
         :param method: Available methods to solve the given *model* are:
             - *newton*: uses Newton-Rhapson method to solve the selected model, it can be memory demanding for *crema* because it requires the computation of the entire Hessian matrix. This method is not available for *creama-sparse*.
             - *quasinewton*: uses Newton-Rhapson method with Hessian matrix approximated by its principal diagonal to find parameters maximising loglikelihood function.
             - *fixed-point*: uses a fixed-point method to find parameters maximising loglikelihood function.
         :type method: str
-        :param initial_guess: Starting point solution may affect the results of the optization process. The user can provid an initial guess or choose between the following options:
+        :param initial_guess: Starting point solution may affect the results of the optimization process. The user can provide an initial guess or choose between the following options:
 
             - **Binary Models**:
 
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
-                - *degrees*: initial guess of each node is proportianal to its degree;
+                - *degrees*: initial guess of each node is proportional to its degree;
                 - *degrees_minor*: initial guess of each node is inversely proportional to its degree;
                 - *chung_lu*: initial guess given by Chung-Lu formula;
 
@@ -2434,13 +2435,13 @@ class DirectedGraph:
 
                 - *random*: random numbers in (0, 1);
                 - *uniform*: uniform initial guess in (0, 1);
-                - *strengths*: initial guess of each node is proportianal to its stength;
+                - *strengths*: initial guess of each node is proportional to its strength;
                 - *strengths_minor*: initial guess of each node is inversely proportional to its strength;
 
         :type initial_guess: str, optional
         :param adjacency: Adjacency can be a binary method (defaults is *dcm_exp*) or an adjacency matrix.
         :type adjacency: str or numpy.ndarray, optional
-        :param method_adjacency: If adjacency is a *model*, it is the *methdod* used to solve it. Defaults to "newton".
+        :param method_adjacency: If adjacency is a *model*, it is the *method* used to solve it. Defaults to "newton".
         :type method_adjacency: str, optional
         :param initial_guess_adjacency: If adjacency is a *model*, it is the chosen initial guess. Defaults to "random".
         :type initial_guess_adjacency: str, optional
@@ -2452,12 +2453,12 @@ class DirectedGraph:
         :type verbose: bool, optional
         :param linsearch: If True the linsearch function is active, defaults to True.
         :type linsearch: bool, optional
-        :param tol: parameter controlling the tollerance of the norm the gradient function, defaults to 1e-8.
+        :param tol: parameter controlling the tolerance of the norm the gradient function, defaults to 1e-8.
         :type tol: float, optional
-        :param eps: parameter controlling the tollerance of the difference between two iterations, defaults to 1e-8.
+        :param eps: parameter controlling the tolerance of the difference between two iterations, defaults to 1e-8.
         :type eps: float, optional
         """
-        # TODO: aggiungere tutti i metodi
+        # TODO: add all methods
         if model in ["dcm", "dcm_exp", "decm", "decm_exp"]:
             self._solve_problem(
                 initial_guess=initial_guess,
@@ -2487,6 +2488,7 @@ class DirectedGraph:
             )
         self._solution_error()
         print("\nsolution error = {}".format(self.error))
+
 
     def ensemble_sampler(self, n, cpu_n=1, output_dir="sample/", seed=None):
         """The function sample a given number of graphs in the ensemble
@@ -2668,7 +2670,6 @@ class BipartiteGraph:
         self.v_adj_list = None
         self.projection_method = 'poisson'
         self.threads_num = 1
-        self.progress_bar = True
         self.rows_pvals = None
         self.cols_pvals = None
         self.is_rows_projected = False
@@ -2698,6 +2699,7 @@ class BipartiteGraph:
         self.full_rows_num = None
         self.solution_converged = None
         self.solution_array = None
+        self.progress_bar = None
 
     def _initialize_graph(self, biadjacency=None, adjacency_list=None, edgelist=None, degree_sequences=None):
         """
@@ -2821,9 +2823,8 @@ class BipartiteGraph:
         """
         Internal method to set the initial point of the solver.
         """
-        if self.initial_guess is None:
-            self.r_x = self.r_rows_deg / (
-                np.sqrt(self.r_n_edges))  # This +1 increases the stability of the solutions.
+        if self.initial_guess is None: # Chung-Lu approximation
+            self.r_x = self.r_rows_deg / (np.sqrt(self.r_n_edges))
             self.r_y = self.r_cols_deg / (np.sqrt(self.r_n_edges))
         elif self.initial_guess == 'random':
             self.r_x = np.random.rand(self.r_n_rows).astype(np.float64)
@@ -3042,7 +3043,8 @@ class BipartiteGraph:
     @staticmethod
     def check_sol(biad_mat, avg_bicm, return_error=False, in_place=False):
         """
-        This function prints the rows sums differences between two matrices, that originally are the biadjacency matrix and its bicm2 average matrix.
+        Static method.
+        This function prints the rows sums differences between two matrices, that originally are the biadjacency matrix and its bicm average matrix.
         The intended use of this is to check if an average matrix is actually a solution for a bipartite configuration model.
 
         If return_error is set to True, it returns 1 if the sum of the differences is bigger than 1.
@@ -3084,15 +3086,14 @@ class BipartiteGraph:
         else:
             return
 
-    @staticmethod
-    def check_sol_light(x, y, rows_deg, cols_deg, return_error=False):
+    def check_sol_light(self, return_error=False):
         """
         Light version of the check_sol function, working only on the fitnesses and the degree sequences.
         """
         error = 0
         rows_error_vec = []
-        for i in range(len(x)):
-            row_avgs = x[i] * y / (1 + x[i] * y)
+        for i in range(self.r_n_rows):
+            row_avgs = self.r_x[i] * self.r_y / (1 + self.r_x[i] * self.r_y)
             if error == 0:
                 if np.any(row_avgs < 0):
                     print('Warning: negative link probabilities')
@@ -3100,11 +3101,12 @@ class BipartiteGraph:
                 if np.any(row_avgs > 1):
                     print('Warning: link probabilities > 1')
                     error = 1
-            rows_error_vec.append(np.sum(row_avgs) - rows_deg[i])
+            rows_error_vec.append(np.sum(self.cols_multiplicity * row_avgs) - self.r_rows_deg[i])
         rows_error_vec = np.abs(rows_error_vec)
         err_rows = np.max(rows_error_vec)
         print('max rows error =', err_rows)
-        cols_error_vec = np.abs([(x * y[j] / (1 + x * y[j])).sum() - cols_deg[j] for j in range(len(y))])
+        cols_error_vec = np.abs([(self.rows_multiplicity * self.r_x * self.r_y[j] / (1 + self.r_x * self.r_y[j])).sum()
+                                 - self.r_cols_deg[j] for j in range(self.r_n_cols)])
         err_cols = np.max(cols_error_vec)
         print('max columns error =', err_cols)
         tot_err = np.sum(rows_error_vec) + np.sum(cols_error_vec)
@@ -3135,10 +3137,7 @@ class BipartiteGraph:
         if self.biadjacency is not None and self.avg_mat is not None:
             return self.check_sol(self.biadjacency, self.avg_mat, return_error=return_error, in_place=in_place)
         else:
-            return self.check_sol_light(self.x[self.nonfixed_rows], self.y[self.nonfixed_cols],
-                                        self.rows_deg[self.nonfixed_rows] - self.full_cols_num,
-                                        self.cols_deg[self.nonfixed_cols] - self.full_rows_num,
-                                        return_error=return_error)
+            return self.check_sol_light(return_error=return_error)
 
     def _set_solved_problem(self, solution):
         """
@@ -3298,10 +3297,6 @@ class BipartiteGraph:
         :param bool print_error: Print the final error of the solution
         :param bool exp: if this is set to true the solver works with the reparameterization $x_i = e^{-\theta_i}$,
             $y_\alpha = e^{-\theta_\alpha}$. It might be slightly faster but also might not converge.
-        :param full_return: If True the algorithm returns more statistics than the obtained solution, defaults to False.
-        :type full_return: bool, optional
-        :param eps: parameter controlling the tolerance of the difference between two iterations, defaults to 1e-8.
-        :type eps: float, optional
         """
         if not self.is_initialized:
             print('Graph is not initialized. I can\'t compute the BiCM.')
@@ -3336,6 +3331,41 @@ class BipartiteGraph:
                 print('Solver did not converge.')
         self.is_randomized = True
 
+    def solve_bicm(
+            self,
+            method='newton',
+            initial_guess=None,
+            light_mode=None,
+            tolerance=None,
+            tol=1e-8,
+            eps=1e-8,
+            max_steps=None,
+            verbose=False,
+            linsearch=True,
+            regularise=None,
+            print_error=True,
+            full_return=False,
+            exp=False):
+        """
+        Deprecated method, replaced by solve_tool
+        """
+        if tolerance is not None:
+            tol = tolerance
+        print('solve_bicm has been deprecated, calling solve_tool instead')
+        self.solve_tool(
+            method=method,
+            initial_guess=initial_guess,
+            light_mode=light_mode,
+            tol=tol,
+            eps=eps,
+            max_steps=max_steps,
+            verbose=verbose,
+            linsearch=linsearch,
+            regularise=regularise,
+            print_error=print_error,
+            full_return=full_return,
+            exp=exp)
+
     def get_bicm_matrix(self):
         """Get the matrix of probabilities of the BiCM.
         If the BiCM has not been computed, it also computes it with standard settings.
@@ -3366,7 +3396,11 @@ class BipartiteGraph:
             self.solve_tool()
         return self.dict_x, self.dict_y
 
-    def _pval_calculator(self, v_list_key, x, y):
+    def get_fitnesses(self):
+        """See get_bicm_fitnesses."""
+        self.get_bicm_fitnesses()
+
+    def pval_calculator(self, v_list_key, x, y):
         """
         Calculate the p-values of the v-motifs numbers of one vertices and all its neighbours.
 
@@ -3397,12 +3431,13 @@ class BipartiteGraph:
                 temp_pvals_dict[neighbor] = max(min(pval, 1), 0)
         return temp_pvals_dict
 
-    def _pval_calculator_poibin(self, deg_couple, deg_dict, x, y):
+    def pval_calculator_poibin(self, deg_couple, deg_dict, degs, x, y):
         """
         Calculate the p-values of the v-motifs numbers of all nodes with a given couple degrees.
 
         :param tuple deg_couple: the couple of degrees considered.
-        :param dict deg_dict: the dictionary containing for each degree the list of nodes of that degree.
+        :param tuple deg_couple: the couple of degrees considered.
+        :param tuple deg_couple: the couple of degrees considered.
         :param numpy.ndarray x: the fitnesses of the layer of the desired projection.
         :param numpy.ndarray y: the fitnesses of the opposite layer.
         :returns: a list containing 3-tuples with the two nodes considered and their p-value.
@@ -3447,7 +3482,7 @@ class BipartiteGraph:
             pval_adj_list = dict()
             if self.threads_num > 1:
                 with Pool(processes=self.threads_num) as pool:
-                    partial_function = partial(self._pval_calculator, x=x, y=y)
+                    partial_function = partial(self.pval_calculator, x=x, y=y)
                     if self.progress_bar:
                         pvals_dicts = pool.map(partial_function, tqdm(v_list_keys))
                     else:
@@ -3458,10 +3493,10 @@ class BipartiteGraph:
             else:
                 if self.progress_bar:
                     for k in tqdm(v_list_keys):
-                        pval_adj_list[k] = self._pval_calculator(k, x=x, y=y)
+                        pval_adj_list[k] = self.pval_calculator(k, x=x, y=y)
                 else:
                     for k in v_list_keys:
-                        pval_adj_list[k] = self._pval_calculator(k, x=x, y=y)
+                        pval_adj_list[k] = self.pval_calculator(k, x=x, y=y)
         else:
             if self.rows_projection:
                 degs = self.rows_deg
@@ -3480,7 +3515,7 @@ class BipartiteGraph:
                 print('Calculating p-values...')
             if self.threads_num > 1:
                 with Pool(processes=self.threads_num) as pool:
-                    partial_function = partial(self._pval_calculator_poibin, deg_dict=deg_dict, x=x, y=y)
+                    partial_function = partial(self.pval_calculator_poibin, deg_dict=deg_dict, degs=degs, x=x, y=y)
                     if self.progress_bar:
                         pvals_dicts = pool.map(partial_function, tqdm(deg_couples))
                     else:
@@ -3490,11 +3525,11 @@ class BipartiteGraph:
                 if self.progress_bar:
                     for deg_couple in tqdm(deg_couples):
                         pvals_dicts.append(
-                            self._pval_calculator_poibin(deg_couple, deg_dict=deg_dict, x=x, y=y))
+                            self.pval_calculator_poibin(deg_couple, deg_dict=deg_dict, degs=degs, x=x, y=y))
                 else:
                     for deg_couple in v_list_coupled:
                         pvals_dicts.append(
-                            self._pval_calculator_poibin(deg_couple, deg_dict=deg_dict, x=x, y=y))
+                            self.pval_calculator_poibin(deg_couple, deg_dict=deg_dict, degs=degs, x=x, y=y))
             pval_adj_list = {k: dict() for k in self.v_adj_list}
             for pvals_dict in pvals_dicts:
                 for node in pvals_dict:
@@ -3582,12 +3617,13 @@ class BipartiteGraph:
                         projected_adj_list[node] = []
                     projected_adj_list[node].append(neighbor)
         return projected_adj_list
-        #     return np.array([(v[0], v[1]) for v in self.rows_pvals if v[2] <= eff_fdr_th])
-        # else:
-        #     eff_fdr_th = nef.pvals_validator([v[2] for v in self.cols_pvals], self.n_cols, alpha=alpha)
-        #     return np.array([(v[0], v[1]) for v in self.cols_pvals if v[2] <= eff_fdr_th])
 
-    def get_rows_projection(self, alpha=0.05, method='poisson', threads_num=None, progress_bar=True):
+    def get_rows_projection(self,
+                            alpha=0.05,
+                            method='poisson',
+                            threads_num=None,
+                            progress_bar=True,
+                            fmt='adjacency_list'):
         """Get the projected network on the rows layer of the graph.
 
         :param alpha: threshold for the validation of the projected edges.
@@ -3599,23 +3635,36 @@ class BipartiteGraph:
             the computation is not parallelized.
         :type threads_num: int, optional
         :param bool progress_bar: Show the progress bar
-        :returns: edgelist of the projected network on the rows layer
-        :rtype: numpy.array
+        :param str fmt: the desired format for the output
+        :returns: the projected network on the rows layer, in the format specified by fmt
         """
         if not self.is_rows_projected:
             self.compute_projection(rows=True, alpha=alpha, method=method, threads_num=threads_num,
                                     progress_bar=progress_bar)
+
+        if fmt == 'matrix':
+            return nef.adjacency_matrix_from_adjacency_list(self.projected_rows_adj_list, fmt='array')
+        elif fmt == 'sparse':
+            return nef.adjacency_matrix_from_adjacency_list(self.projected_rows_adj_list, fmt='sparse')
         if self.rows_dict is None:
-            return self.projected_rows_adj_list
+            adj_list_to_return = self.projected_rows_adj_list
         else:
             adj_list_to_return = {}
             for node in self.projected_rows_adj_list:
                 adj_list_to_return[self.rows_dict[node]] = []
                 for neighbor in self.projected_rows_adj_list[node]:
                     adj_list_to_return[self.rows_dict[node]].append(self.rows_dict[neighbor])
+        if fmt == 'adjacency_list':
             return adj_list_to_return
+        elif fmt == 'edgelist':
+            nef.edgelist_from_adjacency_list_bipartite(adj_list_to_return)
 
-    def get_cols_projection(self, alpha=0.05, method='poisson', threads_num=4, progress_bar=True):
+    def get_cols_projection(self,
+                            alpha=0.05,
+                            method='poisson',
+                            threads_num=None,
+                            progress_bar=True,
+                            fmt='adjacency_list'):
         """Get the projected network on the columns layer of the graph.
 
         :param alpha: threshold for the validation of the projected edges.
@@ -3627,12 +3676,16 @@ class BipartiteGraph:
             the computation is not parallelized.
         :type threads_num: int, optional
         :param bool progress_bar: Show the progress bar
-        :returns: edgelist of the projected network on the columns layer
-        :rtype: numpy.array
+        :param str fmt: the desired format for the output
+        :returns: the projected network on the columns layer, in the format specified by fmt
         """
         if not self.is_cols_projected:
             self.compute_projection(rows=False,
                                     alpha=alpha, method=method, threads_num=threads_num, progress_bar=progress_bar)
+        if fmt == 'biadjacency':
+            return nef.biadjacency_from_adjacency_list(self.projected_rows_adj_list, fmt='array')
+        elif fmt == 'sparse':
+            return nef.biadjacency_from_adjacency_list(self.projected_rows_adj_list, fmt='sparse')
         if self.cols_dict is None:
             return self.projected_cols_adj_list
         else:
@@ -3641,7 +3694,10 @@ class BipartiteGraph:
                 adj_list_to_return[self.cols_dict[node]] = []
                 for neighbor in self.projected_cols_adj_list[node]:
                     adj_list_to_return[self.cols_dict[node]].append(self.cols_dict[neighbor])
+        if fmt == 'adjacency_list':
             return adj_list_to_return
+        elif fmt == 'edgelist':
+            nef.edgelist_from_adjacency_list_bipartite(adj_list_to_return)
 
     def set_biadjacency_matrix(self, biadjacency):
         """Set the biadjacency matrix of the graph.

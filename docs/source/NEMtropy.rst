@@ -36,3 +36,9 @@ Network functions
 
 .. automodule:: NEMtropy.network_functions
     :members:
+
+Poibin class
+-----------------
+
+.. automodule:: NEMtropy.poibin
+    :members:

@@ -12,7 +12,7 @@ setup(
                  ' matteo.bruno@imtlucca.it',
     packages=["NEMtropy"],
     package_dir={'': 'src'},
-    version="2.0.2",
+    version="2.0.3",
     description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
                 " provides the user with a state of the art solver for a"
                 " range variety of Maximum Entropy Networks models derived"
@@ -23,9 +23,9 @@ setup(
     long_description_content_type="text/markdown",
     license="GNU General Public License v3",
     url="https://github.com/nicoloval/NEMtropy/",
-    download_url="https://github.com/nicoloval/NEMtropy/archive/v2.0.0.zip",
+    download_url="https://github.com/nicoloval/NEMtropy/archive/v2.0.2.zip",
     keywords=['Network reconstruction', 'Networks Null Models',
-              'Maximum Entrophy Methods'],
+              'Maximum Entropy Methods'],
     classifiers=[
                 'License :: OSI Approved :: GNU Library or Lesser General'
                 ' Public License (LGPL)',
