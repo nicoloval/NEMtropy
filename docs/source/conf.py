@@ -23,7 +23,7 @@ copyright = "2021, Emiliano Marchese, Nicolo' Vallarano and Matteo Bruno"
 author = "Emiliano Marchese, Nicolo' Vallarano, Matteo Bruno"
 
 # The full version, including alpha/beta/rc tags
-release = '2.0.4'
+release = '2.0.5'
 
 
 # -- General configuration ---------------------------------------------------
