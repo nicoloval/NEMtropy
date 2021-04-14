@@ -88,7 +88,7 @@ class UndirectedGraph:
         self.relative_error_strength = None
         self.full_return = False
         self.last_model = None
-        self.solution_array
+        self.solution_array = None
 
         # function
         self.args = None
@@ -2698,7 +2698,7 @@ class BipartiteGraph:
         self.full_rows_num = None
         self.full_rows_num = None
         self.solution_converged = None
-        self.solution_array = None
+        self.loglikelihood = None
         self.progress_bar = None
 
     def _initialize_graph(self, biadjacency=None, adjacency_list=None, edgelist=None, degree_sequences=None):
@@ -2823,7 +2823,7 @@ class BipartiteGraph:
         """
         Internal method to set the initial point of the solver.
         """
-        if self.initial_guess is None: # Chung-Lu approximation
+        if self.initial_guess is None or self.initial_guess == 'chung_lu':  # Chung-Lu approximation
             self.r_x = self.r_rows_deg / (np.sqrt(self.r_n_edges))
             self.r_y = self.r_cols_deg / (np.sqrt(self.r_n_edges))
         elif self.initial_guess == 'random':
@@ -2835,6 +2835,8 @@ class BipartiteGraph:
         elif self.initial_guess == 'degrees':
             self.r_x = self.r_rows_deg.astype(np.float64)
             self.r_y = self.r_cols_deg.astype(np.float64)
+        else:
+            raise ValueError('initial_guess must be None, "chung_lu", "random", "uniform" or "degrees"')
         if not self.exp:
             self.r_theta_x = - np.log(self.r_x)
             self.r_theta_y = - np.log(self.r_y)
@@ -3176,6 +3178,8 @@ class BipartiteGraph:
             self.norm_seq = solution[3]
             self.diff_seq = solution[4]
             self.alfa_seq = solution[5]
+        if self.method != 'root':
+            self.loglikelihood = self.step_fun(self.solution_array)
         # Reset solver lambda functions for multiprocessing compatibility
         self.hessian_regulariser = None
         self.fun = None
@@ -3592,7 +3596,7 @@ class BipartiteGraph:
         except IndexError:
             print('No V-motifs will be validated. Try increasing alpha')
             eff_fdr_pos = 0
-        eff_fdr_th = eff_fdr_pos * multiplier
+        eff_fdr_th = (eff_fdr_pos + 1) * multiplier  # +1 because of Python numbering: our pvals are ordered 1,...,n
         return eff_fdr_th
 
     def _projection_from_pvals(self, alpha=0.05):
@@ -3635,17 +3639,13 @@ class BipartiteGraph:
             the computation is not parallelized.
         :type threads_num: int, optional
         :param bool progress_bar: Show the progress bar
-        :param str fmt: the desired format for the output
+        :param str fmt: the desired format for the output: adjacency_list (default) or edgelist
         :returns: the projected network on the rows layer, in the format specified by fmt
         """
         if not self.is_rows_projected:
             self.compute_projection(rows=True, alpha=alpha, method=method, threads_num=threads_num,
                                     progress_bar=progress_bar)
 
-        if fmt == 'matrix':
-            return nef.adjacency_matrix_from_adjacency_list(self.projected_rows_adj_list, fmt='array')
-        elif fmt == 'sparse':
-            return nef.adjacency_matrix_from_adjacency_list(self.projected_rows_adj_list, fmt='sparse')
         if self.rows_dict is None:
             adj_list_to_return = self.projected_rows_adj_list
         else:
@@ -3657,7 +3657,7 @@ class BipartiteGraph:
         if fmt == 'adjacency_list':
             return adj_list_to_return
         elif fmt == 'edgelist':
-            nef.edgelist_from_adjacency_list_bipartite(adj_list_to_return)
+            return nef.edgelist_from_adjacency_list_bipartite(adj_list_to_return)
 
     def get_cols_projection(self,
                             alpha=0.05,
@@ -3676,16 +3676,12 @@ class BipartiteGraph:
             the computation is not parallelized.
         :type threads_num: int, optional
         :param bool progress_bar: Show the progress bar
-        :param str fmt: the desired format for the output
+        :param str fmt: the desired format for the output: adjacency_list (default) or edgelist
         :returns: the projected network on the columns layer, in the format specified by fmt
         """
         if not self.is_cols_projected:
             self.compute_projection(rows=False,
                                     alpha=alpha, method=method, threads_num=threads_num, progress_bar=progress_bar)
-        if fmt == 'biadjacency':
-            return nef.biadjacency_from_adjacency_list(self.projected_rows_adj_list, fmt='array')
-        elif fmt == 'sparse':
-            return nef.biadjacency_from_adjacency_list(self.projected_rows_adj_list, fmt='sparse')
         if self.cols_dict is None:
             return self.projected_cols_adj_list
         else:
@@ -3697,7 +3693,7 @@ class BipartiteGraph:
         if fmt == 'adjacency_list':
             return adj_list_to_return
         elif fmt == 'edgelist':
-            nef.edgelist_from_adjacency_list_bipartite(adj_list_to_return)
+            return nef.edgelist_from_adjacency_list_bipartite(adj_list_to_return)
 
     def set_biadjacency_matrix(self, biadjacency):
         """Set the biadjacency matrix of the graph.
@@ -3760,8 +3756,7 @@ class BipartiteGraph:
         self.cols_deg = None
         self.is_initialized = False
 
-
     def model_loglikelihood(self):
         """Returns the loglikelihood of the solution of last model executed.
         """
-        return self.step_fun(self.solution_array)
+        return self.loglikelihood

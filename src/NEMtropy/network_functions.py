@@ -673,22 +673,3 @@ def biadjacency_from_adjacency_list(adj_list, fmt='array'):
         return biad_mat
     else:
         return biad_mat.toarray()
-
-
-def adjacency_matrix_from_adjacency_list(adj_list, fmt='array'):
-    """
-    Creates the adjacency matrix from an adjacency list given as a dictionary.
-    Returns the adjacency as a numpy array by default, or sparse scipy matrix if fmt='sparse'.
-    :param dict adj_list: the adjacency list to be converted. Must contain integers that will be used as indexes.
-    :param str fmt: the desired format of the output adjacency matrix, either 'array' or 'sparse', optional
-    """
-    assert np.isin(fmt, ['array', 'sparse']), 'fmt must be either array or sparse'
-    assert isinstance(list(adj_list.keys())[0], (int, float, complex)), 'Adjacency list must be numeric'
-    rows_index = [k for k, v in adj_list.items() for _ in range(len(v))]
-    cols_index = [i for ids in adj_list.values() for i in ids]
-    biad_mat = scipy.sparse.csr_matrix(([1] * len(rows_index), (rows_index, cols_index)))
-    biad_mat = biad_mat + biad_mat.T
-    if fmt == 'sparse':
-        return biad_mat
-    else:
-        return biad_mat.toarray()
