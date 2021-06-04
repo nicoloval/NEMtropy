@@ -1,6 +1,7 @@
 import numpy as np
 from numba import jit, prange
 from . import solver_functions as sof
+from . import network_functions as nef
 
 
 # DBCM functions
@@ -145,3 +146,24 @@ def std_zeros_dcm(sol):
                 pji = x[j]*y[i]/(1 + x[j]*y[i])
                 temp += 2*(1 - pij)*(1 - pji)*(1 - (1 - pij)*(1 - pji))
     return np.sqrt(temp)
+
+
+def dyads_zscore_dcm(sol, a):
+    count = nef.dyads_count(a)
+    exp = expected_dyads_dcm(sol)
+    std = std_dyads_dcm(sol)
+    return (count - exp)/std
+
+
+def singles_zscore_dcm(sol, a):
+    count = nef.singles_count(a)
+    exp = expected_singles_dcm(sol)
+    std = std_singles_dcm(sol)
+    return (count - exp)/std
+
+
+def zeros_zscore_dcm(sol, a):
+    count = nef.zeros_count(a)
+    exp = expected_zeros_dcm(sol)
+    std = std_zeros_dcm(sol)
+    return (count - exp)/std
