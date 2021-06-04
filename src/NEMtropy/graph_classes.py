@@ -13,6 +13,7 @@ from . import solver_functions as sof
 from . import network_functions as nef
 from . import ensemble_generator as eg
 from . import poibin as pb
+from . import ensemble_functions as ef
 
 
 class UndirectedGraph:
@@ -3765,3 +3766,16 @@ class BipartiteGraph:
         """Returns the loglikelihood of the solution of last model executed.
         """
         return self.step_fun(self.solution_array)
+
+    
+    def dyads_zscore(self):
+    """Returns the z-score of the dyads count based on the solution of the model. Run this method AFTER solving the model.
+
+    :param model: Available models are:
+        - 'dcm'
+    """
+
+
+
+    
+
