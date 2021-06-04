@@ -3769,11 +3769,12 @@ class BipartiteGraph:
 
     
     def dyads_zscore(self):
-    """Returns the z-score of the dyads count based on the solution of the model. Run this method AFTER solving the model.
+        """Returns the z-score of the dyads count based on the solution of the model. Run this method AFTER solving the model.
 
-    :param model: Available models are:
-        - 'dcm'
-    """
+        :param model: Available models are:
+            - 'dcm'
+        """
+        return True
 
 
 

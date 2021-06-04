@@ -4,7 +4,7 @@ sys.path.append("../")
 import NEMtropy.graph_classes as sample
 import numpy as np
 import unittest  # test tool
-import NEMtropy.motifs_functions as mf
+import NEMtropy.network_functions as mf
 
 
 class MyTest(unittest.TestCase):

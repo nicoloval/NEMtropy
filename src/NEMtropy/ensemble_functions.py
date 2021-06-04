@@ -33,7 +33,7 @@ def expected_dyads_dcm(sol):
 @jit(nopython=True)
 def std_dyads_dcm(sol):
     """ compute the standard deviation of the number of reciprocated links.
-    
+
     :param sol: DBCM solution.
     :type sol: numpy.ndarray
     :return: Standard deviation of the dyads count.
@@ -55,7 +55,7 @@ def std_dyads_dcm(sol):
 
 @jit(nopython=True)
 def expected_singles_dcm(sol):
-     """Expected count of singles after the DBCM.
+    """Expected count of singles after the DBCM.
 
     :param sol: DBCM solution.
     :type sol: numpy.ndarray
@@ -75,12 +75,12 @@ def expected_singles_dcm(sol):
         temp -= x[i]*y[i]/((1 + x[i]*y[i])*(1 + y[i]*x[i]))
         er += temp
     return er
-    
+
 
 @jit(nopython=True)
 def std_singles_dcm(sol):
     """ compute the standard deviation of the number of reciprocated links.
-    
+
     :param sol: DBCM solution.
     :type sol: numpy.ndarray
     :return: Standard deviation of the singles count.
@@ -100,10 +100,9 @@ def std_singles_dcm(sol):
     return np.sqrt(temp)
 
 
-
 @jit(nopython=True)
 def expected_zeros_dcm(sol):
-     """Expected count of singles after the DBCM.
+    """Expected count of singles after the DBCM.
 
     :param sol: DBCM solution.
     :type sol: numpy.ndarray
@@ -123,12 +122,12 @@ def expected_zeros_dcm(sol):
         temp -= 1/((1 + x[i]*y[i])*(1 + y[i]*x[i]))
         er += temp
     return er
-    
-    
+
+
 @jit(nopython=True)
 def std_zeros_dcm(sol):
     """ compute the standard deviation of the number of zeros couples.
-    
+
     :param sol: DBCM solution.
     :type sol: numpy.ndarray
     :return: Standard deviation of the zeros count.
