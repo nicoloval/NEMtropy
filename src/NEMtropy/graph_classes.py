@@ -13,6 +13,7 @@ from . import solver_functions as sof
 from . import network_functions as nef
 from . import ensemble_generator as eg
 from . import poibin as pb
+from . import ensemble_functions as ef
 
 
 class UndirectedGraph:
@@ -2596,6 +2597,27 @@ class DirectedGraph:
         """Returns the loglikelihood of the solution of last model executed.
         """
         return self.step_fun(self.solution_array)
+
+    def motifs_2_zscore(self, model='dcm'):
+        """Returns the z-score of the 2-motifs count based on the solution of the model. 
+        To run this method: you need first to:
+            - have initialised the adjacency matrix
+            - have solved the model problem
+        Output object is a dictionary with keys:'dyads', 'singles' and 'zeros'.
+
+        :param model: Available models are:
+            - 'dcm'
+        """
+        if model == "dcm":
+            sol = np.concatenate((self.x, self.y))
+            d = {
+                'dyads': ef.dyads_zscore_dcm(sol, self.adjacency),
+                'singles': ef.singles_zscore_dcm(sol, self.adjacency),
+                'zeros': ef.zeros_zscore_dcm(sol, self.adjacency)
+                }
+            return d
+        else:
+            return {}
 
 
 class BipartiteGraph:
