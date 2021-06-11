@@ -12,7 +12,7 @@ setup(
                  ' matteo.bruno@imtlucca.it',
     packages=["NEMtropy"],
     package_dir={'': 'src'},
-    version="2.0.3",
+    version="2.0.5",
     description="NEMtropy is a Maximum-Entropy toolbox for networks, it"
                 " provides the user with a state of the art solver for a"
                 " range variety of Maximum Entropy Networks models derived"
