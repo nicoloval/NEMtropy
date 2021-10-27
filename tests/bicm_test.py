@@ -1,9 +1,8 @@
-import sys
-sys.path.append('../')
-# from graph_classes import *
-# import NEMtropy
-from NEMtropy import *
-from NEMtropy.network_functions import *
+# import sys
+# sys.path.append('../bicm2/')
+# from BipartiteGraph import *
+# import bicm
+from bicm import *
 import numpy as np
 
 # This test uses a plant-pollinator network from Petanidou, T. (1991). Pollination ecology in a phryganic ecosystem.
@@ -11,7 +10,7 @@ import numpy as np
 print('This test uses a plant-pollinator network from Petanidou, T. (1991). Pollination ecology in a phryganic ecosystem.')
 print('This script is run on an ordinary laptop.')
 
-biad_mat_names = np.loadtxt('test_dataset_bicm.csv', delimiter=',', dtype=str)
+biad_mat_names = np.loadtxt('test_dataset.csv', delimiter=',', dtype=str)
 plants = biad_mat_names[1:, 0]
 pollinators = biad_mat_names[0, 1:]
 biad_mat = biad_mat_names[1:, 1:].astype(np.ubyte)
@@ -94,11 +93,14 @@ rows_projection = myGraph.get_rows_projection()
 print(rows_projection)
 
 # If you don't want to get the progress_bar you can set progress_bar=False. If you want to re-compute the projection with different settings, use compute_projection()
-print('If you don\'t want to get the progress_bar you can set progress_bar=False. If you want to re-compute the projection with different settings, use compute_projection()')
+print('If you don\'t want to get the progress_bar you can set progress_bar=False. If you want to re-compute the projection with different settings (here a lower validation threshold), use compute_projection()')
 
 myGraph.compute_projection(rows=True, alpha=0.01, progress_bar=False)
 
-rows_projection = myGraph.get_rows_projection()
+# You can ask for an edgelist instead of an adjacency list by setting fmt="edgelist"
+print('You can ask for an edgelist instead of an adjacency list by setting fmt="edgelist"')
+
+rows_projection = myGraph.get_rows_projection(fmt='edgelist')
 print(rows_projection)
 
 # These projections only contain links between nodes that behave similarly with respect to the expected behavior calculated from the BiCM. They could also be empty:
