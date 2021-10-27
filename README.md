@@ -140,7 +140,7 @@ These copies are saved as an edgelist, each edgelist can be converted to an
 adjacency matrix by running the NEMtropy build graph function.
 
 ```
-    from NEMtropy.network_functions import build_graph_from_edgelist
+    from NEMtropy.network_functions import build_adjacency_from_edgelist
 
     edgelist_ens = np.loadtxt("sample/0.txt")
     ens_adj = build_adjacency_from_edgelist(edgelist = edgelist_ens,
