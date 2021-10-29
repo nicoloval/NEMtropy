@@ -33,6 +33,7 @@ If you use the module for your scientific research, please consider citing us:
 - [Installation](#installation)
 - [Dependencies](#dependencies)
 - [A Simple Example](#simple-example)
+- [Documentation](#documentation)
 - [Development](#development)
 - [Testing](#testing)
 - [Credits](#credits)
@@ -153,9 +154,13 @@ These collections of random adjacency matrices can be used as a null model:
 it is enough to compute the expected value of the selected network feature 
 on the ensemble of matrices and to compare it with its original value.
 
-To learn more, please read the two ipython notebooks in the examples directory:
-one is a study case on a [directed graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Directed%20Graphs.ipynb), 
-while the other is on an [undirected graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Undirected%20Graphs.ipynb).
+To learn more, please read the ipython notebooks in the examples directory:
+- one is a study case on a [directed graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Directed%20Graphs.ipynb), 
+- while the other is on an [undirected graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Undirected%20Graphs.ipynb).
+
+
+Documentation
+-------------
 
 You can find complete documentation about NEMtropy library in [docs](https://nemtropy.readthedocs.io/en/master/index.html).
 
