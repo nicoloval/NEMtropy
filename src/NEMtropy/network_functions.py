@@ -747,3 +747,23 @@ def zeros_count(a):
         (scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix)
             ):
         return int((n*(n-1) - tmp.count_nonzero()))
+
+
+@jit(nopython=True)
+def motif13_count(a):
+    """Counts abundance of 3-nodes motif 13.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 13 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    n = len(a)
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i:
+                        s += a[i, j]*a[j, i]*a[i, k]*a[k, i]*a[j, k]*a[k, j]
+    return s
