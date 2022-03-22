@@ -2619,6 +2619,26 @@ class DirectedGraph:
         else:
             return {}
 
+    def motifs_3_zscore(self, model='dcm'):
+        """Returns the z-score of the 3-motifs count based on the solution of the model. 
+        To run this method: you need first to:
+            - have initialised the adjacency matrix
+            - have solved the model problem
+        Output object is a dictionary with keys:"13".
+
+        :param model: Available models are:
+            - 'dcm'
+        """
+        if model == "dcm":
+            sol = np.concatenate((self.x, self.y))
+            d = {
+                '13': ef.motif13_zscore_dcm(sol, self.adjacency),
+                }
+            return d
+        else:
+            return {}
+
+
 
 class BipartiteGraph:
     """Bipartite Graph class for undirected binary bipartite networks.

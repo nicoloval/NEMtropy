@@ -2,16 +2,6 @@ import numpy as np
 from numba import jit
 from . import network_functions as nef
 
-# utility functions
-# -----------------
-
-
-def delta(i, j):
-    if i == j:
-        return 1
-    else:
-        return 0
-
 # DBCM functions
 # --------------
 
@@ -235,7 +225,7 @@ def std_motif13_dcm(sol):
                 pki = x[k]*y[i]/(1 + x[k]*y[i])
                 pjk = x[j]*y[k]/(1 + x[j]*y[k])
                 pkj = x[k]*y[j]/(1 + x[k]*y[j])
-                s += pij*pjk*pkj*pki*pik*(1 - delta(k, j))*(1 - delta(k, i))
+                s += pij*pjk*pkj*pki*pik*(1 - int(j == k))*(1 - int(k == i))
             tmp += (1 - pji)*pji*((6*s)**2)
     return np.sqrt(tmp)
 

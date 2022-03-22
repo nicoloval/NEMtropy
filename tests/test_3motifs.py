@@ -14,13 +14,14 @@ class MyTest(unittest.TestCase):
     def test_count_13(self):
         A = np.array(
             [
-                [0, 1, 1],
-                [1, 0, 0],
-                [0, 1, 0],
+                [0, 1, 1, 0],
+                [1, 0, 1, 0],
+                [1, 1, 0, 0],
+                [0, 0, 0, 0],
             ]
         )
 
-        n = mf.dyads_count(A)
+        n = mf.motif13_count(A)
 
         """
         g.solve_tool(
@@ -31,18 +32,17 @@ class MyTest(unittest.TestCase):
         """
 
         # debug
-        # print(n)
 
         # test result
-        self.assertTrue(n == 2)
+        self.assertTrue(n == 6)
 
-    @unittest.skip("not ready yet")
     def test_zscore_13(self):
         A = np.array(
             [
-                [0, 1, 1],
-                [1, 0, 0],
-                [0, 1, 0],
+                [0, 1, 1, 0],
+                [1, 0, 1, 0],
+                [1, 1, 0, 0],
+                [0, 0, 0, 0],
             ]
         )
         g = sample.DirectedGraph(A)
@@ -53,10 +53,10 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        d = g.motifs_2_zscore()
+        d = g.motifs_3_zscore()
 
         # debug
-        # print(n)
+        print(d)
 
         # test result
         #TODO: write a better motif testing
