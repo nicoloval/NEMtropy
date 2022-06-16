@@ -172,6 +172,34 @@ def zeros_zscore_dcm(sol, a):
 # 3-nodes motifs
 # --------------
 
+@jit(nopython=True)
+def expected_motif2_dcm(sol):
+    """Expected number of 3-nodes motif 2 after the DBCM.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Expected motif 2 count.
+    :rtype: numpy.float
+    """
+    n = int(len(sol)/2)
+    y = sol[:n]
+    x = sol[n:]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                for k in range(n):
+                    if k is not j and k is not i:
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pij*(1 - pji)*(1 - pik)*(1 - pki)*pjk*(1 - pkj)
+    return s
+
+
 
 @jit(nopython=True)
 def expected_motif13_dcm(sol):
@@ -199,6 +227,38 @@ def expected_motif13_dcm(sol):
                         pkj = x[k]*y[j]/(1 + x[k]*y[j])
                         s += pij*pji*pik*pki*pjk*pkj
     return s
+
+
+@jit(nopython=True)
+def std_motif2_dcm(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 2.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 2 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            pij = x[i]*y[j]/(1 + x[i]*y[j])
+            pji = x[j]*y[i]/(1 + x[j]*y[i])
+            s = 0
+            for k in range(n):
+                if (i != k) and (j != k):
+                    pik = x[i]*y[k]/(1 + x[i]*y[k])
+                    pki = x[k]*y[i]/(1 + x[k]*y[i])
+                    pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                    pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                    s -= ((1-pjk)*pkj*(1-pki)*pik + (1-pkj)*pjk*(1-pik)*pki*(1-pij))
+                    s += ((1-pkj)*pki*(1-pjk)*(-pij) + pkj*(1-pki)*(1-pik)*(1-pjk)*(1-pij))
+                    s += ((1-pik)*(1-pki)*(1-pkj)*pjk*(-pij) + (1 - pjk)*(1-pkj)*(1-pki)*pik*(1-pij))
+            tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
 
 
 @jit(nopython=True)
@@ -233,5 +293,12 @@ def std_motif13_dcm(sol):
 def motif13_zscore_dcm(sol, a):
     count = nef.motif13_count(a)
     exp = expected_motif13_dcm(sol)
+    std = std_motif13_dcm(sol)
+    return (count - exp)/std
+
+
+def motif2_zscore_dcm(sol, a):
+    count = nef.motif2_count(a)
+    exp = expected_motif2_dcm(sol)
     std = std_motif13_dcm(sol)
     return (count - exp)/std

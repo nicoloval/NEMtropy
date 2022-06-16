@@ -2632,6 +2632,7 @@ class DirectedGraph:
         if model == "dcm":
             sol = np.concatenate((self.x, self.y))
             d = {
+                '2': ef.motif2_zscore_dcm(sol, self.adjacency),
                 '13': ef.motif13_zscore_dcm(sol, self.adjacency),
                 }
             return d

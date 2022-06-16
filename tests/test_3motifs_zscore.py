@@ -15,31 +15,60 @@ class MyTest(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_count_13(self):
-        A = np.array(
-            [
-                [0, 1, 1, 0],
-                [1, 0, 1, 0],
-                [1, 1, 0, 0],
-                [0, 0, 0, 0],
-            ]
-        )
+    @unittest.skip("it works")
+    def test_zscore_2(self):
+        N, seed = (20, 100)
+        A = mg.random_binary_matrix_generator_dense(N, sym=False, seed=seed)
+        g = sample.DirectedGraph(A)
 
-        n = mf.motif13_count(A)
-
-        """
         g.solve_tool(
             model="dcm",
             max_steps=200,
             verbose=False,
         )
-        """
 
+        d = g.motifs_3_zscore()
+        sol = g.solution_array
+
+        n = 100
+        output_dir = "sample_dcm/"
+        # random.seed(100)
+        g.ensemble_sampler(n=n, output_dir=output_dir, seed=seed)
+        n_emp = np.zeros(n)
+        for l in range(n):
+            f = output_dir + "{}.txt".format(l)
+            if not os.stat(f).st_size == 0:
+                g_tmp = nx.read_edgelist(f, create_using=nx.DiGraph())
+                a_tmp = nx.adjacency_matrix(g_tmp).toarray()
+                n_emp[l] = mf.motif2_count(a_tmp)
+				
+        n = mf.motif2_count(A)
+        n_emp_mu = np.mean(n_emp)
+        n_emp_std = np.std(n_emp)
+        n_mu = en.expected_motif2_dcm(sol)
+        n_std = en.std_motif2_dcm(sol)
+        # zz is d['13']
+        zz = (n - n_mu)/n_std
+        z = (n - n_emp_mu)/n_emp_std
         # debug
+        print(f'm empirical mu = {n_emp_mu}')
+        print(f'm empirical std = {n_emp_std}')
+        print(f'm analytical mu = {n_mu}')
+        print(f'm analytical std = {n_std}')
+        print(f"analytical z score = {d['2']}")
+        print(f'empirical z-score = {z}')
+        print(f"diff = d['2'] - z = {abs(d['2'] - z})")
 
         # test result
-        self.assertTrue(n == 6)
+        #TODO: write a better motif testing
+        self.assertTrue(abs(d['2'] - z)< 1)
 
+        l = os.listdir(output_dir)
+        for f in l:
+            os.remove(output_dir + f)
+        os.rmdir(output_dir)
+
+    @unittest.skip("it works")
     def test_zscore_13(self):
         N, seed = (20, 100)
         A = mg.random_binary_matrix_generator_dense(N, sym=False, seed=seed)
@@ -71,16 +100,16 @@ class MyTest(unittest.TestCase):
         n13_emp_std = np.std(n13_emp)
         n13_mu = en.expected_motif13_dcm(sol)
         n13_std = en.std_motif13_dcm(sol)
+        # zz is d['13']
         zz = (n13 - n13_mu)/n13_std
+        z = (n13 - n13_emp_mu)/n13_emp_std
         # debug
         """
-        print(f'm13 observed = {n13}')
         print(f'm13 empirical mu = {n13_emp_mu}')
         print(f'm13 empirical std = {n13_emp_std}')
         print(f'm13 analytical mu = {n13_mu}')
         print(f'm13 analytical std = {n13_std}')
         print(f"analytical z score = {d['13']}")
-        z = (n13 - n13_emp_mu)/n13_emp_std
         print(f'empirical z-score = {z}')
         print(f"diff = d['13'] - z")
         """
@@ -93,7 +122,6 @@ class MyTest(unittest.TestCase):
         for f in l:
             os.remove(output_dir + f)
         os.rmdir(output_dir)
-
 
 
 if __name__ == "__main__":
