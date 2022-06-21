@@ -15,6 +15,58 @@ class MyTest(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_zscore_1(self):
+        N, seed = (20, 100)
+        A = mg.random_binary_matrix_generator_dense(N, sym=False, seed=seed)
+        g = sample.DirectedGraph(A)
+
+        g.solve_tool(
+            model="dcm",
+            max_steps=200,
+            verbose=False,
+        )
+
+        d = g.motifs_3_zscore()
+        sol = g.solution_array
+
+        n = 100
+        output_dir = "sample_dcm/"
+        # random.seed(100)
+        g.ensemble_sampler(n=n, output_dir=output_dir, seed=seed)
+        n_emp = np.zeros(n)
+        for l in range(n):
+            f = output_dir + "{}.txt".format(l)
+            if not os.stat(f).st_size == 0:
+                g_tmp = nx.read_edgelist(f, create_using=nx.DiGraph())
+                a_tmp = nx.adjacency_matrix(g_tmp).toarray()
+                n_emp[l] = mf.motif1_count(a_tmp)
+				
+        n = mf.motif1_count(A)
+        n_emp_mu = np.mean(n_emp)
+        n_emp_std = np.std(n_emp)
+        n_mu = en.expected_motif1_dcm(sol)
+        n_std = en.std_motif1_dcm(sol)
+        # zz is d['13']
+        zz = (n - n_mu)/n_std
+        z = (n - n_emp_mu)/n_emp_std
+        # debug
+        print(f'm empirical mu = {n_emp_mu}')
+        print(f'm empirical std = {n_emp_std}')
+        print(f'm analytical mu = {n_mu}')
+        print(f'm analytical std = {n_std}')
+        print(f"analytical z score = {d['1']}")
+        print(f'empirical z-score = {z}')
+        print(f"diff = d['1'] - z = {abs(d['1'] - z)}")
+
+        # test result
+        #TODO: write a better motif testing
+        self.assertTrue(abs(d['1'] - z)< 1)
+
+        l = os.listdir(output_dir)
+        for f in l:
+            os.remove(output_dir + f)
+        os.rmdir(output_dir)
+
     @unittest.skip("it works")
     def test_zscore_2(self):
         N, seed = (20, 100)
@@ -57,7 +109,7 @@ class MyTest(unittest.TestCase):
         print(f'm analytical std = {n_std}')
         print(f"analytical z score = {d['2']}")
         print(f'empirical z-score = {z}')
-        print(f"diff = d['2'] - z = {abs(d['2'] - z})")
+        print(f"diff = d['2'] - z = {abs(d['2'] - z)}")
 
         # test result
         #TODO: write a better motif testing
