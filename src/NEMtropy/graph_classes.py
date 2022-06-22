@@ -2598,7 +2598,7 @@ class DirectedGraph:
         """
         return self.step_fun(self.solution_array)
 
-    def zscore_dcm_2motifs(self, model='dcm'):
+    def zscore_2motifs(self, model='dcm'):
         """Returns the z-score of the 2-motifs count based on the solution of the model. 
         To run this method: you need first to:
             - have initialised the adjacency matrix
@@ -2622,7 +2622,7 @@ class DirectedGraph:
         else:
             return {}
 
-    def zscore_dcm_3motifs(self, model='dcm'):
+    def zscore_3motifs(self, model='dcm'):
         """Returns the z-score of the 3-motifs count based on the solution of the model. 
         To run this method: you need first to:
             - have initialised the adjacency matrix

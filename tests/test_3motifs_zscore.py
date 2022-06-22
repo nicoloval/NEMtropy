@@ -30,7 +30,7 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        d = g.zscore_dcm_3motifs()
+        d = g.zscore_3motifs()
         sol = np.concatenate((g.x, g.y))
 
         n = 100
@@ -110,7 +110,7 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        d = g.zscore_dcm_3motifs()
+        d = g.zscore_3motifs()
         sol = np.concatenate((g.x, g.y))
 
         n = 100
@@ -127,7 +127,6 @@ class MyTest(unittest.TestCase):
                     n_sam[str(i)][l] = eval(f'mf.count_3motif_{i}(a_tmp)')
 				
         z = {}
-        """
         for i in range(1, 14):
             n_emp = n_sam[str(i)]
             n = eval(f'mf.count_3motif_{i}(A)')
@@ -138,6 +137,7 @@ class MyTest(unittest.TestCase):
             # zz is d['13']
             zz = (n - n_mu)/n_std
             z[str(i)] = (n - n_emp_mu)/n_emp_std
+            """
             # debug
             print(f"motif {i}")
             # print(f'n = {n}')
@@ -148,7 +148,7 @@ class MyTest(unittest.TestCase):
             # print(f'empirical z-score = {z[str(i)]}')
             # print(f"analytical z score = {d[str(i)]}")
             print(f"diff = d[{i}] - z = {abs(d[str(i)] - z[str(i)])}")
-        """
+            """
 
         # test result
         #TODO: 5 is a bit too much of an interval
