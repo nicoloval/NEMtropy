@@ -20,7 +20,7 @@ class MyTest(unittest.TestCase):
             ]
         )
 
-        n = mf.dyads_count(A)
+        n = mf.count_2motif_2(A)
 
         """
         g.solve_tool(
@@ -46,7 +46,7 @@ class MyTest(unittest.TestCase):
             ]
         )
 
-        n = mf.singles_count(A)
+        n = mf.count_2motif_1(A)
 
         """
         g.solve_tool(
@@ -71,7 +71,7 @@ class MyTest(unittest.TestCase):
             ]
         )
 
-        n = mf.zeros_count(A)
+        n = mf.count_2motif_0(A)
 
         """
         g.solve_tool(
@@ -82,7 +82,7 @@ class MyTest(unittest.TestCase):
         """
 
         # debug
-        print(n)
+        # print(n)
 
         # test result
         self.assertTrue(n == 0)
@@ -103,7 +103,7 @@ class MyTest(unittest.TestCase):
             verbose=False,
         )
 
-        d = g.motifs_2_zscore()
+        d = g.zscore_2motifs()
 
         # debug
         # print(n)

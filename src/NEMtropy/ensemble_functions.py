@@ -10,7 +10,7 @@ from . import network_functions as nef
 
 
 @jit(nopython=True)
-def expected_dyads_dcm(sol):
+def expected_dcm_2motif_2(sol):
     """Expected count of dyads after the DBCM.
 
     :param sol: DBCM solution.
@@ -33,7 +33,7 @@ def expected_dyads_dcm(sol):
 
 
 @jit(nopython=True)
-def std_dyads_dcm(sol):
+def std_dcm_2motif_2(sol):
     """ compute the standard deviation of the number of reciprocated links.
 
     :param sol: DBCM solution.
@@ -56,7 +56,7 @@ def std_dyads_dcm(sol):
 
 
 @jit(nopython=True)
-def expected_singles_dcm(sol):
+def expected_dcm_2motif_1(sol):
     """Expected count of singles after the DBCM.
 
     :param sol: DBCM solution.
@@ -80,7 +80,7 @@ def expected_singles_dcm(sol):
 
 
 @jit(nopython=True)
-def std_singles_dcm(sol):
+def std_dcm_2motif_1(sol):
     """ compute the standard deviation of the number of reciprocated links.
 
     :param sol: DBCM solution.
@@ -103,8 +103,8 @@ def std_singles_dcm(sol):
 
 
 @jit(nopython=True)
-def expected_zeros_dcm(sol):
-    """Expected count of singles after the DBCM.
+def expected_dcm_2motif_0(sol):
+    """Expected count of zeros after the DBCM.
 
     :param sol: DBCM solution.
     :type sol: numpy.ndarray
@@ -127,7 +127,7 @@ def expected_zeros_dcm(sol):
 
 
 @jit(nopython=True)
-def std_zeros_dcm(sol):
+def std_dcm_2motif_0(sol):
     """ compute the standard deviation of the number of zeros couples.
 
     :param sol: DBCM solution.
@@ -149,39 +149,32 @@ def std_zeros_dcm(sol):
     return np.sqrt(temp)
 
 
-def dyads_zscore_dcm(sol, a):
-    count = nef.dyads_count(a)
-    exp = expected_dyads_dcm(sol)
-    std = std_dyads_dcm(sol)
+def zscore_dcm_2motif_2(sol, a):
+    count = nef.count_2motif_2(a)
+    exp = expected_dcm_2motif_2(sol)
+    std = std_dcm_2motif_2(sol)
     return (count - exp)/std
 
 
-def singles_zscore_dcm(sol, a):
-    count = nef.singles_count(a)
-    exp = expected_singles_dcm(sol)
-    std = std_singles_dcm(sol)
+def zscore_dcm_2motif_1(sol, a):
+    count = nef.count_2motif_1(a)
+    exp = expected_dcm_2motif_1(sol)
+    std = std_dcm_2motif_1(sol)
     return (count - exp)/std
 
 
-def zeros_zscore_dcm(sol, a):
-    count = nef.zeros_count(a)
-    exp = expected_zeros_dcm(sol)
-    std = std_zeros_dcm(sol)
+def zscore_dcm_2motif_0(sol, a):
+    count = nef.count_2motif_0(a)
+    exp = expected_dcm_2motif_0(sol)
+    std = std_dcm_2motif_0(sol)
     return (count - exp)/std
 
 # 3-nodes motifs
 # --------------
 
 
-
-
-
-
-
-
-
 @jit(nopython=True)
-def expected_motif1_dcm(sol):
+def expected_dcm_3motif_1(sol):
     """Expected number of 3-nodes motif 1 after the DBCM.
 
     :param sol: DBCM solution.
@@ -190,8 +183,8 @@ def expected_motif1_dcm(sol):
     :rtype: numpy.float
     """
     n = int(len(sol)/2)
-    y = sol[:n]
-    x = sol[n:]
+    x = sol[:n]
+    y = sol[n:]
     s = 0
     for i in range(n):
         for j in range(n):
@@ -205,11 +198,12 @@ def expected_motif1_dcm(sol):
                         pjk = x[j]*y[k]/(1 + x[j]*y[k])
                         pkj = x[k]*y[j]/(1 + x[k]*y[j])
                         s += (1 - pij)*pji*pjk*(1 - pkj)*(1 - pik)*(1 - pki)
+                        # s += (1 - pij)*pkj*pki*(1 - pjk)*(1 - pik)*(1 - pji)
     return s
 
 
 @jit(nopython=True)
-def expected_motif2_dcm(sol):
+def expected_dcm_3motif_2(sol):
     """Expected number of 3-nodes motif 2 after the DBCM.
 
     :param sol: DBCM solution.
@@ -218,8 +212,8 @@ def expected_motif2_dcm(sol):
     :rtype: numpy.float
     """
     n = int(len(sol)/2)
-    y = sol[:n]
-    x = sol[n:]
+    x = sol[:n]
+    y = sol[n:]
     s = 0
     for i in range(n):
         for j in range(n):
@@ -237,7 +231,7 @@ def expected_motif2_dcm(sol):
 
 #TODO: write std motif3
 @jit(nopython=True)
-def expected_motif3_dcm(sol):
+def expected_dcm_3motif_3(sol):
     """Expected number of 3-nodes motif 3 after the DBCM.
 
     :param sol: DBCM solution.
@@ -246,8 +240,8 @@ def expected_motif3_dcm(sol):
     :rtype: numpy.float
     """
     n = int(len(sol)/2)
-    y = sol[:n]
-    x = sol[n:]
+    x = sol[:n]
+    y = sol[n:]
     s = 0
     for i in range(n):
         for j in range(n):
@@ -265,7 +259,7 @@ def expected_motif3_dcm(sol):
 
 #TODO: write std motif4
 @jit(nopython=True)
-def expected_motif4_dcm(sol):
+def expected_dcm_3motif_4(sol):
     """Expected number of 3-nodes motif 4 after the DBCM.
 
     :param sol: DBCM solution.
@@ -274,8 +268,8 @@ def expected_motif4_dcm(sol):
     :rtype: numpy.float
     """
     n = int(len(sol)/2)
-    y = sol[:n]
-    x = sol[n:]
+    x = sol[:n]
+    y = sol[n:]
     s = 0
     for i in range(n):
         for j in range(n):
@@ -288,12 +282,11 @@ def expected_motif4_dcm(sol):
                         pki = x[k]*y[i]/(1 + x[k]*y[i])
                         pjk = x[j]*y[k]/(1 + x[j]*y[k])
                         pkj = x[k]*y[j]/(1 + x[k]*y[j])
-                        s += (1-pij)*(1-pji)*(1 - pik)*pki*pjk*(1 - pkj)
+                        s += (1-pij)*(1-pji)*(1 - pki)*pik*pjk*(1 - pkj)
     return s
 
-#TODO: write std motif5
 @jit(nopython=True)
-def expected_motif5_dcm(sol):
+def expected_dcm_3motif_5(sol):
     """Expected number of 3-nodes motif 5 after the DBCM.
 
     :param sol: DBCM solution.
@@ -302,8 +295,8 @@ def expected_motif5_dcm(sol):
     :rtype: numpy.float
     """
     n = int(len(sol)/2)
-    y = sol[:n]
-    x = sol[n:]
+    x = sol[:n]
+    y = sol[n:]
     s = 0
     for i in range(n):
         for j in range(n):
@@ -321,7 +314,203 @@ def expected_motif5_dcm(sol):
 
 
 @jit(nopython=True)
-def expected_motif13_dcm(sol):
+def expected_dcm_3motif_6(sol):
+    """Expected number of 3-nodes motif 6 after the DBCM.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Expected motif 6 count.
+    :rtype: numpy.float
+    """
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                for k in range(n):
+                    if k is not j and k is not i:
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pij*pji*pik*(1 - pki)*pjk*(1 - pkj)
+    return s
+
+
+@jit(nopython=True)
+def expected_dcm_3motif_7(sol):
+    """Expected number of 3-nodes motif 7 after the DBCM.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Expected motif 7 count.
+    :rtype: numpy.float
+    """
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                for k in range(n):
+                    if k is not j and k is not i:
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pij*pji*(1 - pik)*(1 - pki)*(1 - pjk)*pkj
+    return s
+
+
+@jit(nopython=True)
+def expected_dcm_3motif_8(sol):
+    """Expected number of 3-nodes motif 8 after the DBCM.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Expected motif 8 count.
+    :rtype: numpy.float
+    """
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                for k in range(n):
+                    if k is not j and k is not i:
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pij*pji*(1 - pik)*(1 - pki)*pjk*pkj
+    return s
+
+
+@jit(nopython=True)
+def expected_dcm_3motif_9(sol):
+    """Expected number of 3-nodes motif 9 after the DBCM.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Expected motif 9 count.
+    :rtype: numpy.float
+    """
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                for k in range(n):
+                    if k is not j and k is not i:
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += (1 - pij)*pji*pik*(1 - pki)*(1 - pjk)*pkj
+    return s
+
+
+@jit(nopython=True)
+def expected_dcm_3motif_10(sol):
+    """Expected number of 3-nodes motif 10 after the DBCM.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Expected motif 10 count.
+    :rtype: numpy.float
+    """
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                for k in range(n):
+                    if k is not j and k is not i:
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += (1 - pij)*pji*pik*(1 - pki)*pjk*pkj
+    return s
+
+
+@jit(nopython=True)
+def expected_dcm_3motif_11(sol):
+    """Expected number of 3-nodes motif 11 after the DBCM.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Expected motif 11 count.
+    :rtype: numpy.float
+    """
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                for k in range(n):
+                    if k is not j and k is not i:
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pij*(1 - pji)*pik*(1 - pki)*pjk*pkj
+    return s
+
+
+@jit(nopython=True)
+def expected_dcm_3motif_12(sol):
+    """Expected number of 3-nodes motif 12 after the DBCM.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Expected motif 12 count.
+    :rtype: numpy.float
+    """
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                for k in range(n):
+                    if k is not j and k is not i:
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pij*pji*pik*(1 - pki)*pjk*pkj
+    return s
+
+
+@jit(nopython=True)
+def expected_dcm_3motif_13(sol):
     """Expected number of 3-nodes motif 13 after the DBCM.
 
     :param sol: DBCM solution.
@@ -330,8 +519,8 @@ def expected_motif13_dcm(sol):
     :rtype: numpy.float
     """
     n = int(len(sol)/2)
-    y = sol[:n]
-    x = sol[n:]
+    x = sol[:n]
+    y = sol[n:]
     s = 0
     for i in range(n):
         for j in range(n):
@@ -350,7 +539,7 @@ def expected_motif13_dcm(sol):
 ## standard deviation 3-motifs
 
 @jit(nopython=True)
-def std_motif1_dcm(sol):
+def std_dcm_3motif_1(sol):
     """ compute the standard deviation of the number of 3-nodes motifs 1.
 
     :param sol: DBCM solution.
@@ -365,25 +554,26 @@ def std_motif1_dcm(sol):
     tmp = 0
     for i in range(n):
         for j in range(n):
-            pij = x[i]*y[j]/(1 + x[i]*y[j])
-            pji = x[j]*y[i]/(1 + x[j]*y[i])
-            s = 0
-            for k in range(n):
-                if (i != k) and (j != k):
-                    pik = x[i]*y[k]/(1 + x[i]*y[k])
-                    pki = x[k]*y[i]/(1 + x[k]*y[i])
-                    pjk = x[j]*y[k]/(1 + x[j]*y[k])
-                    pkj = x[k]*y[j]/(1 + x[k]*y[j])
-                    s -= 2*(1-pjk)*pkj*(1-pik)*pki*(1-pij)
-                    s += ((1-pkj)*(1-pik)*pki*(1-pjk)*(-pij) + pkj*(1-pki)*(1-pik)*pjk*(1-pij))
-                    s += ((1-pik)*(1-pki)*(1-pkj)*pjk*(-pij) + (1 - pjk)*(1-pkj)*(1-pki)*pik*(1-pij))
-            tmp += (1 - pji)*pji*((s)**2)
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s -= 2*(1-pjk)*pkj*(1-pik)*pki*(1-pij)
+                        s += -(1-pkj)*(1-pjk)*(1-pki)*pik*pij + (1-pkj)*pjk*(1-pki)*(1-pik)*(1-pij)
+                        s += -pik*(1-pki)*(1-pkj)*(1-pjk)*pij + pjk*(1-pkj)*(1-pki)*(1-pik)*(1-pij)
+                tmp += (1 - pji)*pji*((s)**2)
     return np.sqrt(tmp)
 
 
 
 @jit(nopython=True)
-def std_motif2_dcm(sol):
+def std_dcm_3motif_2(sol):
     """ compute the standard deviation of the number of 3-nodes motifs 2.
 
     :param sol: DBCM solution.
@@ -398,24 +588,351 @@ def std_motif2_dcm(sol):
     tmp = 0
     for i in range(n):
         for j in range(n):
-            pij = x[i]*y[j]/(1 + x[i]*y[j])
-            pji = x[j]*y[i]/(1 + x[j]*y[i])
-            s = 0
-            for k in range(n):
-                if (i != k) and (j != k):
-                    pik = x[i]*y[k]/(1 + x[i]*y[k])
-                    pki = x[k]*y[i]/(1 + x[k]*y[i])
-                    pjk = x[j]*y[k]/(1 + x[j]*y[k])
-                    pkj = x[k]*y[j]/(1 + x[k]*y[j])
-                    s -= ((1-pjk)*pkj*(1-pki)*pik + (1-pkj)*pjk*(1-pik)*pki)*(1-pij)
-                    s += ((1-pkj)*(1-pjk)*(1-pik)*pki*(-pij) + (1-pki)*(1-pik)*(1-pjk)*pkj*(1-pij))
-                    s += ((1-pik)*(1-pki)*(1-pkj)*pjk*(-pij) + (1 - pjk)*(1-pkj)*(1-pki)*pik*(1-pij))
-            tmp += (1 - pji)*pji*((s)**2)
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s -= ((1-pjk)*pkj*(1-pki)*pik + (1-pkj)*pjk*(1-pik)*pki)*(1-pij)
+                        s += (-(1-pkj)*(1-pjk)*(1-pik)*pki*pij + (1-pki)*(1-pik)*(1-pjk)*pkj*(1-pij))
+                        s += (-(1-pik)*(1-pki)*(1-pkj)*pjk*pij + (1 - pjk)*(1-pkj)*(1-pki)*pik*(1-pij))
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+@jit(nopython=True)
+def std_dcm_3motif_3(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 3.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 3 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s -= (pjk*pkj*pki*(1 - pik) + (1-pjk)*pkj*pik*pki)*(1 - pij)
+                        s += (-(1-pkj)*(1-pjk)*pik*pki*pij + (1-pki)*(1-pik)*pjk*pkj*(1-pij))
+                        s += ((1-pik)*(1-pki)*(1-pkj)*pjk*pij + (1 - pjk)*(1-pkj)*(1-pki)*pik*pij)
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+@jit(nopython=True)
+def std_dcm_3motif_4(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 4.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 4 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += ((1 - pjk)*(1 - pkj)*(1 - pik)*pki*(1 - pij) - (1 - pjk)*pkj*(1 - pik)*(1 - pki)*pij)
+                        s += -pkj*(1-pjk)*(1 - pik)*(1 - pki)*pij + pki*(1-pik)*(1 - pjk)*(1 - pkj)*(1-pij)
+                        s -= 2*(1 - pij)*pik*(1 - pki)*(1 - pkj)*pjk
+                tmp += (1 - pji)*pji*((s)**2)
     return np.sqrt(tmp)
 
 
 @jit(nopython=True)
-def std_motif13_dcm(sol):
+def std_dcm_3motif_5(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 5.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 5 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += (1 - pjk)*pkj*(1-pik)*pki*(1 - 2*pij)
+                        s += (-pkj*(1 - pjk)*pik*(1 - pki)*pij + pki*(1-pik)*pjk*(1 - pkj)*(1-pij))
+                        s += (1 - 2*pij)*pik*(1 - pki)*(1 - pkj)*pjk
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+
+@jit(nopython=True)
+def std_dcm_3motif_6(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 6.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 6 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pjk*pkj*(1-pik)*pki*(1 - pij) - (1 - pjk)*pkj*pki*pik*pij
+                        s += (-pkj*(1 - pjk)*pik*pki*pij + pki*(1-pik)*pjk*pkj*(1 - pij))
+                        s += 2*pij*pik*(1 - pki)*(1 - pkj)*pjk
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+
+@jit(nopython=True)
+def std_dcm_3motif_7(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 7.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 7 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s -= pjk*pkj*pik*(1 - pki)*(1 - pij) + pjk*(1 - pkj)*pki*pik*(1 - pij)
+                        s += ((1 - pkj)*(1 - pjk)*pik*pki*(1 - pij) - (1 - pki)*(1-pik)*pjk*pkj*pij)
+                        s += ((1 - pik)*pki*(1 - pkj)*(1 - pjk) + (1 - pik)*(1 - pki)*pkj*(1 - pjk))*pij
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+
+@jit(nopython=True)
+def std_dcm_3motif_8(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 8.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 8 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s -= 2*pkj*pjk*pik*pki*(1 - pij)
+                        s += pij*((1 - pjk)*(1 - pkj)*pik*pki + pjk*pkj*(1 - pki)*(1 - pik))
+                        s += (1 - pik)*(1 - pki)*pkj*pjk*pij + pik*pki*(1 - pkj)*(1 - pjk)*pij
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+
+@jit(nopython=True)
+def std_dcm_3motif_9(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 9.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 9 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pik*(1 - pki)*pkj*(1 - pjk)*(1 - pij) - pki*(1 - pik)*pjk*(1 - pkj)*pij
+                        s += (1 - pij)*(1 - pjk)*pkj*pik*(1 - pki) - pjk*(1 - pkj)*pki*(1 - pik)*pij
+                        s += pik*(1 - pki)*pkj*(1 - pjk)*(1 - pij) - (1 - pik)*pki*(1 - pkj)*pjk*pij
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+
+@jit(nopython=True)
+def std_dcm_3motif_10(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 10.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 10 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pkj*(1 - pjk)*pik*pki*(1 - pij) - pjk*pkj*pki*(1 - pik)*pij
+                        s += pij*((1 - pjk)*pkj*pik*(1 - pki) + pjk*(1 - pkj)*pki*(1 - pik))
+                        s += pik*(1 - pki)*pkj*pjk*(1 - pij) - pik*pki*(1 - pkj)*pjk*pij
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+
+def std_dcm_3motif_11(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 11.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 11 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += (1 - pkj)*pjk*pik*pki*(1 - pij) - pjk*pkj*(1 - pki)*pik*pij
+                        s += (1 - pij)*pjk*(1 - pkj)*pik*pki - pjk*pkj*(1 - pki)*pik*pij
+                        s += 2*(1 - pik)*pki*pkj*(1 - pjk)*pij
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+
+def std_dcm_3motif_12(sol):
+    """ compute the standard deviation of the number of 3-nodes motifs 12.
+
+    :param sol: DBCM solution.
+    :type sol: numpy.ndarray
+    :return: Standard deviation of motif 12 count.
+    :rtype: numpy.float
+    """
+    # edges
+    n = int(len(sol)/2)
+    x = sol[:n]
+    y = sol[n:]
+    tmp = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (i != k) and (j != k):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pkj*pjk*pik*pki*(1 - 2*pij)
+                        s += pij*(pjk*(1 - pkj)*pik*pki + pjk*pkj*(1 - pki)*pik)
+                        s += pij*(pik*pki*pkj*(1 - pjk) + pki*(1 - pik)*pkj*pjk)
+                tmp += (1 - pji)*pji*((s)**2)
+    return np.sqrt(tmp)
+
+
+@jit(nopython=True)
+def std_dcm_3motif_13(sol):
     """ compute the standard deviation of the number of 3-nodes motifs 13.
 
     :param sol: DBCM solution.
@@ -430,32 +947,95 @@ def std_motif13_dcm(sol):
     tmp = 0
     for i in range(n):
         for j in range(n):
-            pij = x[i]*y[j]/(1 + x[i]*y[j])
-            pji = x[j]*y[i]/(1 + x[j]*y[i])
-            s = 0
-            for k in range(n):
-                pik = x[i]*y[k]/(1 + x[i]*y[k])
-                pki = x[k]*y[i]/(1 + x[k]*y[i])
-                pjk = x[j]*y[k]/(1 + x[j]*y[k])
-                pkj = x[k]*y[j]/(1 + x[k]*y[j])
-                s += pij*pjk*pkj*pki*pik*(1 - int(j == k))*(1 - int(k == i))
-            tmp += (1 - pji)*pji*((6*s)**2)
+            if i != j:
+                pij = x[i]*y[j]/(1 + x[i]*y[j])
+                pji = x[j]*y[i]/(1 + x[j]*y[i])
+                s = 0
+                for k in range(n):
+                    if (k != i) and (k != j):
+                        pik = x[i]*y[k]/(1 + x[i]*y[k])
+                        pki = x[k]*y[i]/(1 + x[k]*y[i])
+                        pjk = x[j]*y[k]/(1 + x[j]*y[k])
+                        pkj = x[k]*y[j]/(1 + x[k]*y[j])
+                        s += pij*pjk*pkj*pki*pik
+                tmp += (1 - pji)*pji*((6*s)**2)
     return np.sqrt(tmp)
 
-def motif2_zscore_dcm(sol, a):
-    count = nef.motif2_count(a)
-    exp = expected_motif2_dcm(sol)
-    std = std_motif2_dcm(sol)
+# z-score
+def zscore_dcm_3motif_1(sol, a):
+    count = nef.count_3motif_1(a)
+    exp = expected_dcm_3motif_1(sol)
+    std = std_dcm_3motif_1(sol)
     return (count - exp)/std
 
-def motif13_zscore_dcm(sol, a):
-    count = nef.motif13_count(a)
-    exp = expected_motif13_dcm(sol)
-    std = std_motif13_dcm(sol)
+def zscore_dcm_3motif_2(sol, a):
+    count = nef.count_3motif_2(a)
+    exp = expected_dcm_3motif_2(sol)
+    std = std_dcm_3motif_2(sol)
     return (count - exp)/std
 
-def motif1_zscore_dcm(sol, a):
-    count = nef.motif1_count(a)
-    exp = expected_motif1_dcm(sol)
-    std = std_motif1_dcm(sol)
+def zscore_dcm_3motif_3(sol, a):
+    count = nef.count_3motif_3(a)
+    exp = expected_dcm_3motif_3(sol)
+    std = std_dcm_3motif_3(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_4(sol, a):
+    count = nef.count_3motif_4(a)
+    exp = expected_dcm_3motif_4(sol)
+    std = std_dcm_3motif_4(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_5(sol, a):
+    count = nef.count_3motif_5(a)
+    exp = expected_dcm_3motif_5(sol)
+    std = std_dcm_3motif_5(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_6(sol, a):
+    count = nef.count_3motif_6(a)
+    exp = expected_dcm_3motif_6(sol)
+    std = std_dcm_3motif_6(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_7(sol, a):
+    count = nef.count_3motif_7(a)
+    exp = expected_dcm_3motif_7(sol)
+    std = std_dcm_3motif_7(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_8(sol, a):
+    count = nef.count_3motif_8(a)
+    exp = expected_dcm_3motif_8(sol)
+    std = std_dcm_3motif_8(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_9(sol, a):
+    count = nef.count_3motif_9(a)
+    exp = expected_dcm_3motif_9(sol)
+    std = std_dcm_3motif_9(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_10(sol, a):
+    count = nef.count_3motif_10(a)
+    exp = expected_dcm_3motif_10(sol)
+    std = std_dcm_3motif_10(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_11(sol, a):
+    count = nef.count_3motif_11(a)
+    exp = expected_dcm_3motif_11(sol)
+    std = std_dcm_3motif_11(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_12(sol, a):
+    count = nef.count_3motif_12(a)
+    exp = expected_dcm_3motif_12(sol)
+    std = std_dcm_3motif_12(sol)
+    return (count - exp)/std
+
+def zscore_dcm_3motif_13(sol, a):
+    count = nef.count_3motif_13(a)
+    exp = expected_dcm_3motif_13(sol)
+    std = std_dcm_3motif_13(sol)
     return (count - exp)/std

@@ -2598,12 +2598,15 @@ class DirectedGraph:
         """
         return self.step_fun(self.solution_array)
 
-    def motifs_2_zscore(self, model='dcm'):
+    def zscore_dcm_2motifs(self, model='dcm'):
         """Returns the z-score of the 2-motifs count based on the solution of the model. 
         To run this method: you need first to:
             - have initialised the adjacency matrix
             - have solved the model problem
-        Output object is a dictionary with keys:'dyads', 'singles' and 'zeros'.
+        Output object is a dictionary with keys:
+            - '0' for empty dyads
+            - '1' for single dyads
+            - '2' for full dyads
 
         :param model: Available models are:
             - 'dcm'
@@ -2611,35 +2614,59 @@ class DirectedGraph:
         if model == "dcm":
             sol = np.concatenate((self.x, self.y))
             d = {
-                'dyads': ef.dyads_zscore_dcm(sol, self.adjacency),
-                'singles': ef.singles_zscore_dcm(sol, self.adjacency),
-                'zeros': ef.zeros_zscore_dcm(sol, self.adjacency)
+                '0': ef.zscore_dcm_2motif_0(sol, self.adjacency),
+                '1': ef.zscore_dcm_2motif_1(sol, self.adjacency),
+                '2': ef.zscore_dcm_2motif_2(sol, self.adjacency),
                 }
             return d
         else:
             return {}
 
-    def motifs_3_zscore(self, model='dcm'):
+    def zscore_dcm_3motifs(self, model='dcm'):
         """Returns the z-score of the 3-motifs count based on the solution of the model. 
         To run this method: you need first to:
             - have initialised the adjacency matrix
             - have solved the model problem
-        Output object is a dictionary with keys:"13".
-
+        Output object is a dictionary with keys:
+            - "1"
+            - "2"
+            - "3"
+            - "4"
+            - "5"
+            - "6"
+            - "7"
+            - "8"
+            - "9"
+            - "10"
+            - "11"
+            - "12"
+            - "13"
+        For a mapping from the number to the motif check the paper:
+        "Early-warning signals of topological collapse in interbank networks",
+        Squartini, Tiziano and van Lelyweld, Iman and Garlaschelli, Diego.
         :param model: Available models are:
             - 'dcm'
         """
         if model == "dcm":
             sol = np.concatenate((self.x, self.y))
             d = {
-                '1': ef.motif1_zscore_dcm(sol, self.adjacency),
-                '2': ef.motif2_zscore_dcm(sol, self.adjacency),
-                '13': ef.motif13_zscore_dcm(sol, self.adjacency),
+                '1': ef.zscore_dcm_3motif_1(sol, self.adjacency),
+                '2': ef.zscore_dcm_3motif_2(sol, self.adjacency),
+                '3': ef.zscore_dcm_3motif_3(sol, self.adjacency),
+                '4': ef.zscore_dcm_3motif_4(sol, self.adjacency),
+                '5': ef.zscore_dcm_3motif_5(sol, self.adjacency),
+                '6': ef.zscore_dcm_3motif_6(sol, self.adjacency),
+                '7': ef.zscore_dcm_3motif_7(sol, self.adjacency),
+                '8': ef.zscore_dcm_3motif_8(sol, self.adjacency),
+                '9': ef.zscore_dcm_3motif_9(sol, self.adjacency),
+                '10': ef.zscore_dcm_3motif_10(sol, self.adjacency),
+                '11': ef.zscore_dcm_3motif_11(sol, self.adjacency),
+                '12': ef.zscore_dcm_3motif_12(sol, self.adjacency),
+                '13': ef.zscore_dcm_3motif_13(sol, self.adjacency),
                 }
             return d
         else:
             return {}
-
 
 
 class BipartiteGraph:

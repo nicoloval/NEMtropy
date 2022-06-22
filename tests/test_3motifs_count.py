@@ -15,7 +15,7 @@ class MyTest(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_count_13(self):
+    def test_13(self):
         A = np.array(
             [
                 [0, 1, 1, 0],
@@ -25,7 +25,7 @@ class MyTest(unittest.TestCase):
             ]
         )
 
-        n = mf.motif13_count(A)
+        n = mf.count_3motif_13(A)
 
         """
         g.solve_tool(
@@ -40,7 +40,7 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(n == 6)
 
-    def test_count_2(self):
+    def test_2(self):
         A = np.array(
             [
                 [0, 1, 0, 0],
@@ -50,7 +50,7 @@ class MyTest(unittest.TestCase):
             ]
         )
 
-        n = mf.motif2_count(A)
+        n = mf.count_3motif_2(A)
 
         """
         g.solve_tool(
@@ -65,7 +65,7 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(n == 2)
 
-    def test_count_5(self):
+    def test_5(self):
         A = np.array(
             [
                 [0, 1, 1, 0],
@@ -75,7 +75,7 @@ class MyTest(unittest.TestCase):
             ]
         )
 
-        n = mf.motif5_count(A)
+        n = mf.count_3motif_5(A)
 
         """
         g.solve_tool(
@@ -90,7 +90,7 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(n == 1)
 
-    def test_count_10(self):
+    def test_10(self):
         A = np.array(
             [
                 [0, 1, 0, 0],
@@ -100,7 +100,7 @@ class MyTest(unittest.TestCase):
             ]
         )
 
-        n = mf.motif10_count(A)
+        n = mf.count_3motif_10(A)
 
         """
         g.solve_tool(

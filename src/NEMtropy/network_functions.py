@@ -694,7 +694,7 @@ def adjacency_matrix_from_adjacency_list(adj_list, fmt='array'):
         return biad_mat.toarray()
 
 
-def dyads_count(a):
+def count_2motif_2(a):
     """Counts number of dyads.
     :param a np.ndarray: adjacency matrix
     :return: dyads count
@@ -712,7 +712,7 @@ def dyads_count(a):
         return int(tmp[tmp == 2].shape[1])
 
 
-def singles_count(a):
+def count_2motif_1(a):
     """Counts number of singles.
     :param a np.ndarray: adjacency matrix
     :return: singles count
@@ -730,7 +730,7 @@ def singles_count(a):
         return int(tmp[tmp == 1].shape[1]/2)
 
 
-def zeros_count(a):
+def count_2motif_0(a):
     """Counts number of zeros.
     :param a np.ndarray: adjacency matrix
     :return: zeros count
@@ -751,7 +751,7 @@ def zeros_count(a):
 # 3-nodes motifs
 
 @jit(nopython=True)
-def motif1_count(a):
+def count_3motif_1(a):
     """Counts abundance of 3-nodes motif 1.
     :param a np.ndarray: adjacency matrix
     :return: motif 1 count
@@ -765,13 +765,13 @@ def motif1_count(a):
         for j in range(n):
             if j is not i:
                 for k in range(n):
-                    if k is not j and k is not i:
+                    if k is not j and k is not i and i is not j:
                         s += (1 - a[i, j])*a[j, i]*(1 - a[i, k])*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
     return s
  
 
 @jit(nopython=True)
-def motif2_count(a):
+def count_3motif_2(a):
     """Counts abundance of 3-nodes motif 2.
     :param a np.ndarray: adjacency matrix
     :return: motif 2 count
@@ -785,13 +785,53 @@ def motif2_count(a):
         for j in range(n):
             if j is not i:
                 for k in range(n):
-                    if k is not j and k is not i:
+                    if k is not j and k is not i and i is not j:
                         s += a[i, j]*(1 - a[j, i])*(1 - a[i, k])*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
     return s
     
 
 @jit(nopython=True)
-def motif5_count(a):
+def count_3motif_3(a):
+    """Counts abundance of 3-nodes motif 3.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 3 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    n = len(a)
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*(1 - a[i, k])*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
+    return s
+ 
+
+@jit(nopython=True)
+def count_3motif_4(a):
+    """Counts abundance of 3-nodes motif 4.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 4 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    n = len(a)
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += (1 - a[i, j])*(1 - a[j, i])*a[i, k]*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
+    return s
+
+
+@jit(nopython=True)
+def count_3motif_5(a):
     """Counts abundance of 3-nodes motif 5.
     :param a np.ndarray: adjacency matrix
     :return: motif 5 count
@@ -805,13 +845,93 @@ def motif5_count(a):
         for j in range(n):
             if j is not i:
                 for k in range(n):
-                    if k is not j and k is not i:
+                    if k is not j and k is not i and i is not j:
                         s += (1 - a[i, j])*a[j, i]*a[i, k]*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
     return s
 
 
 @jit(nopython=True)
-def motif10_count(a):
+def count_3motif_6(a):
+    """Counts abundance of 3-nodes motif 6.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 6 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    n = len(a)
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*a[i, k]*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
+    return s
+
+
+@jit(nopython=True)
+def count_3motif_7(a):
+    """Counts abundance of 3-nodes motif 7.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 7 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    n = len(a)
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*(1 - a[i, k])*(1 - a[k, i])*(1 - a[j, k])*a[k, j]
+    return s
+
+
+@jit(nopython=True)
+def count_3motif_8(a):
+    """Counts abundance of 3-nodes motif 8.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 8 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    n = len(a)
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*(1 - a[i, k])*(1 - a[k, i])*a[j, k]*a[k, j]
+    return s
+
+
+@jit(nopython=True)
+def count_3motif_9(a):
+    """Counts abundance of 3-nodes motif 9.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 9 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    n = len(a)
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += (1 - a[i, j])*a[j, i]*a[i, k]*(1 - a[k, i])*(1 - a[j, k])*a[k, j]
+    return s
+
+
+@jit(nopython=True)
+def count_3motif_10(a):
     """Counts abundance of 3-nodes motif 10.
     :param a np.ndarray: adjacency matrix
     :return: motif 10 count
@@ -825,14 +945,54 @@ def motif10_count(a):
         for j in range(n):
             if j is not i:
                 for k in range(n):
-                    if k is not j and k is not i:
+                    if k is not j and k is not i and i is not j:
                         s += (1 - a[i, j])*a[j, i]*a[i, k]*(1 - a[k, i])*a[j, k]*a[k, j]
     return s
 
 
 @jit(nopython=True)
-def motif13_count(a):
-    """Counts abundance of 3-nodes motif 13.
+def count_3motif_11(a):
+    """Counts abundance of 3-nodes motif 11.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 11 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    n = len(a)
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*(1 - a[j, i])*a[i, k]*(1 - a[k, i])*a[j, k]*a[k, j]
+    return s
+
+
+@jit(nopython=True)
+def count_3motif_12(a):
+    """Counts abundance of 3-nodes motif_ 12.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 12 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    n = len(a)
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*a[i, k]*(1 - a[k, i])*a[j, k]*a[k, j]
+    return s
+
+
+@jit(nopython=True)
+def count_3motif_13(a):
+    """Counts abundance of 3-nodes motif_ 13.
     :param a np.ndarray: adjacency matrix
     :return: motif 13 count
     :rtype: int
@@ -845,6 +1005,6 @@ def motif13_count(a):
         for j in range(n):
             if j is not i:
                 for k in range(n):
-                    if k is not j and k is not i:
+                    if k is not j and k is not i and i is not j:
                         s += a[i, j]*a[j, i]*a[i, k]*a[k, i]*a[j, k]*a[k, j]
     return s
