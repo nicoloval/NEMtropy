@@ -751,7 +751,7 @@ def count_2motif_0(a):
 # 3-nodes motifs
 
 @jit(nopython=True)
-def count_3motif_1(a):
+def count_3motif_1_ndarray(a):
     """Counts abundance of 3-nodes motif 1.
     :param a np.ndarray: adjacency matrix
     :return: motif 1 count
@@ -771,7 +771,7 @@ def count_3motif_1(a):
  
 
 @jit(nopython=True)
-def count_3motif_2(a):
+def count_3motif_2_ndarray(a):
     """Counts abundance of 3-nodes motif 2.
     :param a np.ndarray: adjacency matrix
     :return: motif 2 count
@@ -791,7 +791,7 @@ def count_3motif_2(a):
     
 
 @jit(nopython=True)
-def count_3motif_3(a):
+def count_3motif_3_ndarray(a):
     """Counts abundance of 3-nodes motif 3.
     :param a np.ndarray: adjacency matrix
     :return: motif 3 count
@@ -811,7 +811,7 @@ def count_3motif_3(a):
  
 
 @jit(nopython=True)
-def count_3motif_4(a):
+def count_3motif_4_ndarray(a):
     """Counts abundance of 3-nodes motif 4.
     :param a np.ndarray: adjacency matrix
     :return: motif 4 count
@@ -831,7 +831,7 @@ def count_3motif_4(a):
 
 
 @jit(nopython=True)
-def count_3motif_5(a):
+def count_3motif_5_ndarray(a):
     """Counts abundance of 3-nodes motif 5.
     :param a np.ndarray: adjacency matrix
     :return: motif 5 count
@@ -851,7 +851,7 @@ def count_3motif_5(a):
 
 
 @jit(nopython=True)
-def count_3motif_6(a):
+def count_3motif_6_ndarray(a):
     """Counts abundance of 3-nodes motif 6.
     :param a np.ndarray: adjacency matrix
     :return: motif 6 count
@@ -871,7 +871,7 @@ def count_3motif_6(a):
 
 
 @jit(nopython=True)
-def count_3motif_7(a):
+def count_3motif_7_ndarray(a):
     """Counts abundance of 3-nodes motif 7.
     :param a np.ndarray: adjacency matrix
     :return: motif 7 count
@@ -891,7 +891,7 @@ def count_3motif_7(a):
 
 
 @jit(nopython=True)
-def count_3motif_8(a):
+def count_3motif_8_ndarray(a):
     """Counts abundance of 3-nodes motif 8.
     :param a np.ndarray: adjacency matrix
     :return: motif 8 count
@@ -911,7 +911,7 @@ def count_3motif_8(a):
 
 
 @jit(nopython=True)
-def count_3motif_9(a):
+def count_3motif_9_ndarray(a):
     """Counts abundance of 3-nodes motif 9.
     :param a np.ndarray: adjacency matrix
     :return: motif 9 count
@@ -931,7 +931,7 @@ def count_3motif_9(a):
 
 
 @jit(nopython=True)
-def count_3motif_10(a):
+def count_3motif_10_ndarray(a):
     """Counts abundance of 3-nodes motif 10.
     :param a np.ndarray: adjacency matrix
     :return: motif 10 count
@@ -951,7 +951,7 @@ def count_3motif_10(a):
 
 
 @jit(nopython=True)
-def count_3motif_11(a):
+def count_3motif_11_ndarray(a):
     """Counts abundance of 3-nodes motif 11.
     :param a np.ndarray: adjacency matrix
     :return: motif 11 count
@@ -971,7 +971,7 @@ def count_3motif_11(a):
 
 
 @jit(nopython=True)
-def count_3motif_12(a):
+def count_3motif_12_ndarray(a):
     """Counts abundance of 3-nodes motif_ 12.
     :param a np.ndarray: adjacency matrix
     :return: motif 12 count
@@ -991,13 +991,12 @@ def count_3motif_12(a):
 
 
 @jit(nopython=True)
-def count_3motif_13(a):
+def count_3motif_13_ndarray(a):
     """Counts abundance of 3-nodes motif_ 13.
     :param a np.ndarray: adjacency matrix
     :return: motif 13 count
     :rtype: int
     """
-
     n = a.shape[0]
     n = len(a)
     s = 0
@@ -1008,3 +1007,441 @@ def count_3motif_13(a):
                     if k is not j and k is not i and i is not j:
                         s += a[i, j]*a[j, i]*a[i, k]*a[k, i]*a[j, k]*a[k, j]
     return s
+
+
+
+def count_3motif_1_sparse(a):
+    """Counts abundance of 3-nodes motif 1.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 1 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += (1 - a[i, j])*a[j, i]*(1 - a[i, k])*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
+    return s
+ 
+
+
+def count_3motif_2_sparse(a):
+    """Counts abundance of 3-nodes motif 2.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 2 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*(1 - a[j, i])*(1 - a[i, k])*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
+    return s
+    
+
+
+def count_3motif_3_sparse(a):
+    """Counts abundance of 3-nodes motif 3.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 3 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*(1 - a[i, k])*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
+    return s
+ 
+
+
+def count_3motif_4_sparse(a):
+    """Counts abundance of 3-nodes motif 4.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 4 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += (1 - a[i, j])*(1 - a[j, i])*a[i, k]*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
+    return s
+
+
+
+def count_3motif_5_sparse(a):
+    """Counts abundance of 3-nodes motif 5.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 5 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += (1 - a[i, j])*a[j, i]*a[i, k]*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
+    return s
+
+
+
+def count_3motif_6_sparse(a):
+    """Counts abundance of 3-nodes motif 6.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 6 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*a[i, k]*(1 - a[k, i])*a[j, k]*(1 - a[k, j])
+    return s
+
+
+
+def count_3motif_7_sparse(a):
+    """Counts abundance of 3-nodes motif 7.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 7 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*(1 - a[i, k])*(1 - a[k, i])*(1 - a[j, k])*a[k, j]
+    return s
+
+
+
+def count_3motif_8_sparse(a):
+    """Counts abundance of 3-nodes motif 8.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 8 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*(1 - a[i, k])*(1 - a[k, i])*a[j, k]*a[k, j]
+    return s
+
+
+
+def count_3motif_9_sparse(a):
+    """Counts abundance of 3-nodes motif 9.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 9 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += (1 - a[i, j])*a[j, i]*a[i, k]*(1 - a[k, i])*(1 - a[j, k])*a[k, j]
+    return s
+
+
+
+def count_3motif_10_sparse(a):
+    """Counts abundance of 3-nodes motif 10.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 10 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += (1 - a[i, j])*a[j, i]*a[i, k]*(1 - a[k, i])*a[j, k]*a[k, j]
+    return s
+
+
+
+def count_3motif_11_sparse(a):
+    """Counts abundance of 3-nodes motif 11.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 11 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*(1 - a[j, i])*a[i, k]*(1 - a[k, i])*a[j, k]*a[k, j]
+    return s
+
+
+
+def count_3motif_12_sparse(a):
+    """Counts abundance of 3-nodes motif_ 12.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 12 count
+    :rtype: int
+    """
+
+    n = a.shape[0]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*a[i, k]*(1 - a[k, i])*a[j, k]*a[k, j]
+    return s
+
+
+
+def count_3motif_13_sparse(a):
+    """Counts abundance of 3-nodes motif_ 13.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 13 count
+    :rtype: int
+    """
+    n = a.shape[0]
+    s = 0
+    for i in range(n):
+        for j in range(n):
+            if j is not i:
+                for k in range(n):
+                    if k is not j and k is not i and i is not j:
+                        s += a[i, j]*a[j, i]*a[i, k]*a[k, i]*a[j, k]*a[k, j]
+    return s
+
+
+def count_3motif_1(a):
+    """Counts abundance of 3-nodes motif 1.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 1 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_1_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_1_sparse(a)
+    else:
+        raise TypeError
+ 
+
+def count_3motif_2(a):
+    """Counts abundance of 3-nodes motif 2.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 2 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_2_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_2_sparse(a)
+    else:
+        raise TypeError
+    
+
+def count_3motif_3(a):
+    """Counts abundance of 3-nodes motif 3.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 3 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_3_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_3_sparse(a)
+    else:
+        raise TypeError
+ 
+
+def count_3motif_4(a):
+    """Counts abundance of 3-nodes motif 4.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 4 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_4_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_4_sparse(a)
+    else:
+        raise TypeError
+
+
+def count_3motif_5(a):
+    """Counts abundance of 3-nodes motif 5.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 5 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_5_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_5_sparse(a)
+    else:
+        raise TypeError
+
+
+def count_3motif_6(a):
+    """Counts abundance of 3-nodes motif 6.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 6 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_6_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_6_sparse(a)
+    else:
+        raise TypeError
+
+
+def count_3motif_7(a):
+    """Counts abundance of 3-nodes motif 7.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 7 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_7_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_7_sparse(a)
+    else:
+        raise TypeError
+
+
+def count_3motif_8(a):
+    """Counts abundance of 3-nodes motif 8.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 8 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_8_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_8_sparse(a)
+    else:
+        raise TypeError
+
+
+def count_3motif_9(a):
+    """Counts abundance of 3-nodes motif 9.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 9 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_9_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_9_sparse(a)
+    else:
+        raise TypeError
+
+
+def count_3motif_10(a):
+    """Counts abundance of 3-nodes motif 10.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 10 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_10_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_10_sparse(a)
+    else:
+        raise TypeError
+
+
+def count_3motif_11(a):
+    """Counts abundance of 3-nodes motif 11.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 11 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_11_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_11_sparse(a)
+    else:
+        raise TypeError
+
+
+def count_3motif_12(a):
+    """Counts abundance of 3-nodes motif_ 12.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 12 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_12_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_12_sparse(a)
+    else:
+        raise TypeError
+
+
+def count_3motif_13(a):
+    """Counts abundance of 3-nodes motif_ 13.
+    :param a np.ndarray: adjacency matrix
+    :return: motif 13 count
+    :rtype: int
+    """
+    if isinstance(a, np.ndarray):
+        return count_3motif_13_ndarray(a)
+    elif isinstance(a, scipy.sparse.spmatrix):
+        return count_3motif_13_sparse(a)
+    else:
+        raise TypeError

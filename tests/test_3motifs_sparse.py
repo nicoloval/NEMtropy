@@ -16,7 +16,7 @@ class MyTest(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_13(self):
+    def test_sparse_13(self):
         A = np.array(
             [
                 [0, 1, 1, 0],
@@ -25,8 +25,9 @@ class MyTest(unittest.TestCase):
                 [0, 0, 0, 0],
             ]
         )
+        lilA = scipy.sparse.lil_matrix(A)
 
-        n = mf.count_3motif_13(A)
+        n = mf.count_3motif_13(lilA)
 
         """
         g.solve_tool(
@@ -41,57 +42,7 @@ class MyTest(unittest.TestCase):
         # test result
         self.assertTrue(n == 6)
 
-    def test_2(self):
-        A = np.array(
-            [
-                [0, 1, 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1],
-                [0, 0, 0, 0],
-            ]
-        )
-
-        n = mf.count_3motif_2(A)
-
-        """
-        g.solve_tool(
-            model="dcm",
-            max_steps=200,
-            verbose=False,
-        )
-        """
-
-        # debug
-
-        # test result
-        self.assertTrue(n == 2)
-
-    def test_5(self):
-        A = np.array(
-            [
-                [0, 1, 1, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1],
-                [0, 0, 0, 0],
-            ]
-        )
-
-        n = mf.count_3motif_5(A)
-
-        """
-        g.solve_tool(
-            model="dcm",
-            max_steps=200,
-            verbose=False,
-        )
-        """
-
-        # debug
-
-        # test result
-        self.assertTrue(n == 1)
-
-    def test_10(self):
+    def test_sparse_10(self):
         A = np.array(
             [
                 [0, 1, 0, 0],
@@ -100,8 +51,10 @@ class MyTest(unittest.TestCase):
                 [0, 0, 0, 0],
             ]
         )
+        lilA = scipy.sparse.lil_matrix(A)
 
-        n = mf.count_3motif_10(A)
+        n = mf.count_3motif_10_sparse(lilA)
+        print(n)
 
         """
         g.solve_tool(
@@ -115,6 +68,7 @@ class MyTest(unittest.TestCase):
 
         # test result
         self.assertTrue(n == 1)
+
 
 if __name__ == "__main__":
     unittest.main()
