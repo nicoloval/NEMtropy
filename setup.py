@@ -39,7 +39,7 @@ setup(
                       "numpy>=1.17",
                       "scipy>=1.4",
                       "networkx>=2.4",
-                      "powerlaw>=1.4"
+                      "powerlaw>=1.4",
                       "tqdm>=4.5"
                       ],
     extras_require={
