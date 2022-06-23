@@ -2607,6 +2607,8 @@ class DirectedGraph:
             - '0' for empty dyads
             - '1' for single dyads
             - '2' for full dyads
+        We rely on the number-to-motif convention fo the paper:
+        Squartini, Tiziano, Iman Van Lelyveld, and Diego Garlaschelli. "Early-warning signals of topological collapse in interbank networks." Scientific reports 3.1 (2013): 1-9.
 
         :param model: Available models are:
             - 'dcm'
@@ -2641,9 +2643,9 @@ class DirectedGraph:
             - "11"
             - "12"
             - "13"
-        For a mapping from the number to the motif check the paper:
-        "Early-warning signals of topological collapse in interbank networks",
-        Squartini, Tiziano and van Lelyweld, Iman and Garlaschelli, Diego.
+        We rely on the number-to-motif convention fo the paper:
+        Squartini, Tiziano, Iman Van Lelyveld, and Diego Garlaschelli. "Early-warning signals of topological collapse in interbank networks." Scientific reports 3.1 (2013): 1-9.
+
         :param model: Available models are:
             - 'dcm'
         """
