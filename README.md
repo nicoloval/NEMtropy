@@ -157,6 +157,7 @@ on the ensemble of matrices and to compare it with its original value.
 To learn more, please read the ipython notebooks in the examples directory:
 - one is a study case on a [directed graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Directed%20Graphs.ipynb), 
 - while the other is on an [undirected graph](https://github.com/nicoloval/NEMtropy/blob/master/examples/Undirected%20Graphs.ipynb).
+- There is also one on motifs!!! [motifs](https://github.com/nicoloval/NEMtropy/blob/c4283e6b939274f532278cd84841656b20d819a4/examples/Motifs.ipynb).
 
 
 Documentation
