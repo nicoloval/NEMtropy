@@ -701,15 +701,8 @@ def count_2motif_2(a):
     :rtype: int
     """
 
-    at = a.transpose()
-    tmp = a + at
-    if isinstance(a, np.ndarray):
-        return int(len(tmp[tmp == 2]))
-    if isinstance(
-        a,
-        (scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix)
-            ):
-        return int(tmp[tmp == 2].shape[1])
+    tmp = a + a.transpose()
+    return int(len(tmp[tmp == 2]))
 
 
 def count_2motif_1(a):
@@ -719,15 +712,8 @@ def count_2motif_1(a):
     :rtype: int
     """
 
-    at = a.transpose()
-    tmp = a + at
-    if isinstance(a, np.ndarray):
-        return int(len(tmp[tmp == 1])/2)
-    if isinstance(
-        a,
-        (scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix)
-            ):
-        return int(tmp[tmp == 1].shape[1]/2)
+    tmp = a + a.transpose()
+    return int(len(tmp[tmp == 1])/2)
 
 
 def count_2motif_0(a):
@@ -738,17 +724,21 @@ def count_2motif_0(a):
     """
 
     n = a.shape[0]
-    at = a.transpose()
-    tmp = a + at
+    tmp = a + a.transpose()
     if isinstance(a, np.ndarray):
         return int((n*(n-1) - np.count_nonzero(tmp)))
     if isinstance(
         a,
-        (scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix)
-            ):
+        (
+            scipy.sparse.csr_array,
+            # scipy.sparse.coo_array,
+            # scipy.sparse.bsr_array,
+        )
+    ):
         return int((n*(n-1) - tmp.count_nonzero()))
 
 # 3-nodes motifs
+
 
 @jit(nopython=True)
 def count_3motif_1_ndarray(a):
