@@ -14,18 +14,20 @@ This module allows you to solve the desired model and generate a number of rando
 NEMtropy builds on the current literature on the matter, improving both in speed of convergence and in the scale of the feasible networks.
 To explore Maximum-Entropy modeling on networks, checkout [Maximum Entropy Hub](https://meh.imtlucca.it/).
 
-The models implemented in NEMtropy are presented in a forthcoming [paper](https://arxiv.org/abs/2101.12625) on arXiv.
 If you use the module for your scientific research, please consider citing us:
 
 ```
-    @misc{vallarano2021fast,
-          title={Fast and scalable likelihood maximization for Exponential Random Graph Models}, 
-          author={Nicolò Vallarano and Matteo Bruno and Emiliano Marchese and Giuseppe Trapani and Fabio Saracco and Tiziano Squartini and Giulio Cimini and Mario Zanon},
-          year={2021},
-          eprint={2101.12625},
-          archivePrefix={arXiv},
-          primaryClass={physics.data-an}
-    }
+@article{vallarano2021fast,
+  title={Fast and scalable likelihood maximization for exponential random graph models with local constraints},
+  author={Vallarano, Nicol{\`o} and Bruno, Matteo and Marchese, Emiliano and Trapani, Giuseppe and Saracco, Fabio and Cimini, Giulio and Zanon, Mario and Squartini, Tiziano},
+  journal={Scientific Reports},
+  volume={11},
+  number={1},
+  pages={15227},
+  year={2021},
+  publisher={Nature Publishing Group UK London}
+}
+
 ```
 
 #### Table Of Contents
