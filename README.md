@@ -1,7 +1,7 @@
 ![PyPI](https://img.shields.io/pypi/v/nemtropy)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nemtropy)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![ArXiv](https://img.shields.io/badge/ArXiv-2101.12625-red)](https://arxiv.org/abs/2101.12625)
+[![Scientific Reports](https://media.springernature.com/full/nature-cms/uploads/product/srep/header-d3c533c187c710c1bedbd8e293815d5f.svg)](https://doi.org/10.1038/s41598-021-93830-4)
 
 NEMtropy: Network Entropy Maximization, a Toolbox Running On PYthon
 -------------------------------------------------------------------
@@ -60,6 +60,7 @@ for in-depth discussion please see the references.
 **Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa* | -
 
 The BiCM module is also available as [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
+With the BiCM module you can also compute the weighted version BiWCM [[3]](#3), (soon?) to be added to NEMtropy as well.
 
 _References_
 
@@ -78,7 +79,11 @@ _References_
 	"Randomizing bipartite networks: the case of the World Trade Web." 
 	Scientific reports 5, no. 1 (2015): 1-18.
     https://doi.org/10.1038/srep10595
-
+* <a id="4">[4]</a>
+    Bruno, Matteo, Dario Mazzilli, Aurelio Patelli, Tiziano Squartini, and Fabio Saracco.
+        "Inferring comparative advantage via entropy maximization."
+        Journal of Physics: Complexity, Volume 4, Number 4 (2023).
+    https://doi.org/10.1088/2632-072X/ad1411
 
 Installation
 ------------
@@ -203,13 +208,13 @@ Credits
 
 _Authors_:
 
-[Nicolò Vallarano](http://www.imtlucca.it/en/nicolo.vallarano/) (a.k.a. [nicoloval](https://github.com/nicoloval))
+[Nicolò Vallarano](https://www.ifi.uzh.ch/en/bdlt/Team/Postdocs/Dr.-Vallarano-Nicol%C3%B2.html) (a.k.a. [nicoloval](https://github.com/nicoloval))
 
 [Emiliano Marchese](https://www.imtlucca.it/en/emiliano.marchese/) (a.k.a. [EmilianoMarchese](https://github.com/EmilianoMarchese))
 
-[Matteo Bruno](https://www.imtlucca.it/en/matteo.bruno/) (BiCM) (a.k.a. [mat701](https://github.com/mat701))
+[Matteo Bruno](https://csl.sony.it/member/matteo-bruno/) (BiCM) (a.k.a. [mat701](https://github.com/mat701))
 
 _Acknowledgements:_
 
-The module was developed under the supervision of [Tiziano Squartini](http://www.imtlucca.it/en/tiziano.squartini/), [Fabio Saracco](http://www.imtlucca.it/en/fabio.saracco/), [Mario Zanon](http://www.imtlucca.it/it/mario.zanon/), and [Giulio Cimini](https://www.fisica.uniroma2.it/elenco-telefonico/ciminigi/).
+The module was developed under the supervision of [Tiziano Squartini](http://www.imtlucca.it/en/tiziano.squartini/), [Fabio Saracco](http://www.imtlucca.it/en/fabio.saracco/), [Mario Zanon](https://mariozanon.wordpress.com/), and [Giulio Cimini](https://www.fisica.uniroma2.it/elenco-telefonico/ciminigi/).
 It was developed at [IMT school of advanced studies Lucca](https://www.imtlucca.it/), and financed by the research project Optimized Reconstruction of Complex networkS - ORCS.

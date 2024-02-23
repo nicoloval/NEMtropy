@@ -8,8 +8,8 @@ with open('README.md', "r", encoding="utf-8") as fh:
 setup(
     name="NEMtropy",
     author="Nicolo' Vallarano, Emiliano Marchese, Matteo Bruno",
-    author_email='nicolo.vallarano@imtlucca.it, emiliano.marchese@imtlucca.it,'
-                 ' matteo.bruno@imtlucca.it',
+    author_email='nico.vallarano@gmail.com, emilianomarcheserc@gmail.com,'
+                 ' matteobruno180@gmail.com',
     packages=["NEMtropy"],
     package_dir={'': 'src'},
     version="2.1.1",
@@ -23,7 +23,7 @@ setup(
     long_description_content_type="text/markdown",
     license="GNU General Public License v3",
     url="https://github.com/nicoloval/NEMtropy/",
-    download_url="https://github.com/nicoloval/NEMtropy/archive/refs/tags/v2.0.6.zip",
+    download_url="https://github.com/nicoloval/NEMtropy/archive/refs/tags/v2.1.1.zip",
     keywords=['Network reconstruction', 'Networks Null Models',
               'Maximum Entropy Methods'],
     classifiers=[

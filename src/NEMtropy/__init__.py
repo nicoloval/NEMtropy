@@ -4,6 +4,6 @@ from .ensemble_generator import *
 from .models_functions import *
 
 __version__ = "2.1.1"
-__author__ = """Nicolo' Vallarano (nicolo.vallarano@imtlucca.it)
-Emiliano Marchese (emiliano.marchese@imtlucca.it)
-Matteo Bruno (matteo.bruno@imtlucca.it)"""
+__author__ = """Nicolo' Vallarano (nico.vallarano@gmail.com)
+Emiliano Marchese (emilianomarcheserc@gmail.com)
+Matteo Bruno (matteobruno180@gmail.com)"""

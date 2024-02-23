@@ -15,9 +15,9 @@ in speed of convergence and in the scale of the feasible networks. To
 explore Maximum-Entropy modeling on networks, checkout `Maximum Entropy
 Hub <https://meh.imtlucca.it/>`__.
 
-The models implemented in NEMtropy are presented in a forthcoming
-`paper <https://arxiv.org/abs/2101.12625>`__ on arXiv. If you use the
-module for your scientific research, please consider citing us:
+The models implemented in NEMtropy are presented in a 
+`paper <https://doi.org/10.1038/s41598-021-93830-4>`__ on Scientific Reports. 
+If you use the module for your scientific research, please consider citing us:
 
 ::
 
@@ -60,8 +60,9 @@ in-depth discussion please see the references.
 +----------------------+--------------------+-------------------+-------------------+
 
 The BiCM module is also available as `a standalone package <https://github.com/mat701/BiCM>`__, find its docs `here <https://bipartite-configuration-model.readthedocs.io/en/latest/>`__.
+With the BiCM module you can also compute the weighted version BiWCM `[4] <#4>`, (soon?) to be added to NEMtropy as well.
 
-*References*
+*Further references*
 
 -  [1] Squartini, Tiziano, Rossana Mastrandrea, and Diego Garlaschelli.
    "Unbiased sampling of network ensembles." New Journal of Physics 17.2
@@ -73,6 +74,9 @@ The BiCM module is also available as `a standalone package <https://github.com/m
 -  [3] Saracco, Fabio, Riccardo Di Clemente, Andrea Gabrielli, and Tiziano Squartini.
    "Randomizing bipartite networks: the case of the World Trade Web."
    Scientific reports 5, no. 1 (2015): 1-18. https://doi.org/10.1038/srep10595
+-  [4] Bruno, Matteo, Dario Mazzilli, Aurelio Patelli, Tiziano Squartini, and Fabio Saracco.
+   "Inferring comparative advantage via entropy maximization."
+   Journal of Physics: Complexity, Volume 4, Number 4 (2023). https://doi.org/10.1088/2632-072X/ad1411
 
 
 Installation
