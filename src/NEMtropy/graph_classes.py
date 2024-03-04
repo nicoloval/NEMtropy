@@ -3613,7 +3613,8 @@ class BipartiteGraph:
                     pval_adj_list[node].update(pvals_dict[node])
         return pval_adj_list
 
-    def compute_projection(self, rows=True, alpha=0.05, method='poisson', threads_num=None, progress_bar=True):
+    def compute_projection(self, rows=True, alpha=0.05, approx_method=None, method=None,
+                           threads_num=None, progress_bar=True, validation_method='fdr'):
         """Compute the projection of the network on the rows or columns layer.
         If the BiCM has not been computed, it also computes it with standard settings.
         This is the most customizable method for the pvalues computation.
@@ -3626,9 +3627,23 @@ class BipartiteGraph:
             the computation is not parallelized.
         :param bool progress_bar: Show progress bar of the pvalues computation.
         """
+        if approx_method is None:
+            if method is not None:
+                print('"method" is deprecated, use approx_method instead')
+                approx_method = method
+            else:
+                approx_method = 'poisson'
         self.rows_projection = rows
-        self.projection_method = method
+        self.projection_method = approx_method
         self.progress_bar = progress_bar
+        if self.adj_list is None and self.biadjacency is None:
+            print('''
+            Without the edges I can't compute the projection. 
+            Use set_biadjacency_matrix, set_adjacency_list or set_edgelist to add edges.
+            ''')
+            return
+        if alpha >= 1:
+            print('Warning: alpha larger than 1 will yield a full projection.')
         if threads_num is None:
             if system() == 'Windows':
                 threads_num = 1
@@ -3658,18 +3673,25 @@ class BipartiteGraph:
                 self.projected_cols_adj_list = self._projection_from_pvals(alpha=alpha)
                 self.is_cols_projected = True
 
-    def _pvals_validator(self, pval_list, alpha=0.05):
+    def _pvals_validator(self, pval_list, alpha=0.05, validation_method='fdr'):
         sorted_pvals = np.sort(pval_list)
         if self.rows_projection:
-            multiplier = 2 * alpha / (self.n_rows * (self.n_rows - 1))
+            tests_num = (self.n_rows * (self.n_rows - 1)) / 2
         else:
-            multiplier = 2 * alpha / (self.n_cols * (self.n_cols - 1))
-        try:
-            eff_fdr_pos = np.where(sorted_pvals <= (np.arange(1, len(sorted_pvals) + 1) * alpha * multiplier))[0][-1]
-        except IndexError:
-            print('No V-motifs will be validated. Try increasing alpha')
-            eff_fdr_pos = 0
-        eff_fdr_th = (eff_fdr_pos + 1) * multiplier  # +1 because of Python numbering: our pvals are ordered 1,...,n
+            tests_num = (self.n_cols * (self.n_cols - 1)) / 2
+        multiplier = alpha / tests_num
+        eff_fdr_th = alpha
+        if validation_method == 'bonferroni':
+            eff_fdr_th = multiplier
+            if sorted_pvals[0] > eff_fdr_th:
+                print('No V-motifs will be validated. Try increasing alpha')
+        elif validation_method == 'fdr':
+            try:
+                eff_fdr_pos = np.where(sorted_pvals <= (np.arange(1, len(sorted_pvals) + 1) * multiplier))[0][-1]
+            except IndexError:
+                print('No V-motifs will be validated. Try increasing alpha')
+                eff_fdr_pos = 0
+            eff_fdr_th = (eff_fdr_pos + 1) * multiplier  # +1 because of Python numbering: our pvals are ordered 1,...,n
         return eff_fdr_th
 
     def _projection_from_pvals(self, alpha=0.05):
