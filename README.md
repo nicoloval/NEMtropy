@@ -50,17 +50,17 @@ The specific kind of network to randomize and property to preserve defines the m
 * **DECM** *Directed Enhanced Configuration Model* [[1]](#1)
 * **CReMa** [[2]](#2)
 * **BiCM** *Bipartite Configuration Model* [[3]](#3)
+* **BiWCM** *Bipartite Weighted Configuration Model* [[4]](#4)
 
 The following table may helps you identify the model that fits your needs in function of the type of network you are working with;
 for in-depth discussion please see the references.
 
 [...] | Undirected Graph | Directed Graph | Bipartite Graph
 ----- | ---------------- | -------------- | --------------
-**Binary Graph** | *UBCM* | *DBCM* | *BiCM*
+**Binary Graph** | *UBCM* | *DBCM* | *BiCM*, *BiWCM*
 **Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa* | -
 
 The BiCM module is also available as [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
-With the BiCM module you can also compute the weighted version BiWCM [[3]](#3), (soon?) to be added to NEMtropy as well.
 
 _References_
 
