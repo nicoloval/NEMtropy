@@ -60,7 +60,7 @@ for in-depth discussion please see the references.
 **Binary Graph** | *UBCM* | *DBCM* | *BiCM*, *BiWCM*
 **Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa* | -
 
-The BiCM module is also available as [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
+The BiCM module is now (NEMtropy>=3.0.0) imported and it is mantained as a [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
 
 _References_
 
