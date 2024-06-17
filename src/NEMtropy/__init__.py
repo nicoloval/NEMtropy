@@ -8,7 +8,7 @@ from bicm.graph_classes import *
 from bicm.models_functions import *
 from bicm.network_functions import *
 
-__version__ = "3.0.1"
+__version__ = "3.0.2"
 __author__ = """Nicolo' Vallarano (nico.vallarano@gmail.com)
 Emiliano Marchese (emilianomarcheserc@gmail.com)
 Matteo Bruno (matteobruno180@gmail.com)"""

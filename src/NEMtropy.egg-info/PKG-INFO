@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: NEMtropy
-Version: 2.1.1
+Version: 3.0.1
 Summary: NEMtropy is a Maximum-Entropy toolbox for networks, it provides the user with a state of the art solver for a range variety of Maximum Entropy Networks models derived from the ERGM family. This module allows you to solve the desired model and generate a number of randomized graphs from the original one: the so-called graphs ensemble.
 Home-page: https://github.com/nicoloval/NEMtropy/
 Download-URL: https://github.com/nicoloval/NEMtropy/archive/refs/tags/v2.1.1.zip
@@ -21,7 +21,7 @@ Requires-Dist: scipy>=1.4
 Requires-Dist: networkx>=2.4
 Requires-Dist: powerlaw>=1.4
 Requires-Dist: tqdm>=4.5
-Requires-Dist: bicm>=3.1
+Requires-Dist: bicm>=3.2.0
 Provides-Extra: dev
 Requires-Dist: pytest>=6.0.1; extra == "dev"
 Requires-Dist: flake8>=3.8.3; extra == "dev"
@@ -84,17 +84,17 @@ The specific kind of network to randomize and property to preserve defines the m
 * **DECM** *Directed Enhanced Configuration Model* [[1]](#1)
 * **CReMa** [[2]](#2)
 * **BiCM** *Bipartite Configuration Model* [[3]](#3)
+* **BiWCM** *Bipartite Weighted Configuration Model* [[4]](#4)
 
 The following table may helps you identify the model that fits your needs in function of the type of network you are working with;
 for in-depth discussion please see the references.
 
 [...] | Undirected Graph | Directed Graph | Bipartite Graph
 ----- | ---------------- | -------------- | --------------
-**Binary Graph** | *UBCM* | *DBCM* | *BiCM*
+**Binary Graph** | *UBCM* | *DBCM* | *BiCM*, *BiWCM*
 **Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa* | -
 
-The BiCM module is also available as [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
-With the BiCM module you can also compute the weighted version BiWCM [[3]](#3), (soon?) to be added to NEMtropy as well.
+The BiCM module is now (NEMtropy>=3.0.0) imported and it is mantained as a [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
 
 _References_
 
