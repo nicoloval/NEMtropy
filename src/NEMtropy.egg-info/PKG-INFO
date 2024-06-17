@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: NEMtropy
-Version: 3.0.1
+Version: 3.0.2
 Summary: NEMtropy is a Maximum-Entropy toolbox for networks, it provides the user with a state of the art solver for a range variety of Maximum Entropy Networks models derived from the ERGM family. This module allows you to solve the desired model and generate a number of randomized graphs from the original one: the so-called graphs ensemble.
 Home-page: https://github.com/nicoloval/NEMtropy/
 Download-URL: https://github.com/nicoloval/NEMtropy/archive/refs/tags/v2.1.1.zip

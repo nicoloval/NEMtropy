@@ -46,6 +46,7 @@ to preserve defines the model you need:
 -  **DECM** *Directed Enhanced Configuration Model* `[1] <#1>`__
 -  **CReMa** `[2] <#2>`__
 -  **BiCM** *Bipartite Configuration Model* `[3] <#3>`__
+-  **BiWCM** *Bipartite Weighted Configuration Model* `[4] <#4>`__
 
 The following table may helps you identify the model that fits your
 needs in function of the type of network you are working with; for
@@ -56,11 +57,10 @@ in-depth discussion please see the references.
 +======================+====================+===================+===================+
 | **Binary Graph**     | *UBCM*             | *DBCM*            | *BiCM*            |
 +----------------------+--------------------+-------------------+-------------------+
-| **Weighted Graph**   | *UECM*, *CReMa*    | *DECM*, *CReMa*   | -                 |
+| **Weighted Graph**   | *UECM*, *CReMa*    | *DECM*, *CReMa*   | *BiWCM*                 |
 +----------------------+--------------------+-------------------+-------------------+
 
 The BiCM module is also available as `a standalone package <https://github.com/mat701/BiCM>`__, find its docs `here <https://bipartite-configuration-model.readthedocs.io/en/latest/>`__.
-With the BiCM module you can also compute the weighted version BiWCM `[4] <#4>`, (soon?) to be added to NEMtropy as well.
 
 *Further references*
 

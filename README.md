@@ -57,8 +57,8 @@ for in-depth discussion please see the references.
 
 [...] | Undirected Graph | Directed Graph | Bipartite Graph
 ----- | ---------------- | -------------- | --------------
-**Binary Graph** | *UBCM* | *DBCM* | *BiCM*, *BiWCM*
-**Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa* | -
+**Binary Graph** | *UBCM* | *DBCM* | *BiCM*
+**Weighted Graph** | *UECM*, *CReMa*  | *DECM*, *CReMa* | *BiWCM*
 
 The BiCM module is now (NEMtropy>=3.0.0) imported and it is mantained as a [a standalone package](https://github.com/mat701/BiCM), find its docs [here](https://bipartite-configuration-model.readthedocs.io/en/latest/). 
 
@@ -104,7 +104,7 @@ you can simply type from your terminal:
 Dependencies
 ------------
 
-NEMtropy uses <code>numba</code>, <code>powerlaw</code>, <code>tqdm</code>, <code>scipy</code>, <code>networkx</code> libraries. They can be installed via pip by running in your terminal the following command:
+NEMtropy uses <code>numba</code>, <code>powerlaw</code>, <code>tqdm</code>, <code>scipy</code>, <code>networkx</code>, <code>bicm</code> libraries. They can be installed via pip by running in your terminal the following command:
 
 ```
     $ pip install numba
@@ -112,6 +112,7 @@ NEMtropy uses <code>numba</code>, <code>powerlaw</code>, <code>tqdm</code>, <cod
     $ pip install networkx
     $ pip install scipy
     $ pip install tqdm
+    $ pip install bicm
 ```
 
 For <code>python3.5</code> users the correct command is the following:
