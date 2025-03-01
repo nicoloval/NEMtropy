@@ -159,7 +159,7 @@ class UndirectedGraph:
                         self.dseq,
                         self.nodes_dict,
                     ) = nef.edgelist_from_edgelist_undirected(edgelist)
-                else:
+                else: # when the edge list contains edge weights
                     (
                         self.edgelist,
                         self.dseq,
@@ -169,6 +169,7 @@ class UndirectedGraph:
                 self.n_nodes = len(self.dseq)
                 self.n_edges = np.sum(self.dseq)/2
                 self.is_initialized = True
+                self.is_weighted = True
 
         elif degree_sequence is not None:
             if not isinstance(degree_sequence, (list, np.ndarray)):
