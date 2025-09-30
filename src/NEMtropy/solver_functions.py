@@ -208,8 +208,8 @@ def solver(
             dx = f - x
             # TODO: hotfix to compute dx in infty cases
             for i in range(len(x)):
-                if x[i] == np.infty:
-                    dx[i] = np.infty
+                if x[i] == np.inf:
+                    dx[i] = np.inf
         toc_dx += time.time() - tic
 
         # backtraking line search
