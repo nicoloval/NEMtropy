@@ -2836,7 +2836,7 @@ def iterative_dcm_exp_2(theta, args):
     tmp = np.concatenate((k_out, k_in))
     ff = -np.log(
         np.array(
-            [tmp[i] / f[i] if tmp[i] != 0 else -np.infty for i in range(2 * n)]
+            [tmp[i] / f[i] if tmp[i] != 0 else -np.inf for i in range(2 * n)]
         )
     )
     # ff = -np.log(tmp/f)
@@ -3224,8 +3224,8 @@ def linsearch_fun_DCM_exp_fixed(xx):
                 and kk < 50):
             alfa *= beta
             kk += 1
-            cond = np.linalg.norm(alfa*dx[dx != np.infty], ord=2) < \
-                np.linalg.norm(dx_old[dx_old != np.infty], ord=2)
+            cond = np.linalg.norm(alfa*dx[dx != np.inf], ord=2) < \
+                np.linalg.norm(dx_old[dx_old != np.inf], ord=2)
     return alfa
 
 # DECM exponential functions
@@ -3808,8 +3808,8 @@ def linsearch_fun_DECM_exp_fixed(xx):
               and kk < 50):
             alfa *= beta
             kk += 1
-            cond = np.linalg.norm(alfa*dx[dx != np.infty], ord=2) < \
-                np.linalg.norm(dx_old[dx_old != np.infty], ord=2)
+            cond = np.linalg.norm(alfa*dx[dx != np.inf], ord=2) < \
+                np.linalg.norm(dx_old[dx_old != np.inf], ord=2)
 
     return alfa
 
