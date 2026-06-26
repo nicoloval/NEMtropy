@@ -166,10 +166,12 @@ class UndirectedGraph:
                         self.strength_sequence,
                         self.nodes_dict,
                     ) = nef.edgelist_from_edgelist_undirected(edgelist)
+                    self.is_weighted = True
+                    
                 self.n_nodes = len(self.dseq)
                 self.n_edges = np.sum(self.dseq)/2
                 self.is_initialized = True
-                self.is_weighted = True
+                
 
         elif degree_sequence is not None:
             if not isinstance(degree_sequence, (list, np.ndarray)):
