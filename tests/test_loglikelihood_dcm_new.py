@@ -25,7 +25,7 @@ class MyTest(unittest.TestCase):
         g.regularise = "identity"
         g._initialize_problem("dcm", "fixed-point")
         # theta = np.random.rand(6)
-        theta = np.array([np.infty, 0.5, 0.5, 0.5, np.infty, 0.5])
+        theta = np.array([np.inf, 0.5, 0.5, 0.5, np.inf, 0.5])
         x0 = np.exp(-theta)
 
         f_sample = g.fun(x0)
@@ -63,7 +63,7 @@ class MyTest(unittest.TestCase):
         g.initial_guess = "uniform"
         g.regularise = "identity"
         g._initialize_problem("dcm", "newton")
-        theta = np.array([np.infty, 0.5, 0.5, 0.5, 0.5, 0.5])
+        theta = np.array([np.inf, 0.5, 0.5, 0.5, 0.5, 0.5])
         x0 = np.exp(-theta)
 
         k_out = g.args[0]

@@ -367,7 +367,7 @@ class MyTest(unittest.TestCase):
         # x0 = 1*np.ones(4*n)
         x0 = np.concatenate((-1 * np.ones(2 * n), np.ones(2 * n)))
         args = (k_out, k_in, s_out, s_in)
-        # x0[args == 0] = np.infty
+        # x0[args == 0] = np.inf
 
         fun = lambda x: -mof.loglikelihood_prime_decm_exp(x, args)
         fun_jac = lambda x: -mof.loglikelihood_hessian_decm_exp(x, args)

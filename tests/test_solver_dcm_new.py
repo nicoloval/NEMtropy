@@ -308,7 +308,7 @@ class MyTest(unittest.TestCase):
         g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = np.inf
         args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
@@ -380,7 +380,7 @@ class MyTest(unittest.TestCase):
         g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = np.inf
         args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
@@ -455,7 +455,7 @@ class MyTest(unittest.TestCase):
         g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = np.inf
         args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
@@ -531,7 +531,7 @@ class MyTest(unittest.TestCase):
         g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = np.inf
         args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
@@ -602,7 +602,7 @@ class MyTest(unittest.TestCase):
         g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = np.inf
         args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
@@ -682,7 +682,7 @@ class MyTest(unittest.TestCase):
         g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = np.inf
         args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
@@ -762,7 +762,7 @@ class MyTest(unittest.TestCase):
         g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = np.inf
         args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
@@ -843,7 +843,7 @@ class MyTest(unittest.TestCase):
         g._set_args("dcm")
 
         x0 = g.x0
-        x0[x0 == 0] = np.infty
+        x0[x0 == 0] = np.inf
         args = g.args
 
         fun = lambda x: -loglikelihood_prime_dcm_exp(x, args)
