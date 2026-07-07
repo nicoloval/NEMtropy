@@ -18,6 +18,8 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
+If you see a warning that NEMtropy is not imported from `src/NEMtropy`, reinstall editable from the repo root — otherwise tests run against the PyPI wheel and can fail spuriously.
+
 ## Commands
 
 ### Default CI / local quick run (~30s)
