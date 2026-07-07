@@ -48,7 +48,7 @@ Dynamic: requires-python
 Dynamic: summary
 
 ![PyPI](https://img.shields.io/pypi/v/nemtropy)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nemtropy)
+![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Scientific Reports](https://media.springernature.com/full/nature-cms/uploads/product/srep/header-d3c533c187c710c1bedbd8e293815d5f.svg)](https://doi.org/10.1038/s41598-021-93830-4)
 
@@ -232,11 +232,17 @@ To build a development environment (Python 3.10+):
 
 Testing
 -------
-If you want to test the package integrity, you can run the following 
-bash command from the tests' directory:
+See [TESTING.md](TESTING.md) for the full guide. Quick start (Python 3.10+):
 
 ```
-    $ bash run_all.sh
+    $ pip install -e ".[dev]"
+    $ pytest
+```
+
+By default, slow tests are skipped (~30s). To run everything:
+
+```
+    $ pytest --override-ini 'addopts='
 ```
 
 __P.S.__ _at the moment there may be some problems with the DECM solver functions_
