@@ -12,6 +12,8 @@ tests/
 
 ## Setup
 
+Requires Python 3.10+.
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate

@@ -1,5 +1,5 @@
 ![PyPI](https://img.shields.io/pypi/v/nemtropy)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nemtropy)
+![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Scientific Reports](https://media.springernature.com/full/nature-cms/uploads/product/srep/header-d3c533c187c710c1bedbd8e293815d5f.svg)](https://doi.org/10.1038/s41598-021-93830-4)
 
@@ -88,6 +88,8 @@ _References_
 Installation
 ------------
 
+NEMtropy requires **Python 3.10 or newer**.
+
 NEMtropy can be installed via pip. You can get it from your terminal:
 
 ```
@@ -104,25 +106,11 @@ you can simply type from your terminal:
 Dependencies
 ------------
 
-NEMtropy uses <code>numba</code>, <code>powerlaw</code>, <code>tqdm</code>, <code>scipy</code>, <code>networkx</code>, <code>bicm</code> libraries. They can be installed via pip by running in your terminal the following command:
+NEMtropy requires Python 3.10+. Runtime dependencies (`numpy`, `scipy`, `networkx`, `powerlaw`, `tqdm`, `bicm`, and transitively `numba`) are installed automatically with the package. To install them manually:
 
 ```
-    $ pip install numba
-    $ pip install powerlaw
-    $ pip install networkx
-    $ pip install scipy
-    $ pip install tqdm
-    $ pip install bicm
+    $ pip install numba powerlaw networkx scipy tqdm bicm
 ```
-
-For <code>python3.5</code> users the correct command is the following:
-
-```
-    $ pip install --prefer-binary numba
-```
-
-It avoids an error during the installation of <code>llvmlite</code> due to 
-the absence of its wheel in <code>python3.5</code>.
 
 Simple Example
 --------------
@@ -185,7 +173,7 @@ branch. If necessary to merge manually do so without fast-forward:
     $ git merge --no-ff myfeature
 ```
 
-To build a development environment run:
+To build a development environment (Python 3.10+):
 
 ```
     $ python3 -m venv venv 
@@ -195,11 +183,17 @@ To build a development environment run:
 
 Testing
 -------
-If you want to test the package integrity, you can run the following 
-bash command from the tests' directory:
+See [TESTING.md](TESTING.md) for the full guide. Quick start (Python 3.10+):
 
 ```
-    $ bash run_all.sh
+    $ pip install -e ".[dev]"
+    $ pytest
+```
+
+By default, slow tests are skipped (~30s). To run everything:
+
+```
+    $ pytest --override-ini 'addopts='
 ```
 
 __P.S.__ _at the moment there may be some problems with the DECM solver functions_

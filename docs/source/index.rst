@@ -82,6 +82,8 @@ The BiCM module is also available as `a standalone package <https://github.com/m
 Installation
 ============
 
+NEMtropy requires Python 3.10 or newer.
+
 NEMtropy can be installed via pip. You can get it from your terminal:
 
 ::
@@ -98,22 +100,9 @@ simply type from your terminal:
 Dependencies
 ============
 
-NEMtropy uses <code>numba</code> and <code>powerlaw</code> libraries.
-They can be installed via pip by running in your terminal the following command:
-
-::
-
-        $ pip install numba
-        $ pip install powerlaw
-
-For python3.5 users the correct command is the following:
-
-::
-
-        $ pip install --prefer-binary numba
-
-It avoids an error during the installation of llvmlite due to the
-absence of its wheel in python3.5.
+NEMtropy requires Python 3.10+. Runtime dependencies are installed
+automatically with the package (including ``numba`` and ``powerlaw`` via
+``bicm`` and other declared requirements).
 
 
 Simple Example
