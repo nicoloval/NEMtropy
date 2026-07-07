@@ -1,4 +1,4 @@
-numpy>=1.17
+numpy>=1.22
 scipy>=1.4
 networkx>=2.4
 powerlaw>=1.4
@@ -8,9 +8,9 @@ bicm>=3.2.0
 [dev]
 pytest>=6.0.1
 flake8>=3.8.3
-wheel>=0.35.1
+wheel>=0.38.1
 check-manifest>=0.44
-setuptools>=47.1.0
+setuptools>=78.1.1
 twine>=3.2.0
 tox>=3.20.1
 powerlaw>=1.4.4

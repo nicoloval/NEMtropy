@@ -1,6 +1,8 @@
 How to install
 =====================================
 
+NEMtropy requires Python 3.10 or newer.
+
 Simply install it via pip on your machine:
 
 .. code-block:: python

@@ -88,6 +88,8 @@ _References_
 Installation
 ------------
 
+NEMtropy requires **Python 3.10 or newer**.
+
 NEMtropy can be installed via pip. You can get it from your terminal:
 
 ```
@@ -104,25 +106,11 @@ you can simply type from your terminal:
 Dependencies
 ------------
 
-NEMtropy uses <code>numba</code>, <code>powerlaw</code>, <code>tqdm</code>, <code>scipy</code>, <code>networkx</code>, <code>bicm</code> libraries. They can be installed via pip by running in your terminal the following command:
+NEMtropy requires Python 3.10+. Runtime dependencies (`numpy`, `scipy`, `networkx`, `powerlaw`, `tqdm`, `bicm`, and transitively `numba`) are installed automatically with the package. To install them manually:
 
 ```
-    $ pip install numba
-    $ pip install powerlaw
-    $ pip install networkx
-    $ pip install scipy
-    $ pip install tqdm
-    $ pip install bicm
+    $ pip install numba powerlaw networkx scipy tqdm bicm
 ```
-
-For <code>python3.5</code> users the correct command is the following:
-
-```
-    $ pip install --prefer-binary numba
-```
-
-It avoids an error during the installation of <code>llvmlite</code> due to 
-the absence of its wheel in <code>python3.5</code>.
 
 Simple Example
 --------------
@@ -185,7 +173,7 @@ branch. If necessary to merge manually do so without fast-forward:
     $ git merge --no-ff myfeature
 ```
 
-To build a development environment run:
+To build a development environment (Python 3.10+):
 
 ```
     $ python3 -m venv venv 
