@@ -159,8 +159,7 @@ def out_degree(a):
     """Returns matrix *a* out degrees sequence.
 
     :param a: Adjacency matrix
-    :type a: numpy.ndarray, scipy.sparse.csr.csr_matrix,
-        scipy.sparse.coo.coo_matrix
+    :type a: numpy.ndarray or scipy sparse matrix/array
     :return: Out degree sequence.
     :rtype: numpy.ndarray
     """
@@ -168,16 +167,15 @@ def out_degree(a):
     if type(a) == np.ndarray:
         return np.sum(a > 0, 1)
     # if the matrix is a scipy sparse matrix
-    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
-        return np.sum(a > 0, 1).A1  # noqa
+    elif scipy.sparse.issparse(a):
+        return np.asarray(np.sum(a > 0, 1)).ravel()  # noqa
 
 
 def in_degree(a):
     """Returns matrix *a* in degrees sequence.
 
     :param a: Adjacency matrix.
-    :type a: numpy.ndarray, scipy.sparse.csr.csr_matrix,
-        scipy.sparse.coo.coo_matrix
+    :type a: numpy.ndarray or scipy sparse matrix/array
     :return: In degree sequence.
     :rtype: numpy.ndarray
     """
@@ -185,16 +183,15 @@ def in_degree(a):
     if type(a) == np.ndarray:
         return np.sum(a > 0, 0)
     # if the matrix is a scipy sparse matrix
-    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
-        return np.sum(a > 0, 0).A1
+    elif scipy.sparse.issparse(a):
+        return np.asarray(np.sum(a > 0, 0)).ravel()
 
 
 def out_strength(a):
     """Returns matrix *a* out strengths sequence.
 
     :param a: Adjacency matrix.
-    :type a: numpy.ndarray, scipy.sparse.csr.csr_matrix,
-        scipy.sparse.coo.coo_matrix
+    :type a: numpy.ndarray or scipy sparse matrix/array
     :return: Out strengths sequence.
     :rtype: numpy.ndarray
     """
@@ -202,16 +199,15 @@ def out_strength(a):
     if type(a) == np.ndarray:
         return np.sum(a, 1)
     # if the matrix is a scipy sparse matrix
-    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
-        return np.sum(a, 1).A1
+    elif scipy.sparse.issparse(a):
+        return np.asarray(np.sum(a, 1)).ravel()
 
 
 def in_strength(a):
     """Returns matrix *a* in strengths sequence.
 
     :param a: Adjacency matrix.
-    :type a: numpy.ndarray, scipy.sparse.csr.csr_matrix,
-        scipy.sparse.coo.coo_matrix
+    :type a: numpy.ndarray or scipy sparse matrix/array
     :return: In strengths sequence.
     :rtype: numpy.ndarray
     """
@@ -219,8 +215,8 @@ def in_strength(a):
     if type(a) == np.ndarray:
         return np.sum(a, 0)
     # if the matrix is a scipy sparse matrix
-    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
-        return np.sum(a, 0).A1
+    elif scipy.sparse.issparse(a):
+        return np.asarray(np.sum(a, 0)).ravel()
 
 
 def degree(a):
@@ -235,8 +231,8 @@ def degree(a):
     if type(a) == np.ndarray:
         return np.sum(a > 0, 1)
     # if the matrix is a scipy sparse matrix
-    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
-        return np.sum(a > 0, 1).A1
+    elif scipy.sparse.issparse(a):
+        return np.asarray(np.sum(a > 0, 1)).ravel()
 
 
 def strength(a):
@@ -251,8 +247,8 @@ def strength(a):
     if type(a) == np.ndarray:
         return np.sum(a, 1)
     # if the matrix is a scipy sparse matrix
-    elif type(a) in [scipy.sparse.csr.csr_matrix, scipy.sparse.coo.coo_matrix]:
-        return np.sum(a, 1).A1
+    elif scipy.sparse.issparse(a):
+        return np.asarray(np.sum(a, 1)).ravel()
 
 
 def edgelist_from_edgelist_undirected(edgelist):

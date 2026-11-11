@@ -16,6 +16,14 @@ from . import ensemble_functions as ef
 from bicm.graph_classes import *
 
 
+def _sparse_values(adjacency, raw_ind, col_ind):
+    """Entries of a scipy sparse matrix or array at the given indices, as a 1D float array."""
+    values = scipy.sparse.csr_array(adjacency)[raw_ind, col_ind]
+    if scipy.sparse.issparse(values):
+        values = values.toarray()
+    return np.asarray(values, dtype=np.float64).ravel()
+
+
 class UndirectedGraph:
     """Undirected Graph instance can be initialised with adjacency
     matrix, edgelist, degrees sequence or strengths sequence.
@@ -108,7 +116,7 @@ class UndirectedGraph:
         if adjacency is not None:
             if not isinstance(
                 adjacency, (list, np.ndarray)
-            ) and not scipy.sparse.isspmatrix(adjacency):
+            ) and not scipy.sparse.issparse(adjacency):
                 raise TypeError(
                     "The adjacency matrix must be passed as a list or"
                     "numpy array or scipy sparse matrix."
@@ -391,8 +399,8 @@ class UndirectedGraph:
 
     def _set_initial_guess_cm(self):
 
-        if ~self.is_reduced:
-            self.degree_reduction()
+        # Always recompute the reduction (the old `~self.is_reduced` check was always true).
+        self.degree_reduction()
 
         if isinstance(self.initial_guess, np.ndarray):
             self.r_x = self.initial_guess[self.r_index_dseq]
@@ -807,7 +815,7 @@ class UndirectedGraph:
         else:
             self.is_sparse = False
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
-            not scipy.sparse.isspmatrix(adjacency)
+            not scipy.sparse.issparse(adjacency)
         ):
             raise ValueError("adjacency must be a matrix or a method")
         elif isinstance(adjacency, str):
@@ -857,11 +865,11 @@ class UndirectedGraph:
             self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
-        elif scipy.sparse.isspmatrix(adjacency):
+        elif scipy.sparse.issparse(adjacency):
             raw_ind, col_ind = scipy.sparse.triu(adjacency).nonzero()
             raw_ind = raw_ind.astype(np.int64)
             col_ind = col_ind.astype(np.int64)
-            weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
+            weigths_value = _sparse_values(adjacency, raw_ind, col_ind)
             self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
@@ -1235,7 +1243,7 @@ class DirectedGraph:
         if adjacency is not None:
             if not isinstance(
                 adjacency, (list, np.ndarray)
-            ) and not scipy.sparse.isspmatrix(adjacency):
+            ) and not scipy.sparse.issparse(adjacency):
                 raise TypeError(
                     ("The adjacency matrix must be passed as a list or numpy"
                      " array or scipy sparse matrix.")
@@ -1624,8 +1632,8 @@ class DirectedGraph:
         # of rows and columns.
         # remember if you insert your choice as initial choice,
         # it should be numpy.ndarray
-        if ~self.is_reduced:
-            self.degree_reduction()
+        # Always recompute the reduction (the old `~self.is_reduced` check was always true).
+        self.degree_reduction()
 
         if isinstance(self.initial_guess, np.ndarray):
             # we reduce the full x0, it's not very honest
@@ -1672,8 +1680,8 @@ class DirectedGraph:
         # If you want to customize the initial guess, remember that the code
         # starts with a reduced number of rows and columns.
 
-        if ~self.is_reduced:
-            self.degree_reduction()
+        # Always recompute the reduction (the old `~self.is_reduced` check was always true).
+        self.degree_reduction()
 
         if isinstance(self.initial_guess, np.ndarray):
             # we reduce the full x0, it's not very honest
@@ -2293,7 +2301,7 @@ class DirectedGraph:
             self.is_sparse = False
 
         if not isinstance(adjacency, (list, np.ndarray, str)) and (
-            not scipy.sparse.isspmatrix(adjacency)
+            not scipy.sparse.issparse(adjacency)
         ):
             raise ValueError("adjacency must be a matrix or a method")
         elif isinstance(adjacency, str):
@@ -2337,11 +2345,11 @@ class DirectedGraph:
             self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True
-        elif scipy.sparse.isspmatrix(adjacency):
+        elif scipy.sparse.issparse(adjacency):
             raw_ind, col_ind = adjacency.nonzero()
             raw_ind = raw_ind.astype(np.int64)
             col_ind = col_ind.astype(np.int64)
-            weigths_value = (adjacency[raw_ind, col_ind].A1).astype(np.float64)
+            weigths_value = _sparse_values(adjacency, raw_ind, col_ind)
             self.adjacency_crema = (raw_ind, col_ind, weigths_value)
             self.is_sparse = False
             self.adjacency_given = True

@@ -38,11 +38,11 @@ setup(
                 ],
     install_requires=[
                       "numpy>=1.22",
-                      "scipy>=1.4",
+                      "scipy>=1.8",
                       "networkx>=2.4",
                       "powerlaw>=1.4",
                       "tqdm>=4.5",
-                      "bicm>=3.2.0"
+                      "bicm>=3.5.0"
                       ],
     extras_require={
         "dev": [
