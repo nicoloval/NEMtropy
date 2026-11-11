@@ -85,7 +85,7 @@ def solver(
     full_return=False,
     linsearch=True,
 ):
-    """Find roots of eq. fun = 0, using newton, quasinewton or
+    r"""Find roots of eq. fun = 0, using newton, quasinewton or
     fixed-point algorithm.
 
     :param x0: Initial point

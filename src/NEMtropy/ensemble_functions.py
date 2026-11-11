@@ -867,6 +867,7 @@ def std_dcm_3motif_10(sol):
     return np.sqrt(tmp)
 
 
+@jit(nopython=True)
 def std_dcm_3motif_11(sol):
     """ compute the standard deviation of the number of 3-nodes motifs 11.
 
@@ -899,6 +900,7 @@ def std_dcm_3motif_11(sol):
     return np.sqrt(tmp)
 
 
+@jit(nopython=True)
 def std_dcm_3motif_12(sol):
     """ compute the standard deviation of the number of 3-nodes motifs 12.
 
