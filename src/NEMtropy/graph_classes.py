@@ -24,6 +24,23 @@ def _sparse_values(adjacency, raw_ind, col_ind):
     return np.asarray(values, dtype=np.float64).ravel()
 
 
+_METHODS = ("newton", "quasinewton", "fixed-point")
+
+
+def _check_model_and_method(model, method, models):
+    """Raise a clear error if model or method is not available."""
+    if model not in models:
+        raise ValueError(
+            "Model '{}' is not available. Choose one of: {}.".format(
+                model, ", ".join(models))
+        )
+    if method not in _METHODS:
+        raise ValueError(
+            "Method '{}' is not available. Choose one of: {}.".format(
+                method, ", ".join(_METHODS))
+        )
+
+
 class UndirectedGraph:
     """Undirected Graph instance can be initialised with adjacency
     matrix, edgelist, degrees sequence or strengths sequence.
@@ -1007,7 +1024,9 @@ class UndirectedGraph:
         :param eps: parameter controlling the tolerance of the difference between two iterations, defaults to 1e-8.
         :type eps: float, optional
         """
-        # TODO: aggiungere tutti i metodi
+        _check_model_and_method(
+            model, method,
+            ("cm", "cm_exp", "ecm", "ecm_exp", "crema", "crema-sparse"))
         if model in ["cm", "cm_exp", "ecm", "ecm_exp"]:
             self._solve_problem(
                 initial_guess=initial_guess,
@@ -2470,7 +2489,9 @@ class DirectedGraph:
         :param eps: parameter controlling the tolerance of the difference between two iterations, defaults to 1e-8.
         :type eps: float, optional
         """
-        # TODO: add all methods
+        _check_model_and_method(
+            model, method,
+            ("dcm", "dcm_exp", "decm", "decm_exp", "crema", "crema-sparse"))
         if model in ["dcm", "dcm_exp", "decm", "decm_exp"]:
             self._solve_problem(
                 initial_guess=initial_guess,
